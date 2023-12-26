@@ -1,16 +1,16 @@
 ### default Profile ###
 spring:
   profiles:
-    default: local
+    active: local
     include:
       - oauth
       - session
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: { MYSQL_URL }
-    username: { MYSQL_USERNAME }
-    password: { MYSQL_PASSWORD }
+    url: ${MYSQL_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
 
   jpa:
     hibernate:
