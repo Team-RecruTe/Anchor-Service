@@ -32,6 +32,9 @@ public class Mentor extends BaseEntity {
   private String accountNumber;
 
   @Column(length = 20, nullable = false)
+  private String accountName;
+
+  @Column(length = 20, nullable = false)
   private String bankName;
 
   @OneToOne(fetch = FetchType.LAZY)
