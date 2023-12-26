@@ -1,6 +1,7 @@
 package com.anchor.domain.mentor.domain;
 
 import com.anchor.domain.mentoring.domain.Mentoring;
+import com.anchor.domain.user.domain.User;
 import com.anchor.global.util.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,6 +14,7 @@ import jakarta.persistence.OneToOne;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -44,4 +46,18 @@ public class Mentor extends BaseEntity {
   @OneToMany(mappedBy = "mentor")
   private List<Mentoring> mentoring = new ArrayList<>();
 
+  @OneToOne(mappedBy = "mentor")
+  private User user;
+
+  @Builder
+  private Mentor(String companyEmail, Career career, String accountNumber, String accountName,
+      String bankName, User user) {
+    this.companyEmail = companyEmail;
+    this.career = career;
+    this.accountNumber = accountNumber;
+    this.accountName = accountName;
+    this.bankName = bankName;
+    this.user = user;
+  }
+  
 }

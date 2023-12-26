@@ -12,11 +12,14 @@ import jakarta.persistence.OneToOne;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicInsert;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@DynamicInsert
 @Entity
 public class Mentoring extends BaseEntity {
 
@@ -29,7 +32,7 @@ public class Mentoring extends BaseEntity {
   @Column(nullable = false)
   private Integer cost;
 
-  @Column(nullable = false, columnDefinition = "int default 0")
+  @Column(columnDefinition = "int default 0")
   private Integer totalApplicationNumber;
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -50,4 +53,13 @@ public class Mentoring extends BaseEntity {
   @OneToMany(mappedBy = "mentoring")
   private List<MentoringApplication> mentoringApplications = new ArrayList<>();
 
+  @Builder
+  private Mentoring(String title, String durationTime, Integer cost, Mentor mentor,
+      MentoringDetail mentoringDetail) {
+    this.title = title;
+    this.durationTime = durationTime;
+    this.cost = cost;
+    this.mentor = mentor;
+    this.mentoringDetail = mentoringDetail;
+  }
 }
