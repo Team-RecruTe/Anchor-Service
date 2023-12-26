@@ -14,6 +14,7 @@ import jakarta.persistence.OneToOne;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -39,5 +40,17 @@ public class User extends BaseEntity {
 
   @OneToMany(mappedBy = "user")
   private List<MentoringApplication> mentoringApplicationList = new ArrayList<>();
+
+  @Builder
+  public User(String email, String nickname, String image, UserRole role) {
+    this.email = email;
+    this.nickname = nickname;
+    this.image = image;
+    this.role = role;
+  }
+
+  public String getRoleKey() {
+    return role.getKey();
+  }
 
 }
