@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -73,4 +74,75 @@ public class MentoringController {
     return ResponseEntity.ok(result);
   }
 
+
+
+  @GetMapping("")
+  public ResponseEntity<List<MentoringResponseDto>> mentoringList() {
+
+    List<MentoringResponseDto> mentoringList = mentoringService.loadMentoringList();
+    return ResponseEntity.ok()
+        .body(mentoringList);
+  }
+
+  @GetMapping("/{id}")
+  public ResponseEntity<MentoringDetailResponseDto> mentoringDetail(
+      @PathVariable("id") Long id) {
+
+    MentoringDetailResponseDto mentoringDetail = mentoringService.loadMentoringDetail(id);
+
+    return ResponseEntity.ok()
+        .body(mentoringDetail);
+  }
+
+
+  @GetMapping("/{id}/apply")
+  public ResponseEntity<List<MentoringUnavailableTimeDto>> mentoringApplicationPage(
+      @PathVariable("id") Long id, HttpSession session) {
+
+    List<MentoringUnavailableTimeDto> mentoringUnavailableTimes =
+        mentoringService.loadMentoringUnavailableTime(id);
+
+    List<MentoringUnavailableTimeDto> sessionSavedMentoringUnavailableTimeList = getSessionSavedMentoringUnavailableTimeList(
+        session, id);
+
+    mentoringUnavailableTimes.addAll(sessionSavedMentoringUnavailableTimeList);
+
+    return ResponseEntity.ok()
+        .body(mentoringUnavailableTimes);
+  }
+
+
+  @PostMapping("/{id}/progress")
+  public ResponseEntity<List<MentoringUnavailableTimeDto>> mentoringTimeSessionSave(
+      @PathVariable("id") Long id,
+      @RequestBody MentoringApplicationTimeDto applicationTime, HttpSession session) {
+
+    List<MentoringUnavailableTimeDto> sessionMentoringUnavailableTime = getSessionSavedMentoringUnavailableTimeList(
+        session, id);
+
+    addSessionRequestMentoringApplicationTime(sessionMentoringUnavailableTime, applicationTime);
+
+    return ResponseEntity.ok()
+        .body(sessionMentoringUnavailableTime);
+  }
+
+
+  private List<MentoringUnavailableTimeDto> getSessionSavedMentoringUnavailableTimeList(
+      HttpSession session, Long id) {
+    List<MentoringUnavailableTimeDto> sessionSavedmentoringTimeList =
+        (List<MentoringUnavailableTimeDto>) session.getAttribute(String.valueOf(id));
+
+    return sessionSavedmentoringTimeList == null ?
+        new ArrayList<>() : sessionSavedmentoringTimeList;
+  }
+
+  private void addSessionRequestMentoringApplicationTime(
+      List<MentoringUnavailableTimeDto> sessionList, MentoringApplicationTimeDto applicationTime) {
+
+    MentoringUnavailableTimeDto mentoringUnavailableTimeDto = applicationTime.convertToMentoringUnavailableTimeDto();
+
+    if (!sessionList.contains(mentoringUnavailableTimeDto)) {
+      sessionList.add(mentoringUnavailableTimeDto);
+    }
+  }
 }

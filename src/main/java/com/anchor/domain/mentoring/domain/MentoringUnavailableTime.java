@@ -15,10 +15,10 @@ import lombok.NoArgsConstructor;
 @Entity
 public class MentoringUnavailableTime extends BaseEntity {
 
-  @Column(nullable = false, columnDefinition = "datetime(6)")
+  @Column(nullable = false, columnDefinition = "datetime")
   private LocalDateTime fromDateTime;
 
-  @Column(nullable = false, columnDefinition = "datetime(6)")
+  @Column(nullable = false, columnDefinition = "datetime")
   private LocalDateTime toDateTime;
 
   @Column(name = "mentor_id", nullable = false)

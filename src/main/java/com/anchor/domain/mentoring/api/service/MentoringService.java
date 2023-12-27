@@ -8,10 +8,14 @@ import com.anchor.domain.mentoring.api.service.response.MentoringContents;
 import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringDeleteResult;
+import com.anchor.domain.mentoring.api.service.response.MentoringDetailResponseDto;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
+import com.anchor.domain.mentoring.api.service.response.MentoringResponseDto;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -60,6 +64,22 @@ public class MentoringService {
     return new MentoringContents(mentoring.getContents(), mentoring.getTags());
   }
 
+  @org.springframework.transaction.annotation.Transactional(readOnly = true)
+  public List<MentoringResponseDto> loadMentoringList() {
+    List<Mentoring> mentoringList = mentoringRepository.findAll();
+
+    return mentoringList.stream()
+                        .map(MentoringResponseDto::new)
+                        .toList();
+  }
+
+  @org.springframework.transaction.annotation.Transactional(readOnly = true)
+  public MentoringDetailResponseDto loadMentoringDetail(Long id) {
+    Mentoring findMentoring = mentoringRepository.findById(id)
+                                                 .orElseThrow(() -> new NoSuchElementException(id + "에 해당하는 멘토링이 존재하지 않습니다."));
+    return new MentoringDetailResponseDto(findMentoring);
+  }
+
   private Mentoring getMentoringById(Long id) {
     return mentoringRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링이 없습니다."));
@@ -69,5 +89,22 @@ public class MentoringService {
     Mentor mentor = mentorRepository.findById(mentorId)
         .orElseThrow(() -> new NoSuchElementException("일치하는 멘토가 없습니다."));
     return mentor;
+  }
+
+  public List<MentoringUnavailableTimeDto> loadMentoringUnavailableTime(Long id) {
+    Mentoring findMentoring = mentoringRepository.findById(id)
+                                                 .orElseThrow(() -> new NoSuchElementException(id + "에 해당하는 멘토링이 존재하지 않습니다."));
+
+    return findMentoring.getMentor()
+                        .getMentoringUnavailableTime()
+                        .isEmpty() ?
+        null :
+        new ArrayList<>(
+            findMentoring.getMentor()
+                         .getMentoringUnavailableTime()
+                         .stream()
+                         .map(MentoringUnavailableTimeDto::new)
+                         .toList()
+        );
   }
 }
