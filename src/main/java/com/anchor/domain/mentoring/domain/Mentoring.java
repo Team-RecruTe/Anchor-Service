@@ -1,6 +1,7 @@
 package com.anchor.domain.mentoring.domain;
 
 import com.anchor.domain.mentor.domain.Mentor;
+import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.global.util.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,6 +13,7 @@ import jakarta.persistence.OneToOne;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -36,18 +38,36 @@ public class Mentoring extends BaseEntity {
   @JoinColumn(name = "mentor_id")
   private Mentor mentor;
 
-  @OneToOne(fetch = FetchType.LAZY)
+  @OneToOne(
+      fetch = FetchType.LAZY,
+      orphanRemoval = true
+  )
   @JoinColumn(name = "mentoring_detail_id")
   private MentoringDetail mentoringDetail;
 
-  @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "mentoring_unavailable_time_id")
-  private MentoringUnavailableTime mentoringUnavailableTime;
-
-  @OneToMany(mappedBy = "mentoring")
+  @OneToMany(
+      mappedBy = "mentoring",
+      orphanRemoval = true
+  )
   private List<MentoringTag> mentoringTag = new ArrayList<>();
 
-  @OneToMany(mappedBy = "mentoring")
+  @OneToMany(
+      mappedBy = "mentoring",
+      orphanRemoval = true
+  )
   private List<MentoringApplication> mentoringApplications = new ArrayList<>();
 
+  @Builder
+  private Mentoring(String title, String durationTime, Integer cost, Mentor mentor) {
+    this.title = title;
+    this.durationTime = durationTime;
+    this.cost = cost;
+    this.mentor = mentor;
+  }
+
+  public void changeBasicInfo(MentoringBasicInfo mentoringBasicInfo) {
+    this.title = mentoringBasicInfo.getTitle();
+    this.durationTime = mentoringBasicInfo.getDurationTime();
+    this.cost = mentoringBasicInfo.getCost();
+  }
 }
