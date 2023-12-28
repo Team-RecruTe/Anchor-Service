@@ -2,7 +2,6 @@ package com.anchor.domain.mentor.api.controller.request;
 
 
 import com.anchor.domain.mentor.domain.Career;
-import com.anchor.domain.mentor.domain.Mentor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

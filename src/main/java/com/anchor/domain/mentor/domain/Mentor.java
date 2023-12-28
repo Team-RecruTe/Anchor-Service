@@ -40,12 +40,15 @@ public class Mentor extends BaseEntity {
   private String accountNumber;
 
   @Column(length = 20, nullable = false)
-  private String accountName;
-
-  @Column(length = 20, nullable = false)
   private String bankName;
 
-  @OneToOne(fetch = FetchType.LAZY)
+  @Column(length = 20, nullable = false)
+  private String accountName;
+
+  @OneToOne(
+      fetch = FetchType.LAZY,
+      cascade = CascadeType.ALL
+  )
   @JoinColumn(name = "mentor_introduction_id")
   private MentorIntroduction mentorIntroduction;
 
@@ -86,13 +89,6 @@ public class Mentor extends BaseEntity {
     this.accountName = mentorInfoRequest.getAccountName();
   }
 
-  public void editInfo(MentorInfoRequest mentorInfoRequest) {
-    this.career = mentorInfoRequest.getCareer();
-    this.bankName = mentorInfoRequest.getBankName();
-    this.accountNumber = mentorInfoRequest.getAccountNumber();
-    this.accountName = mentorInfoRequest.getAccountName();
-  }
-
   public void editContents(MentorIntroductionRequest mentorIntroductionRequest) {
     if (this.mentorIntroduction == null) {
       this.mentorIntroduction = MentorIntroduction.addContents(mentorIntroductionRequest.getContents());
@@ -100,6 +96,5 @@ public class Mentor extends BaseEntity {
       this.mentorIntroduction.editContents(mentorIntroductionRequest.getContents());
     }
   }
-
 
 }
