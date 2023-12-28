@@ -2,6 +2,7 @@ package com.anchor.domain.mentoring.api.controller;
 
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
+import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
 import com.anchor.domain.mentoring.api.service.MentoringService;
 import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
@@ -9,6 +10,10 @@ import com.anchor.domain.mentoring.api.service.response.MentoringDeleteResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.util.type.Link;
+import com.anchor.domain.mentoring.api.service.response.MentoringDetailResponse;
+import com.anchor.domain.mentoring.api.service.response.MentoringInfo;
+import com.anchor.domain.mentoring.api.service.response.MentoringUnavailableTimeResponse;
+import com.anchor.global.auth.SessionUser;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +34,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MentoringController {
 
+  private static final String SUCCESS = "success";
+  private static final String FAILURE = "failure";
   private final MentoringService mentoringService;
 
   @PostMapping
@@ -77,33 +84,34 @@ public class MentoringController {
 
 
   @GetMapping("")
-  public ResponseEntity<List<MentoringResponseDto>> mentoringList() {
+  public ResponseEntity<List<MentoringInfo>> mentoringList() {
 
-    List<MentoringResponseDto> mentoringList = mentoringService.loadMentoringList();
+    List<MentoringInfo> mentoringInfoList = mentoringService.loadMentoringList();
+
     return ResponseEntity.ok()
-        .body(mentoringList);
+        .body(mentoringInfoList);
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<MentoringDetailResponseDto> mentoringDetail(
+  public ResponseEntity<MentoringDetailResponse> mentoringDetail(
       @PathVariable("id") Long id) {
 
-    MentoringDetailResponseDto mentoringDetail = mentoringService.loadMentoringDetail(id);
+    MentoringDetailResponse mentoringDetailResponse = mentoringService.loadMentoringDetail(id);
 
     return ResponseEntity.ok()
-        .body(mentoringDetail);
+        .body(mentoringDetailResponse);
   }
 
 
   @GetMapping("/{id}/apply")
-  public ResponseEntity<List<MentoringUnavailableTimeDto>> mentoringApplicationPage(
+  public ResponseEntity<List<MentoringUnavailableTimeResponse>> mentoringApplicationPage(
       @PathVariable("id") Long id, HttpSession session) {
 
-    List<MentoringUnavailableTimeDto> mentoringUnavailableTimes =
+    List<MentoringUnavailableTimeResponse> mentoringUnavailableTimes =
         mentoringService.loadMentoringUnavailableTime(id);
 
-    List<MentoringUnavailableTimeDto> sessionSavedMentoringUnavailableTimeList = getSessionSavedMentoringUnavailableTimeList(
-        session, id);
+    List<MentoringUnavailableTimeResponse> sessionSavedMentoringUnavailableTimeList =
+        getSessionSavedMentoringUnavailableTimeList(session, id);
 
     mentoringUnavailableTimes.addAll(sessionSavedMentoringUnavailableTimeList);
 
@@ -111,38 +119,78 @@ public class MentoringController {
         .body(mentoringUnavailableTimes);
   }
 
+  /**
+   * 멘토링 결제 완료가 되면 멘토링 신청이력을 저장합니다.
+   */
+  @PostMapping("/{id}/apply")
+  public String mentoringApplicationSave(@PathVariable("id") Long id,
+      @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
 
-  @PostMapping("/{id}/progress")
-  public ResponseEntity<List<MentoringUnavailableTimeDto>> mentoringTimeSessionSave(
+    SessionUser sessionUser = (SessionUser) session.getAttribute("user");
+
+    if (sessionUser == null) {
+      throw new RuntimeException("로그인 정보가 없습니다. 잘못된 접근입니다.");
+    }
+
+    boolean isSaveMentoringApplication = mentoringService.saveMentoringApplication(sessionUser, id,
+        applicationTime);
+
+    if (isSaveMentoringApplication) {
+
+      List<MentoringUnavailableTimeResponse> sessionSavedMentoringUnavailableTimeList =
+          getSessionSavedMentoringUnavailableTimeList(session, id);
+
+      mentoringService.removeMentoringApplicationTimeFromSession
+          (sessionSavedMentoringUnavailableTimeList, applicationTime);
+
+      return SUCCESS;
+    }
+
+    return FAILURE;
+  }
+
+  /**
+   * 멘토링 신청과정입니다. 결제진행중인 시간대를 다른 회원이 신청하지 못하도록 Lock 합니다.
+   */
+  @PostMapping("/{id}/apply-process")
+  public String mentoringTimeSessionSave(
       @PathVariable("id") Long id,
-      @RequestBody MentoringApplicationTimeDto applicationTime, HttpSession session) {
+      @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
 
-    List<MentoringUnavailableTimeDto> sessionMentoringUnavailableTime = getSessionSavedMentoringUnavailableTimeList(
+    List<MentoringUnavailableTimeResponse> sessionSavedMentoringUnavailableTimeList = getSessionSavedMentoringUnavailableTimeList(
         session, id);
 
-    addSessionRequestMentoringApplicationTime(sessionMentoringUnavailableTime, applicationTime);
+    mentoringService.addMentoringApplicationTimeFromSession(
+        sessionSavedMentoringUnavailableTimeList,
+        applicationTime);
 
-    return ResponseEntity.ok()
-        .body(sessionMentoringUnavailableTime);
+    return SUCCESS;
+  }
+
+  /**
+   * 멘토링 신청 도중 결제실패 또는 취소시 Lock이 걸려있던 시간대를 해제합니다.
+   */
+  @PostMapping("/{id}/apply-cancel")
+  public String mentoringTimeSessionRemove(@PathVariable("id") Long id,
+      @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
+
+    List<MentoringUnavailableTimeResponse> sessionSavedMentoringUnavailableTimeList =
+        getSessionSavedMentoringUnavailableTimeList(session, id);
+
+    boolean removeResult = mentoringService.removeMentoringApplicationTimeFromSession
+        (sessionSavedMentoringUnavailableTimeList, applicationTime);
+
+    return removeResult ? SUCCESS : FAILURE;
   }
 
 
-  private List<MentoringUnavailableTimeDto> getSessionSavedMentoringUnavailableTimeList(
+  private List<MentoringUnavailableTimeResponse> getSessionSavedMentoringUnavailableTimeList(
       HttpSession session, Long id) {
-    List<MentoringUnavailableTimeDto> sessionSavedmentoringTimeList =
-        (List<MentoringUnavailableTimeDto>) session.getAttribute(String.valueOf(id));
+    List<MentoringUnavailableTimeResponse> sessionSavedmentoringTimeList =
+        (List<MentoringUnavailableTimeResponse>) session.getAttribute(String.valueOf(id));
 
     return sessionSavedmentoringTimeList == null ?
         new ArrayList<>() : sessionSavedmentoringTimeList;
   }
 
-  private void addSessionRequestMentoringApplicationTime(
-      List<MentoringUnavailableTimeDto> sessionList, MentoringApplicationTimeDto applicationTime) {
-
-    MentoringUnavailableTimeDto mentoringUnavailableTimeDto = applicationTime.convertToMentoringUnavailableTimeDto();
-
-    if (!sessionList.contains(mentoringUnavailableTimeDto)) {
-      sessionList.add(mentoringUnavailableTimeDto);
-    }
-  }
 }

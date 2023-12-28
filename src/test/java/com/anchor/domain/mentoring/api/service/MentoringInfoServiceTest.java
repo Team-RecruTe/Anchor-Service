@@ -17,9 +17,9 @@ import static org.mockito.Mockito.when;
 
 import com.anchor.domain.mentor.domain.Career;
 import com.anchor.domain.mentor.domain.Mentor;
-import com.anchor.domain.mentoring.api.service.response.MentoringDetailResponseDto;
-import com.anchor.domain.mentoring.api.service.response.MentoringResponseDto;
-import com.anchor.domain.mentoring.api.service.response.MentoringUnavailableTimeDto;
+import com.anchor.domain.mentoring.api.service.response.MentoringDetailResponse;
+import com.anchor.domain.mentoring.api.service.response.MentoringInfo;
+import com.anchor.domain.mentoring.api.service.response.MentoringUnavailableTimeResponse;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringDetail;
 import com.anchor.domain.mentoring.domain.MentoringTag;
@@ -41,7 +41,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class MentoringServiceTest {
+class MentoringInfoServiceTest {
 
   @Mock
   private MentoringRepository mentoringRepository;
@@ -77,7 +77,7 @@ class MentoringServiceTest {
     //when
     when(mentoringRepository.findAll()).thenReturn(mentoringList);
 
-    List<MentoringResponseDto> result = mentoringService.loadMentoringList();
+    List<MentoringInfo> result = mentoringService.loadMentoringList();
 
     //then
     assertThat(result)
@@ -98,7 +98,7 @@ class MentoringServiceTest {
     //given
     Long inputMentoringId = 1L;
 
-    MentoringDetail mentoringDetail = MentoringDetail.builder()
+    com.anchor.domain.mentoring.domain.MentoringDetail mentoringDetail = MentoringDetail.builder()
         .contents(MENTORING_CONTENT)
         .build();
 
@@ -116,13 +116,13 @@ class MentoringServiceTest {
     //when
     when(mentoringRepository.findById(anyLong())).thenReturn(Optional.of(mentoring));
 
-    MentoringDetailResponseDto result = mentoringService.loadMentoringDetail(inputMentoringId);
+    MentoringDetailResponse result = mentoringService.loadMentoringDetail(inputMentoringId);
 
     //then
     assertThat(result)
         .extracting("title", "content", "durationTime", "nickname", "cost")
         .contains(MENTORING_TITLE, MENTORING_CONTENT, DURATION_TIME, NICKNAME, COST);
-    assertThat(result.tags())
+    assertThat(result.getTags())
         .hasSize(mentoringTags.size())
         .contains("자바", "백엔드");
   }
@@ -150,7 +150,7 @@ class MentoringServiceTest {
   void loadMentoringUnavailableTimeTest() {
     //given
     Long inputMentoringId = 1L;
-    List<com.anchor.domain.mentoring.domain.MentoringUnavailableTime> unavailableTimes = createMentoringUnavailableTime(
+    List<MentoringUnavailableTime> unavailableTimes = createMentoringUnavailableTime(
         mentor);
 
     Mentoring mentoring = Mentoring.builder()
@@ -163,7 +163,7 @@ class MentoringServiceTest {
     //when
     when(mentoringRepository.findById(anyLong())).thenReturn(Optional.of(mentoring));
 
-    List<MentoringUnavailableTimeDto> result =
+    List<MentoringUnavailableTimeResponse> result =
         mentoringService.loadMentoringUnavailableTime(inputMentoringId);
 
     //then
@@ -200,7 +200,7 @@ class MentoringServiceTest {
     //when
     when(mentoringRepository.findById(anyLong())).thenReturn(Optional.of(mentoring));
 
-    List<MentoringUnavailableTimeDto> result =
+    List<MentoringUnavailableTimeResponse> result =
         mentoringService.loadMentoringUnavailableTime(inputMentoringId);
     //then
     assertThat(result).isNull();
@@ -220,7 +220,8 @@ class MentoringServiceTest {
     return mentoringList;
   }
 
-  private void fillMentoringTagToMentoring(List<MentoringTag> testTags, Mentoring mentoring) {
+  private void fillMentoringTagToMentoring(List<MentoringTag> testTags,
+      Mentoring mentoring) {
     MentoringTag backEndTag = MentoringTag.builder()
         .tag("백엔드")
         .mentoring(mentoring)
