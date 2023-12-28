@@ -55,7 +55,7 @@ public class Mentor extends BaseEntity {
       mappedBy = "mentor",
       orphanRemoval = true
   )
-  private List<Mentoring> mentoring = new ArrayList<>();
+  private List<Mentoring> mentorings = new ArrayList<>();
 
   @Builder
   private Mentor(String companyEmail, Career career, String accountNumber, String accountName,

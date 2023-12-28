@@ -42,4 +42,7 @@ public class MentoringApplication extends BaseEntity {
   @JoinColumn(name = "mentoring_application_id")
   private User user;
 
+  public void changeStatus(MentoringStatus mentoringStatus) {
+    this.mentoringStatus = mentoringStatus;
+  }
 }

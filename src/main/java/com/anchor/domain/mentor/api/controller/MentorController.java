@@ -1,5 +1,6 @@
 package com.anchor.domain.mentor.api.controller;
 
+import com.anchor.domain.mentor.api.controller.request.MentoringStatusInfos;
 import com.anchor.domain.mentor.api.controller.request.MentoringUnavailableTimeInfos;
 import com.anchor.domain.mentor.api.service.MentorService;
 import com.anchor.global.auth.SessionUser;
@@ -24,6 +25,19 @@ public class MentorController {
     SessionUser user = (SessionUser) httpSession.getAttribute("user");
     mentorService.setUnavailableTimes(user.getMentorId(),
         mentoringUnavailableTimeInfos.getDateTimeRanges());
+
+    return ResponseEntity.ok()
+        .build();
+  }
+
+  @PostMapping("/me/applied-mentorings")
+  public ResponseEntity<String> changeMentoringStatus(
+      @RequestBody MentoringStatusInfos mentoringStatusInfos,
+      HttpSession httpSession) {
+
+    SessionUser user = (SessionUser) httpSession.getAttribute("user");
+    mentorService.changeMentoringStatus(user.getMentorId(),
+        mentoringStatusInfos.getMentoringStatusInfos());
 
     return ResponseEntity.ok()
         .build();

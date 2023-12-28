@@ -3,11 +3,11 @@ package com.anchor.domain.mentor.api.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
-import com.anchor.domain.mentor.api.controller.request.MentoringUnavailableTimeInfos.DateTimeRange;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentor.domain.repository.MentorRepository;
 import com.anchor.domain.mentoring.domain.MentoringUnavailableTime;
 import com.anchor.global.aws.AwsS3Config;
+import com.anchor.global.util.DateTimeRange;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
