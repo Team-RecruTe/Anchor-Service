@@ -3,7 +3,7 @@ package com.anchor.domain.mentoring.api.controller;
 import static com.anchor.domain.user.domain.UserRole.MENTOR;
 
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
-import com.anchor.domain.mentoring.api.controller.request.MentoringContents;
+import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringUnavailableTimeInfos;
 import com.anchor.domain.mentoring.api.service.MentoringService;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreationResult;
@@ -83,8 +83,8 @@ public class MentoringController {
 
   @PostMapping("/{id}/contents")
   public ResponseEntity<String> registerMentoringDetail(@PathVariable Long id,
-      @RequestBody MentoringContents mentoringContents) {
-    mentoringService.registerContents(id, mentoringContents);
+      @RequestBody MentoringContentsInfo mentoringContentsInfo) {
+    mentoringService.registerContents(id, mentoringContentsInfo);
 
     return ResponseEntity.ok()
         .build();
@@ -92,8 +92,8 @@ public class MentoringController {
 
   @PutMapping("/{id}/contents")
   public ResponseEntity<String> editMentoringDetail(@PathVariable Long id,
-      @RequestBody MentoringContents mentoringContents) {
-    mentoringService.editContents(id, mentoringContents);
+      @RequestBody MentoringContentsInfo mentoringContentsInfo) {
+    mentoringService.editContents(id, mentoringContentsInfo);
 
     return ResponseEntity.ok()
         .build();

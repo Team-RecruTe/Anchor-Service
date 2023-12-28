@@ -4,7 +4,7 @@ import com.anchor.domain.mentor.domain.Career;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentor.domain.repository.MentorRepository;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
-import com.anchor.domain.mentoring.api.controller.request.MentoringContents;
+import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -54,7 +54,7 @@ public class MentoringTest {
     mentoringRepository.save(mentoring);
 
     // when
-    mentoringService.registerContents(1L, new MentoringContents("<h1>컨텐츠입니다.<h1>"));
+    mentoringService.registerContents(1L, new MentoringContentsInfo("<h1>컨텐츠입니다.<h1>"));
 
     // then
   }
