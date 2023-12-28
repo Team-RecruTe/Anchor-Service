@@ -2,8 +2,9 @@ package com.anchor.domain.mentoring.api.service;
 
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
-import com.anchor.domain.mentoring.api.controller.request.MentoringContents;
+import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringUnavailableTimeInfos.DateTimeRange;
+import com.anchor.domain.mentoring.api.service.response.MentoringContentsResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreationResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
 import com.anchor.domain.mentoring.domain.Mentoring;
@@ -62,19 +63,32 @@ public class MentoringService {
     mentoringUnavailableTimeRepository.saveAll(mentoringUnavailableTimes);
   }
 
-  public void registerContents(Long id, MentoringContents mentoringContents) {
+  public void registerContents(Long id, MentoringContentsInfo mentoringContentsInfo) {
     Mentoring mentoring = mentoringRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링이 없습니다."));
 
-    mentoring.registerDetail(mentoringContents);
+    mentoring.registerDetail(mentoringContentsInfo);
     mentoringRepository.save(mentoring);
   }
 
-  public void editContents(Long id, MentoringContents mentoringContents) {
+  public void editContents(Long id, MentoringContentsInfo mentoringContentsInfo) {
     Mentoring mentoring = mentoringRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링이 없습니다."));
 
-    mentoring.editDetail(mentoringContents);
+    mentoring.editDetail(mentoringContentsInfo);
     mentoringRepository.save(mentoring);
   }
+
+  public void changeMentoringStatus() {
+
+  }
+
+  public MentoringContentsResult getMentoringDetail(Long id) {
+    Mentoring mentoring = mentoringRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링이 없습니다."));
+
+    return new MentoringContentsResult(mentoring.getMentoringDetail()
+        .getContents());
+  }
+
 }

@@ -208,3 +208,9 @@ src/main/resources/application-*
 
 ### p6spy ###
 src/main/resources/spy.properties
+
+### http ###
+http
+
+### data ###
+data

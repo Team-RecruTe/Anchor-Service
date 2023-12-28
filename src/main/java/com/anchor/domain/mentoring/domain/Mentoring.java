@@ -2,7 +2,7 @@ package com.anchor.domain.mentoring.domain;
 
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
-import com.anchor.domain.mentoring.api.controller.request.MentoringContents;
+import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
 import com.anchor.global.util.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -74,14 +74,13 @@ public class Mentoring extends BaseEntity {
     this.cost = mentoringBasicInfo.getCost();
   }
 
-  public void registerDetail(MentoringContents mentoringContents) {
+  public void registerDetail(MentoringContentsInfo mentoringContentsInfo) {
     this.mentoringDetail = MentoringDetail.registerDetail(
-        mentoringContents.getContents());
+        mentoringContentsInfo.getContents());
   }
 
-  public void editDetail(MentoringContents mentoringContents) {
-    this.mentoringDetail.editDetail(mentoringContents.getContents());
+  public void editDetail(MentoringContentsInfo mentoringContentsInfo) {
+    this.mentoringDetail.editDetail(mentoringContentsInfo.getContents());
   }
-
 
 }
