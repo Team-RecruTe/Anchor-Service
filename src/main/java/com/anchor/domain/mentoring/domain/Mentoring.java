@@ -2,7 +2,9 @@ package com.anchor.domain.mentoring.domain;
 
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
+import com.anchor.domain.mentoring.api.controller.request.MentoringContents;
 import com.anchor.global.util.BaseEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -32,7 +34,7 @@ public class Mentoring extends BaseEntity {
   private Integer cost;
 
   @Column(nullable = false, columnDefinition = "int default 0")
-  private Integer totalApplicationNumber;
+  private Integer totalApplicationNumber = 0;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "mentor_id")
@@ -40,6 +42,7 @@ public class Mentoring extends BaseEntity {
 
   @OneToOne(
       fetch = FetchType.LAZY,
+      cascade = CascadeType.ALL,
       orphanRemoval = true
   )
   @JoinColumn(name = "mentoring_detail_id")
@@ -47,13 +50,13 @@ public class Mentoring extends BaseEntity {
 
   @OneToMany(
       mappedBy = "mentoring",
+      cascade = CascadeType.ALL,
       orphanRemoval = true
   )
   private List<MentoringTag> mentoringTag = new ArrayList<>();
 
   @OneToMany(
-      mappedBy = "mentoring",
-      orphanRemoval = true
+      mappedBy = "mentoring"
   )
   private List<MentoringApplication> mentoringApplications = new ArrayList<>();
 
@@ -70,4 +73,15 @@ public class Mentoring extends BaseEntity {
     this.durationTime = mentoringBasicInfo.getDurationTime();
     this.cost = mentoringBasicInfo.getCost();
   }
+
+  public void registerDetail(MentoringContents mentoringContents) {
+    this.mentoringDetail = MentoringDetail.registerDetail(
+        mentoringContents.getContents());
+  }
+
+  public void editDetail(MentoringContents mentoringContents) {
+    this.mentoringDetail.editDetail(mentoringContents.getContents());
+  }
+
+
 }

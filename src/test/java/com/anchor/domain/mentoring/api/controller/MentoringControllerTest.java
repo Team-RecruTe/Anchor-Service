@@ -148,7 +148,7 @@ class MentoringControllerTest {
 
     Mockito.doNothing()
         .when(mentoringService)
-        .setUnavailableTimes(any(List.class));
+        .setUnavailableTimes(1L, any(List.class));
 
     String json = objectMapper.writeValueAsString(mentoringUnavailableTimeInfos);
 

@@ -2,6 +2,7 @@ package com.anchor.domain.mentoring.api.service;
 
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
+import com.anchor.domain.mentoring.api.controller.request.MentoringContents;
 import com.anchor.domain.mentoring.api.controller.request.MentoringUnavailableTimeInfos.DateTimeRange;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreationResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
@@ -54,10 +55,26 @@ public class MentoringService {
   }
 
   @Transactional
-  public void setUnavailableTimes(List<DateTimeRange> unavailableTimes) {
+  public void setUnavailableTimes(Long id, List<DateTimeRange> unavailableTimes) {
     List<MentoringUnavailableTime> mentoringUnavailableTimes = MentoringUnavailableTime.of(
         unavailableTimes);
 
     mentoringUnavailableTimeRepository.saveAll(mentoringUnavailableTimes);
+  }
+
+  public void registerContents(Long id, MentoringContents mentoringContents) {
+    Mentoring mentoring = mentoringRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링이 없습니다."));
+
+    mentoring.registerDetail(mentoringContents);
+    mentoringRepository.save(mentoring);
+  }
+
+  public void editContents(Long id, MentoringContents mentoringContents) {
+    Mentoring mentoring = mentoringRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링이 없습니다."));
+
+    mentoring.editDetail(mentoringContents);
+    mentoringRepository.save(mentoring);
   }
 }

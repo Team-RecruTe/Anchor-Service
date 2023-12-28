@@ -20,18 +20,18 @@ import lombok.NoArgsConstructor;
 public class MentoringUnavailableTime extends BaseEntity {
 
   @Column(nullable = false)
-  private LocalDateTime from;
+  private LocalDateTime fromDateTime;
 
   @Column(nullable = false)
-  private LocalDateTime to;
+  private LocalDateTime toDateTime;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "mentor_id")
   private Mentor mentor;
 
-  private MentoringUnavailableTime(LocalDateTime from, LocalDateTime to) {
-    this.from = from;
-    this.to = to;
+  private MentoringUnavailableTime(LocalDateTime fromDateTime, LocalDateTime toDateTime) {
+    this.fromDateTime = fromDateTime;
+    this.toDateTime = toDateTime;
   }
 
   public static List<MentoringUnavailableTime> of(List<DateTimeRange> dateTimeRanges) {

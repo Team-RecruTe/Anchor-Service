@@ -43,7 +43,7 @@ public class Mentor extends BaseEntity {
   @JoinColumn(name = "mentor_introduction_id")
   private MentorIntroduction mentorIntroduction;
 
-  @OneToMany(mappedBy = "mentoring_unavailable_time_id")
+  @OneToMany(mappedBy = "mentor")
   private List<MentoringUnavailableTime> mentoringUnavailableTime = new ArrayList<>();
 
   @OneToMany(

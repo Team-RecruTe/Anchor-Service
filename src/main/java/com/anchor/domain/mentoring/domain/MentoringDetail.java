@@ -17,4 +17,16 @@ public class MentoringDetail extends BaseEntity {
   @Column(nullable = false)
   private String contents;
 
+  private MentoringDetail(String contents) {
+    this.contents = contents;
+  }
+
+  public static MentoringDetail registerDetail(String contents) {
+    return new MentoringDetail(contents);
+  }
+
+  public void editDetail(String contents) {
+    this.contents = contents;
+  }
+
 }

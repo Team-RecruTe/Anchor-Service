@@ -3,6 +3,7 @@ package com.anchor.domain.mentoring.api.controller;
 import static com.anchor.domain.user.domain.UserRole.MENTOR;
 
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
+import com.anchor.domain.mentoring.api.controller.request.MentoringContents;
 import com.anchor.domain.mentoring.api.controller.request.MentoringUnavailableTimeInfos;
 import com.anchor.domain.mentoring.api.service.MentoringService;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreationResult;
@@ -74,7 +75,25 @@ public class MentoringController {
   public ResponseEntity<String> registerUnavailableTime(@PathVariable Long id,
       @RequestBody MentoringUnavailableTimeInfos mentoringUnavailableTimeInfos) {
 
-    mentoringService.setUnavailableTimes(mentoringUnavailableTimeInfos.getDateTimeRanges());
+    mentoringService.setUnavailableTimes(id, mentoringUnavailableTimeInfos.getDateTimeRanges());
+
+    return ResponseEntity.ok()
+        .build();
+  }
+
+  @PostMapping("/{id}/contents")
+  public ResponseEntity<String> registerMentoringDetail(@PathVariable Long id,
+      @RequestBody MentoringContents mentoringContents) {
+    mentoringService.registerContents(id, mentoringContents);
+
+    return ResponseEntity.ok()
+        .build();
+  }
+
+  @PutMapping("/{id}/contents")
+  public ResponseEntity<String> editMentoringDetail(@PathVariable Long id,
+      @RequestBody MentoringContents mentoringContents) {
+    mentoringService.editContents(id, mentoringContents);
 
     return ResponseEntity.ok()
         .build();
