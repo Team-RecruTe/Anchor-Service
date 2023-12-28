@@ -115,6 +115,7 @@ public class MentoringController {
 
     mentoringUnavailableTimes.addAll(sessionSavedMentoringUnavailableTimeList);
 
+    updateSessionSavedMentoringUnavailableTimeList(session, id, mentoringUnavailableTimes);
     return ResponseEntity.ok()
         .body(mentoringUnavailableTimes);
   }
@@ -143,6 +144,8 @@ public class MentoringController {
       mentoringService.removeMentoringApplicationTimeFromSession
           (sessionSavedMentoringUnavailableTimeList, applicationTime);
 
+      updateSessionSavedMentoringUnavailableTimeList(session, id,
+          sessionSavedMentoringUnavailableTimeList);
       return SUCCESS;
     }
 
@@ -150,7 +153,7 @@ public class MentoringController {
   }
 
   /**
-   * 멘토링 신청과정입니다. 결제진행중인 시간대를 다른 회원이 신청하지 못하도록 Lock 합니다.
+   * 멘토링 신청과정입니다. 결제진행중인 시간대를 다른 회원이 신청하지 못하도록 잠금처리 합니다.
    */
   @PostMapping("/{id}/apply-process")
   public String mentoringTimeSessionSave(
@@ -164,11 +167,13 @@ public class MentoringController {
         sessionSavedMentoringUnavailableTimeList,
         applicationTime);
 
+    updateSessionSavedMentoringUnavailableTimeList(session, id,
+        sessionSavedMentoringUnavailableTimeList);
     return SUCCESS;
   }
 
   /**
-   * 멘토링 신청 도중 결제실패 또는 취소시 Lock이 걸려있던 시간대를 해제합니다.
+   * 멘토링 신청 도중 결제실패 또는 취소시 잠금상태였던 시간대를 해제합니다.
    */
   @PostMapping("/{id}/apply-cancel")
   public String mentoringTimeSessionRemove(@PathVariable("id") Long id,
@@ -180,6 +185,8 @@ public class MentoringController {
     boolean removeResult = mentoringService.removeMentoringApplicationTimeFromSession
         (sessionSavedMentoringUnavailableTimeList, applicationTime);
 
+    updateSessionSavedMentoringUnavailableTimeList(session, id,
+        sessionSavedMentoringUnavailableTimeList);
     return removeResult ? SUCCESS : FAILURE;
   }
 
@@ -193,4 +200,8 @@ public class MentoringController {
         new ArrayList<>() : sessionSavedmentoringTimeList;
   }
 
+  private void updateSessionSavedMentoringUnavailableTimeList(HttpSession session, Long id,
+      List<MentoringUnavailableTimeResponse> sessionSavedTimeList) {
+    session.setAttribute(String.valueOf(id), sessionSavedTimeList);
+  }
 }
