@@ -29,9 +29,4 @@ public class AwsS3Config {
         .build();
   }
 
-  @Bean
-  public AwsS3Utils awsS3Utils() {
-    return new AwsS3Utils(amazonS3Client());
-  }
-
 }

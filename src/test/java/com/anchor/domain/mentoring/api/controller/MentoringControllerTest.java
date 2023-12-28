@@ -8,14 +8,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
-import com.anchor.domain.mentoring.api.controller.request.MentoringUnavailableTimeInfos.DateTimeRange;
 import com.anchor.domain.mentoring.api.service.MentoringService;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreationResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -125,6 +120,7 @@ class MentoringControllerTest {
         .andExpect(status().isBadRequest());
   }
 
+  /* MentorService 테스트로 이동 필요
   @DisplayName("멘토링 불가능한 시간을 입력받아, 검증을 마치고, ok를 응답합니다.")
   @Test
   void validateMentoringUnavailableTimeInfos() throws Exception {
@@ -162,6 +158,5 @@ class MentoringControllerTest {
     perform.andDo(print())
         .andExpect(status().isOk());
   }
-
-
+  */
 }

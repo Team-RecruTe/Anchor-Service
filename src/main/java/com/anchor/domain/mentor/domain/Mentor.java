@@ -3,6 +3,7 @@ package com.anchor.domain.mentor.domain;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringUnavailableTime;
 import com.anchor.global.util.BaseEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -43,8 +44,12 @@ public class Mentor extends BaseEntity {
   @JoinColumn(name = "mentor_introduction_id")
   private MentorIntroduction mentorIntroduction;
 
-  @OneToMany(mappedBy = "mentor")
-  private List<MentoringUnavailableTime> mentoringUnavailableTime = new ArrayList<>();
+  @OneToMany(
+      mappedBy = "mentor",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true
+  )
+  private List<MentoringUnavailableTime> mentoringUnavailableTimes = new ArrayList<>();
 
   @OneToMany(
       mappedBy = "mentor",

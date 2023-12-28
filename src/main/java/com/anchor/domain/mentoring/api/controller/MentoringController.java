@@ -4,7 +4,6 @@ import static com.anchor.domain.user.domain.UserRole.MENTOR;
 
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
-import com.anchor.domain.mentoring.api.controller.request.MentoringUnavailableTimeInfos;
 import com.anchor.domain.mentoring.api.service.MentoringService;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreationResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
@@ -66,16 +65,6 @@ public class MentoringController {
     }
 
     mentoringService.delete(id);
-
-    return ResponseEntity.ok()
-        .build();
-  }
-
-  @PostMapping("/{id}/schedule")
-  public ResponseEntity<String> registerUnavailableTime(@PathVariable Long id,
-      @RequestBody MentoringUnavailableTimeInfos mentoringUnavailableTimeInfos) {
-
-    mentoringService.setUnavailableTimes(id, mentoringUnavailableTimeInfos.getDateTimeRanges());
 
     return ResponseEntity.ok()
         .build();

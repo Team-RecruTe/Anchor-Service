@@ -1,7 +1,7 @@
 package com.anchor.domain.mentoring.domain;
 
+import com.anchor.domain.mentor.api.controller.request.MentoringUnavailableTimeInfos.DateTimeRange;
 import com.anchor.domain.mentor.domain.Mentor;
-import com.anchor.domain.mentoring.api.controller.request.MentoringUnavailableTimeInfos.DateTimeRange;
 import com.anchor.global.util.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,10 +19,10 @@ import lombok.NoArgsConstructor;
 @Entity
 public class MentoringUnavailableTime extends BaseEntity {
 
-  @Column(nullable = false)
+  @Column(nullable = false, columnDefinition = "datetime(6)")
   private LocalDateTime fromDateTime;
 
-  @Column(nullable = false)
+  @Column(nullable = false, columnDefinition = "datetime(6)")
   private LocalDateTime toDateTime;
 
   @ManyToOne(fetch = FetchType.LAZY)

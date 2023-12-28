@@ -3,16 +3,12 @@ package com.anchor.domain.mentoring.api.service;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
-import com.anchor.domain.mentoring.api.controller.request.MentoringUnavailableTimeInfos.DateTimeRange;
 import com.anchor.domain.mentoring.api.service.response.MentoringContentsResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreationResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
 import com.anchor.domain.mentoring.domain.Mentoring;
-import com.anchor.domain.mentoring.domain.MentoringUnavailableTime;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
-import com.anchor.domain.mentoring.domain.repository.MentoringUnavailableTimeRepository;
 import jakarta.transaction.Transactional;
-import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +18,6 @@ import org.springframework.stereotype.Service;
 public class MentoringService {
 
   private final MentoringRepository mentoringRepository;
-  private final MentoringUnavailableTimeRepository mentoringUnavailableTimeRepository;
 
   @Transactional
   public MentoringCreationResult create(Mentor mentor,
@@ -55,14 +50,8 @@ public class MentoringService {
     mentoringRepository.delete(mentoring);
   }
 
+
   @Transactional
-  public void setUnavailableTimes(Long id, List<DateTimeRange> unavailableTimes) {
-    List<MentoringUnavailableTime> mentoringUnavailableTimes = MentoringUnavailableTime.of(
-        unavailableTimes);
-
-    mentoringUnavailableTimeRepository.saveAll(mentoringUnavailableTimes);
-  }
-
   public void registerContents(Long id, MentoringContentsInfo mentoringContentsInfo) {
     Mentoring mentoring = mentoringRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링이 없습니다."));
@@ -71,6 +60,7 @@ public class MentoringService {
     mentoringRepository.save(mentoring);
   }
 
+  @Transactional
   public void editContents(Long id, MentoringContentsInfo mentoringContentsInfo) {
     Mentoring mentoring = mentoringRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링이 없습니다."));
@@ -83,6 +73,7 @@ public class MentoringService {
 
   }
 
+  @Transactional
   public MentoringContentsResult getMentoringDetail(Long id) {
     Mentoring mentoring = mentoringRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링이 없습니다."));

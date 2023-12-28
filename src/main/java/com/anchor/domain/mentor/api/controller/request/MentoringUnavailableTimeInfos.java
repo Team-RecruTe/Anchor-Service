@@ -1,4 +1,4 @@
-package com.anchor.domain.mentoring.api.controller.request;
+package com.anchor.domain.mentor.api.controller.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
