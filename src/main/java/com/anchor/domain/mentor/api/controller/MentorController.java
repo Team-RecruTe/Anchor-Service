@@ -66,7 +66,7 @@ public class MentorController {
   @PostMapping("/register/email/send")
   public Map<String, Boolean> emailSend(String receiver) {
     String emailCode = RandomCodeMaker.makeRandomCode();
-    session.setAttribute("emailCode", emailCode);
+    session.setAttribute("ecode", emailCode);
     MailDto mailDto = MailDto.builder()
         .receiver(receiver)
         .title("Anchor-Service: 이메일 인증키입니다.")
@@ -81,7 +81,7 @@ public class MentorController {
 
   @PostMapping("/register/email/auth")
   public String emailVerify(String userEmailCode) {
-    String emailCode = (String) session.getAttribute("emailCode");
+    String emailCode = (String) session.getAttribute("ecode");
     if (userEmailCode.equals(emailCode)) {
       return "이메일 인증 성공";
     } else {
