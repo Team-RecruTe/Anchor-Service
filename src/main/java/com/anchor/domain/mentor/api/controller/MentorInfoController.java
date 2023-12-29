@@ -22,24 +22,23 @@ public class MentorInfoController {
 
   private final MentorInfoService mentorInfoService;
 
-  @GetMapping("/{id}")
-  public String getMentors(@PathVariable Long id){ //Model model
+  @GetMapping("/{id}") //방문자
+  public String getVisitorView(@PathVariable Long id){ //Model model
     MentorInfoResponse mentorInfoResponse = mentorInfoService.findMentors(id);
+    //멘토 소개글, 멘토링 내용...
     //model.addAttribute();
     return "멘토 정보 페이지 조회 성공";
   }
 
-
-  @GetMapping("/{id}/info")
-  public String getMentorsInfo(@PathVariable Long id ){ //@AuthenticationPrincipal , Model model
-    MentorInfoResponse mentorInfoResponse = mentorInfoService.findMentors(id);
+  @GetMapping("/{id}/info") //멘토회원
+  public String getMentorView(@PathVariable Long id){ //@AuthenticationPrincipal , Model model
+    //MentorInfoResponse mentorInfoResponse = mentorInfoService.
     //model.addAttribute();
     return "멘토 필수정보 페이지 조회 성공";
   }
 
-
-  @PutMapping("/{id}/info")
-  public Map<String, Object> putMentorsInfo(@PathVariable Long id,  //@AuthenticationPrincipal , Model model
+  @PutMapping("/{id}/info") //멘토회원
+  public Map<String, Object> putInfo(@PathVariable Long id,  //@AuthenticationPrincipal , Model model
                                               @RequestBody MentorInfoRequest mentorInfoRequest){
     //model.addAttribute();
     mentorInfoService.modifyMentorsInfo(id, mentorInfoRequest);
@@ -48,16 +47,12 @@ public class MentorInfoController {
     return resultMap;
   }
 
-
-  @DeleteMapping("/{id}")
+  @DeleteMapping("/{id}") //멘토회원
   public Map<String, Object> deleteMentors(@PathVariable Long id){
     mentorInfoService.deleteMentors(id);
     Map<String, Object> resultMap = new HashMap<>();
     resultMap.put("delete", "ok");
     return resultMap;
-
   }
-
-
 
 }

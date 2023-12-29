@@ -15,16 +15,14 @@ public class MentorInfoResponse {
   private String bankName;
   private String accountNumber;
   private String accountName;
-  private MentorIntroduction mentorIntroduction;
 
-  //DB를 조회 : entity -> dto
+  //entity -> dto
   public MentorInfoResponse(Mentor entity){
     this.companyEmail = entity.getCompanyEmail();
     this.career = entity.getCareer();
     this.bankName = entity.getBankName();
     this.accountNumber = entity.getAccountNumber();
     this.accountName = entity.getAccountName();
-    this.mentorIntroduction = entity.getMentorIntroduction();
   }
 
 }

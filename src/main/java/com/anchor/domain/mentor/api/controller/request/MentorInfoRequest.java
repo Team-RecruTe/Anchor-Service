@@ -24,14 +24,4 @@ public class MentorInfoRequest {
     this.accountName = accountName;
   }
 
-  //DB에 등록 : dto -> entity
-  public Mentor toEntity(){
-    return Mentor.builder()
-        .career(career)
-        .bankName(bankName)
-        .accountNumber(accountNumber)
-        .accountName(accountName)
-        .build();
-  }
-
 }
