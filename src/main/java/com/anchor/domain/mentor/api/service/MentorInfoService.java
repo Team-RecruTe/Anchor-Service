@@ -26,7 +26,7 @@ public class MentorInfoService {
   public void modifyMentorsInfo(Long id, MentorInfoRequest mentorInfoRequest) {
     Mentor mentor = mentorsInfoRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("해당 멘토를 찾을 수 없습니다."));
-    mentor.modify(mentorInfoRequest);
+    mentor.editEssence(mentorInfoRequest);
     mentorsInfoRepository.save(mentor);
   }
 
