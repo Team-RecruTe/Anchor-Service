@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <script src="/js/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h2 style="font-weight:700; color:#fff; text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;">
+        🎀signup page🎀</h2>
+    <label class="form-label" for="email">EMAIL</label>
+    <input type="text" id="email" name="email" placeholder="email">
+    <button id="btnEmailSend"
+            style="background-color: rgb(255, 144, 202); color:white;">SEND EMAIL
+    </button>
+    <label class="form-label" for="email">EMAIL</label>
+    <input type="text" id="emailCheck" name="emailCheck" placeholder="emailCheck">
+    <button id="btnEmailCheck"
+            style="background-color: rgb(255, 144, 202); color:white;">VERIFY EMAIL
+    </button>
+  </div>
+</body>
+<script>
+  $("#btnEmailSend").on("click", function(e) {
+	  $.ajax({
+		  url : "/mentors/register/email/send",
+		  data : {
+			  receiver : $("#email").val(),
+		  },
+		  method: "post",
+		  success : function(data) {
+			  console.log("success");
+			  console.log(data);
+		  },
+		  complete : function(data) {
+			  console.log("complete");
+			  console.log(data);
+		  },
+	  });
+	return false;
+  });
+
+  $("#btnEmailCheck").on("click", function(e) {
+	  $.ajax({
+		  url : "/mentors/register/email/auth",
+		  data : {
+			  userEmailCode : $("#emailCheck").val(),
+		  },
+		  method: "post",
+		  success : function(data) {
+			  console.log("success");
+			  console.log(data);
+		  },
+		  complete : function(data) {
+			  console.log("complete");
+			  console.log(data);
+		  },
+	  });
+	return false;
+  })
+</script>
+</html>

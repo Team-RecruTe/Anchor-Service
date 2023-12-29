@@ -1,5 +1,6 @@
 package com.anchor.domain.mentor.api.service;
 
+import com.anchor.domain.mentor.api.controller.request.MentorRegisterInfo;
 import com.anchor.domain.mentor.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
 import com.anchor.domain.mentor.api.service.response.AppliedMentoringSearchResult;
 import com.anchor.domain.mentor.api.service.response.MentoringUnavailableTimes;
@@ -91,4 +92,15 @@ public class MentorService {
     return mentoringApplicationRepository.findAllByMentorId(mentorId,
         pageable);
   }
+
+  public void register(MentorRegisterInfo mentorRegisterInfo) {
+    Mentor dbInsertMentor = Mentor.builder()
+        .companyEmail(mentorRegisterInfo.getCompanyEmail())
+        .career(mentorRegisterInfo.getCareer())
+        .accountNumber(mentorRegisterInfo.getAccountNumber())
+        .bankName(mentorRegisterInfo.getBankName())
+        .build();
+    mentorRepository.save(dbInsertMentor);
+  }
+
 }

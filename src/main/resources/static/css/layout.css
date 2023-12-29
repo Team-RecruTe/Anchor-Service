@@ -1,0 +1,64 @@
+.logo {
+  height:60px;
+}
+.profile {
+  width:150px;
+
+}
+#memberProfileImage {
+  width:150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 300px;
+  border: 5px solid #ccc;
+}
+.subscribeList li {
+  display: flex;
+  align-items: center;
+  margin:10px 0;
+}
+.subscribeList li .thumb {
+  width:60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 100px;
+  overflow: hidden;
+  margin-right: 20px;
+}
+.subscribeList li .btn {
+  margin-left: auto;
+}
+
+
+.story-box {
+  border: 1px solid #ccc;
+}
+.story-box .mypage-header {
+  padding:15px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #ccc;
+}
+.story-box .mypage-header img {
+  width:60px;
+  height:60px;
+  object-fit: cover;
+  border-radius: 100px;
+  border: 2px solid #ccc;
+  margin-right: 10px;
+}
+.story-box .main-image img {
+  max-width:100%;
+}
+.comment-box {
+  padding:15px;
+  display: flex;
+  flex-direction: column;
+}
+.comment-box .btn {
+  margin-left: auto;
+}
+
+#preview {
+    width: 100%;
+}
