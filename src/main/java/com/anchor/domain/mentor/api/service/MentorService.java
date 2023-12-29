@@ -99,6 +99,7 @@ public class MentorService {
         .career(mentorRegisterInfo.getCareer())
         .accountNumber(mentorRegisterInfo.getAccountNumber())
         .bankName(mentorRegisterInfo.getBankName())
+        .accountName(mentorRegisterInfo.getAccountName())
         .build();
     mentorRepository.save(dbInsertMentor);
   }

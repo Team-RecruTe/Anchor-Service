@@ -13,4 +13,5 @@ public class MentorRegisterInfo {
   private Career career;
   private String accountNumber;
   private String bankName;
+  private String accountName;
 }
