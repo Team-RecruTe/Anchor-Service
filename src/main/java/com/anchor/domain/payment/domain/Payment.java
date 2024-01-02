@@ -10,6 +10,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -37,4 +38,19 @@ public class Payment extends BaseEntity {
   @JoinColumn(name = "mentoring_application_id")
   private MentoringApplication mentoringApplication;
 
+  @Builder
+  private Payment(String impUid, String merchantUid, Integer amount, Integer cancelAmount,
+      PaymentStatus paymentStatus, MentoringApplication mentoringApplication) {
+    this.impUid = impUid;
+    this.merchantUid = merchantUid;
+    this.amount = amount;
+    this.cancelAmount = cancelAmount;
+    this.paymentStatus = paymentStatus;
+    addMentoringApplication(mentoringApplication);
+  }
+
+  private void addMentoringApplication(MentoringApplication mentoringApplication) {
+    this.mentoringApplication = mentoringApplication;
+    this.mentoringApplication.changePayment(this);
+  }
 }

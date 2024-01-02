@@ -47,13 +47,15 @@ public class UserService {
    * 아직 결제기능을 개발하지 않아, 결제취소 프로세스를 추가하지 않았습니다.
    */
   @Transactional
-  public boolean changeAppliedMentoringStatus(Long applicationId,
-      AppliedMentoringStatus appliedMentoringStatus) {
+  public boolean changeAppliedMentoringStatus(SessionUser sessionUser, AppliedMentoringStatus appliedMentoringStatus) {
 
-    MentoringApplication findMentoringApplication =
-        mentoringApplicationRepository.findById(applicationId)
-            .orElseThrow(
-                () -> new NoSuchElementException(applicationId + "에 해당하는 멘토링 신청내역이 존재하지 않습니다."));
+    User findUser = userRepository.findByEmail(sessionUser.getEmail())
+        .orElseThrow(() -> new NoSuchElementException(sessionUser.getEmail() + "에 해당하는 회원이 존재하지 않습니다."));
+
+    List<MentoringApplication> mentoringApplicationList = findUser.getMentoringApplicationList();
+
+    MentoringApplication findMentoringApplication = findMatchingMentoringApplication(
+        appliedMentoringStatus, mentoringApplicationList);
 
     MentoringStatus changeStatus = appliedMentoringStatus.getStatus();
 
@@ -62,7 +64,7 @@ public class UserService {
 
         findMentoringApplication.changeMentoringStatus(changeStatus);
 
-        deleteMentoringUnavailableTime(findMentoringApplication, appliedMentoringStatus);
+        deleteMentoringUnavailableTime(appliedMentoringStatus, findMentoringApplication);
 
         MentoringApplication modifiedMentoringStatus = mentoringApplicationRepository.save(
             findMentoringApplication);
@@ -73,9 +75,20 @@ public class UserService {
     }
   }
 
+  private MentoringApplication findMatchingMentoringApplication(AppliedMentoringStatus appliedMentoringStatus,
+      List<MentoringApplication> mentoringApplicationList) {
 
-  private void deleteMentoringUnavailableTime(MentoringApplication mentoringApplication,
-      AppliedMentoringStatus appliedMentoringStatus) {
+    return mentoringApplicationList
+        .stream()
+        .filter(application ->
+            application.isMatchingDateTime(appliedMentoringStatus))
+        .findFirst()
+        .orElseThrow(() -> new RuntimeException("일치하는 멘토링 신청이력을 조회하지 못했습니다."));
+  }
+
+
+  private void deleteMentoringUnavailableTime(AppliedMentoringStatus appliedMentoringStatus,
+      MentoringApplication mentoringApplication) {
 
     LocalDateTime targetStartDateTime = appliedMentoringStatus.getStartDateTime();
     LocalDateTime targetEndDateTime = appliedMentoringStatus.getEndDateTime();

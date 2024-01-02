@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,17 +45,15 @@ public class UserController {
   /**
    * 신청한 멘토링의 상태를 변경합니다. 취소, 또는 완료로 변경가능합니다.
    */
-  @PostMapping("/me/applied-mentorings/{applicationId}")
-  public String appliedMentoringStatusChange(@PathVariable("applicationId") Long applicationId,
-      @RequestBody AppliedMentoringStatus mentoringStatus,
-      HttpSession session) {
+  @PostMapping("/me/applied-mentorings")
+  public String appliedMentoringStatusChange(@RequestBody AppliedMentoringStatus mentoringStatus, HttpSession session) {
 
     SessionUser sessionUser = getSessionUserFromSession(session);
     if (sessionUser == null) {
       throw new RuntimeException("로그인 정보가 없습니다. 잘못된 접근입니다.");
     }
 
-    return userService.changeAppliedMentoringStatus(applicationId, mentoringStatus) ?
+    return userService.changeAppliedMentoringStatus(sessionUser, mentoringStatus) ?
         SUCCESS : FAILURE;
   }
 

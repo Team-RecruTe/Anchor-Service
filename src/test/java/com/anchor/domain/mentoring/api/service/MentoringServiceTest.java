@@ -1,17 +1,17 @@
 package com.anchor.domain.mentoring.api.service;
 
-import static com.anchor.domain.mentoring.api.service.TestConstant.APPLICATION_DATE;
-import static com.anchor.domain.mentoring.api.service.TestConstant.APPLICATION_TIME;
-import static com.anchor.domain.mentoring.api.service.TestConstant.COST;
-import static com.anchor.domain.mentoring.api.service.TestConstant.DURATION_TIME;
-import static com.anchor.domain.mentoring.api.service.TestConstant.FIRST_FROM_DATE_TIME;
-import static com.anchor.domain.mentoring.api.service.TestConstant.FIRST_TO_DATE_TIME;
-import static com.anchor.domain.mentoring.api.service.TestConstant.MENTORING_CONTENT;
-import static com.anchor.domain.mentoring.api.service.TestConstant.MENTORING_TITLE;
-import static com.anchor.domain.mentoring.api.service.TestConstant.NICKNAME;
-import static com.anchor.domain.mentoring.api.service.TestConstant.SECOND_FROM_DATE_TIME;
-import static com.anchor.domain.mentoring.api.service.TestConstant.SECOND_TO_DATE_TIME;
-import static com.anchor.domain.mentoring.api.service.TestConstant.USER_EMAIL;
+import static com.anchor.constant.TestConstant.APPLICATION_DATE;
+import static com.anchor.constant.TestConstant.APPLICATION_TIME;
+import static com.anchor.constant.TestConstant.COST;
+import static com.anchor.constant.TestConstant.DURATION_TIME;
+import static com.anchor.constant.TestConstant.FIRST_FROM_DATE_TIME;
+import static com.anchor.constant.TestConstant.FIRST_TO_DATE_TIME;
+import static com.anchor.constant.TestConstant.MENTORING_CONTENT;
+import static com.anchor.constant.TestConstant.MENTORING_TITLE;
+import static com.anchor.constant.TestConstant.NICKNAME;
+import static com.anchor.constant.TestConstant.SECOND_FROM_DATE_TIME;
+import static com.anchor.constant.TestConstant.SECOND_TO_DATE_TIME;
+import static com.anchor.constant.TestConstant.USER_EMAIL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
@@ -19,6 +19,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.anchor.domain.mentor.domain.Career;
@@ -280,6 +282,8 @@ class MentoringServiceTest {
             "mentoringEndDateTime", "mentoringStatus")
         .contains(NICKNAME, MENTORING_TITLE, mentoringApplication.getStartDateTime(),
             mentoringApplication.getEndDateTime(), MentoringStatus.WAITING);
+
+    verify(mentoringUnavailableTimeRepository, times(1)).save(any(MentoringUnavailableTime.class));
   }
 
   @Test
@@ -508,18 +512,3 @@ class MentoringServiceTest {
   }
 }
 
-class TestConstant {
-
-  public static final String NICKNAME = "테스트유저";
-  public static final String USER_EMAIL = "testUser@test.com";
-  public static final String MENTORING_TITLE = "테스트타이틀";
-  public static final String MENTORING_CONTENT = "테스트내용";
-  public static final String DURATION_TIME = "1시간";
-  public static final Integer COST = 10_000;
-  public static final String FIRST_FROM_DATE_TIME = "2024/01/01 00:00:00";
-  public static final String FIRST_TO_DATE_TIME = "2024/01/01 23:59:59";
-  public static final String SECOND_FROM_DATE_TIME = "2024/01/02 13:00:00";
-  public static final String SECOND_TO_DATE_TIME = "2024/01/02 14:00:00";
-  public static final String APPLICATION_DATE = "2024/01/03";
-  public static final String APPLICATION_TIME = "13:00";
-}

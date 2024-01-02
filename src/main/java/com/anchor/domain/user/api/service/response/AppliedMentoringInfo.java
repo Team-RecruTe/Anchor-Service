@@ -10,30 +10,30 @@ public class AppliedMentoringInfo {
 
   private LocalDateTime startDateTime;
   private LocalDateTime endDateTime;
-  private String mentorNickName;
+  private String mentorNickname;
   private String mentoringTitle;
-  private Long paymentId;
+  private String impUid;
 
   @Builder
   private AppliedMentoringInfo(LocalDateTime startDateTime, LocalDateTime endDateTime,
-      String mentorNickName, String mentoringTitle, Long paymentId) {
+      String mentorNickname, String mentoringTitle, String impUid) {
     this.startDateTime = startDateTime;
     this.endDateTime = endDateTime;
-    this.mentorNickName = mentorNickName;
+    this.mentorNickname = mentorNickname;
     this.mentoringTitle = mentoringTitle;
-    this.paymentId = paymentId;
+    this.impUid = impUid;
   }
 
   public AppliedMentoringInfo(MentoringApplication mentoringApplication) {
     this.startDateTime = mentoringApplication.getStartDateTime();
     this.endDateTime = mentoringApplication.getEndDateTime();
-    this.mentorNickName = mentoringApplication.getMentoring()
+    this.mentorNickname = mentoringApplication.getMentoring()
         .getMentor()
         .getUser()
         .getNickname();
     this.mentoringTitle = mentoringApplication.getMentoring()
         .getTitle();
-    this.paymentId = mentoringApplication.getPayment()
-        .getId();
+    this.impUid = mentoringApplication.getPayment()
+        .getImpUid();
   }
 }

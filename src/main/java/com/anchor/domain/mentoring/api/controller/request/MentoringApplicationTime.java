@@ -4,14 +4,15 @@ import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentoring.api.service.response.MentoringUnavailableTimeResponse;
 import com.anchor.domain.mentoring.domain.MentoringUnavailableTime;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import java.beans.ConstructorProperties;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class MentoringApplicationTime {
 
   @JsonFormat(pattern = "yyyy-MM-dd")
@@ -20,7 +21,6 @@ public class MentoringApplicationTime {
   private LocalTime time;
 
   @Builder
-  @ConstructorProperties({"date", "time"})
   private MentoringApplicationTime(LocalDate date, LocalTime time) {
     this.date = date;
     this.time = time;

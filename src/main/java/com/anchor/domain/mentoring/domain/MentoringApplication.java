@@ -2,6 +2,7 @@ package com.anchor.domain.mentoring.domain;
 
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
 import com.anchor.domain.payment.domain.Payment;
+import com.anchor.domain.user.api.controller.request.AppliedMentoringStatus;
 import com.anchor.domain.user.domain.User;
 import com.anchor.global.util.BaseEntity;
 import jakarta.persistence.Column;
@@ -74,6 +75,17 @@ public class MentoringApplication extends BaseEntity {
   public boolean isChangedMentoringStatus(MentoringStatus changeStatus) {
 
     return this.mentoringStatus.equals(changeStatus);
+  }
+
+  public boolean isMatchingDateTime(AppliedMentoringStatus appliedMentoringStatus) {
+
+    return this.startDateTime.isEqual(appliedMentoringStatus.getStartDateTime())
+        &&
+        this.endDateTime.isEqual(appliedMentoringStatus.getEndDateTime());
+  }
+
+  public void changePayment(Payment payment) {
+    setPayment(payment);
   }
 
   @Override
