@@ -9,10 +9,15 @@ import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 
 @WithMockUser(username = "hossi", roles = {"USER, MENTOR"})
+@AutoConfigureTestDatabase(replace = Replace.NONE)
+@ActiveProfiles("test")
 @SpringBootTest
 public class MentoringTest {
 
@@ -51,6 +56,5 @@ public class MentoringTest {
 
     // then
   }
-
 
 }

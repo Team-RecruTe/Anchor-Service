@@ -42,16 +42,14 @@ public class Mentoring extends BaseEntity {
 
   @OneToOne(
       fetch = FetchType.LAZY,
-      cascade = CascadeType.ALL,
-      orphanRemoval = true
+      cascade = CascadeType.ALL
   )
   @JoinColumn(name = "mentoring_detail_id")
   private MentoringDetail mentoringDetail;
 
   @OneToMany(
       mappedBy = "mentoring",
-      cascade = CascadeType.ALL,
-      orphanRemoval = true
+      cascade = CascadeType.ALL
   )
   private List<MentoringTag> mentoringTag = new ArrayList<>();
 
