@@ -101,7 +101,7 @@ class MentorInfoServiceTest {
     when(mentorInfoRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
     // When
-    mentorInfoService.modifyMentorsInfo(mentorId, request);
+    mentorInfoService.editMentorsInfo(mentorId, request);
 
     // Then
     // Repository의 save 메서드가 한 번 호출되었는지 확인
