@@ -25,10 +25,10 @@ import lombok.NoArgsConstructor;
 public class MentoringApplication extends BaseEntity {
 
   @Column(nullable = false, columnDefinition = "datetime")
-  LocalDateTime startDateTime;
+  private LocalDateTime startDateTime;
 
   @Column(nullable = false, columnDefinition = "datetime")
-  LocalDateTime endDateTime;
+  private LocalDateTime endDateTime;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -69,6 +69,11 @@ public class MentoringApplication extends BaseEntity {
 
   public void changeStatus(MentoringStatus mentoringStatus) {
     this.mentoringStatus = mentoringStatus;
+  }
+
+  public boolean isChangedMentoringStatus(MentoringStatus changeStatus) {
+
+    return this.mentoringStatus.equals(changeStatus);
   }
 
   @Override

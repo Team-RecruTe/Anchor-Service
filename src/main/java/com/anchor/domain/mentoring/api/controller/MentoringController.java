@@ -4,6 +4,7 @@ import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
 import com.anchor.domain.mentoring.api.service.MentoringService;
+import com.anchor.domain.mentoring.api.service.response.MentoringApplicationResponse;
 import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringDeleteResult;
@@ -124,7 +125,8 @@ public class MentoringController {
    * 멘토링 결제 완료가 되면 멘토링 신청이력을 저장합니다.
    */
   @PostMapping("/{id}/apply")
-  public String mentoringApplicationSave(@PathVariable("id") Long id,
+  public ResponseEntity<MentoringApplicationResponse> mentoringApplicationSave(
+      @PathVariable("id") Long id,
       @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
 
     SessionUser sessionUser = (SessionUser) session.getAttribute("user");
@@ -133,10 +135,11 @@ public class MentoringController {
       throw new RuntimeException("로그인 정보가 없습니다. 잘못된 접근입니다.");
     }
 
-    boolean isSaveMentoringApplication = mentoringService.saveMentoringApplication(sessionUser, id,
+    MentoringApplicationResponse mentoringApplicationResponse = mentoringService.saveMentoringApplication(
+        sessionUser, id,
         applicationTime);
 
-    if (isSaveMentoringApplication) {
+    if (mentoringApplicationResponse != null) {
 
       List<MentoringUnavailableTimeResponse> sessionSavedMentoringUnavailableTimeList =
           getSessionSavedMentoringUnavailableTimeList(session, id);
@@ -146,10 +149,12 @@ public class MentoringController {
 
       updateSessionSavedMentoringUnavailableTimeList(session, id,
           sessionSavedMentoringUnavailableTimeList);
-      return SUCCESS;
+      return ResponseEntity.ok()
+          .body(mentoringApplicationResponse);
     }
 
-    return FAILURE;
+    return ResponseEntity.badRequest()
+        .build();
   }
 
   /**

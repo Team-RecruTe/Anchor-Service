@@ -67,7 +67,7 @@ public class UserService {
         MentoringApplication modifiedMentoringStatus = mentoringApplicationRepository.save(
             findMentoringApplication);
 
-        return isChangedMentoringStatus(modifiedMentoringStatus, changeStatus);
+        return modifiedMentoringStatus.isChangedMentoringStatus(changeStatus);
       }
       default -> throw new IllegalArgumentException("잘못된 상태변경입니다.");
     }
@@ -94,12 +94,5 @@ public class UserService {
         mentoringUnavailableTimeRepository.delete(unavailableTime);
       }
     }
-  }
-
-  private boolean isChangedMentoringStatus(MentoringApplication modifiedMentoringStatus,
-      MentoringStatus changeStatus) {
-
-    return modifiedMentoringStatus.getMentoringStatus()
-        .equals(changeStatus);
   }
 }

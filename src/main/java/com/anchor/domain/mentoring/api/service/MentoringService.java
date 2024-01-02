@@ -1,7 +1,7 @@
 package com.anchor.domain.mentoring.api.service;
 
-import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
+import com.anchor.domain.mentoring.api.service.response.MentoringApplicationResponse;
 import com.anchor.domain.mentoring.api.service.response.MentoringDetailResponse;
 import com.anchor.domain.mentoring.api.service.response.MentoringInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringUnavailableTimeResponse;
@@ -25,7 +25,6 @@ import com.anchor.domain.mentoring.domain.repository.MentoringUnavailableTimeRep
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -131,7 +130,8 @@ public class MentoringService {
    * 멘토링 신청이 완료되면 멘토링 신청내역을 저장합니다.
    */
   @Transactional
-  public boolean saveMentoringApplication(SessionUser sessionUser, Long mentoringId,
+  public MentoringApplicationResponse saveMentoringApplication(SessionUser sessionUser,
+      Long mentoringId,
       MentoringApplicationTime applicationTime) {
 
     Mentoring findMentoring = mentoringRepository.findById(mentoringId)
@@ -147,15 +147,12 @@ public class MentoringService {
         .mentoringApplicationTime(applicationTime)
         .build();
 
-    MentoringApplication saveResult = mentoringApplicationRepository.save(saveMentoringApplication);
+    MentoringApplication saveResult = mentoringApplicationRepository.save(
+        saveMentoringApplication);
 
-    if (saveResult.equals(saveMentoringApplication)) {
+    saveMentoringUnavailableTime(saveResult, findMentoring);
 
-      saveMentoringUnavailableTime(saveResult, findMentoring);
-
-      return true;
-    }
-    return false;
+    return new MentoringApplicationResponse(saveResult);
   }
 
   public void addMentoringApplicationTimeFromSession(
@@ -181,16 +178,8 @@ public class MentoringService {
   private void saveMentoringUnavailableTime(MentoringApplication mentoringApplication,
       Mentoring findMentoring) {
 
-    Mentor findMentor = findMentoring.getMentor();
-
-    LocalDateTime savedStartDateTime = mentoringApplication.getStartDateTime();
-    LocalDateTime savedEndDateTime = mentoringApplication.getEndDateTime();
-
-    MentoringUnavailableTime saveMentoringUnavailableTime = MentoringUnavailableTime.builder()
-        .fromDateTime(savedStartDateTime)
-        .toDateTime(savedEndDateTime)
-        .mentor(findMentor)
-        .build();
+    MentoringUnavailableTime saveMentoringUnavailableTime =
+        new MentoringUnavailableTime(mentoringApplication, findMentoring);
 
     mentoringUnavailableTimeRepository.save(saveMentoringUnavailableTime);
   }
