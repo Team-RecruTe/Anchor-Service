@@ -83,7 +83,7 @@ class MentorIntroductionServiceTest {
     when(mentorIntroductionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
     // When
-    MentorIntroductionResponse mentorIntroductionResponse = mentorIntroductionService.findMentors(mentorId); // 수정된 부분
+    //MentorIntroductionResponse mentorIntroductionResponse = mentorIntroductionService.findMentors(mentorId); // 수정된 부분
 
     // Then
     verify(mentorIntroductionRepository, times(1)).save(any());

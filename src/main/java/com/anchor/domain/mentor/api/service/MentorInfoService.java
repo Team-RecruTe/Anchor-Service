@@ -2,6 +2,7 @@ package com.anchor.domain.mentor.api.service;
 
 import com.anchor.domain.mentor.api.controller.request.MentorInfoRequest;
 import com.anchor.domain.mentor.api.service.response.MentorInfoResponse;
+import com.anchor.domain.mentor.domain.Career;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentor.domain.repository.MentorInfoRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,12 @@ public class MentorInfoService {
   public void editMentorsInfo(Long id, MentorInfoRequest mentorInfoRequest) {
     Mentor mentor = mentorsInfoRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("해당 멘토를 찾을 수 없습니다."));
-    mentor.editEssence(mentorInfoRequest);
+    Mentor.builder()
+        .career(mentorInfoRequest.getCareer())
+        .accountName(mentorInfoRequest.getAccountName())
+        .accountNumber(mentorInfoRequest.getAccountNumber())
+        .accountName(mentorInfoRequest.getAccountName())
+        .build();
     mentorsInfoRepository.save(mentor);
   }
 
