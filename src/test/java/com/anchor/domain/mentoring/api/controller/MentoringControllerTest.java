@@ -6,18 +6,19 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.service.MentoringService;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
+import com.anchor.global.auth.SessionUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -36,42 +37,21 @@ class MentoringControllerTest {
   @MockBean
   MentoringService mentoringService;
 
-  @DisplayName("멘토링 필수 정보를 입력받아, title 검증을 거치고, 실패합니다.")
+  @MockBean
+  SessionUser sessionUser;
+
+  @DisplayName("멘토링 필수 정보 중에 잘못된 {durationTime}에 대한 {400, BadRequest}를 응답합니다.")
   @Test
-  void validateTitle() throws Exception {
+  void failToValidateDurationTime() throws Exception {
     // given
-    Mockito.when(
-            mentoringService.create(any(Mentor.class),
-                any(MentoringBasicInfo.class)))
-        .thenReturn(new MentoringCreateResult(1L));
+    MockHttpSession session = new MockHttpSession();
+    SessionUser user = new SessionUser();
+    user.addMentorId(1L);
+    session.setAttribute("user", user);
 
-    MentoringBasicInfo mentoringBasicInfo = MentoringBasicInfo.builder()
-        .title("  ")
-        .durationTime("10m")
-        .cost(10000)
-        .build();
-
-    String json = objectMapper.writeValueAsString(mentoringBasicInfo);
-
-    // when
-    ResultActions perform = mockMvc.perform(post("/mentorings")
-        .with(csrf())
-        .contentType("application/json")
-        .content(json));
-
-    // then
-    perform.andDo(print())
-        .andExpect(status().isBadRequest());
-  }
-
-  @DisplayName("멘토링 필수 정보를 입력받아, durationTime 검증을 거치고, 실패합니다.")
-  @Test
-  void validateDurationTime() throws Exception {
-    // given
-    Mockito.when(
-            mentoringService.create(any(Mentor.class),
-                any(MentoringBasicInfo.class)))
-        .thenReturn(new MentoringCreateResult(1L));
+    BDDMockito.given(mentoringService.create(any(Long.class),
+            any(MentoringBasicInfo.class)))
+        .willReturn(new MentoringCreateResult(1L));
 
     MentoringBasicInfo mentoringBasicInfo = MentoringBasicInfo.builder()
         .title("제목입니다")
@@ -84,6 +64,7 @@ class MentoringControllerTest {
     // when
     ResultActions perform = mockMvc.perform(post("/mentorings")
         .with(csrf())
+        .session(session)
         .contentType("application/json")
         .content(json));
 
@@ -92,19 +73,26 @@ class MentoringControllerTest {
         .andExpect(status().isBadRequest());
   }
 
-  @DisplayName("멘토링 필수 정보를 입력받아, cost 검증을 거치고, 실패합니다.")
+  @DisplayName("멘토링 필수 정보 중에 올바른 {durationTime}에 대해 {200, OK}를 응답합니다.")
   @Test
-  void validateCost() throws Exception {
+  void succeedToValidateDurationTime() throws Exception {
     // given
-    Mockito.when(
-            mentoringService.create(any(Mentor.class),
-                any(MentoringBasicInfo.class)))
-        .thenReturn(new MentoringCreateResult(1L));
+    MockHttpSession session = new MockHttpSession();
+    SessionUser user = new SessionUser();
+    user.addMentorId(1L);
+    session.setAttribute("user", user);
+
+    BDDMockito.given(sessionUser.getMentorId())
+        .willReturn(1L);
+
+    BDDMockito.given(mentoringService.create(any(Long.class),
+            any(MentoringBasicInfo.class)))
+        .willReturn(new MentoringCreateResult(1L));
 
     MentoringBasicInfo mentoringBasicInfo = MentoringBasicInfo.builder()
         .title("제목입니다.")
-        .durationTime("10m")
-        .cost(null)
+        .durationTime("1h 20m")
+        .cost(10000)
         .build();
 
     String json = objectMapper.writeValueAsString(mentoringBasicInfo);
@@ -112,45 +100,7 @@ class MentoringControllerTest {
     // when
     ResultActions perform = mockMvc.perform(post("/mentorings")
         .with(csrf())
-        .contentType("application/json")
-        .content(json));
-
-    // then
-    perform.andDo(print())
-        .andExpect(status().isBadRequest());
-  }
-
-  /* MentorService 테스트로 이동 필요
-  @DisplayName("멘토링 불가능한 시간을 입력받아, 검증을 마치고, ok를 응답합니다.")
-  @Test
-  void validateMentoringUnavailableTimeInfos() throws Exception {
-    // given
-    Map<String, List<DateTimeRange>> mentoringUnavailableTimeInfos = new HashMap<>();
-    List<DateTimeRange> dateTimeRanges = List.of(
-        DateTimeRange.of(
-            LocalDateTime.of(2023, 12, 12, 20, 30),
-            LocalDateTime.of(2023, 12, 12, 21, 30)
-        ),
-        DateTimeRange.of(
-            LocalDateTime.of(2023, 12, 12, 21, 30),
-            LocalDateTime.of(2023, 12, 12, 22, 30)
-        ),
-        DateTimeRange.of(
-            LocalDateTime.of(2023, 12, 12, 22, 30),
-            LocalDateTime.of(2023, 12, 12, 23, 30)
-        )
-    );
-    mentoringUnavailableTimeInfos.put("dateTimeRanges", dateTimeRanges);
-
-    Mockito.doNothing()
-        .when(mentoringService)
-        .setUnavailableTimes(1L, any(List.class));
-
-    String json = objectMapper.writeValueAsString(mentoringUnavailableTimeInfos);
-
-    // when
-    ResultActions perform = mockMvc.perform(post("/mentorings/1/schedule")
-        .with(csrf())
+        .session(session)
         .contentType("application/json")
         .content(json));
 
@@ -158,5 +108,5 @@ class MentoringControllerTest {
     perform.andDo(print())
         .andExpect(status().isOk());
   }
-  */
+
 }

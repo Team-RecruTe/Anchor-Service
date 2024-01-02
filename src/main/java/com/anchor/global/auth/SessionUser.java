@@ -20,4 +20,8 @@ public class SessionUser implements Serializable {
     this.image = user.getImage();
   }
 
+  public void addMentorId(Long mentorId) {
+    this.mentorId = mentorId;
+  }
+
 }

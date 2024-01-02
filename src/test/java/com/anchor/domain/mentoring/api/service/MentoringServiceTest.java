@@ -61,7 +61,7 @@ class MentoringServiceTest {
     when(mentoringRepository.save(any())).thenReturn(mentoring);
 
     // when
-    MentoringCreateResult mentoringCreateResult = mentoringService.create(mentor,
+    MentoringCreateResult mentoringCreateResult = mentoringService.create(mentor.getId(),
         mentoringBasicInfo);
 
     // then

@@ -1,6 +1,7 @@
 package com.anchor.domain.mentoring.api.service;
 
 import com.anchor.domain.mentor.domain.Mentor;
+import com.anchor.domain.mentor.domain.repository.MentorRepository;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringContents;
@@ -20,9 +21,11 @@ import org.springframework.stereotype.Service;
 public class MentoringService {
 
   private final MentoringRepository mentoringRepository;
+  private final MentorRepository mentorRepository;
 
   @Transactional
-  public MentoringCreateResult create(Mentor mentor, MentoringBasicInfo mentoringBasicInfo) {
+  public MentoringCreateResult create(Long mentorId, MentoringBasicInfo mentoringBasicInfo) {
+    Mentor mentor = getMentorById(mentorId);
     Mentoring mentoring = Mentoring.createMentoring(mentor, mentoringBasicInfo);
     Mentoring savedMentoring = mentoringRepository.save(mentoring);
     return new MentoringCreateResult(savedMentoring.getId());
@@ -62,4 +65,9 @@ public class MentoringService {
         .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링이 없습니다."));
   }
 
+  private Mentor getMentorById(Long mentorId) {
+    Mentor mentor = mentorRepository.findById(mentorId)
+        .orElseThrow(() -> new NoSuchElementException("일치하는 멘토가 없습니다."));
+    return mentor;
+  }
 }
