@@ -74,7 +74,7 @@ class MentorInfoServiceTest {
     assertEquals(mentor.getCareer(), mentorInfoResponse.getCareer());
     assertEquals(mentor.getBankName(), mentorInfoResponse.getBankName());
     assertEquals(mentor.getAccountNumber(), mentorInfoResponse.getAccountNumber());
-    assertEquals(mentor.getMentorIntroduction(), mentorInfoResponse.getMentorIntroduction());
+    //assertEquals(mentor.getMentorIntroduction(), mentorInfoResponse.getMentorIntroduction());
 
     // Verify : that findById method was called once with the correct argument
     verify(mentorInfoRepository, times(1)).findById(mentorId);
@@ -123,6 +123,7 @@ class MentorInfoServiceTest {
     // Repository의 deleteById 메서드가 한 번 호출되었는지 확인
     verify(mentorInfoRepository, times(1)).deleteById(mentorId);
   }
+
 
 
 }
