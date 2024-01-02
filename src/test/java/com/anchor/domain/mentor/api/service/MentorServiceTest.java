@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.tuple;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentor.domain.repository.MentorRepository;
 import com.anchor.domain.mentoring.domain.MentoringUnavailableTime;
-import com.anchor.global.aws.AwsS3Config;
 import com.anchor.global.util.DateTimeRange;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -15,21 +14,22 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureDataJpa;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@WithMockUser(username = "hossi", roles = {"USER, MENTOR"})
-@EnableJpaRepositories(basePackages = "com.anchor")
-@ComponentScan(basePackages = "com.anchor")
-@ContextConfiguration(classes = {AwsS3Config.class})
+//@WithMockUser(username = "hossi", roles = {"USER, MENTOR"})
+//@EnableJpaRepositories(basePackages = "com.anchor")
+//@ComponentScan(basePackages = "com.anchor")
+//@ContextConfiguration(classes = {AwsS3Config.class})
+//@Import(MentorService.class)
 @ExtendWith(value = SpringExtension.class)
-@AutoConfigureDataJpa
+@ActiveProfiles("test")
 @SpringBootTest
+//@DataJpaTest
+@AutoConfigureTestDatabase(replace = Replace.NONE)
 class MentorServiceTest {
 
   @Autowired
