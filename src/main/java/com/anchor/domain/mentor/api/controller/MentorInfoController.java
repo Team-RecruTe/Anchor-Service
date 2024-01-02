@@ -41,7 +41,7 @@ public class MentorInfoController {
   public Map<String, Object> putInfo(@PathVariable Long id,  //@AuthenticationPrincipal , Model model
                                               @RequestBody MentorInfoRequest mentorInfoRequest){
     //model.addAttribute();
-    mentorInfoService.modifyMentorsInfo(id, mentorInfoRequest);
+    mentorInfoService.editMentorsInfo(id, mentorInfoRequest);
     Map<String, Object> resultMap = new HashMap<>();
     resultMap.put("modify", "ok");
     return resultMap;
