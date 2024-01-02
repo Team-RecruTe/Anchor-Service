@@ -51,7 +51,8 @@ public class Mentor extends BaseEntity {
   private List<MentoringUnavailableTime> mentoringUnavailableTimes = new ArrayList<>();
 
   @OneToMany(
-      mappedBy = "mentor"
+      mappedBy = "mentor",
+      cascade = CascadeType.ALL
   )
   private List<Mentoring> mentorings = new ArrayList<>();
 

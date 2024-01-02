@@ -3,8 +3,10 @@ package com.anchor.domain.mentoring.api.service;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
-import com.anchor.domain.mentoring.api.service.response.MentoringContentsResult;
-import com.anchor.domain.mentoring.api.service.response.MentoringCreationResult;
+import com.anchor.domain.mentoring.api.service.response.MentoringContents;
+import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
+import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
+import com.anchor.domain.mentoring.api.service.response.MentoringDeleteResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
@@ -20,66 +22,44 @@ public class MentoringService {
   private final MentoringRepository mentoringRepository;
 
   @Transactional
-  public MentoringCreationResult create(Mentor mentor,
-      MentoringBasicInfo mentoringBasicInfo) {
-    Mentoring mentoring = Mentoring.builder()
-        .title(mentoringBasicInfo.getTitle())
-        .durationTime(mentoringBasicInfo.getDurationTime())
-        .cost(mentoringBasicInfo.getCost())
-        .mentor(mentor)
-        .build();
-
-    Mentoring createdMentoring = mentoringRepository.save(mentoring);
-
-    return new MentoringCreationResult(createdMentoring.getId());
+  public MentoringCreateResult create(Mentor mentor, MentoringBasicInfo mentoringBasicInfo) {
+    Mentoring mentoring = Mentoring.createMentoring(mentor, mentoringBasicInfo);
+    Mentoring savedMentoring = mentoringRepository.save(mentoring);
+    return new MentoringCreateResult(savedMentoring.getId());
   }
 
   @Transactional
   public MentoringEditResult edit(Long id, MentoringBasicInfo mentoringBasicInfo) {
-    Mentoring mentoring = mentoringRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링이 없습니다."));
+    Mentoring mentoring = getMentoringById(id);
     mentoring.changeBasicInfo(mentoringBasicInfo);
-    Mentoring editedMentoring = mentoringRepository.save(mentoring);
-    return MentoringEditResult.of(editedMentoring);
+    Mentoring savedMentoring = mentoringRepository.save(mentoring);
+    return new MentoringEditResult(savedMentoring.getId());
   }
 
   @Transactional
-  public void delete(Long id) {
-    Mentoring mentoring = mentoringRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링이 없습니다."));
+  public MentoringDeleteResult delete(Long id) {
+    Mentoring mentoring = getMentoringById(id);
     mentoringRepository.delete(mentoring);
-  }
-
-
-  @Transactional
-  public void registerContents(Long id, MentoringContentsInfo mentoringContentsInfo) {
-    Mentoring mentoring = mentoringRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링이 없습니다."));
-
-    mentoring.registerDetail(mentoringContentsInfo);
-    mentoringRepository.save(mentoring);
+    return new MentoringDeleteResult(mentoring.getId());
   }
 
   @Transactional
-  public void editContents(Long id, MentoringContentsInfo mentoringContentsInfo) {
-    Mentoring mentoring = mentoringRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링이 없습니다."));
-
-    mentoring.editDetail(mentoringContentsInfo);
-    mentoringRepository.save(mentoring);
-  }
-
-  public void changeMentoringStatus() {
-
+  public MentoringContentsEditResult editContents(Long id, MentoringContentsInfo mentoringContentsInfo) {
+    Mentoring mentoring = getMentoringById(id);
+    mentoring.editContents(mentoringContentsInfo);
+    Mentoring savedMentoring = mentoringRepository.save(mentoring);
+    return new MentoringContentsEditResult(savedMentoring.getId());
   }
 
   @Transactional
-  public MentoringContentsResult getMentoringDetail(Long id) {
-    Mentoring mentoring = mentoringRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링이 없습니다."));
+  public MentoringContents getContents(Long id) {
+    Mentoring mentoring = getMentoringById(id);
+    return new MentoringContents(mentoring.getContents(), mentoring.getTags());
+  }
 
-    return new MentoringContentsResult(mentoring.getMentoringDetail()
-        .getContents());
+  private Mentoring getMentoringById(Long id) {
+    return mentoringRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링이 없습니다."));
   }
 
 }

@@ -13,7 +13,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -51,7 +54,7 @@ public class Mentoring extends BaseEntity {
       mappedBy = "mentoring",
       cascade = CascadeType.ALL
   )
-  private List<MentoringTag> mentoringTag = new ArrayList<>();
+  private Set<MentoringTag> mentoringTags = new HashSet<>();
 
   @OneToMany(
       mappedBy = "mentoring"
@@ -66,19 +69,56 @@ public class Mentoring extends BaseEntity {
     this.mentor = mentor;
   }
 
+  public static Mentoring createMentoring(Mentor mentor, MentoringBasicInfo mentoringBasicInfo) {
+    Mentoring mentoring = Mentoring.builder()
+        .title(mentoringBasicInfo.getTitle())
+        .durationTime(mentoringBasicInfo.getDurationTime())
+        .cost(mentoringBasicInfo.getCost())
+        .mentor(mentor)
+        .build();
+    mentor.getMentorings()
+        .add(mentoring);
+    return mentoring;
+  }
+
+  public List<String> getTags() {
+    return mentoringTags.stream()
+        .map(MentoringTag::getTag)
+        .toList();
+  }
+
+  public String getContents() {
+    return mentoringDetail.getContents();
+  }
+
   public void changeBasicInfo(MentoringBasicInfo mentoringBasicInfo) {
     this.title = mentoringBasicInfo.getTitle();
     this.durationTime = mentoringBasicInfo.getDurationTime();
     this.cost = mentoringBasicInfo.getCost();
   }
 
-  public void registerDetail(MentoringContentsInfo mentoringContentsInfo) {
-    this.mentoringDetail = MentoringDetail.registerDetail(
-        mentoringContentsInfo.getContents());
+  public void editContents(MentoringContentsInfo mentoringContentsInfo) {
+    editMentoringTags(mentoringContentsInfo.getTags());
+    editDetails(mentoringContentsInfo);
   }
 
-  public void editDetail(MentoringContentsInfo mentoringContentsInfo) {
-    this.mentoringDetail.editDetail(mentoringContentsInfo.getContents());
+  private void editMentoringTags(List<String> tags) {
+    Set<String> savedTags = this.mentoringTags.stream()
+        .map(MentoringTag::getTag)
+        .collect(Collectors.toSet());
+    ArrayList<String> mutableTags = new ArrayList<>(tags);
+    mutableTags.removeAll(savedTags);
+    this.mentoringTags.addAll(mutableTags.stream()
+        .map(MentoringTag::new)
+        .collect(Collectors.toSet()));
+  }
+
+  private void editDetails(MentoringContentsInfo mentoringContentsInfo) {
+    if (this.mentoringDetail == null) {
+      this.mentoringDetail = MentoringDetail.registerDetail(mentoringContentsInfo.getContents());
+    } else {
+      this.mentoringDetail.editDetail(mentoringContentsInfo.getContents());
+    }
   }
 
 }

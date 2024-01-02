@@ -5,9 +5,12 @@ import static com.anchor.domain.user.domain.UserRole.MENTOR;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
 import com.anchor.domain.mentoring.api.service.MentoringService;
-import com.anchor.domain.mentoring.api.service.response.MentoringCreationResult;
+import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
+import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
+import com.anchor.domain.mentoring.api.service.response.MentoringDeleteResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
 import com.anchor.domain.user.domain.User;
+import com.anchor.global.util.Link;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,17 +34,21 @@ public class MentoringController {
   private final MentoringService mentoringService;
 
   @PostMapping
-  public ResponseEntity<MentoringCreationResult> createMentoring(
+  public ResponseEntity<MentoringCreateResult> createMentoring(
       @RequestBody @Valid MentoringBasicInfo mentoringBasicInfo, HttpSession httpSession) {
     User user = (User) httpSession.getAttribute("user");
     if (user.getRole() != MENTOR) {
       throw new AuthorizationServiceException("멘토링을 생성할 권한이 없습니다.");
     }
 
-    MentoringCreationResult mentoringCreationResult = mentoringService.create(user.getMentor(),
+    MentoringCreateResult result = mentoringService.create(user.getMentor(),
         mentoringBasicInfo);
 
-    return ResponseEntity.ok(mentoringCreationResult);
+    result.addLinks(Link.builder()
+        .setLink("self", String.format("/mentorings/%d", result.getId()))
+        .build());
+
+    return ResponseEntity.ok(result);
   }
 
   @PutMapping("/{id}")
@@ -52,40 +59,37 @@ public class MentoringController {
       throw new AuthorizationServiceException("멘토링을 수정할 권한이 없습니다.");
     }
 
-    MentoringEditResult mentoringEditResult = mentoringService.edit(id, mentoringBasicInfo);
+    MentoringEditResult result = mentoringService.edit(id, mentoringBasicInfo);
+    result.addLinks(Link.builder()
+        .setLink("self", String.format("/mentorings/%d", result.getId()))
+        .build());
 
-    return ResponseEntity.ok(mentoringEditResult);
+    return ResponseEntity.ok(result);
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<String> deleteMentoring(@PathVariable Long id, HttpSession httpSession) {
+  public ResponseEntity<MentoringDeleteResult> deleteMentoring(@PathVariable Long id, HttpSession httpSession) {
     User user = (User) httpSession.getAttribute("user");
     if (user.getRole() != MENTOR) {
       throw new AuthorizationServiceException("멘토링을 삭제할 권한이 없습니다.");
     }
 
-    mentoringService.delete(id);
+    MentoringDeleteResult result = mentoringService.delete(id);
 
-    return ResponseEntity.ok()
-        .build();
-  }
-
-  @PostMapping("/{id}/contents")
-  public ResponseEntity<String> registerMentoringDetail(@PathVariable Long id,
-      @RequestBody MentoringContentsInfo mentoringContentsInfo) {
-    mentoringService.registerContents(id, mentoringContentsInfo);
-
-    return ResponseEntity.ok()
-        .build();
+    return ResponseEntity.ok(result);
   }
 
   @PutMapping("/{id}/contents")
-  public ResponseEntity<String> editMentoringDetail(@PathVariable Long id,
-      @RequestBody MentoringContentsInfo mentoringContentsInfo) {
-    mentoringService.editContents(id, mentoringContentsInfo);
+  public ResponseEntity<MentoringContentsEditResult> editContents(@PathVariable Long id,
+      @RequestBody @Valid MentoringContentsInfo mentoringContentsInfo) {
+    MentoringContentsEditResult result = mentoringService.editContents(id,
+        mentoringContentsInfo);
 
-    return ResponseEntity.ok()
-        .build();
+    result.addLinks(Link.builder()
+        .setLink("self", String.format("/mentorings/%d/contents", result.getId()))
+        .build());
+
+    return ResponseEntity.ok(result);
   }
 
 }

@@ -5,12 +5,12 @@ import java.util.List;
 import lombok.Getter;
 
 @Getter
-public class MentoringEditResult {
+public class MentoringCreateResult {
 
   private Long id;
   private List<Link> links;
 
-  public MentoringEditResult(Long id) {
+  public MentoringCreateResult(Long id) {
     this.id = id;
   }
 

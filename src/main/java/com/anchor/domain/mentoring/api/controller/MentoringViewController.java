@@ -1,7 +1,7 @@
 package com.anchor.domain.mentoring.api.controller;
 
 import com.anchor.domain.mentoring.api.service.MentoringService;
-import com.anchor.domain.mentoring.api.service.response.MentoringContentsResult;
+import com.anchor.domain.mentoring.api.service.response.MentoringContents;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,8 +23,8 @@ public class MentoringViewController {
 
   @GetMapping("/{id}/edit")
   public String viewMentoringEditPage(@PathVariable Long id, Model model) {
-    MentoringContentsResult mentoringContentsResult = mentoringService.getMentoringDetail(id);
-    model.addAttribute("mentoringContent", mentoringContentsResult);
+    MentoringContents result = mentoringService.getContents(id);
+    model.addAttribute("mentoringContents", result);
 
     return "mentoring-edit";
   }

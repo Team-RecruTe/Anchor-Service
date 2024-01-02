@@ -22,4 +22,8 @@ public class MentoringTag extends BaseEntity {
   @JoinColumn(name = "mentoring_id")
   private Mentoring mentoring;
 
+  public MentoringTag(String tag) {
+    this.tag = tag;
+  }
+
 }

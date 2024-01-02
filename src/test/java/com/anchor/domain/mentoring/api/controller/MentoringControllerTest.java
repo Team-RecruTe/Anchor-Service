@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.service.MentoringService;
-import com.anchor.domain.mentoring.api.service.response.MentoringCreationResult;
+import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,7 +43,7 @@ class MentoringControllerTest {
     Mockito.when(
             mentoringService.create(any(Mentor.class),
                 any(MentoringBasicInfo.class)))
-        .thenReturn(new MentoringCreationResult(1L));
+        .thenReturn(new MentoringCreateResult(1L));
 
     MentoringBasicInfo mentoringBasicInfo = MentoringBasicInfo.builder()
         .title("  ")
@@ -71,7 +71,7 @@ class MentoringControllerTest {
     Mockito.when(
             mentoringService.create(any(Mentor.class),
                 any(MentoringBasicInfo.class)))
-        .thenReturn(new MentoringCreationResult(1L));
+        .thenReturn(new MentoringCreateResult(1L));
 
     MentoringBasicInfo mentoringBasicInfo = MentoringBasicInfo.builder()
         .title("제목입니다")
@@ -99,7 +99,7 @@ class MentoringControllerTest {
     Mockito.when(
             mentoringService.create(any(Mentor.class),
                 any(MentoringBasicInfo.class)))
-        .thenReturn(new MentoringCreationResult(1L));
+        .thenReturn(new MentoringCreateResult(1L));
 
     MentoringBasicInfo mentoringBasicInfo = MentoringBasicInfo.builder()
         .title("제목입니다.")

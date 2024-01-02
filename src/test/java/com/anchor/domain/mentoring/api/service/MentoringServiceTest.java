@@ -11,7 +11,7 @@ import static org.mockito.Mockito.times;
 import com.anchor.domain.mentor.domain.Career;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
-import com.anchor.domain.mentoring.api.service.response.MentoringCreationResult;
+import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
@@ -61,12 +61,12 @@ class MentoringServiceTest {
     when(mentoringRepository.save(any())).thenReturn(mentoring);
 
     // when
-    MentoringCreationResult mentoringCreationResult = mentoringService.create(mentor,
+    MentoringCreateResult mentoringCreateResult = mentoringService.create(mentor,
         mentoringBasicInfo);
 
     // then
-    assertThat(mentoringCreationResult).isNotNull();
-    assertThat(mentoringCreationResult).extracting("mentoringId")
+    assertThat(mentoringCreateResult).isNotNull();
+    assertThat(mentoringCreateResult).extracting("mentoringId")
         .isEqualTo(1L);
   }
 
