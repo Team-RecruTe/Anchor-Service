@@ -17,7 +17,7 @@ public class MentoringStatusInfos {
   @NoArgsConstructor
   public static class MentoringStatusInfo {
 
-    private DateTimeRange mentoringEstimatedTime;
+    private DateTimeRange mentoringReservedTime;
     private String mentoringStatus;
 
     public MentoringStatus getMentoringStatus() {

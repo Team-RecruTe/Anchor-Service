@@ -65,5 +65,4 @@ public class QMentorRepositoryImpl implements QMentorRepository {
     });
   }
 
-
 }
