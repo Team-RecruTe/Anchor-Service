@@ -48,9 +48,11 @@ public class MentoringController {
     SessionUser user = (SessionUser) httpSession.getAttribute("user");
     MentoringCreateResult result = mentoringService.create(user.getMentorId(),
         mentoringBasicInfo);
+
     result.addLinks(Link.builder()
         .setLink("self", String.format("/mentorings/%d", result.getId()))
         .build());
+
     return ResponseEntity.ok(result);
   }
 
@@ -61,6 +63,7 @@ public class MentoringController {
     result.addLinks(Link.builder()
         .setLink("self", String.format("/mentorings/%d", result.getId()))
         .build());
+
     return ResponseEntity.ok(result);
   }
 
