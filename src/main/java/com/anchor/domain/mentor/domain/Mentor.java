@@ -1,7 +1,6 @@
 package com.anchor.domain.mentor.domain;
 
 import com.anchor.domain.mentoring.domain.Mentoring;
-import com.anchor.domain.mentoring.domain.MentoringUnavailableTime;
 import com.anchor.domain.user.domain.User;
 import com.anchor.global.util.BaseEntity;
 import jakarta.persistence.CascadeType;
@@ -60,15 +59,14 @@ public class Mentor extends BaseEntity {
     this.bankName = bankName;
   }
 
-  @OneToMany(mappedBy = "mentor")
-  private List<MentoringUnavailableTime> mentoringUnavailableTime = new ArrayList<>();
 
   @OneToOne(mappedBy = "mentor")
   private User user;
 
   @Builder
-  private Mentor(String companyEmail, Career career, String accountNumber, String accountName,
+  private Mentor(Long id, String companyEmail, Career career, String accountNumber, String accountName,
       String bankName, User user) {
+    super(id);
     this.companyEmail = companyEmail;
     this.career = career;
     this.accountNumber = accountNumber;

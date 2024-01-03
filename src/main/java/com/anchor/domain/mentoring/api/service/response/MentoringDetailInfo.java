@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class MentoringDetailResponse {
+public class MentoringDetailInfo {
 
   private String title;
   private String durationTime;
@@ -17,7 +17,7 @@ public class MentoringDetailResponse {
   private List<String> tags;
 
   @Builder
-  private MentoringDetailResponse(String title, String durationTime, String content,
+  private MentoringDetailInfo(String title, String durationTime, String content,
       String nickname,
       Integer cost, List<String> tags) {
     this.title = title;
@@ -28,7 +28,7 @@ public class MentoringDetailResponse {
     this.tags = tags;
   }
 
-  public MentoringDetailResponse(Mentoring mentoring) {
+  public MentoringDetailInfo(Mentoring mentoring) {
 
     this.title = mentoring.getTitle();
 

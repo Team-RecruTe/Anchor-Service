@@ -26,10 +26,10 @@ import static org.mockito.Mockito.when;
 import com.anchor.domain.mentor.domain.Career;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
-import com.anchor.domain.mentoring.api.service.response.MentoringApplicationResponse;
-import com.anchor.domain.mentoring.api.service.response.MentoringDetailResponse;
-import com.anchor.domain.mentoring.api.service.response.MentoringInfo;
-import com.anchor.domain.mentoring.api.service.response.MentoringUnavailableTimeResponse;
+import com.anchor.domain.mentoring.api.service.response.ApplicationUnavailableTime;
+import com.anchor.domain.mentoring.api.service.response.AppliedMentoringInfo;
+import com.anchor.domain.mentoring.api.service.response.MentoringDefaultInfo;
+import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringDetail;
@@ -85,6 +85,7 @@ class MentoringServiceTest {
         .build();
 
     mentor = Mentor.builder()
+        .id(1L)
         .companyEmail("testCompany@test.com")
         .accountName("계좌명")
         .accountNumber("12345678")
@@ -103,7 +104,7 @@ class MentoringServiceTest {
     //when
     when(mentoringRepository.findAll()).thenReturn(mentoringList);
 
-    List<MentoringInfo> result = mentoringService.loadMentoringList();
+    List<MentoringDefaultInfo> result = mentoringService.loadMentoringList();
 
     //then
     assertThat(result)
@@ -142,7 +143,7 @@ class MentoringServiceTest {
     given(mentoringRepository.findById(anyLong())).willReturn(Optional.of(mentoring));
 
     //when
-    MentoringDetailResponse result = mentoringService.loadMentoringDetail(inputMentoringId);
+    MentoringDetailInfo result = mentoringService.loadMentoringDetail(inputMentoringId);
 
     //then
     assertThat(result)
@@ -185,11 +186,11 @@ class MentoringServiceTest {
         .cost(10_000)
         .mentor(mentor)
         .build();
-
     given(mentoringRepository.findById(anyLong())).willReturn(Optional.of(mentoring));
+    given(mentoringUnavailableTimeRepository.findByMentorId(anyLong())).willReturn(unavailableTimes);
 
     //when
-    List<MentoringUnavailableTimeResponse> result =
+    List<ApplicationUnavailableTime> result =
         mentoringService.loadMentoringUnavailableTime(inputMentoringId);
 
     //then
@@ -226,7 +227,7 @@ class MentoringServiceTest {
     given(mentoringRepository.findById(anyLong())).willReturn(Optional.of(mentoring));
 
     //when
-    List<MentoringUnavailableTimeResponse> result =
+    List<ApplicationUnavailableTime> result =
         mentoringService.loadMentoringUnavailableTime(inputMentoringId);
 
     //then
@@ -273,11 +274,11 @@ class MentoringServiceTest {
         .willReturn(unavailableTime);
 
     //when
-    MentoringApplicationResponse mentoringApplicationResponse =
+    AppliedMentoringInfo appliedMentoringInfo =
         mentoringService.saveMentoringApplication(sessionUser, mentoringId, applicationTime);
 
     //then
-    assertThat(mentoringApplicationResponse)
+    assertThat(appliedMentoringInfo)
         .extracting("mentorNickname", "mentoringTitle", "mentoringStartDateTime",
             "mentoringEndDateTime", "mentoringStatus")
         .contains(NICKNAME, MENTORING_TITLE, mentoringApplication.getStartDateTime(),
@@ -344,7 +345,7 @@ class MentoringServiceTest {
   void addMentoringApplicationTimeFromSession() {
     //given
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-    List<MentoringUnavailableTimeResponse> sessionList = createMentoringUnavailableTimeResponseList();
+    List<ApplicationUnavailableTime> sessionList = createMentoringUnavailableTimeResponseList();
 
     MentoringApplicationTime applicationTime = MentoringApplicationTime.builder()
         .date(LocalDate.of(2024, 1, 3))
@@ -352,7 +353,7 @@ class MentoringServiceTest {
         .build();
 
     //when
-    mentoringService.addMentoringApplicationTimeFromSession(sessionList, applicationTime);
+    mentoringService.addApplicationTimeFromSession(sessionList, applicationTime);
 
     //then
     assertThat(sessionList)
@@ -372,7 +373,7 @@ class MentoringServiceTest {
   void notAddMentoringApplicationTimeFromSessionIsDuplicate() {
     //given
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-    List<MentoringUnavailableTimeResponse> sessionList = createMentoringUnavailableTimeResponseList();
+    List<ApplicationUnavailableTime> sessionList = createMentoringUnavailableTimeResponseList();
 
     MentoringApplicationTime applicationTime = MentoringApplicationTime.builder()
         .date(LocalDate.of(2024, 1, 2))
@@ -380,7 +381,7 @@ class MentoringServiceTest {
         .build();
 
     //when
-    mentoringService.addMentoringApplicationTimeFromSession(sessionList, applicationTime);
+    mentoringService.addApplicationTimeFromSession(sessionList, applicationTime);
     //then
     assertThat(sessionList)
         .hasSize(2)
@@ -398,7 +399,7 @@ class MentoringServiceTest {
   void removeMentoringApplicationTimeFromSession() {
     //given
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-    List<MentoringUnavailableTimeResponse> sessionList = createMentoringUnavailableTimeResponseList();
+    List<ApplicationUnavailableTime> sessionList = createMentoringUnavailableTimeResponseList();
 
     MentoringApplicationTime applicationTime = MentoringApplicationTime.builder()
         .date(LocalDate.of(2024, 1, 3))
@@ -408,7 +409,7 @@ class MentoringServiceTest {
     sessionList.add(applicationTime.convertToMentoringUnavailableTimeResponse());
 
     //when
-    mentoringService.removeMentoringApplicationTimeFromSession(sessionList, applicationTime);
+    mentoringService.removeApplicationTimeFromSession(sessionList, applicationTime);
     //then
     assertThat(sessionList)
         .hasSize(2)
@@ -486,8 +487,8 @@ class MentoringServiceTest {
     return LocalTime.parse(APPLICATION_TIME, formatter);
   }
 
-  private List<MentoringUnavailableTimeResponse> createMentoringUnavailableTimeResponseList() {
-    List<MentoringUnavailableTimeResponse> sessionList = new ArrayList<>();
+  private List<ApplicationUnavailableTime> createMentoringUnavailableTimeResponseList() {
+    List<ApplicationUnavailableTime> sessionList = new ArrayList<>();
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 
     LocalDateTime fromDateTime1 = LocalDateTime.parse(FIRST_FROM_DATE_TIME, formatter);
@@ -496,11 +497,11 @@ class MentoringServiceTest {
     LocalDateTime fromDateTime2 = LocalDateTime.parse(SECOND_FROM_DATE_TIME, formatter);
     LocalDateTime toDateTime2 = LocalDateTime.parse(SECOND_TO_DATE_TIME, formatter);
 
-    MentoringUnavailableTimeResponse response1 = MentoringUnavailableTimeResponse.builder()
+    ApplicationUnavailableTime response1 = ApplicationUnavailableTime.builder()
         .fromDateTime(fromDateTime1)
         .toDateTime(toDateTime1)
         .build();
-    MentoringUnavailableTimeResponse response2 = MentoringUnavailableTimeResponse.builder()
+    ApplicationUnavailableTime response2 = ApplicationUnavailableTime.builder()
         .fromDateTime(fromDateTime2)
         .toDateTime(toDateTime2)
         .build();

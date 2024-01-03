@@ -16,6 +16,10 @@ import com.anchor.domain.mentoring.api.service.response.MentoringDeleteResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringDetailResponseDto;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringResponseDto;
+import com.anchor.domain.mentoring.api.service.response.ApplicationUnavailableTime;
+import com.anchor.domain.mentoring.api.service.response.AppliedMentoringInfo;
+import com.anchor.domain.mentoring.api.service.response.MentoringDefaultInfo;
+import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringUnavailableTime;
@@ -25,7 +29,6 @@ import com.anchor.domain.mentoring.domain.repository.MentoringUnavailableTimeRep
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
@@ -83,63 +86,56 @@ public class MentoringService {
    * 현재 저장되어있는 모든 멘토링을 조회합니다.
    */
   @Transactional(readOnly = true)
-  public List<MentoringInfo> loadMentoringList() {
+  public List<MentoringDefaultInfo> loadMentoringList() {
     List<Mentoring> mentoringList = mentoringRepository.findAll();
 
     return mentoringList.stream()
-                        .map(MentoringInfo::new)
-                        .toList();
+        .map(MentoringDefaultInfo::new)
+        .toList();
   }
 
   /**
    * 입력한 ID를 통해 멘토링 상세정보를 조회합니다.
    */
   @Transactional(readOnly = true)
-  public MentoringDetailResponse loadMentoringDetail(Long id) {
+  public MentoringDetailInfo loadMentoringDetail(Long id) {
 
-    Mentoring findMentoring = mentoringRepository.findById(id)
-                                                 .orElseThrow(() -> new NoSuchElementException(id + "에 해당하는 멘토링이 존재하지 않습니다."));
+    Mentoring findMentoring = getMentoringById(id);
 
-    return new MentoringDetailResponse(findMentoring);
+    return new MentoringDetailInfo(findMentoring);
   }
 
   /**
    * 멘토링 신청페이지 조회시, 신청 불가능한 시간을 데이터베이스에서 조회합니다.
    */
   @Transactional(readOnly = true)
-  public List<MentoringUnavailableTimeResponse> loadMentoringUnavailableTime(Long id) {
+  public List<ApplicationUnavailableTime> loadMentoringUnavailableTime(Long id) {
 
-    Mentoring findMentoring = mentoringRepository.findById(id)
-                                                 .orElseThrow(() -> new NoSuchElementException(id + "에 해당하는 멘토링이 존재하지 않습니다."));
+    Mentoring findMentoring = getMentoringById(id);
 
-    List<MentoringUnavailableTime> mentoringUnavailableTime = findMentoring.getMentor()
-                                                                           .getMentoringUnavailableTime();
+    List<MentoringUnavailableTime> mentoringUnavailableTime = mentoringUnavailableTimeRepository.findByMentorId(
+        findMentoring.getMentor()
+            .getId());
 
     return mentoringUnavailableTime
         .isEmpty() ?
         null :
-        new ArrayList<>(
-            mentoringUnavailableTime
-                .stream()
-                .map(MentoringUnavailableTimeResponse::new)
-                .toList()
-        );
+        mentoringUnavailableTime
+            .stream()
+            .map(ApplicationUnavailableTime::new)
+            .toList();
   }
 
   /**
    * 멘토링 신청이 완료되면 멘토링 신청내역을 저장합니다.
    */
   @Transactional
-  public MentoringApplicationResponse saveMentoringApplication(SessionUser sessionUser,
-      Long mentoringId,
-      MentoringApplicationTime applicationTime) {
+  public AppliedMentoringInfo saveMentoringApplication(SessionUser sessionUser,
+      Long mentoringId, MentoringApplicationTime applicationTime) {
 
-    Mentoring findMentoring = mentoringRepository.findById(mentoringId)
-        .orElseThrow(() -> new NoSuchElementException(mentoringId + "에 해당하는 멘토링이 존재하지 않습니다."));
+    Mentoring findMentoring = getMentoringById(mentoringId);
 
-    User loginUser = userRepository.findByEmail(sessionUser.getEmail())
-        .orElseThrow(
-            () -> new NoSuchElementException(sessionUser.getEmail() + "에 해당하는 회원이 존재하지 않습니다."));
+    User loginUser = getUser(sessionUser);
 
     MentoringApplication saveMentoringApplication = MentoringApplication.builder()
         .mentoring(findMentoring)
@@ -147,36 +143,49 @@ public class MentoringService {
         .mentoringApplicationTime(applicationTime)
         .build();
 
-    MentoringApplication saveResult = mentoringApplicationRepository.save(
-        saveMentoringApplication);
+    MentoringApplication saveResult = mentoringApplicationRepository.save(saveMentoringApplication);
 
     saveMentoringUnavailableTime(saveResult, findMentoring);
 
-    return new MentoringApplicationResponse(saveResult);
+    return new AppliedMentoringInfo(saveResult);
   }
 
-  public void addMentoringApplicationTimeFromSession(
-      List<MentoringUnavailableTimeResponse> sessionList,
-      MentoringApplicationTime applicationTime) {
 
-    MentoringUnavailableTimeResponse targetMentoringUnavailableTime = applicationTime.convertToMentoringUnavailableTimeResponse();
+  public void addApplicationTimeFromSession
+      (List<ApplicationUnavailableTime> sessionList, MentoringApplicationTime applicationTime) {
 
-    if (!sessionList.contains(targetMentoringUnavailableTime)) {
-      sessionList.add(targetMentoringUnavailableTime);
+    ApplicationUnavailableTime targetMentoringApplicationUnavailableTime = applicationTime.convertToMentoringUnavailableTimeResponse();
+
+    if (!sessionList.contains(targetMentoringApplicationUnavailableTime)) {
+      sessionList.add(targetMentoringApplicationUnavailableTime);
     }
   }
 
-  public boolean removeMentoringApplicationTimeFromSession(
-      List<MentoringUnavailableTimeResponse> sessionList,
-      MentoringApplicationTime applicationTime) {
+  public boolean removeApplicationTimeFromSession
+      (List<ApplicationUnavailableTime> sessionList, MentoringApplicationTime applicationTime) {
 
-    MentoringUnavailableTimeResponse targetMentoringUnavailableTime = applicationTime.convertToMentoringUnavailableTimeResponse();
+    ApplicationUnavailableTime targetMentoringApplicationUnavailableTime = applicationTime.convertToMentoringUnavailableTimeResponse();
 
-    return sessionList.remove(targetMentoringUnavailableTime);
+    return sessionList.remove(targetMentoringApplicationUnavailableTime);
   }
 
-  private void saveMentoringUnavailableTime(MentoringApplication mentoringApplication,
-      Mentoring findMentoring) {
+  private Mentor getMentorById(Long id) {
+    Mentor mentor = mentorRepository.findById(id)
+                                    .orElseThrow(() -> new NoSuchElementException("일치하는 멘토 정보가 없습니다."));
+    return mentor;
+  }
+
+  private Mentoring getMentoringById(Long id) {
+    return mentoringRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException(id + "에 해당하는 멘토링이 존재하지 않습니다."));
+  }
+
+  private User getUser(SessionUser sessionUser) {
+    return userRepository.findByEmail(sessionUser.getEmail())
+        .orElseThrow(() -> new NoSuchElementException(sessionUser.getEmail() + "에 해당하는 회원이 존재하지 않습니다."));
+  }
+
+  private void saveMentoringUnavailableTime(MentoringApplication mentoringApplication, Mentoring findMentoring) {
 
     MentoringUnavailableTime saveMentoringUnavailableTime =
         new MentoringUnavailableTime(mentoringApplication, findMentoring);

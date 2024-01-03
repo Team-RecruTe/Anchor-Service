@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 
 @Getter
-public class MentoringApplicationResponse {
+public class AppliedMentoringInfo {
 
   private String mentorNickname;
   private String mentoringTitle;
@@ -14,7 +14,7 @@ public class MentoringApplicationResponse {
   private LocalDateTime mentoringEndDateTime;
   private MentoringStatus mentoringStatus;
 
-  public MentoringApplicationResponse(MentoringApplication mentoringApplication) {
+  public AppliedMentoringInfo(MentoringApplication mentoringApplication) {
     this.mentorNickname = mentoringApplication.getMentoring()
         .getMentor()
         .getUser()

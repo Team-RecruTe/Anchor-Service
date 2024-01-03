@@ -2,7 +2,7 @@ package com.anchor.domain.mentoring.domain;
 
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
 import com.anchor.domain.payment.domain.Payment;
-import com.anchor.domain.user.api.controller.request.AppliedMentoringStatus;
+import com.anchor.domain.user.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
 import com.anchor.domain.user.domain.User;
 import com.anchor.global.util.BaseEntity;
 import jakarta.persistence.Column;
@@ -19,6 +19,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -40,6 +41,7 @@ public class MentoringApplication extends BaseEntity {
   private Mentoring mentoring;
 
   @OneToOne(mappedBy = "mentoringApplication")
+  @Setter(AccessLevel.PRIVATE)
   private Payment payment;
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -72,16 +74,11 @@ public class MentoringApplication extends BaseEntity {
     this.mentoringStatus = mentoringStatus;
   }
 
-  public boolean isChangedMentoringStatus(MentoringStatus changeStatus) {
+  private boolean isMatchingDateTime(RequiredMentoringStatusInfo requiredMentoringStatusInfo) {
 
-    return this.mentoringStatus.equals(changeStatus);
-  }
-
-  public boolean isMatchingDateTime(AppliedMentoringStatus appliedMentoringStatus) {
-
-    return this.startDateTime.isEqual(appliedMentoringStatus.getStartDateTime())
+    return this.startDateTime.isEqual(requiredMentoringStatusInfo.getStartDateTime())
         &&
-        this.endDateTime.isEqual(appliedMentoringStatus.getEndDateTime());
+        this.endDateTime.isEqual(requiredMentoringStatusInfo.getEndDateTime());
   }
 
   public void changePayment(Payment payment) {

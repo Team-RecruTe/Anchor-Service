@@ -1,6 +1,6 @@
 package com.anchor.domain.user.api.controller;
 
-import com.anchor.domain.user.api.controller.request.AppliedMentoringStatus;
+import com.anchor.domain.user.api.controller.request.MentoringStatusInfo;
 import com.anchor.domain.user.api.service.UserService;
 import com.anchor.domain.user.api.service.response.AppliedMentoringInfo;
 import com.anchor.global.auth.SessionUser;
@@ -30,9 +30,6 @@ public class UserController {
   public ResponseEntity<List<AppliedMentoringInfo>> appliedMentoringList(HttpSession session) {
 
     SessionUser sessionUser = getSessionUserFromSession(session);
-    if (sessionUser == null) {
-      throw new RuntimeException("로그인 정보가 없습니다. 잘못된 접근입니다.");
-    }
 
     List<AppliedMentoringInfo> appliedMentoringInfoList = userService.loadAppliedMentoringList(
         sessionUser);
@@ -46,18 +43,21 @@ public class UserController {
    * 신청한 멘토링의 상태를 변경합니다. 취소, 또는 완료로 변경가능합니다.
    */
   @PostMapping("/me/applied-mentorings")
-  public String appliedMentoringStatusChange(@RequestBody AppliedMentoringStatus mentoringStatus, HttpSession session) {
+  public String appliedMentoringStatusChange(@RequestBody MentoringStatusInfo mentoringStatus,
+      HttpSession session) {
 
     SessionUser sessionUser = getSessionUserFromSession(session);
-    if (sessionUser == null) {
-      throw new RuntimeException("로그인 정보가 없습니다. 잘못된 접근입니다.");
-    }
 
     return userService.changeAppliedMentoringStatus(sessionUser, mentoringStatus) ?
         SUCCESS : FAILURE;
   }
 
+
   private SessionUser getSessionUserFromSession(HttpSession session) {
-    return (SessionUser) session.getAttribute("user");
+    SessionUser sessionUser = (SessionUser) session.getAttribute("user");
+    if (sessionUser == null) {
+      throw new RuntimeException("로그인 정보가 없습니다. 잘못된 접근입니다.");
+    }
+    return sessionUser;
   }
 }

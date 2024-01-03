@@ -3,18 +3,14 @@ package com.anchor.domain.user.api.service;
 import static com.anchor.constant.TestConstant.APPLICATION_DATE;
 import static com.anchor.constant.TestConstant.APPLICATION_TIME;
 import static com.anchor.constant.TestConstant.DATE_FORMATTER;
-import static com.anchor.constant.TestConstant.FIRST_FROM_DATE_TIME;
-import static com.anchor.constant.TestConstant.FIRST_TO_DATE_TIME;
 import static com.anchor.constant.TestConstant.MENTORING_TITLE;
 import static com.anchor.constant.TestConstant.NICKNAME;
-import static com.anchor.constant.TestConstant.SECOND_FROM_DATE_TIME;
-import static com.anchor.constant.TestConstant.SECOND_TO_DATE_TIME;
 import static com.anchor.constant.TestConstant.TIME_FORMATTER;
 import static com.anchor.constant.TestConstant.USER_EMAIL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -25,12 +21,11 @@ import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTi
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
-import com.anchor.domain.mentoring.domain.MentoringUnavailableTime;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
-import com.anchor.domain.mentoring.domain.repository.MentoringUnavailableTimeRepository;
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.domain.payment.domain.PaymentStatus;
-import com.anchor.domain.user.api.controller.request.AppliedMentoringStatus;
+import com.anchor.domain.user.api.controller.request.MentoringStatusInfo;
+import com.anchor.domain.user.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
 import com.anchor.domain.user.api.service.response.AppliedMentoringInfo;
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
@@ -38,11 +33,11 @@ import com.anchor.global.auth.SessionUser;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -58,8 +53,6 @@ class UserServiceTest {
   UserRepository userRepository;
   @Mock
   MentoringApplicationRepository mentoringApplicationRepository;
-  @Mock
-  MentoringUnavailableTimeRepository mentoringUnavailableTimeRepository;
 
   @InjectMocks
   UserService userService;
@@ -70,6 +63,7 @@ class UserServiceTest {
   @BeforeEach
   void initUserAndSessionUser() {
     user = User.builder()
+        .id(1L)
         .nickname(NICKNAME)
         .email(USER_EMAIL)
         .image("testImage")
@@ -79,8 +73,8 @@ class UserServiceTest {
   }
 
   @Test
-  @DisplayName("멘토링 신청내역을 조회한다.")
-  void loadAppliedMentoringList() {
+  @DisplayName("회원정보를 통해 회원이 신청한 멘토링 목록을 조회한다.")
+  void loadAppliedMentoringInfoList() {
     //given
     Mentor mentor = Mentor.builder()
         .user(user)
@@ -91,29 +85,14 @@ class UserServiceTest {
         .mentor(mentor)
         .build();
 
-    MentoringApplicationTime applicationTime = createMentoringApplicationTime();
+    List<MentoringApplicationTime> applicationTimeList = createMentoringApplicationTimeList();
 
-    MentoringApplication mentoringApplication = MentoringApplication.builder()
-        .mentoringApplicationTime(applicationTime)
-        .mentoring(mentoring)
-        .user(user)
-        .build();
+    List<MentoringApplication> mentoringApplicationList = createMentoringApplicationList(applicationTimeList, mentoring,
+        user);
+    List<Payment> paymentList = createPaymentList(mentoringApplicationList);
 
-    Payment payment = Payment.builder()
-        .impUid("test_impUid")
-        .merchantUid("test_merchantUid")
-        .amount(10_000)
-        .paymentStatus(PaymentStatus.SUCCESS)
-        .mentoringApplication(mentoringApplication)
-        .build();
-
-    AppliedMentoringInfo appliedMentoringInfo = AppliedMentoringInfo.builder()
-        .startDateTime(mentoringApplication.getStartDateTime())
-        .endDateTime(mentoringApplication.getEndDateTime())
-        .mentorNickname(user.getNickname())
-        .mentoringTitle(mentoring.getTitle())
-        .impUid(payment.getImpUid())
-        .build();
+    List<AppliedMentoringInfo> mentoringInfoList = createMentoringInfoList(mentoringApplicationList, mentoring,
+        paymentList);
 
     given(userRepository.findByEmail(anyString())).willReturn(Optional.of(user));
 
@@ -122,13 +101,15 @@ class UserServiceTest {
 
     //then
     assertThat(result)
-        .hasSize(1)
-        .extracting("startDateTime", "endDateTime", "mentorNickname", "mentoringTitle", "impUid")
-        .contains(
-            tuple(appliedMentoringInfo.getStartDateTime(), appliedMentoringInfo.getEndDateTime(),
-                appliedMentoringInfo.getMentorNickname(), appliedMentoringInfo.getMentoringTitle(),
-                appliedMentoringInfo.getImpUid())
-        );
+        .hasSize(5);
+
+    for (int i = 0; i < result.size(); i++) {
+      AppliedMentoringInfo mentoringInfo = mentoringInfoList.get(i);
+      assertThat(result.get(i)).extracting("startDateTime", "endDateTime", "mentorNickname", "mentoringTitle", "impUid")
+          .contains(
+              mentoringInfo.getStartDateTime(), mentoringInfo.getEndDateTime(), mentoringInfo.getMentorNickname(),
+              mentoringInfo.getMentoringTitle(), mentoringInfo.getImpUid());
+    }
   }
 
 
@@ -154,43 +135,61 @@ class UserServiceTest {
         .user(user)
         .build();
 
-    List<MentoringUnavailableTime> unavailableTimeList = createMentoringUnavailableTime(mentor);
-
     Mentoring mentoring = Mentoring.builder()
         .title(MENTORING_TITLE)
         .mentor(mentor)
         .build();
 
-    MentoringApplicationTime applicationTime = createMentoringApplicationTime();
+    List<MentoringApplicationTime> applicationTimes = createMentoringApplicationTimeList();
 
-    unavailableTimeList.add(applicationTime.convertToMentoringUnavailableTime(mentor));
+    List<MentoringApplication> mentoringApplications = createMentoringApplicationList(applicationTimes, mentoring,
+        user);
 
-    MentoringApplication mentoringApplication = MentoringApplication.builder()
-        .mentoringApplicationTime(applicationTime)
-        .mentoring(mentoring)
-        .mentoringStatus(MentoringStatus.CANCELED)
-        .user(user)
+    List<RequiredMentoringStatusInfo> requiredMentoringStatusInfoList = createMentoringStatus(applicationTimes);
+
+    MentoringStatusInfo changeRequest = MentoringStatusInfo.builder()
+        .mentoringStatusList(requiredMentoringStatusInfoList)
         .build();
-
-    AppliedMentoringStatus appliedMentoringStatus = createAppliedMentoringStatusWithStatusIsCANCELED(applicationTime);
 
     given(userRepository.findByEmail(anyString())).willReturn(Optional.of(user));
 
-    given(mentoringApplicationRepository.save(any(MentoringApplication.class))).willReturn(mentoringApplication);
+    AtomicInteger index = new AtomicInteger(0);
+
+    given(mentoringApplicationRepository.findByStartDateTimeAndEndDateTimeAndUserId
+        (any(LocalDateTime.class), any(LocalDateTime.class), anyLong()))
+        .willAnswer(invocation -> {
+
+          int currentIndex = index.getAndIncrement();
+
+          if (currentIndex < mentoringApplications.size()) {
+
+            return Optional.of(mentoringApplications.get(currentIndex));
+          } else {
+
+            return null;
+          }
+        });
 
     //when
-    boolean result = userService.changeAppliedMentoringStatus(sessionUser, appliedMentoringStatus);
+    boolean result = userService.changeAppliedMentoringStatus(sessionUser, changeRequest);
 
     //then
     assertThat(result).isTrue();
-    verify(mentoringUnavailableTimeRepository, times(1)).delete(any(MentoringUnavailableTime.class));
+    mentoringApplications.forEach(
+        mentoringApplication -> assertThat(mentoringApplication.getMentoringStatus()).isEqualTo(
+            MentoringStatus.CANCELED));
   }
+
 
   @Test
   @DisplayName("세션에 저장된 회원 이메일정보가 DB에 없을 경우, NoSuchElementException을 발생시킨다.")
   void changeAppliedMentoringStatusNotFoundUserEmail() {
     //given
-    AppliedMentoringStatus appliedMentoringStatus = AppliedMentoringStatus.builder()
+    RequiredMentoringStatusInfo requiredMentoringStatusInfo = RequiredMentoringStatusInfo.builder()
+        .build();
+
+    MentoringStatusInfo changeRequest = MentoringStatusInfo.builder()
+        .mentoringStatusList(List.of(requiredMentoringStatusInfo))
         .build();
 
     given(userRepository.findByEmail(anyString())).willThrow(
@@ -198,50 +197,57 @@ class UserServiceTest {
 
     //when then
     assertThatThrownBy(
-        () -> userService.changeAppliedMentoringStatus(sessionUser, appliedMentoringStatus))
+        () -> userService.changeAppliedMentoringStatus(sessionUser, changeRequest))
         .isInstanceOf(NoSuchElementException.class)
         .hasMessage(sessionUser.getEmail() + "에 해당하는 회원이 존재하지 않습니다.");
-
-    verify(mentoringUnavailableTimeRepository, times(0)).delete(any(MentoringUnavailableTime.class));
   }
 
   @Test
-  @DisplayName("입력된 멘토링상태변경 시간대와 일치하는 멘토링신청이력이 없을경우, 예외를 발생시킨다.")
+  @DisplayName("상태변경을 요청하는 멘토링시간대와 일치하는 멘토링 신청내역이 존재하지 않는다면, NoSuchElementException을 발생시킨다.")
   void changeAppliedMentoringStatusNotFoundMentoringApplication() {
     //given
     Mentor mentor = Mentor.builder()
         .user(user)
         .build();
 
-    List<MentoringUnavailableTime> unavailableTimeList = createMentoringUnavailableTime(mentor);
-
     Mentoring mentoring = Mentoring.builder()
         .title(MENTORING_TITLE)
         .mentor(mentor)
         .build();
 
-    MentoringApplicationTime applicationTime = createMentoringApplicationTime();
+    List<MentoringApplicationTime> applicationTimes = createMentoringApplicationTimeList();
 
-    unavailableTimeList.add(applicationTime.convertToMentoringUnavailableTime(mentor));
+    List<MentoringApplication> mentoringApplications = createMentoringApplicationList(applicationTimes, mentoring,
+        user);
 
-    MentoringApplication mentoringApplication = MentoringApplication.builder()
-        .mentoringApplicationTime(applicationTime)
-        .mentoring(mentoring)
-        .mentoringStatus(MentoringStatus.CANCELED)
-        .user(user)
+    List<RequiredMentoringStatusInfo> wrongRequiredMentoringStatusInfoList = createWrongAppliedMentoringTimeList(
+        applicationTimes);
+
+    MentoringStatusInfo changeRequest = MentoringStatusInfo.builder()
+        .mentoringStatusList(wrongRequiredMentoringStatusInfoList)
         .build();
-
-    AppliedMentoringStatus wrongAppliedMentoringStatus = createWrongAppliedMentoringStatus();
 
     given(userRepository.findByEmail(anyString())).willReturn(Optional.of(user));
 
-    //when then
-    assertThatThrownBy(
-        () -> userService.changeAppliedMentoringStatus(sessionUser, wrongAppliedMentoringStatus))
-        .isInstanceOf(RuntimeException.class)
-        .hasMessage("일치하는 멘토링 신청이력을 조회하지 못했습니다.");
+    AtomicInteger index = new AtomicInteger(0);
 
-    verify(mentoringUnavailableTimeRepository, times(0)).delete(any(MentoringUnavailableTime.class));
+    given(mentoringApplicationRepository.findByStartDateTimeAndEndDateTimeAndUserId
+        (any(LocalDateTime.class), any(LocalDateTime.class), anyLong()))
+        .willAnswer(invocation -> {
+          int currentIndex = index.getAndIncrement();
+          if (currentIndex < 3) {
+            return Optional.of(mentoringApplications.get(currentIndex));
+          } else {
+            throw new NoSuchElementException("일치하는 멘토링 신청이력이 존재하지 않습니다.");
+          }
+        });
+
+    //when
+    boolean result = userService.changeAppliedMentoringStatus(sessionUser, changeRequest);
+
+    //then
+    assertThat(result).isTrue();
+    verify(mentoringApplicationRepository, times(3)).save(any(MentoringApplication.class));
   }
 
 
@@ -253,98 +259,180 @@ class UserServiceTest {
         .user(user)
         .build();
 
-    List<MentoringUnavailableTime> unavailableTimeList = createMentoringUnavailableTime(mentor);
-
     Mentoring mentoring = Mentoring.builder()
         .title(MENTORING_TITLE)
         .mentor(mentor)
         .build();
 
-    MentoringApplicationTime applicationTime = createMentoringApplicationTime();
+    List<MentoringApplicationTime> applicationTimeList = createMentoringApplicationTimeList();
 
-    unavailableTimeList.add(applicationTime.convertToMentoringUnavailableTime(mentor));
+    List<MentoringApplication> mentoringApplications = createMentoringApplicationList(applicationTimeList, mentoring,
+        user);
 
-    MentoringApplication mentoringApplication = MentoringApplication.builder()
-        .mentoringApplicationTime(applicationTime)
-        .mentoring(mentoring)
-        .mentoringStatus(MentoringStatus.CANCELED)
-        .user(user)
+    List<RequiredMentoringStatusInfo> wrongAppliedMentoringTimeList = createWrongAppliedMentoringStatusList(
+        applicationTimeList);
+
+    MentoringStatusInfo changeRequest = MentoringStatusInfo.builder()
+        .mentoringStatusList(wrongAppliedMentoringTimeList)
         .build();
-
-    AppliedMentoringStatus appliedMentoringStatus = createAppliedMentoringStatusWithStatusIsWAITING(applicationTime);
 
     given(userRepository.findByEmail(anyString())).willReturn(Optional.of(user));
 
-    //when then
-    assertThatThrownBy(
-        () -> userService.changeAppliedMentoringStatus(sessionUser, appliedMentoringStatus))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("잘못된 상태변경입니다.");
+    AtomicInteger index = new AtomicInteger(0);
 
-    verify(mentoringUnavailableTimeRepository, times(0)).delete(any(MentoringUnavailableTime.class));
+    given(mentoringApplicationRepository.findByStartDateTimeAndEndDateTimeAndUserId
+        (any(LocalDateTime.class), any(LocalDateTime.class), anyLong()))
+        .willAnswer(invocation -> {
+          int currentIndex = index.getAndIncrement();
+          if (currentIndex < mentoringApplications.size()) {
+            return Optional.of(mentoringApplications.get(currentIndex));
+          } else {
+            return null;
+          }
+        });
+
+    //when
+    boolean result = userService.changeAppliedMentoringStatus(sessionUser, changeRequest);
+
+    //then
+    assertThat(result).isTrue();
+    verify(mentoringApplicationRepository, times(3)).save(any(MentoringApplication.class));
   }
 
-  private MentoringApplicationTime createMentoringApplicationTime() {
-    return MentoringApplicationTime.builder()
-        .date(LocalDate.parse(APPLICATION_DATE, DATE_FORMATTER))
-        .time(LocalTime.parse(APPLICATION_TIME, TIME_FORMATTER))
-        .build();
+  private List<AppliedMentoringInfo> createMentoringInfoList(List<MentoringApplication> mentoringApplicationList,
+      Mentoring mentoring, List<Payment> paymentList) {
+
+    List<AppliedMentoringInfo> mentoringInfoList = new ArrayList<>();
+
+    for (int i = 0; i < mentoringApplicationList.size(); i++) {
+      mentoringInfoList.add(
+          AppliedMentoringInfo.builder()
+              .startDateTime(mentoringApplicationList.get(i)
+                  .getStartDateTime())
+              .endDateTime(mentoringApplicationList.get(i)
+                  .getEndDateTime())
+              .mentorNickname(user.getNickname())
+              .mentoringTitle(mentoring.getTitle())
+              .impUid(paymentList.get(i)
+                  .getImpUid())
+              .build()
+      );
+    }
+    return mentoringInfoList;
   }
 
-  private List<MentoringUnavailableTime> createMentoringUnavailableTime(Mentor mentor) {
-    List<MentoringUnavailableTime> unavailableTimes = new ArrayList<>();
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-
-    LocalDateTime fromDateTime1 = LocalDateTime.parse(FIRST_FROM_DATE_TIME, formatter);
-    LocalDateTime toDateTime1 = LocalDateTime.parse(FIRST_TO_DATE_TIME, formatter);
-
-    LocalDateTime fromDateTime2 = LocalDateTime.parse(SECOND_FROM_DATE_TIME, formatter);
-    LocalDateTime toDateTime2 = LocalDateTime.parse(SECOND_TO_DATE_TIME, formatter);
-
-    MentoringUnavailableTime firstUnavailableTime = MentoringUnavailableTime.builder()
-        .fromDateTime(fromDateTime1)
-        .toDateTime(toDateTime1)
-        .mentor(mentor)
-        .build();
-    MentoringUnavailableTime secondUnavailableTime = MentoringUnavailableTime.builder()
-        .fromDateTime(fromDateTime2)
-        .toDateTime(toDateTime2)
-        .mentor(mentor)
-        .build();
-
-    unavailableTimes.add(firstUnavailableTime);
-    unavailableTimes.add(secondUnavailableTime);
-
-    return unavailableTimes;
+  private List<Payment> createPaymentList(List<MentoringApplication> mentoringApplicationList) {
+    List<Payment> paymentList = new ArrayList<>();
+    for (MentoringApplication mentoringApplication : mentoringApplicationList) {
+      paymentList.add(
+          Payment.builder()
+              .impUid("test_impUid")
+              .merchantUid("test_merchantUid")
+              .amount(10_000)
+              .paymentStatus(PaymentStatus.SUCCESS)
+              .mentoringApplication(mentoringApplication)
+              .build());
+    }
+    return paymentList;
   }
 
-  private AppliedMentoringStatus createAppliedMentoringStatusWithStatusIsCANCELED(
-      MentoringApplicationTime applicationTime) {
+  private List<MentoringApplicationTime> createMentoringApplicationTimeList() {
 
-    return AppliedMentoringStatus.builder()
-        .status(MentoringStatus.CANCELED)
-        .startDateTime(applicationTime.getFromDateTime())
-        .endDateTime(applicationTime.getToDateTime())
-        .build();
+    List<MentoringApplicationTime> applications = new ArrayList<>();
+
+    for (int i = 0; i < 5; i++) {
+      applications.add(
+          MentoringApplicationTime.builder()
+              .date(LocalDate.parse(APPLICATION_DATE, DATE_FORMATTER)
+                  .plusDays(i))
+              .time(LocalTime.parse(APPLICATION_TIME, TIME_FORMATTER))
+              .build());
+    }
+
+    return applications;
   }
 
-  private AppliedMentoringStatus createAppliedMentoringStatusWithStatusIsWAITING(
-      MentoringApplicationTime applicationTime) {
+  private List<MentoringApplication> createMentoringApplicationList
+      (List<MentoringApplicationTime> applicationTimes, Mentoring mentoring, User user) {
 
-    return AppliedMentoringStatus.builder()
-        .status(MentoringStatus.WAITING)
-        .startDateTime(applicationTime.getFromDateTime())
-        .endDateTime(applicationTime.getToDateTime())
-        .build();
+    List<MentoringApplication> mentoringApplications = new ArrayList<>();
+
+    for (MentoringApplicationTime applicationTime : applicationTimes) {
+
+      mentoringApplications.add(
+          MentoringApplication.builder()
+              .mentoring(mentoring)
+              .user(user)
+              .mentoringStatus(MentoringStatus.APPROVAL)
+              .mentoringApplicationTime(applicationTime)
+              .build());
+    }
+
+    return mentoringApplications;
   }
 
-  private AppliedMentoringStatus createWrongAppliedMentoringStatus() {
+  private List<RequiredMentoringStatusInfo> createMentoringStatus
+      (List<MentoringApplicationTime> applicationTimeList) {
+
+    List<RequiredMentoringStatusInfo> mentoringStatusList = new ArrayList<>();
+
+    for (MentoringApplicationTime applicationTime : applicationTimeList) {
+      mentoringStatusList.add(
+          RequiredMentoringStatusInfo.builder()
+              .status(MentoringStatus.CANCELED)
+              .startDateTime(applicationTime.getFromDateTime())
+              .endDateTime(applicationTime.getToDateTime())
+              .build()
+      );
+    }
+
+    return mentoringStatusList;
+  }
+
+  private List<RequiredMentoringStatusInfo> createWrongAppliedMentoringTimeList
+      (List<MentoringApplicationTime> applicationTimes) {
+
     LocalDateTime now = LocalDateTime.now();
-    return AppliedMentoringStatus.builder()
-        .status(MentoringStatus.CANCELED)
-        .startDateTime(now)
-        .endDateTime(now.plusHours(1L))
-        .build();
+
+    List<RequiredMentoringStatusInfo> statusList = new ArrayList<>();
+
+    for (int i = 0; i < 5; i++) {
+      LocalDateTime startDateTime = now;
+
+      if (i <= 2) {
+        startDateTime = applicationTimes.get(i)
+            .getFromDateTime();
+
+      }
+
+      statusList.add(
+          RequiredMentoringStatusInfo.builder()
+              .status(MentoringStatus.CANCELED)
+              .startDateTime(startDateTime)
+              .endDateTime(startDateTime.plusHours(1L))
+              .build()
+      );
+    }
+    return statusList;
   }
 
+  private List<RequiredMentoringStatusInfo> createWrongAppliedMentoringStatusList(
+      List<MentoringApplicationTime> applicationTimes) {
+    List<RequiredMentoringStatusInfo> statusList = new ArrayList<>();
+
+    for (int i = 0; i < 5; i++) {
+
+      LocalDateTime startDateTime = applicationTimes.get(i)
+          .getFromDateTime();
+
+      statusList.add(
+          RequiredMentoringStatusInfo.builder()
+              .status(i <= 2 ? MentoringStatus.CANCELED : MentoringStatus.WAITING)
+              .startDateTime(startDateTime)
+              .endDateTime(startDateTime.plusHours(1L))
+              .build()
+      );
+    }
+    return statusList;
+  }
 }

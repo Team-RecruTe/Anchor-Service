@@ -14,6 +14,10 @@ import com.anchor.global.util.type.Link;
 import com.anchor.domain.mentoring.api.service.response.MentoringDetailResponse;
 import com.anchor.domain.mentoring.api.service.response.MentoringInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringUnavailableTimeResponse;
+import com.anchor.domain.mentoring.api.service.response.ApplicationUnavailableTime;
+import com.anchor.domain.mentoring.api.service.response.AppliedMentoringInfo;
+import com.anchor.domain.mentoring.api.service.response.MentoringDefaultInfo;
+import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
 import com.anchor.global.auth.SessionUser;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -85,49 +89,47 @@ public class MentoringController {
 
 
   @GetMapping("")
-  public ResponseEntity<List<MentoringInfo>> mentoringList() {
+  public ResponseEntity<List<MentoringDefaultInfo>> mentoringList() {
 
-    List<MentoringInfo> mentoringInfoList = mentoringService.loadMentoringList();
+    List<MentoringDefaultInfo> mentoringDefaultInfoList = mentoringService.loadMentoringList();
 
     return ResponseEntity.ok()
-        .body(mentoringInfoList);
+        .body(mentoringDefaultInfoList);
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<MentoringDetailResponse> mentoringDetail(
+  public ResponseEntity<MentoringDetailInfo> mentoringDetail(
       @PathVariable("id") Long id) {
 
-    MentoringDetailResponse mentoringDetailResponse = mentoringService.loadMentoringDetail(id);
+    MentoringDetailInfo mentoringDetailInfo = mentoringService.loadMentoringDetail(id);
 
     return ResponseEntity.ok()
-        .body(mentoringDetailResponse);
+        .body(mentoringDetailInfo);
   }
 
 
   @GetMapping("/{id}/apply")
-  public ResponseEntity<List<MentoringUnavailableTimeResponse>> mentoringApplicationPage(
+  public ResponseEntity<List<ApplicationUnavailableTime>> mentoringApplicationPage(
       @PathVariable("id") Long id, HttpSession session) {
 
-    List<MentoringUnavailableTimeResponse> mentoringUnavailableTimes =
+    List<ApplicationUnavailableTime> applicationUnavailableTimeList =
         mentoringService.loadMentoringUnavailableTime(id);
 
-    List<MentoringUnavailableTimeResponse> sessionSavedMentoringUnavailableTimeList =
-        getSessionSavedMentoringUnavailableTimeList(session, id);
+    List<ApplicationUnavailableTime> sessionApplicationUnavailableTimeList = getSessionUnavailableTimeList(session, id);
 
-    mentoringUnavailableTimes.addAll(sessionSavedMentoringUnavailableTimeList);
+    sessionApplicationUnavailableTimeList.addAll(applicationUnavailableTimeList);
 
-    updateSessionSavedMentoringUnavailableTimeList(session, id, mentoringUnavailableTimes);
+    updateSessionUnavailableTimeList(session, id, sessionApplicationUnavailableTimeList);
     return ResponseEntity.ok()
-        .body(mentoringUnavailableTimes);
+        .body(sessionApplicationUnavailableTimeList);
   }
 
   /**
    * 멘토링 결제 완료가 되면 멘토링 신청이력을 저장합니다.
    */
   @PostMapping("/{id}/apply")
-  public ResponseEntity<MentoringApplicationResponse> mentoringApplicationSave(
-      @PathVariable("id") Long id,
-      @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
+  public ResponseEntity<AppliedMentoringInfo> mentoringApplicationSave
+  (@PathVariable("id") Long id, @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
 
     SessionUser sessionUser = (SessionUser) session.getAttribute("user");
 
@@ -135,22 +137,20 @@ public class MentoringController {
       throw new RuntimeException("로그인 정보가 없습니다. 잘못된 접근입니다.");
     }
 
-    MentoringApplicationResponse mentoringApplicationResponse = mentoringService.saveMentoringApplication(
-        sessionUser, id,
-        applicationTime);
+    AppliedMentoringInfo appliedMentoringInfo =
+        mentoringService.saveMentoringApplication(sessionUser, id, applicationTime);
 
-    if (mentoringApplicationResponse != null) {
+    if (appliedMentoringInfo != null) {
 
-      List<MentoringUnavailableTimeResponse> sessionSavedMentoringUnavailableTimeList =
-          getSessionSavedMentoringUnavailableTimeList(session, id);
+      List<ApplicationUnavailableTime> sessionApplicationUnavailableTimeList =
+          getSessionUnavailableTimeList(session, id);
 
-      mentoringService.removeMentoringApplicationTimeFromSession
-          (sessionSavedMentoringUnavailableTimeList, applicationTime);
+      mentoringService.removeApplicationTimeFromSession(sessionApplicationUnavailableTimeList, applicationTime);
 
-      updateSessionSavedMentoringUnavailableTimeList(session, id,
-          sessionSavedMentoringUnavailableTimeList);
+      updateSessionUnavailableTimeList(session, id, sessionApplicationUnavailableTimeList);
+
       return ResponseEntity.ok()
-          .body(mentoringApplicationResponse);
+          .body(appliedMentoringInfo);
     }
 
     return ResponseEntity.badRequest()
@@ -165,15 +165,11 @@ public class MentoringController {
       @PathVariable("id") Long id,
       @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
 
-    List<MentoringUnavailableTimeResponse> sessionSavedMentoringUnavailableTimeList = getSessionSavedMentoringUnavailableTimeList(
-        session, id);
+    List<ApplicationUnavailableTime> sessionApplicationUnavailableTimeList = getSessionUnavailableTimeList(session, id);
 
-    mentoringService.addMentoringApplicationTimeFromSession(
-        sessionSavedMentoringUnavailableTimeList,
-        applicationTime);
+    mentoringService.addApplicationTimeFromSession(sessionApplicationUnavailableTimeList, applicationTime);
 
-    updateSessionSavedMentoringUnavailableTimeList(session, id,
-        sessionSavedMentoringUnavailableTimeList);
+    updateSessionUnavailableTimeList(session, id, sessionApplicationUnavailableTimeList);
     return SUCCESS;
   }
 
@@ -184,29 +180,30 @@ public class MentoringController {
   public String mentoringTimeSessionRemove(@PathVariable("id") Long id,
       @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
 
-    List<MentoringUnavailableTimeResponse> sessionSavedMentoringUnavailableTimeList =
-        getSessionSavedMentoringUnavailableTimeList(session, id);
+    List<ApplicationUnavailableTime> sessionApplicationUnavailableTimeList =
+        getSessionUnavailableTimeList(session, id);
 
-    boolean removeResult = mentoringService.removeMentoringApplicationTimeFromSession
-        (sessionSavedMentoringUnavailableTimeList, applicationTime);
+    boolean removeResult = mentoringService.removeApplicationTimeFromSession
+        (sessionApplicationUnavailableTimeList, applicationTime);
 
-    updateSessionSavedMentoringUnavailableTimeList(session, id,
-        sessionSavedMentoringUnavailableTimeList);
+    updateSessionUnavailableTimeList(session, id,
+        sessionApplicationUnavailableTimeList);
     return removeResult ? SUCCESS : FAILURE;
   }
 
 
-  private List<MentoringUnavailableTimeResponse> getSessionSavedMentoringUnavailableTimeList(
+  private List<ApplicationUnavailableTime> getSessionUnavailableTimeList(
       HttpSession session, Long id) {
-    List<MentoringUnavailableTimeResponse> sessionSavedmentoringTimeList =
-        (List<MentoringUnavailableTimeResponse>) session.getAttribute(String.valueOf(id));
 
-    return sessionSavedmentoringTimeList == null ?
-        new ArrayList<>() : sessionSavedmentoringTimeList;
+    List<ApplicationUnavailableTime> sessionApplicationunavailableTimeList =
+        (List<ApplicationUnavailableTime>) session.getAttribute(String.valueOf(id));
+
+    return sessionApplicationunavailableTimeList == null ?
+        new ArrayList<>() : sessionApplicationunavailableTimeList;
   }
 
-  private void updateSessionSavedMentoringUnavailableTimeList(HttpSession session, Long id,
-      List<MentoringUnavailableTimeResponse> sessionSavedTimeList) {
+  private void updateSessionUnavailableTimeList(HttpSession session, Long id,
+      List<ApplicationUnavailableTime> sessionSavedTimeList) {
     session.setAttribute(String.valueOf(id), sessionSavedTimeList);
   }
 }

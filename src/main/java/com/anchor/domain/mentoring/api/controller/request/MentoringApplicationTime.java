@@ -1,7 +1,7 @@
 package com.anchor.domain.mentoring.api.controller.request;
 
 import com.anchor.domain.mentor.domain.Mentor;
-import com.anchor.domain.mentoring.api.service.response.MentoringUnavailableTimeResponse;
+import com.anchor.domain.mentoring.api.service.response.ApplicationUnavailableTime;
 import com.anchor.domain.mentoring.domain.MentoringUnavailableTime;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
@@ -37,11 +37,11 @@ public class MentoringApplicationTime {
         .build();
   }
 
-  public MentoringUnavailableTimeResponse convertToMentoringUnavailableTimeResponse() {
+  public ApplicationUnavailableTime convertToMentoringUnavailableTimeResponse() {
     LocalDateTime fromDateTime = getFromDateTime();
     LocalDateTime toDateTime = getToDateTime();
 
-    return MentoringUnavailableTimeResponse.builder()
+    return ApplicationUnavailableTime.builder()
         .fromDateTime(fromDateTime)
         .toDateTime(toDateTime)
         .build();
