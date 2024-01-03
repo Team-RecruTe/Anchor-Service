@@ -1,7 +1,6 @@
 package com.anchor.domain.mentoring.api.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 import com.anchor.domain.mentor.domain.Career;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentor.domain.repository.MentorRepository;

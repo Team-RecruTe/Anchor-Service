@@ -43,8 +43,7 @@ public class MentorService {
 
   private Mentor getMentor(Long id) {
     Mentor mentor = mentorRepository.findById(id)
-        .orElseThrow(
-            () -> new NoSuchElementException("일치하는 멘토 정보가 없습니다."));
+        .orElseThrow(() -> new NoSuchElementException("일치하는 멘토 정보가 없습니다."));
     return mentor;
   }
 
@@ -60,8 +59,7 @@ public class MentorService {
     DateTimeRange mentoringReservedTime = requiredMentoringStatusInfo.getMentoringReservedTime();
     MentoringStatus mentoringStatus = requiredMentoringStatusInfo.getMentoringStatus();
     try {
-      MentoringApplication mentoringApplication = getMentoringApplication(
-          mentoringId, mentoringReservedTime);
+      MentoringApplication mentoringApplication = getMentoringApplication(mentoringId, mentoringReservedTime);
       mentoringApplication.changeStatus(mentoringStatus);
       mentoringApplicationRepository.save(mentoringApplication);
     } catch (NullPointerException | PersistenceException e) {
@@ -74,8 +72,7 @@ public class MentorService {
     LocalDateTime startDateTime = mentoringReservedTime.getFrom();
     LocalDateTime endDateTime = mentoringReservedTime.getTo();
     try {
-      return mentoringApplicationRepository.findByMentoringIdAndProgressTime(
-          id, startDateTime, endDateTime);
+      return mentoringApplicationRepository.findByMentoringIdAndProgressTime(id, startDateTime, endDateTime);
     } catch (NonUniqueResultException e) {
       log.warn("Exception: {}", e);
       throw new RuntimeException(e);
@@ -83,8 +80,7 @@ public class MentorService {
   }
 
   public MentoringUnavailableTimes getUnavailableTimes(Long mentorId) {
-    List<MentoringUnavailableTime> unavailableTimes = mentorRepository.findUnavailableTimes(
-        mentorId);
+    List<MentoringUnavailableTime> unavailableTimes = mentorRepository.findUnavailableTimes(mentorId);
     List<MentoringApplication> reservedMentorings = mentoringApplicationRepository.findTimesByMentoringIdAndStatus(
         mentorId, MentoringStatus.APPROVAL,
         MentoringStatus.WAITING);
