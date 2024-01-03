@@ -1,7 +1,6 @@
 package com.anchor.domain.mentor.domain;
 
 import com.anchor.domain.mentoring.domain.Mentoring;
-import com.anchor.domain.mentoring.domain.MentoringUnavailableTime;
 import com.anchor.global.util.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -48,17 +47,10 @@ public class Mentor extends BaseEntity {
       mappedBy = "mentor",
       cascade = CascadeType.ALL
   )
-  private List<MentoringUnavailableTime> mentoringUnavailableTimes = new ArrayList<>();
-
-  @OneToMany(
-      mappedBy = "mentor",
-      cascade = CascadeType.ALL
-  )
   private List<Mentoring> mentorings = new ArrayList<>();
 
   @Builder
-  private Mentor(String companyEmail, Career career, String accountNumber, String accountName,
-      String bankName) {
+  private Mentor(String companyEmail, Career career, String accountNumber, String accountName, String bankName) {
     this.companyEmail = companyEmail;
     this.career = career;
     this.accountNumber = accountNumber;

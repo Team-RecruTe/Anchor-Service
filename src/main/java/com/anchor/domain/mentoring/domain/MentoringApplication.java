@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -41,6 +42,17 @@ public class MentoringApplication extends BaseEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "mentoring_application_id")
   private User user;
+
+  @Builder
+  private MentoringApplication(LocalDateTime startDateTime, LocalDateTime endDateTime, MentoringStatus mentoringStatus,
+      Mentoring mentoring, Payment payment, User user) {
+    this.startDateTime = startDateTime;
+    this.endDateTime = endDateTime;
+    this.mentoringStatus = mentoringStatus;
+    this.mentoring = mentoring;
+    this.payment = payment;
+    this.user = user;
+  }
 
   public void changeStatus(MentoringStatus mentoringStatus) {
     this.mentoringStatus = mentoringStatus;

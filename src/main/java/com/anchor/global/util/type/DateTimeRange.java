@@ -1,7 +1,8 @@
-package com.anchor.global.util;
+package com.anchor.global.util.type;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -22,6 +23,19 @@ public class DateTimeRange {
 
   public static DateTimeRange of(LocalDateTime from, LocalDateTime to) {
     return new DateTimeRange(from, to);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof DateTimeRange other) {
+      return other.hashCode() == hashCode();
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(from, to);
   }
 
 }

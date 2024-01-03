@@ -1,6 +1,8 @@
 package com.anchor.domain.mentoring.api.service.response;
 
-public class MentoringDeleteResult {
+import com.anchor.global.util.ResponseDto;
+
+public class MentoringDeleteResult extends ResponseDto {
 
   private final Long id;
 

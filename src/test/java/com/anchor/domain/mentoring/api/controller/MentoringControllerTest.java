@@ -49,8 +49,7 @@ class MentoringControllerTest {
     user.addMentorId(1L);
     session.setAttribute("user", user);
 
-    BDDMockito.given(mentoringService.create(any(Long.class),
-            any(MentoringBasicInfo.class)))
+    BDDMockito.given(mentoringService.create(any(Long.class), any(MentoringBasicInfo.class)))
         .willReturn(new MentoringCreateResult(1L));
 
     MentoringBasicInfo mentoringBasicInfo = MentoringBasicInfo.builder()

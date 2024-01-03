@@ -1,4 +1,4 @@
-package com.anchor.global.util.querydsl;
+package com.anchor.global.config;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;

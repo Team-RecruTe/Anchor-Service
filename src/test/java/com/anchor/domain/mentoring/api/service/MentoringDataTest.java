@@ -8,7 +8,7 @@ import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringDetail;
 import com.anchor.domain.mentoring.domain.MentoringTag;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
-import com.anchor.global.util.querydsl.QueryDslConfig;
+import com.anchor.global.config.QueryDslConfig;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Set;
