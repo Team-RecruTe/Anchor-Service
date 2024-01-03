@@ -1,5 +1,6 @@
-package com.anchor.global.util.file;
+package com.anchor.global.util.valid;
 
+import com.anchor.global.util.valid.CustomValidatorRegistry.RangeValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 import java.lang.annotation.ElementType;
@@ -9,8 +10,8 @@ import java.lang.annotation.Target;
 
 @Target(value = ElementType.FIELD)
 @Retention(value = RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = ValidFileValidator.class)
-public @interface ValidFile {
+@Constraint(validatedBy = RangeValidator.class)
+public @interface ValidRange {
 
   String message() default "Invalid File";
 
