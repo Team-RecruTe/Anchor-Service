@@ -1,13 +1,9 @@
 package com.anchor.domain.mentoring.domain;
 
-import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.global.util.BaseEntity;
-import com.anchor.global.util.DateTimeRange;
+import com.anchor.global.util.type.DateTimeRange;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AccessLevel;
@@ -25,9 +21,8 @@ public class MentoringUnavailableTime extends BaseEntity {
   @Column(nullable = false, columnDefinition = "datetime(6)")
   private LocalDateTime toDateTime;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "mentor_id")
-  private Mentor mentor;
+  @Column(name = "mentor_id", nullable = false)
+  private Long mentorId;
 
   private MentoringUnavailableTime(LocalDateTime fromDateTime, LocalDateTime toDateTime) {
     this.fromDateTime = fromDateTime;
