@@ -1,6 +1,5 @@
 package com.anchor.domain.mentoring.domain;
 
-import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.global.util.BaseEntity;
 import com.anchor.global.util.type.DateTimeRange;
 import jakarta.persistence.Column;
