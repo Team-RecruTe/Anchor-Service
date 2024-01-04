@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Objects;
 import lombok.Getter;
 
 @Getter
@@ -25,23 +24,5 @@ public class PaidMentoringInfo implements Serializable {
         .getTitle();
     this.mentoringStartDateTime = mentoringApplication.getStartDateTime();
     this.amount = payment.getAmount();
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof PaidMentoringInfo that)) {
-      return false;
-    }
-    return Objects.equals(getMentoringTitle(), that.getMentoringTitle()) && Objects.equals(
-        getMentoringStartDateTime(), that.getMentoringStartDateTime()) && Objects.equals(getAmount(),
-        that.getAmount());
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(getMentoringTitle(), getMentoringStartDateTime(), getAmount());
   }
 }

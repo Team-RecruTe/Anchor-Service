@@ -14,15 +14,19 @@ import com.anchor.domain.payment.domain.repository.PaymentRepository;
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
-import com.anchor.global.util.ExternalApiClient;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClient;
 
 @Slf4j
 @Service
@@ -33,7 +37,8 @@ public class PaymentService {
   private static final String SUCCESS = "success";
   private static final String FAIL = "fail";
 
-  private final ExternalApiClient apiClient;
+  private final RestClient restClient;
+  private final ObjectMapper objectMapper;
   private final PaymentRepository paymentRepository;
   private final UserRepository userRepository;
   private final MentoringApplicationRepository mentoringApplicationRepository;
@@ -43,7 +48,7 @@ public class PaymentService {
   @Value("${payment.imp-secret}")
   private String impSecret;
 
-  public String validatePaymentResult(PaymentResultInfo paymentResultInfo) {
+  public String validatePaymentResult(PaymentResultInfo paymentResultInfo) throws JsonProcessingException {
     String impUid = paymentResultInfo.getImpUid();
 
     String accessToken = getAccessToken();
@@ -66,18 +71,24 @@ public class PaymentService {
       return new PaidMentoringInfo(appliedMentoring, savedPayment);
 
     } catch (RuntimeException e) {
-      log.warn(e.getClass()
-          .getSimpleName() + " :: " + e.getMessage());
+      log.warn(e.getClass() + " :: " + e.getMessage());
 
       return null;
     }
   }
 
 
-  private String getAccessToken() {
+  private String getAccessToken() throws JsonProcessingException {
     TokenRequest tokenRequest = new TokenRequest(impKey, impSecret);
 
-    ResponseEntity<TokenData> tokenResponseEntity = apiClient.getTokenDataEntity(tokenRequest, ACCESS_TOKEN_URL);
+    String tokenRequestToJson = objectMapper.writeValueAsString(tokenRequest);
+
+    ResponseEntity<TokenData> tokenResponseEntity = restClient.post()
+        .uri(ACCESS_TOKEN_URL)
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(tokenRequestToJson)
+        .retrieve()
+        .toEntity(TokenData.class);
 
     TokenData tokenData = Objects.requireNonNullElse(tokenResponseEntity.getBody(), null);
 
@@ -94,8 +105,14 @@ public class PaymentService {
   private PaymentDataDetail getSinglePaymentData(String impUid, String accessToken) {
     String requestUrl = createPaymentDataRequestUrl(impUid);
 
-    ResponseEntity<SinglePaymentData> paymentResponseEntity =
-        apiClient.getSinglePaymentDataEntity(requestUrl, accessToken);
+    ResponseEntity<SinglePaymentData> paymentResponseEntity = restClient.get()
+        .uri(requestUrl)
+        .headers(header -> {
+          header.add(HttpHeaders.AUTHORIZATION, accessToken);
+          header.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        })
+        .retrieve()
+        .toEntity(SinglePaymentData.class);
 
     SinglePaymentData paymentData = Objects.requireNonNullElse(paymentResponseEntity.getBody(), null);
 
@@ -113,15 +130,9 @@ public class PaymentService {
   }
 
   private MentoringApplication getMentoringApplication(RequiredPaymentInfo requiredPaymentInfo, User user) {
-
-    MentoringApplication mentoringApplication = mentoringApplicationRepository.findAppliedMentoringByTimeAndUserId(
+    return mentoringApplicationRepository.findAppliedMentoringByTimeAndUserId(
             requiredPaymentInfo.getStartDateTime(), requiredPaymentInfo.getEndDateTime(), user.getId())
         .orElseThrow(() -> new NoSuchElementException("조건에 부합하는 멘토링 신청이력이 존재하지 않습니다."));
-
-    if (mentoringApplication.isExistPayment()) {
-      throw new RuntimeException("이미 결제내역이 존재합니다.");
-    }
-    return mentoringApplication;
   }
 
   private User getUser(SessionUser sessionUser) {
