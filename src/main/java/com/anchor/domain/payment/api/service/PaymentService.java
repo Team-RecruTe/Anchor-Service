@@ -15,7 +15,6 @@ import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.util.ExternalApiClient;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -44,7 +43,7 @@ public class PaymentService {
   @Value("${payment.imp-secret}")
   private String impSecret;
 
-  public String validatePaymentResult(PaymentResultInfo paymentResultInfo) throws JsonProcessingException {
+  public String validatePaymentResult(PaymentResultInfo paymentResultInfo) {
     String impUid = paymentResultInfo.getImpUid();
 
     String accessToken = getAccessToken();
@@ -74,7 +73,7 @@ public class PaymentService {
   }
 
 
-  private String getAccessToken() throws JsonProcessingException {
+  private String getAccessToken() {
     TokenRequest tokenRequest = new TokenRequest(impKey, impSecret);
 
     ResponseEntity<TokenData> tokenResponseEntity = apiClient.getTokenDataEntity(tokenRequest, ACCESS_TOKEN_URL);
