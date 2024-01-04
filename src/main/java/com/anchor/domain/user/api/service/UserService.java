@@ -4,12 +4,11 @@ import com.anchor.domain.mentoring.api.controller.request.MentoringReviewInfo;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
-import com.anchor.domain.mentoring.domain.MentoringReview;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
-import com.anchor.domain.mentoring.domain.repository.MentoringReviewRepository;
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.domain.payment.domain.Payup;
+import com.anchor.domain.payment.domain.repository.PaymentRepository;
 import com.anchor.domain.payment.domain.repository.PayupRepository;
 import com.anchor.domain.user.api.controller.request.MentoringStatusInfo;
 import com.anchor.domain.user.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
@@ -21,18 +20,17 @@ import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.portone.request.RequiredPaymentCancelData;
+import com.anchor.global.portone.response.PaymentCancelData.PaymentCancelDetail;
 import com.anchor.global.portone.response.PaymentCancelResult;
 import com.anchor.global.portone.response.PaymentResult;
+import com.anchor.global.util.ExternalApiUtil;
 import com.anchor.global.util.PaymentUtils;
-import com.anchor.global.util.type.DateTimeRange;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,18 +42,8 @@ public class UserService {
 
   private final UserRepository userRepository;
   private final MentoringApplicationRepository mentoringApplicationRepository;
-  private final MentoringReviewRepository mentoringReviewRepository;
   private final PayupRepository payupRepository;
   private final PaymentUtils paymentUtils;
-
-  public void writeReview(Long id, MentoringReviewInfo mentoringReviewInfo) {
-    Optional<MentoringApplication> mentoringApplication = mentoringApplicationRepository.findById(id);
-    MentoringReview dbMentoringReviewInsert = MentoringReview.builder()
-        .contents(mentoringReviewInfo.getContents())
-        .mentoringApplication(mentoringApplication.get())
-        .build();
-    mentoringReviewRepository.save(dbMentoringReviewInsert);
-  }
 
   @Transactional
   public UserInfoResponse getProfile(String email){
@@ -95,11 +83,13 @@ public class UserService {
     userRepository.delete(user);
   }
 
+
   @Transactional(readOnly = true)
   public Page<AppliedMentoringInfo> loadAppliedMentoringList(SessionUser sessionUser, Pageable pageable) {
     User user = getUser(sessionUser);
     return mentoringApplicationRepository.findByUserId(user.getId(), pageable);
   }
+
 
   @Transactional
   public boolean changeAppliedMentoringStatus(SessionUser sessionUser, MentoringStatusInfo changeRequest) {
