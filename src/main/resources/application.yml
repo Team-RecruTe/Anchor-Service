@@ -5,6 +5,7 @@ spring:
     include:
       - oauth
       - session
+      - aws
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -23,3 +24,20 @@ spring:
 #  h2:
 #    console:
 #      enabled: true
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    s3:
+      bucket: anchor-image-stroage
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
