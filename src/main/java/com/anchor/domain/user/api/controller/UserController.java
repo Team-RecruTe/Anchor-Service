@@ -37,7 +37,7 @@ public class UserController {
   public Map<String, Object> putInfo(@RequestBody UserNicknameRequest userNicknameRequest){
     SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
     String email = sessionUser.getEmail();
-    userService.modifyNickname(email, userNicknameRequest);
+    userService.editNickname(email, userNicknameRequest);
     Map<String, Object> resultMap = new HashMap<>();
     resultMap.put("modify", "ok");
     return resultMap;
