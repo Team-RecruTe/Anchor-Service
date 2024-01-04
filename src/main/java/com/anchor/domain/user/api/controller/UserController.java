@@ -1,23 +1,29 @@
 package com.anchor.domain.user.api.controller;
 
 import com.anchor.domain.user.api.controller.request.MentoringStatusInfo;
+import com.anchor.domain.user.api.controller.request.UserNicknameRequest;
 import com.anchor.domain.user.api.service.UserService;
 import com.anchor.domain.user.api.service.response.AppliedMentoringInfo;
+import com.anchor.domain.user.api.service.response.UserInfoResponse;
 import com.anchor.global.auth.SessionUser;
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+
 @RequiredArgsConstructor
-@RequestMapping("/users")
+@RequestMapping
+@RestController("/users")
 public class UserController {
 
   private static final String SUCCESS = "success";
@@ -39,13 +45,12 @@ public class UserController {
     return ResponseEntity.ok().build();
   }
 
-  @DeleteMapping
+  @DeleteMapping("/me")
   public ResponseEntity<String> deleteUser(HttpSession httpSession){
     SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user"); //email, nickname, image
     userService.deleteUser(sessionUser.getEmail());
     return ResponseEntity.ok().build();
   }
-
 
 
   /**
