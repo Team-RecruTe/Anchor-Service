@@ -3,8 +3,9 @@ spring:
   profiles:
     active: local
     include:
+      - oauth
+      - session
       - aws
-      - pay
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -87,4 +88,3 @@ rest-template:
 #  h2:
 #    console:
 #      enabled: true
-
