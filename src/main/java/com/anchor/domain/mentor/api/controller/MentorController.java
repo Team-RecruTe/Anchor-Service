@@ -7,7 +7,9 @@ import com.anchor.domain.mentor.api.service.response.MentoringUnavailableTimes;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.util.type.Link;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RequestMapping("/me")
 @RequiredArgsConstructor
 @RestController
@@ -35,9 +38,11 @@ public class MentorController {
 
   @PostMapping("/schedule")
   public ResponseEntity<String> registerUnavailableTimes(
-      @RequestBody MentoringUnavailableTimeInfo mentoringUnavailableTimeInfo, HttpSession httpSession) {
+      @Valid @RequestBody MentoringUnavailableTimeInfo mentoringUnavailableTimeInfo, HttpSession httpSession) {
     SessionUser user = (SessionUser) httpSession.getAttribute("user");
     mentorService.setUnavailableTimes(user.getMentorId(), mentoringUnavailableTimeInfo.getDateTimeRanges());
+    log.info("IsEmpty: {}", mentoringUnavailableTimeInfo.getDateTimeRanges()
+        .isEmpty());
     return ResponseEntity.ok()
         .build();
   }

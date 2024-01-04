@@ -24,4 +24,5 @@ public class DBInitConfig {
     initializer.setDatabasePopulator(populator);
     return initializer;
   }
+
 }

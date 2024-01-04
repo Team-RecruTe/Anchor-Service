@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = RangeValidator.class)
 public @interface ValidRange {
 
-  String message() default "Invalid File";
+  String message() default "Invalid Range";
 
   Class<?>[] groups() default {};
 

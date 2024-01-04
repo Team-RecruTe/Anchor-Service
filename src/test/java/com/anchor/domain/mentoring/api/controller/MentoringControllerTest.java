@@ -1,16 +1,21 @@
 package com.anchor.domain.mentoring.api.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.anchor.domain.image.api.controller.ImageController;
+import com.anchor.domain.image.api.service.ImageService;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.service.MentoringService;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
 import com.anchor.global.auth.SessionUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.ByteArrayInputStream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
@@ -18,14 +23,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.web.client.RestClient;
 
 @MockBean(JpaMetamodelMappingContext.class)
 @WithMockUser(username = "hossi", roles = {"MENTOR"})
-@WebMvcTest(MentoringController.class)
+@WebMvcTest({MentoringController.class, ImageController.class})
 class MentoringControllerTest {
 
   @Autowired
@@ -36,6 +44,9 @@ class MentoringControllerTest {
 
   @MockBean
   MentoringService mentoringService;
+
+  @MockBean
+  ImageService imageService;
 
   @MockBean
   SessionUser sessionUser;
@@ -106,6 +117,31 @@ class MentoringControllerTest {
     // then
     perform.andDo(print())
         .andExpect(status().isOk());
+  }
+
+  @DisplayName("비어있는 이미지에 대해 Validation을 실패합니다.")
+  @Test
+  void registerUnavailableTimes() throws Exception {
+    // given
+    MockHttpSession session = new MockHttpSession();
+    session.setAttribute("user", new SessionUser());
+    RestClient restClient = RestClient.create();
+    byte[] image = new byte[0];
+    
+    MockMultipartFile file = new MockMultipartFile("image", "image.png", MediaType.IMAGE_PNG_VALUE,
+        new ByteArrayInputStream(image));
+
+    // when
+    ResultActions perform = mockMvc.perform(
+        multipart(POST, "/image/upload")
+            .file(file)
+            .with(csrf())
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+            .session(session));
+
+    // then
+    perform.andDo(print())
+        .andExpect(status().isBadRequest());
   }
 
 }

@@ -19,12 +19,12 @@ public class CustomValidatorRegistry {
 
   }
 
-  public static class RangeValidator implements ConstraintValidator<ValidFile, List<DateTimeRange>> {
+  public static class RangeValidator implements ConstraintValidator<ValidRange, List<DateTimeRange>> {
 
     @Override
-    public boolean isValid(List<DateTimeRange> ranges, ConstraintValidatorContext context) {
-      Set<DateTimeRange> rangeSet = new HashSet<>(ranges);
-      return rangeSet.size() == ranges.size();
+    public boolean isValid(List<DateTimeRange> dateTimeRanges, ConstraintValidatorContext context) {
+      Set<DateTimeRange> rangeSet = new HashSet<>(dateTimeRanges);
+      return rangeSet.size() == dateTimeRanges.size();
     }
 
   }
