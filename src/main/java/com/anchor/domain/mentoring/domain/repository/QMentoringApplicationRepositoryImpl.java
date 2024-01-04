@@ -2,6 +2,7 @@ package com.anchor.domain.mentoring.domain.repository;
 
 import static com.anchor.domain.mentoring.domain.QMentoring.mentoring;
 import static com.anchor.domain.mentoring.domain.QMentoringApplication.mentoringApplication;
+import static com.anchor.domain.payment.domain.QPayment.payment;
 
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -24,6 +25,7 @@ public class QMentoringApplicationRepositoryImpl implements QMentoringApplicatio
         queryFactory
             .selectFrom(mentoringApplication)
             .join(mentoringApplication.mentoring, mentoring)
+            .join(mentoringApplication.payment, payment)
             .fetchJoin()
             .where(
                 mentoringApplication.startDateTime.eq(startDateTime)

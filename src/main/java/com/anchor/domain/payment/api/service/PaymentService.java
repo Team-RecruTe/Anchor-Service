@@ -66,7 +66,8 @@ public class PaymentService {
       return new PaidMentoringInfo(appliedMentoring, savedPayment);
 
     } catch (RuntimeException e) {
-      log.warn(e.getClass() + " :: " + e.getMessage());
+      log.warn(e.getClass()
+          .getSimpleName() + " :: " + e.getMessage());
 
       return null;
     }
@@ -112,9 +113,15 @@ public class PaymentService {
   }
 
   private MentoringApplication getMentoringApplication(RequiredPaymentInfo requiredPaymentInfo, User user) {
-    return mentoringApplicationRepository.findAppliedMentoringByTimeAndUserId(
+
+    MentoringApplication mentoringApplication = mentoringApplicationRepository.findAppliedMentoringByTimeAndUserId(
             requiredPaymentInfo.getStartDateTime(), requiredPaymentInfo.getEndDateTime(), user.getId())
         .orElseThrow(() -> new NoSuchElementException("조건에 부합하는 멘토링 신청이력이 존재하지 않습니다."));
+
+    if (mentoringApplication.isExistPayment()) {
+      throw new RuntimeException("이미 결제내역이 존재합니다.");
+    }
+    return mentoringApplication;
   }
 
   private User getUser(SessionUser sessionUser) {
