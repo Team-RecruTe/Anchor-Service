@@ -14,19 +14,16 @@ import com.anchor.domain.payment.domain.repository.PaymentRepository;
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
+import com.anchor.global.util.ExternalApiClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClient;
 
 @Slf4j
 @Service
@@ -37,8 +34,7 @@ public class PaymentService {
   private static final String SUCCESS = "success";
   private static final String FAIL = "fail";
 
-  private final RestClient restClient;
-  private final ObjectMapper objectMapper;
+  private final ExternalApiClient apiClient;
   private final PaymentRepository paymentRepository;
   private final UserRepository userRepository;
   private final MentoringApplicationRepository mentoringApplicationRepository;
@@ -81,14 +77,7 @@ public class PaymentService {
   private String getAccessToken() throws JsonProcessingException {
     TokenRequest tokenRequest = new TokenRequest(impKey, impSecret);
 
-    String tokenRequestToJson = objectMapper.writeValueAsString(tokenRequest);
-
-    ResponseEntity<TokenData> tokenResponseEntity = restClient.post()
-        .uri(ACCESS_TOKEN_URL)
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(tokenRequestToJson)
-        .retrieve()
-        .toEntity(TokenData.class);
+    ResponseEntity<TokenData> tokenResponseEntity = apiClient.getTokenDataEntity(tokenRequest, ACCESS_TOKEN_URL);
 
     TokenData tokenData = Objects.requireNonNullElse(tokenResponseEntity.getBody(), null);
 
@@ -105,14 +94,8 @@ public class PaymentService {
   private PaymentDataDetail getSinglePaymentData(String impUid, String accessToken) {
     String requestUrl = createPaymentDataRequestUrl(impUid);
 
-    ResponseEntity<SinglePaymentData> paymentResponseEntity = restClient.get()
-        .uri(requestUrl)
-        .headers(header -> {
-          header.add(HttpHeaders.AUTHORIZATION, accessToken);
-          header.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-        })
-        .retrieve()
-        .toEntity(SinglePaymentData.class);
+    ResponseEntity<SinglePaymentData> paymentResponseEntity =
+        apiClient.getSinglePaymentDataEntity(requestUrl, accessToken);
 
     SinglePaymentData paymentData = Objects.requireNonNullElse(paymentResponseEntity.getBody(), null);
 
