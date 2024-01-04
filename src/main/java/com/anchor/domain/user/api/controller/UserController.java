@@ -63,6 +63,23 @@ public class UserController {
   }
 
 
+
+  /**
+   * 멘토링 신청내역을 조회합니다.
+   */
+  @GetMapping("/me/applied-mentorings")
+  public ResponseEntity<List<AppliedMentoringInfo>> appliedMentoringList(HttpSession session) {
+
+    SessionUser sessionUser = getSessionUserFromSession(session);
+
+    List<AppliedMentoringInfo> appliedMentoringInfoList = userService.loadAppliedMentoringList(
+        sessionUser);
+
+    return ResponseEntity.ok()
+        .body(appliedMentoringInfoList);
+  }
+
+
   /**
    * 신청한 멘토링의 상태를 변경합니다. 취소, 또는 완료로 변경가능합니다.
    */

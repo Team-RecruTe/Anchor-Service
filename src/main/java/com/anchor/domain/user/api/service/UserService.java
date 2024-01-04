@@ -96,7 +96,7 @@ public class UserService {
   }
 
   @Transactional
-  public void modifyNickname(String email, UserNicknameRequest userNicknameRequest){
+  public void editNickname(String email, UserNicknameRequest userNicknameRequest){
     User user = userRepository.findByEmail(email)
         .orElseThrow(()->{
           return new RuntimeException("해당 유저를 찾을 수 없습니다.");
