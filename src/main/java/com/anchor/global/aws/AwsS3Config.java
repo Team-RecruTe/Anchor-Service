@@ -1,5 +1,6 @@
 package com.anchor.global.aws;
 
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
@@ -23,10 +24,21 @@ public class AwsS3Config {
   @Bean
   public AmazonS3 amazonS3Client() {
     BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
+    
     return AmazonS3ClientBuilder.standard()
         .withRegion(region)
         .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
+        .withClientConfiguration(clientConfiguration())
         .build();
+  }
+
+  @Bean
+  public ClientConfiguration clientConfiguration() {
+    ClientConfiguration clientConfiguration = new ClientConfiguration();
+    clientConfiguration.withMaxConnections(10)
+        .withConnectionTimeout(3000)
+        .withSocketTimeout(5000);
+    return clientConfiguration;
   }
 
 }

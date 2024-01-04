@@ -5,6 +5,7 @@ import com.anchor.domain.image.api.service.response.S3ImageUrl;
 import com.anchor.domain.image.domain.Image;
 import com.anchor.domain.image.domain.repository.ImageRepository;
 import com.anchor.global.aws.AwsS3Utils;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ public class ImageService {
   private final ImageRepository imageRepository;
   private final AwsS3Utils awsS3Utils;
 
+  @Transactional
   public S3ImageUrl save(ImageFile file) {
     String url = awsS3Utils.uploadFile(file.getImage());
     imageRepository.save(Image.of(url));

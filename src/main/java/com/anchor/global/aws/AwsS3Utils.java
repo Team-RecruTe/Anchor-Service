@@ -23,9 +23,9 @@ public class AwsS3Utils {
 
   public String uploadFile(MultipartFile file) {
     String fileName = ImageFileResolver.buildFileName(file.getOriginalFilename());
-
     ObjectMetadata objectMetadata = new ObjectMetadata();
     objectMetadata.setContentType(file.getContentType());
+
     try (InputStream inputStream = file.getInputStream()) {
       amazonS3Client.putObject(
           new PutObjectRequest(bucketName, fileName, inputStream, objectMetadata)
