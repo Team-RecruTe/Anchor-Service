@@ -102,7 +102,6 @@ public class UserService {
     return mentoringApplicationRepository.findByUserId(user.getId(), pageable);
   }
 
-
   @Transactional
   public boolean changeAppliedMentoringStatus(SessionUser sessionUser, MentoringStatusInfo changeRequest) {
     User user = getUser(sessionUser);
