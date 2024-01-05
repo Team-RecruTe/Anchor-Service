@@ -60,12 +60,12 @@ class MentorDataTest {
   void setUnavailableTimes() {
     // given
     Mentor mentor = Mentor.builder()
-        .accountName("홍길동")
-        .career(Career.JUNIOR)
-        .accountNumber("123456")
-        .companyEmail("random@naver.com")
-        .bankName("한국은행")
-        .build();
+                          .accountName("홍길동")
+                          .career(Career.JUNIOR)
+                          .accountNumber("123456")
+                          .companyEmail("random@naver.com")
+                          .bankName("한국은행")
+                          .build();
     Mentor savedMentor = mentorRepository.save(mentor);
 
     List<DateTimeRange> dateTimeRanges = List.of(
@@ -113,54 +113,62 @@ class MentorDataTest {
   void cancelMentoringStatus() {
     //given
     Mentor mentor = Mentor.builder()
-        .accountName("홍길동")
-        .career(Career.JUNIOR)
-        .accountNumber("123456")
-        .companyEmail("random@naver.com")
-        .bankName("한국은행")
-        .build();
+                          .accountName("홍길동")
+                          .career(Career.JUNIOR)
+                          .accountNumber("123456")
+                          .companyEmail("random@naver.com")
+                          .bankName("한국은행")
+                          .build();
     Mentor savedMentor = mentorRepository.save(mentor);
 
     Mentoring mentoring = Mentoring.createMentoring(mentor, MentoringBasicInfo.builder()
-        .title("제목입니다.")
-        .durationTime("1h")
-        .cost(10000)
-        .build());
+                                                                              .title("제목입니다.")
+                                                                              .durationTime("1h")
+                                                                              .cost(10000)
+                                                                              .build());
     mentoringRepository.save(mentoring);
 
     User user = User.builder()
-        .email("asdf@naver.com")
-        .image("image")
-        .role(UserRole.USER)
-        .nickname("홍홍홍")
-        .build();
+                    .email("asdf@naver.com")
+                    .image("image")
+                    .role(UserRole.USER)
+                    .nickname("홍홍홍")
+                    .build();
     User savedUser = userRepository.save(user);
 
     MentoringApplication mentoringApplication = MentoringApplication.builder()
-        .startDateTime(LocalDateTime.of(2023, 12, 12, 20, 30, 0))
-        .endDateTime(LocalDateTime.of(2023, 12, 12, 21, 30, 0))
-        .user(savedUser)
-        .mentoring(mentoring)
-        .payment(null)
-        .mentoringStatus(MentoringStatus.WAITING)
-        .build();
+                                                                    .startDateTime(
+                                                                        LocalDateTime.of(2023, 12, 12, 20, 30, 0))
+                                                                    .endDateTime(
+                                                                        LocalDateTime.of(2023, 12, 12, 21, 30, 0))
+                                                                    .user(savedUser)
+                                                                    .mentoring(mentoring)
+                                                                    .payment(null)
+                                                                    .mentoringStatus(MentoringStatus.WAITING)
+                                                                    .build();
     MentoringApplication savedMentoringApplication = mentoringApplicationRepository.save(mentoringApplication);
 
     List<RequiredMentoringStatusInfo> requiredMentoringStatusInfos = new ArrayList<>();
     RequiredMentoringStatusInfo requiredMentoringStatusInfo = RequiredMentoringStatusInfo.builder()
-        .mentoringReservedTime(DateTimeRange.of(
-            LocalDateTime.of(2023, 12, 12, 20, 30, 0),
-            LocalDateTime.of(2023, 12, 12, 21, 30, 0)
-        ))
-        .mentoringStatus(MentoringStatus.CANCELLED.name())
-        .build();
+                                                                                         .mentoringReservedTime(
+                                                                                             DateTimeRange.of(
+                                                                                                 LocalDateTime.of(
+                                                                                                     2023, 12, 12, 20,
+                                                                                                     30, 0),
+                                                                                                 LocalDateTime.of(
+                                                                                                     2023, 12, 12, 21,
+                                                                                                     30, 0)
+                                                                                             ))
+                                                                                         .mentoringStatus(
+                                                                                             MentoringStatus.CANCELLED.name())
+                                                                                         .build();
     requiredMentoringStatusInfos.add(requiredMentoringStatusInfo);
 
     // when
     mentorService.changeMentoringStatus(savedMentor.getId(), requiredMentoringStatusInfos);
     MentoringApplication updatedMentoringApplication =
         mentoringApplicationRepository.findById(savedMentoringApplication.getId())
-            .get();
+                                      .get();
 
     // then
     assertThat(updatedMentoringApplication.getMentoringStatus()).isEqualTo(MentoringStatus.CANCELLED);
@@ -172,54 +180,62 @@ class MentorDataTest {
   void approveMentoringStatus() {
     //given
     Mentor mentor = Mentor.builder()
-        .accountName("홍길동")
-        .career(Career.JUNIOR)
-        .accountNumber("123456")
-        .companyEmail("random@naver.com")
-        .bankName("한국은행")
-        .build();
+                          .accountName("홍길동")
+                          .career(Career.JUNIOR)
+                          .accountNumber("123456")
+                          .companyEmail("random@naver.com")
+                          .bankName("한국은행")
+                          .build();
     Mentor savedMentor = mentorRepository.save(mentor);
 
     Mentoring mentoring = Mentoring.createMentoring(mentor, MentoringBasicInfo.builder()
-        .title("제목입니다.")
-        .durationTime("1h")
-        .cost(10000)
-        .build());
+                                                                              .title("제목입니다.")
+                                                                              .durationTime("1h")
+                                                                              .cost(10000)
+                                                                              .build());
     mentoringRepository.save(mentoring);
 
     User user = User.builder()
-        .email("asdf@naver.com")
-        .image("image")
-        .role(UserRole.USER)
-        .nickname("홍홍홍")
-        .build();
+                    .email("asdf@naver.com")
+                    .image("image")
+                    .role(UserRole.USER)
+                    .nickname("홍홍홍")
+                    .build();
     User savedUser = userRepository.save(user);
 
     MentoringApplication mentoringApplication = MentoringApplication.builder()
-        .startDateTime(LocalDateTime.of(2023, 12, 12, 20, 30, 0))
-        .endDateTime(LocalDateTime.of(2023, 12, 12, 21, 30, 0))
-        .user(savedUser)
-        .mentoring(mentoring)
-        .payment(null)
-        .mentoringStatus(MentoringStatus.WAITING)
-        .build();
+                                                                    .startDateTime(
+                                                                        LocalDateTime.of(2023, 12, 12, 20, 30, 0))
+                                                                    .endDateTime(
+                                                                        LocalDateTime.of(2023, 12, 12, 21, 30, 0))
+                                                                    .user(savedUser)
+                                                                    .mentoring(mentoring)
+                                                                    .payment(null)
+                                                                    .mentoringStatus(MentoringStatus.WAITING)
+                                                                    .build();
     MentoringApplication savedMentoringApplication = mentoringApplicationRepository.save(mentoringApplication);
 
     List<RequiredMentoringStatusInfo> requiredMentoringStatusInfos = new ArrayList<>();
     RequiredMentoringStatusInfo requiredMentoringStatusInfo = RequiredMentoringStatusInfo.builder()
-        .mentoringReservedTime(DateTimeRange.of(
-            LocalDateTime.of(2023, 12, 12, 20, 30, 0),
-            LocalDateTime.of(2023, 12, 12, 21, 30, 0)
-        ))
-        .mentoringStatus(MentoringStatus.APPROVAL.name())
-        .build();
+                                                                                         .mentoringReservedTime(
+                                                                                             DateTimeRange.of(
+                                                                                                 LocalDateTime.of(
+                                                                                                     2023, 12, 12, 20,
+                                                                                                     30, 0),
+                                                                                                 LocalDateTime.of(
+                                                                                                     2023, 12, 12, 21,
+                                                                                                     30, 0)
+                                                                                             ))
+                                                                                         .mentoringStatus(
+                                                                                             MentoringStatus.APPROVAL.name())
+                                                                                         .build();
     requiredMentoringStatusInfos.add(requiredMentoringStatusInfo);
 
     // when
     mentorService.changeMentoringStatus(savedMentor.getId(), requiredMentoringStatusInfos);
     MentoringApplication updatedMentoringApplication =
         mentoringApplicationRepository.findById(savedMentoringApplication.getId())
-            .get();
+                                      .get();
 
     // then
     assertThat(updatedMentoringApplication.getMentoringStatus()).isEqualTo(MentoringStatus.APPROVAL);
