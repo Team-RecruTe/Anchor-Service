@@ -114,6 +114,7 @@ public class UserService {
           return new RuntimeException("해당 유저를 찾을 수 없습니다.");
         });
     user.editNickname(userNicknameRequest);
+    userRepository.save(user);
   }
 
   @Transactional
