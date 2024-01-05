@@ -106,10 +106,10 @@ public class Mentoring extends BaseEntity {
     Set<String> savedTags = this.mentoringTags.stream()
         .map(MentoringTag::getTag)
         .collect(Collectors.toSet());
-    ArrayList<String> mutableTags = new ArrayList<>(tags);
+    List<String> mutableTags = new ArrayList<>(tags);
     mutableTags.removeAll(savedTags);
     this.mentoringTags.addAll(mutableTags.stream()
-        .map(MentoringTag::new)
+        .map(tag -> new MentoringTag(tag, this))
         .collect(Collectors.toSet()));
   }
 

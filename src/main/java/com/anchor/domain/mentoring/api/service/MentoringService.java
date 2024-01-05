@@ -9,11 +9,15 @@ import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditRes
 import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringDeleteResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
+import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
 import jakarta.transaction.Transactional;
+import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -69,5 +73,10 @@ public class MentoringService {
     Mentor mentor = mentorRepository.findById(mentorId)
         .orElseThrow(() -> new NoSuchElementException("일치하는 멘토가 없습니다."));
     return mentor;
+  }
+
+  @Transactional
+  public Page<MentoringSearchResult> getMentorings(List<String> tags, String keyword, Pageable pageable) {
+    return mentoringRepository.findMentorings(tags, keyword, pageable);
   }
 }

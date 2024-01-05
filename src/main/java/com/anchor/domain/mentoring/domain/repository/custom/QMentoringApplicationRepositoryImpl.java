@@ -33,11 +33,11 @@ public class QMentoringApplicationRepositoryImpl implements QMentoringApplicatio
   public List<MentoringApplication> findTimesByMentoringIdAndStatus(Long mentorId, MentoringStatus... statuses) {
     return jpaQueryFactory.selectFrom(mentoringApplication)
         .where(mentoringApplication.mentoring.mentor.id.eq(mentorId)
-            .and(statusOr(statuses)))
+            .and(equalsStatuses(statuses)))
         .fetch();
   }
 
-  private BooleanBuilder statusOr(MentoringStatus... statuses) {
+  private BooleanBuilder equalsStatuses(MentoringStatus... statuses) {
     BooleanBuilder builder = new BooleanBuilder();
     Arrays.stream(statuses)
         .map(this::equalStatus)
