@@ -73,10 +73,10 @@ class PaymentServiceTest {
 
   void sessionUserInit() {
     user = User.builder()
-        .id(1L)
-        .email("test@test.com")
-        .nickname("testName")
-        .build();
+               .id(1L)
+               .email("test@test.com")
+               .nickname("testName")
+               .build();
 
     sessionUser = new SessionUser(user);
   }
@@ -123,8 +123,9 @@ class PaymentServiceTest {
 
     //when then
     assertThatThrownBy(() -> paymentService.validatePaymentResult(paymentResultInfo)).isInstanceOf(
-            RuntimeException.class)
-        .hasMessage("인증에 실패하였습니다. API키와 secret을 확인하세요. wrongImpKey, wrongImpSecret");
+                                                                                         RuntimeException.class)
+                                                                                     .hasMessage(
+                                                                                         "인증에 실패하였습니다. API키와 secret을 확인하세요. wrongImpKey, wrongImpSecret");
   }
 
 
@@ -162,15 +163,15 @@ class PaymentServiceTest {
     MentoringApplication mentoringApplication = createMentoringApplication();
 
     Payment payment = Payment.builder()
-        .requiredPaymentInfo(requiredPaymentInfo)
-        .build();
+                             .requiredPaymentInfo(requiredPaymentInfo)
+                             .build();
 
     PaidMentoringInfo paidMentoringInfo = new PaidMentoringInfo(mentoringApplication, payment);
 
     given(userRepository.findByEmail(anyString())).willReturn(Optional.of(user));
 
     given(mentoringApplicationRepository.findAppliedMentoringByTimeAndUserId
-        (any(LocalDateTime.class), any(LocalDateTime.class), anyLong()))
+                                            (any(LocalDateTime.class), any(LocalDateTime.class), anyLong()))
         .willReturn(Optional.of(mentoringApplication));
 
     given(paymentRepository.save(any(Payment.class))).willReturn(payment);
@@ -199,8 +200,10 @@ class PaymentServiceTest {
 
     //then
     assertThat(result).isNull();
-    verify(mentoringApplicationRepository, never()).findAppliedMentoringByTimeAndUserId(any(LocalDateTime.class),
-        any(LocalDateTime.class), anyLong());
+    verify(mentoringApplicationRepository, never()).findAppliedMentoringByTimeAndUserId(
+        any(LocalDateTime.class),
+        any(LocalDateTime.class),
+        anyLong());
     verify(paymentRepository, never()).save(any());
   }
 
@@ -215,7 +218,7 @@ class PaymentServiceTest {
     given(userRepository.findByEmail(anyString())).willReturn(Optional.of(user));
 
     given(mentoringApplicationRepository.findAppliedMentoringByTimeAndUserId
-        (any(LocalDateTime.class), any(LocalDateTime.class), anyLong()))
+                                            (any(LocalDateTime.class), any(LocalDateTime.class), anyLong()))
         .willThrow(new NoSuchElementException("조건에 부합하는 멘토링 신청이력이 존재하지 않습니다."));
 
     //when
@@ -239,7 +242,7 @@ class PaymentServiceTest {
     given(userRepository.findByEmail(anyString())).willReturn(Optional.of(user));
 
     given(mentoringApplicationRepository.findAppliedMentoringByTimeAndUserId
-        (any(LocalDateTime.class), any(LocalDateTime.class), anyLong()))
+                                            (any(LocalDateTime.class), any(LocalDateTime.class), anyLong()))
         .willReturn(Optional.of(mentoringApplicationExistPayment));
 
     //when
@@ -252,117 +255,109 @@ class PaymentServiceTest {
 
   private PaymentResultInfo createPaymentResultInfo() {
     return PaymentResultInfo.builder()
-        .amount(100)
-        .impUid("testImpUid")
-        .merchantUid("testMerchantUid")
-        .build();
+                            .amount(100)
+                            .impUid("testImpUid")
+                            .merchantUid("testMerchantUid")
+                            .build();
   }
 
   private PaymentResultInfo createWrongPaymentResultInfo() {
     return PaymentResultInfo.builder()
-        .amount(100)
-        .impUid("wrongImpUid")
-        .merchantUid("testMerchantUid")
-        .build();
+                            .amount(100)
+                            .impUid("wrongImpUid")
+                            .merchantUid("testMerchantUid")
+                            .build();
   }
 
   private TokenData createTokenData() {
     String mockAccessToken = "testAccessToken";
 
     TokenDataDetail mockTokenDataDetail = TokenDataDetail.builder()
-        .accessToken(mockAccessToken)
-        .now(123456L)
-        .expiredAt(1234566L)
-        .build();
+                                                         .accessToken(mockAccessToken)
+                                                         .now(123456L)
+                                                         .expiredAt(1234566L)
+                                                         .build();
 
     return TokenData.builder()
-        .code(0)
-        .message(null)
-        .response(mockTokenDataDetail)
-        .build();
+                    .code(0)
+                    .message(null)
+                    .response(mockTokenDataDetail)
+                    .build();
   }
 
   private TokenData createWrongTokenData() {
     return TokenData.builder()
-        .code(-1)
-        .message("인증에 실패하였습니다. API키와 secret을 확인하세요. wrongImpKey, wrongImpSecret")
-        .response(null)
-        .build();
+                    .code(-1)
+                    .message("인증에 실패하였습니다. API키와 secret을 확인하세요. wrongImpKey, wrongImpSecret")
+                    .response(null)
+                    .build();
   }
 
   private SinglePaymentData createSinglePaymentData() {
     PaymentDataDetail mockPaymentDataDetail = PaymentDataDetail.builder()
-        .amount(100)
-        .impUid("testImpUid")
-        .merchantUid("testMerchantUid")
-        .build();
+                                                               .amount(100)
+                                                               .impUid("testImpUid")
+                                                               .merchantUid("testMerchantUid")
+                                                               .build();
 
     return SinglePaymentData.builder()
-        .code(0)
-        .message(null)
-        .response(mockPaymentDataDetail)
-        .build();
+                            .code(0)
+                            .message(null)
+                            .response(mockPaymentDataDetail)
+                            .build();
   }
 
   private SinglePaymentData createWrongPaymentData() {
     return SinglePaymentData.builder()
-        .code(-1)
-        .message("존재하지 않는 결제정보입니다.")
-        .response(null)
-        .build();
+                            .code(-1)
+                            .message("존재하지 않는 결제정보입니다.")
+                            .response(null)
+                            .build();
   }
 
   private RequiredPaymentInfo createRequiredPaymentInfo() {
     return RequiredPaymentInfo.builder()
-        .startDateTime(LocalDateTime.of(2024, 1, 3, 13, 0))
-        .endDateTime(LocalDateTime.of(2024, 1, 3, 14, 0))
-        .impUid("testImpUid")
-        .merchantUid("testMerchantUid")
-        .amount(100)
-        .build();
+                              .startDateTime(LocalDateTime.of(2024, 1, 3, 13, 0))
+                              .endDateTime(LocalDateTime.of(2024, 1, 3, 14, 0))
+                              .impUid("testImpUid")
+                              .merchantUid("testMerchantUid")
+                              .amount(100)
+                              .build();
   }
 
   private MentoringApplication createMentoringApplication() {
     MentoringApplicationTime applicationTime = MentoringApplicationTime.builder()
-        .date(LocalDate.of(2024, 1, 3))
-        .time(LocalTime.of(13, 0))
-        .build();
+                                                                       .date(LocalDate.of(2024, 1, 3))
+                                                                       .time(LocalTime.of(13, 0))
+                                                                       .build();
 
     Mentoring mentoring = Mentoring.builder()
-        .title("testTitle")
-        .mentor(Mentor.builder()
-            .build())
-        .build();
+                                   .title("testTitle")
+                                   .mentor(Mentor.builder()
+                                                 .build())
+                                   .build();
 
-    return MentoringApplication.builder()
-        .user(user)
-        .mentoringApplicationTime(applicationTime)
-        .mentoring(mentoring)
-        .build();
+    return new MentoringApplication(applicationTime, null, mentoring, user);
   }
 
   private MentoringApplication createMentoringApplicationExistPayment(RequiredPaymentInfo requiredPaymentInfo) {
     MentoringApplicationTime applicationTime = MentoringApplicationTime.builder()
-        .date(LocalDate.of(2024, 1, 3))
-        .time(LocalTime.of(13, 0))
-        .build();
+                                                                       .date(LocalDate.of(2024, 1, 3))
+                                                                       .time(LocalTime.of(13, 0))
+                                                                       .build();
 
     Mentoring mentoring = Mentoring.builder()
-        .title("testTitle")
-        .mentor(Mentor.builder()
-            .build())
-        .build();
+                                   .title("testTitle")
+                                   .mentor(Mentor.builder()
+                                                 .build())
+                                   .build();
 
-    MentoringApplication mentoringApplication = MentoringApplication.builder()
-        .user(user)
-        .mentoringApplicationTime(applicationTime)
-        .mentoring(mentoring)
-        .build();
+    MentoringApplication mentoringApplication = new MentoringApplication(applicationTime, null, mentoring, user);
 
     Payment payment = Payment.builder()
-        .requiredPaymentInfo(requiredPaymentInfo)
-        .mentoringApplication(mentoringApplication)
-        .build();
+                             .requiredPaymentInfo(requiredPaymentInfo)
+                             .mentoringApplication(mentoringApplication)
+                             .build();
 
     return mentoringApplication;
   }

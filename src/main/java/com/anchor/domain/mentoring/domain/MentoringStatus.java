@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 public enum MentoringStatus {
 
   WAITING("대기"),
-  CANCELED("취소"),
+  CANCELLED("취소"),
   APPROVAL("승인"),
   COMPLETE("완료");
 
@@ -30,7 +30,7 @@ public enum MentoringStatus {
 
   public boolean isEqualTo(String status) {
     return status.toUpperCase()
-        .equals(this.name());
+                 .equals(this.name());
   }
 
 }

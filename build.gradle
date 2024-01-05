@@ -71,16 +71,3 @@ clean.doLast {
 tasks.named('test') {
     useJUnitPlatform()
 }
-
-/* QueryDSL Config */
-def querydslDir = layout.buildDirectory.dir("generated/querydsl").get().asFile
-sourceSets {
-    main.java.srcDirs += [querydslDir]
-}
-tasks.withType(JavaCompile).configureEach {
-    options.generatedSourceOutputDirectory = file(querydslDir)
-}
-clean.doLast {
-    file(querydslDir).deleteDir()
-}
-/* QueryDSL Config */
