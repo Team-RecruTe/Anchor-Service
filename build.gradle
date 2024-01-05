@@ -44,10 +44,6 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
 
-    /* RestTemplate reference Dependency*/
-    implementation 'org.apache.httpcomponents.client5:httpclient5:5.3'
-
-
     /* QueryDSL Dependencies */
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta' // querydsl jpa 모듈입니다.
     annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta" // querydsl 어노테이션 프로세서입니다.
@@ -75,3 +71,16 @@ clean.doLast {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+/* QueryDSL Config */
+def querydslDir = layout.buildDirectory.dir("generated/querydsl").get().asFile
+sourceSets {
+    main.java.srcDirs += [querydslDir]
+}
+tasks.withType(JavaCompile).configureEach {
+    options.generatedSourceOutputDirectory = file(querydslDir)
+}
+clean.doLast {
+    file(querydslDir).deleteDir()
+}
+/* QueryDSL Config */
