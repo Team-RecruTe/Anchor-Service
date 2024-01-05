@@ -103,6 +103,91 @@ public class PaymentService {
     }
   }
 
+  private String getAccessToken() {
+    TokenRequest tokenRequest = new TokenRequest(impKey, impSecret);
+
+    ResponseEntity<TokenData> tokenResponseEntity = apiClient.getTokenDataEntity(tokenRequest, ACCESS_TOKEN_URL);
+
+    TokenData tokenData = Objects.requireNonNullElse(tokenResponseEntity.getBody(), null);
+
+    if (tokenData.statusCheck()) {
+
+      return tokenData.getResponse()
+          .getAccessToken();
+
+    } else {
+      throw new RuntimeException(tokenData.getMessage());
+    }
+  }
+
+  private PaymentDataDetail getSinglePaymentData(String impUid, String accessToken) {
+    String requestUrl = createPaymentDataRequestUrl(impUid);
+
+    ResponseEntity<SinglePaymentData> paymentResponseEntity =
+        apiClient.getSinglePaymentDataEntity(requestUrl, accessToken);
+
+    SinglePaymentData paymentData = Objects.requireNonNullElse(paymentResponseEntity.getBody(), null);
+
+    if (paymentData.statusCheck()) {
+
+      return paymentData.getResponse();
+
+    } else {
+      throw new RuntimeException(paymentData.getMessage());
+    }
+  }
+
+  private String createPaymentDataRequestUrl(String impUid) {
+    return "https://api.iamport.kr/payments/" + impUid;
+  }
+
+  private User getUser(SessionUser sessionUser) {
+    return userRepository.findByEmail(sessionUser.getEmail())
+        .orElseThrow(() -> new NoSuchElementException(sessionUser.getEmail() + "에 해당하는 회원이 존재하지 않습니다."));
+  }
+
+  private MentoringApplication getMentoringApplication(RequiredPaymentInfo requiredPaymentInfo, User user) {
+
+    MentoringApplication mentoringApplication = mentoringApplicationRepository.findAppliedMentoringByTimeAndUserId
+            (requiredPaymentInfo.getStartDateTime(), requiredPaymentInfo.getEndDateTime(), user.getId())
+        .orElseThrow(() -> new NoSuchElementException("조건에 부합하는 멘토링 신청이력이 존재하지 않습니다."));
+
+    if (mentoringApplication.isExistPayment()) {
+      throw new RuntimeException("이미 결제내역이 존재합니다.");
+    }
+    return mentoringApplication;
+  }
+
+
+  private MentoringApplication getMentoringApplication(RequiredMentoringCancelInfo mentoringCancelInfo, User user) {
+
+    MentoringApplication mentoringApplication = mentoringApplicationRepository.findMentoringApplicationByTimeRangeAndUserId
+            (mentoringCancelInfo.getStartDateTime(), mentoringCancelInfo.getEndDateTime(), user.getId())
+        .orElseThrow(() -> new NoSuchElementException("조건에 부합하는 멘토링 신청이력이 존재하지 않습니다."));
+
+    Payment payment = mentoringApplication.getPayment();
+    if (payment.isCancelled()) {
+      throw new RuntimeException(mentoringApplication.getId() + " 는 이미 취소된 결제내역입니다.");
+    }
+
+    return mentoringApplication;
+  }
+
+  private MentoringApplication getMentoringApplication(RequiredMentoringCancelInfo mentoringCancelInfo) {
+
+    MentoringApplication mentoringApplication = mentoringApplicationRepository.findMentoringApplicationByMentoringId
+            (mentoringCancelInfo.getStartDateTime(), mentoringCancelInfo.getEndDateTime(),
+                mentoringCancelInfo.getMentoringId())
+        .orElseThrow(() -> new NoSuchElementException("조건에 부합하는 멘토링 신청이력이 존재하지 않습니다."));
+
+    Payment payment = mentoringApplication.getPayment();
+    if (payment.isCancelled()) {
+      throw new RuntimeException(mentoringApplication.getId() + " 는 이미 취소된 결제내역입니다.");
+    }
+
+    return mentoringApplication;
+  }
+
   private void paymentCancelProcess(List<RequiredMentoringCancelInfo> mentoringCancelInfos,
       User user) {
 
@@ -150,40 +235,6 @@ public class PaymentService {
     });
   }
 
-  private String getAccessToken() {
-    TokenRequest tokenRequest = new TokenRequest(impKey, impSecret);
-
-    ResponseEntity<TokenData> tokenResponseEntity = apiClient.getTokenDataEntity(tokenRequest, ACCESS_TOKEN_URL);
-
-    TokenData tokenData = Objects.requireNonNullElse(tokenResponseEntity.getBody(), null);
-
-    if (tokenData.statusCheck()) {
-
-      return tokenData.getResponse()
-          .getAccessToken();
-
-    } else {
-      throw new RuntimeException(tokenData.getMessage());
-    }
-  }
-
-  private PaymentDataDetail getSinglePaymentData(String impUid, String accessToken) {
-    String requestUrl = createPaymentDataRequestUrl(impUid);
-
-    ResponseEntity<SinglePaymentData> paymentResponseEntity =
-        apiClient.getSinglePaymentDataEntity(requestUrl, accessToken);
-
-    SinglePaymentData paymentData = Objects.requireNonNullElse(paymentResponseEntity.getBody(), null);
-
-    if (paymentData.statusCheck()) {
-
-      return paymentData.getResponse();
-
-    } else {
-      throw new RuntimeException(paymentData.getMessage());
-    }
-  }
-
   private void paymentCancel(ApiPaymentCancelData cancelData, String accessToken) {
 
     ResponseEntity<PaymentCancelData> paymentCancelDataEntity =
@@ -201,56 +252,5 @@ public class PaymentService {
       throw new RuntimeException(paymentCancelData.getMessage());
     }
   }
-
-  private String createPaymentDataRequestUrl(String impUid) {
-    return "https://api.iamport.kr/payments/" + impUid;
-  }
-
-  private MentoringApplication getMentoringApplication(RequiredPaymentInfo requiredPaymentInfo, User user) {
-
-    MentoringApplication mentoringApplication = mentoringApplicationRepository.findAppliedMentoringByTimeAndUserId
-            (requiredPaymentInfo.getStartDateTime(), requiredPaymentInfo.getEndDateTime(), user.getId())
-        .orElseThrow(() -> new NoSuchElementException("조건에 부합하는 멘토링 신청이력이 존재하지 않습니다."));
-
-    if (mentoringApplication.isExistPayment()) {
-      throw new RuntimeException("이미 결제내역이 존재합니다.");
-    }
-    return mentoringApplication;
-  }
-
-  private MentoringApplication getMentoringApplication(RequiredMentoringCancelInfo mentoringCancelInfo, User user) {
-
-    MentoringApplication mentoringApplication = mentoringApplicationRepository.findMentoringApplicationByTimeRangeAndUserId
-            (mentoringCancelInfo.getStartDateTime(), mentoringCancelInfo.getEndDateTime(), user.getId())
-        .orElseThrow(() -> new NoSuchElementException("조건에 부합하는 멘토링 신청이력이 존재하지 않습니다."));
-
-    Payment payment = mentoringApplication.getPayment();
-    if (payment.isCancelled()) {
-      throw new RuntimeException(mentoringApplication.getId() + " 는 이미 취소된 결제내역입니다.");
-    }
-
-    return mentoringApplication;
-  }
-
-  private MentoringApplication getMentoringApplication(RequiredMentoringCancelInfo mentoringCancelInfo) {
-
-    MentoringApplication mentoringApplication = mentoringApplicationRepository.findMentoringApplicationByMentoringId
-            (mentoringCancelInfo.getStartDateTime(), mentoringCancelInfo.getEndDateTime(),
-                mentoringCancelInfo.getMentoringId())
-        .orElseThrow(() -> new NoSuchElementException("조건에 부합하는 멘토링 신청이력이 존재하지 않습니다."));
-
-    Payment payment = mentoringApplication.getPayment();
-    if (payment.isCancelled()) {
-      throw new RuntimeException(mentoringApplication.getId() + " 는 이미 취소된 결제내역입니다.");
-    }
-
-    return mentoringApplication;
-  }
-
-  private User getUser(SessionUser sessionUser) {
-    return userRepository.findByEmail(sessionUser.getEmail())
-        .orElseThrow(() -> new NoSuchElementException(sessionUser.getEmail() + "에 해당하는 회원이 존재하지 않습니다."));
-  }
-
 
 }
