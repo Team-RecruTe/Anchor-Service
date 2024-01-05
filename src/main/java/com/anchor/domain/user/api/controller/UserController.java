@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,45 +18,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
-@RequestMapping("/users")
+@RequestMapping("/users/me")
 @RestController
 public class UserController {
 
   private final UserService userService;
-  private final HttpSession httpSession;
 
-  @GetMapping("/me")
-  public String getInfo(Model model){
-  SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user"); //email, nickname, image
-  String email = sessionUser.getEmail();
-  UserInfoResponse userInfoResponse = userService.getProfile(email);
-  model.addAttribute("user", userInfoResponse);
-    return "내 프로필 페이지 조회";
-  }
-
-  @PutMapping("/me")
-  public Map<String, Object> putInfo(@RequestBody UserNicknameRequest userNicknameRequest){
+  @PutMapping
+  public ResponseEntity<String> putInfo(@RequestBody UserNicknameRequest userNicknameRequest, HttpSession httpSession){
     SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
-    String email = sessionUser.getEmail();
-    userService.editNickname(email, userNicknameRequest);
-    Map<String, Object> resultMap = new HashMap<>();
-    resultMap.put("modify", "ok");
-    return resultMap;
+    userService.editNickname(sessionUser.getEmail(), userNicknameRequest);
+    return ResponseEntity.ok().build();
   }
 
-  @PutMapping("/me/image")
-  public Map<String, Object> putImage(@RequestBody UserNicknameRequest userNicknameRequest){
-    return null;
+  @PutMapping("/image")
+  public ResponseEntity<String> putImage(@RequestBody UserNicknameRequest userNicknameRequest, HttpSession httpSession){
+    return ResponseEntity.ok().build();
   }
 
-  @DeleteMapping("/me")
-  public Map<String, Object> deleteUser(){
+  @DeleteMapping
+  public ResponseEntity<String> deleteUser(HttpSession httpSession){
     SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user"); //email, nickname, image
-    String email = sessionUser.getEmail();
-    userService.deleteUser(email);
-    Map<String, Object> resultMap = new HashMap<>();
-    resultMap.put("delete", "ok");
-    return resultMap;
+    userService.deleteUser(sessionUser.getEmail());
+    return ResponseEntity.ok().build();
   }
 
 }
