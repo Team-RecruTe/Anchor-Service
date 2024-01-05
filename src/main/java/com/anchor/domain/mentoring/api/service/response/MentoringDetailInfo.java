@@ -42,7 +42,7 @@ public class MentoringDetailInfo {
         .getNickname();
     this.cost = mentoring.getCost();
 
-    this.tags = mentoring.getMentoringTag()
+    this.tags = mentoring.getMentoringTags()
         .stream()
         .map(MentoringTag::getTag)
         .toList();

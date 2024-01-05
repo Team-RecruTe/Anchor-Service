@@ -1,25 +1,19 @@
 package com.anchor.domain.mentoring.api.service;
 
-import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
-import com.anchor.domain.mentoring.api.service.response.MentoringApplicationResponse;
-import com.anchor.domain.mentoring.api.service.response.MentoringDetailResponse;
-import com.anchor.domain.mentoring.api.service.response.MentoringInfo;
-import com.anchor.domain.mentoring.api.service.response.MentoringUnavailableTimeResponse;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentor.domain.repository.MentorRepository;
+import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
+import com.anchor.domain.mentoring.api.service.response.ApplicationUnavailableTime;
+import com.anchor.domain.mentoring.api.service.response.AppliedMentoringInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringContents;
 import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
-import com.anchor.domain.mentoring.api.service.response.MentoringDeleteResult;
-import com.anchor.domain.mentoring.api.service.response.MentoringDetailResponseDto;
-import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
-import com.anchor.domain.mentoring.api.service.response.MentoringResponseDto;
-import com.anchor.domain.mentoring.api.service.response.ApplicationUnavailableTime;
-import com.anchor.domain.mentoring.api.service.response.AppliedMentoringInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringDefaultInfo;
+import com.anchor.domain.mentoring.api.service.response.MentoringDeleteResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
+import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringUnavailableTime;
@@ -137,11 +131,8 @@ public class MentoringService {
 
     User loginUser = getUser(sessionUser);
 
-    MentoringApplication saveMentoringApplication = MentoringApplication.builder()
-        .mentoring(findMentoring)
-        .user(loginUser)
-        .mentoringApplicationTime(applicationTime)
-        .build();
+    MentoringApplication saveMentoringApplication =
+        new MentoringApplication(applicationTime, null, findMentoring, null, loginUser);
 
     MentoringApplication saveResult = mentoringApplicationRepository.save(saveMentoringApplication);
 
@@ -171,7 +162,7 @@ public class MentoringService {
 
   private Mentor getMentorById(Long id) {
     Mentor mentor = mentorRepository.findById(id)
-                                    .orElseThrow(() -> new NoSuchElementException("일치하는 멘토 정보가 없습니다."));
+        .orElseThrow(() -> new NoSuchElementException("일치하는 멘토 정보가 없습니다."));
     return mentor;
   }
 

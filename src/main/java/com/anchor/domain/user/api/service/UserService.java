@@ -74,7 +74,7 @@ public class UserService {
         mentoringApplicationRepository.findByStartDateTimeAndEndDateTimeAndUserId(startDateTime, endDateTime, userId)
             .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링 신청이력이 존재하지 않습니다."));
 
-    mentoringApplication.changeMentoringStatus(mentoringStatus.getStatus());
+    mentoringApplication.changeStatus(mentoringStatus.getStatus());
 
     mentoringApplicationRepository.save(mentoringApplication);
   }

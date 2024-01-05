@@ -26,15 +26,14 @@ import static org.mockito.Mockito.when;
 import com.anchor.domain.mentor.domain.Career;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
+import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
 import com.anchor.domain.mentoring.api.service.response.ApplicationUnavailableTime;
 import com.anchor.domain.mentoring.api.service.response.AppliedMentoringInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringDefaultInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
-import com.anchor.domain.mentoring.domain.MentoringDetail;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
-import com.anchor.domain.mentoring.domain.MentoringTag;
 import com.anchor.domain.mentoring.domain.MentoringUnavailableTime;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
@@ -125,20 +124,14 @@ class MentoringServiceTest {
     //given
     Long inputMentoringId = 1L;
 
-    com.anchor.domain.mentoring.domain.MentoringDetail mentoringDetail = MentoringDetail.builder()
-        .contents(MENTORING_CONTENT)
-        .build();
-
     Mentoring mentoring = Mentoring.builder()
         .title(MENTORING_TITLE)
         .durationTime(DURATION_TIME)
         .cost(10_000)
         .mentor(mentor)
-        .mentoringDetail(mentoringDetail)
         .build();
 
-    List<MentoringTag> mentoringTags = new ArrayList<>();
-    fillMentoringTagToMentoring(mentoringTags, mentoring);
+    mentoring.editContents(new MentoringContentsInfo("테스트내용", List.of("백엔드", "자바")));
 
     given(mentoringRepository.findById(anyLong())).willReturn(Optional.of(mentoring));
 
@@ -150,7 +143,7 @@ class MentoringServiceTest {
         .extracting("title", "content", "durationTime", "nickname", "cost")
         .contains(MENTORING_TITLE, MENTORING_CONTENT, DURATION_TIME, NICKNAME, COST);
     assertThat(result.getTags())
-        .hasSize(mentoringTags.size())
+        .hasSize(2)
         .contains("자바", "백엔드");
   }
 
@@ -256,8 +249,8 @@ class MentoringServiceTest {
 
     MentoringApplication mentoringApplication = MentoringApplication.builder()
         .mentoring(mentoring)
+        .mentoringStatus(MentoringStatus.WAITING)
         .user(user)
-        .mentoringApplicationTime(applicationTime)
         .build();
 
     MentoringUnavailableTime unavailableTime = new MentoringUnavailableTime(mentoringApplication,
@@ -436,20 +429,6 @@ class MentoringServiceTest {
     return mentoringList;
   }
 
-  private void fillMentoringTagToMentoring(List<MentoringTag> testTags,
-      Mentoring mentoring) {
-    MentoringTag backEndTag = MentoringTag.builder()
-        .tag("백엔드")
-        .mentoring(mentoring)
-        .build();
-    MentoringTag javaTag = MentoringTag.builder()
-        .tag("자바")
-        .mentoring(mentoring)
-        .build();
-    testTags.add(backEndTag);
-    testTags.add(javaTag);
-  }
-
   private List<MentoringUnavailableTime> createMentoringUnavailableTime(Mentor mentor) {
     List<MentoringUnavailableTime> unavailableTimes = new ArrayList<>();
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
@@ -460,16 +439,8 @@ class MentoringServiceTest {
     LocalDateTime fromDateTime2 = LocalDateTime.parse(SECOND_FROM_DATE_TIME, formatter);
     LocalDateTime toDateTime2 = LocalDateTime.parse(SECOND_TO_DATE_TIME, formatter);
 
-    MentoringUnavailableTime firstUnavailableTime = MentoringUnavailableTime.builder()
-        .fromDateTime(fromDateTime1)
-        .toDateTime(toDateTime1)
-        .mentor(mentor)
-        .build();
-    MentoringUnavailableTime secondUnavailableTime = MentoringUnavailableTime.builder()
-        .fromDateTime(fromDateTime2)
-        .toDateTime(toDateTime2)
-        .mentor(mentor)
-        .build();
+    MentoringUnavailableTime firstUnavailableTime = new MentoringUnavailableTime(fromDateTime1, toDateTime1, mentor);
+    MentoringUnavailableTime secondUnavailableTime = new MentoringUnavailableTime(fromDateTime2, toDateTime2, mentor);
 
     unavailableTimes.add(firstUnavailableTime);
     unavailableTimes.add(secondUnavailableTime);

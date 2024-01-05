@@ -62,11 +62,12 @@ public class Mentoring extends BaseEntity {
   private List<MentoringApplication> mentoringApplications = new ArrayList<>();
 
   @Builder
-  private Mentoring(String title, String durationTime, Integer cost, Mentor mentor) {
+  private Mentoring(String title, String durationTime, Integer cost, Mentor mentor, MentoringDetail mentoringDetail) {
     this.title = title;
     this.durationTime = durationTime;
     this.cost = cost;
     this.mentor = mentor;
+    this.mentoringDetail = mentoringDetail;
   }
 
   public static Mentoring createMentoring(Mentor mentor, MentoringBasicInfo mentoringBasicInfo) {

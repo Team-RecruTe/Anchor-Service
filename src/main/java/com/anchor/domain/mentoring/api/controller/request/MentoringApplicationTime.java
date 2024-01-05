@@ -30,11 +30,7 @@ public class MentoringApplicationTime {
     LocalDateTime fromDateTime = getFromDateTime();
     LocalDateTime toDateTime = getToDateTime();
 
-    return MentoringUnavailableTime.builder()
-        .fromDateTime(fromDateTime)
-        .toDateTime(toDateTime)
-        .mentor(mentor)
-        .build();
+    return new MentoringUnavailableTime(fromDateTime, toDateTime, mentor);
   }
 
   public ApplicationUnavailableTime convertToMentoringUnavailableTimeResponse() {

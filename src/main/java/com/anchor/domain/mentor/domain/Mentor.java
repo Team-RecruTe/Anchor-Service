@@ -50,16 +50,6 @@ public class Mentor extends BaseEntity {
   )
   private List<Mentoring> mentorings = new ArrayList<>();
 
-  @Builder
-  private Mentor(String companyEmail, Career career, String accountNumber, String accountName, String bankName) {
-    this.companyEmail = companyEmail;
-    this.career = career;
-    this.accountNumber = accountNumber;
-    this.accountName = accountName;
-    this.bankName = bankName;
-  }
-
-
   @OneToOne(mappedBy = "mentor")
   private User user;
 

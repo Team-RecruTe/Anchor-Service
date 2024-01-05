@@ -1,31 +1,28 @@
 package com.anchor.domain.mentoring.api.controller;
 
+import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
-import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
 import com.anchor.domain.mentoring.api.service.MentoringService;
-import com.anchor.domain.mentoring.api.service.response.MentoringApplicationResponse;
+import com.anchor.domain.mentoring.api.service.response.ApplicationUnavailableTime;
+import com.anchor.domain.mentoring.api.service.response.AppliedMentoringInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
+import com.anchor.domain.mentoring.api.service.response.MentoringDefaultInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringDeleteResult;
+import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.util.type.Link;
-import com.anchor.domain.mentoring.api.service.response.MentoringDetailResponse;
-import com.anchor.domain.mentoring.api.service.response.MentoringInfo;
-import com.anchor.domain.mentoring.api.service.response.MentoringUnavailableTimeResponse;
-import com.anchor.domain.mentoring.api.service.response.ApplicationUnavailableTime;
-import com.anchor.domain.mentoring.api.service.response.AppliedMentoringInfo;
-import com.anchor.domain.mentoring.api.service.response.MentoringDefaultInfo;
-import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
-import com.anchor.global.auth.SessionUser;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -85,7 +82,6 @@ public class MentoringController {
 
     return ResponseEntity.ok(result);
   }
-
 
 
   @GetMapping("")

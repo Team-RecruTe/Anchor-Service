@@ -1,5 +1,6 @@
 package com.anchor.domain.mentoring.domain;
 
+import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.global.util.BaseEntity;
 import com.anchor.global.util.type.DateTimeRange;
 import jakarta.persistence.Column;
@@ -27,6 +28,19 @@ public class MentoringUnavailableTime extends BaseEntity {
   private MentoringUnavailableTime(LocalDateTime fromDateTime, LocalDateTime toDateTime) {
     this.fromDateTime = fromDateTime;
     this.toDateTime = toDateTime;
+  }
+
+  public MentoringUnavailableTime(MentoringApplication application, Mentoring mentoring) {
+    this.fromDateTime = application.getStartDateTime();
+    this.toDateTime = application.getEndDateTime();
+    this.mentorId = mentoring.getMentor()
+        .getId();
+  }
+
+  public MentoringUnavailableTime(LocalDateTime fromDateTime, LocalDateTime toDateTime, Mentor mentor) {
+    this.fromDateTime = fromDateTime;
+    this.toDateTime = toDateTime;
+    this.mentorId = mentor.getId();
   }
 
   public static List<MentoringUnavailableTime> of(List<DateTimeRange> dateTimeRanges) {

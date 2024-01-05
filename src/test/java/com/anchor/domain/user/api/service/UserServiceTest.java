@@ -177,7 +177,7 @@ class UserServiceTest {
     assertThat(result).isTrue();
     mentoringApplications.forEach(
         mentoringApplication -> assertThat(mentoringApplication.getMentoringStatus()).isEqualTo(
-            MentoringStatus.CANCELED));
+            MentoringStatus.CANCELLED));
   }
 
 
@@ -364,7 +364,6 @@ class UserServiceTest {
               .mentoring(mentoring)
               .user(user)
               .mentoringStatus(MentoringStatus.APPROVAL)
-              .mentoringApplicationTime(applicationTime)
               .build());
     }
 
@@ -379,7 +378,7 @@ class UserServiceTest {
     for (MentoringApplicationTime applicationTime : applicationTimeList) {
       mentoringStatusList.add(
           RequiredMentoringStatusInfo.builder()
-              .status(MentoringStatus.CANCELED)
+              .status(MentoringStatus.CANCELLED)
               .startDateTime(applicationTime.getFromDateTime())
               .endDateTime(applicationTime.getToDateTime())
               .build()
@@ -407,7 +406,7 @@ class UserServiceTest {
 
       statusList.add(
           RequiredMentoringStatusInfo.builder()
-              .status(MentoringStatus.CANCELED)
+              .status(MentoringStatus.CANCELLED)
               .startDateTime(startDateTime)
               .endDateTime(startDateTime.plusHours(1L))
               .build()
@@ -427,7 +426,7 @@ class UserServiceTest {
 
       statusList.add(
           RequiredMentoringStatusInfo.builder()
-              .status(i <= 2 ? MentoringStatus.CANCELED : MentoringStatus.WAITING)
+              .status(i <= 2 ? MentoringStatus.CANCELLED : MentoringStatus.WAITING)
               .startDateTime(startDateTime)
               .endDateTime(startDateTime.plusHours(1L))
               .build()

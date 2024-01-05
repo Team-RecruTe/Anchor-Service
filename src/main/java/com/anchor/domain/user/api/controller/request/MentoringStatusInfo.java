@@ -41,7 +41,7 @@ public class MentoringStatusInfo {
 
     public boolean mentoringStatusIsCanceledOrComplete() {
 
-      if (status.equals(MentoringStatus.CANCELED) || status.equals(MentoringStatus.COMPLETE)) {
+      if (status.equals(MentoringStatus.CANCELLED) || status.equals(MentoringStatus.COMPLETE)) {
         return true;
       } else {
         throw new IllegalArgumentException("변경하려는 상태가 CANCELED 또는 COMPLETE 가 아닙니다.");
