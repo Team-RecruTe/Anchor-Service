@@ -11,10 +11,9 @@ import com.anchor.global.auth.SessionUser;
 import com.anchor.global.util.type.Link;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import java.util.HashMap;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -64,7 +63,7 @@ public class MentorController {
   }
 
   @PostMapping("/register/email/send")
-  public Map<String, Boolean> emailSend(String receiver) {
+  public ResponseEntity emailSend(String receiver) {
     String emailCode = RandomCodeMaker.makeRandomCode();
     session.setAttribute("ecode", emailCode);
     MailDto mailDto = MailDto.builder()
@@ -73,19 +72,17 @@ public class MentorController {
         .content(emailCode)
         .build();
     mailService.sendMail(mailDto);
-    log.info("new session email code===" + emailCode);
-    Map<String, Boolean> resultMap = new HashMap<>();
-    resultMap.put("isSent", true);
-    return resultMap;
+    return new ResponseEntity("success", HttpStatus.OK);
   }
 
   @PostMapping("/register/email/auth")
-  public String emailVerify(String userEmailCode) {
+  public ResponseEntity emailVerify(String userEmailCode) {
     String emailCode = (String) session.getAttribute("ecode");
     if (userEmailCode.equals(emailCode)) {
-      return "이메일 인증 성공";
-    } else {
-      return "이메일 인증 실패";
+      return new ResponseEntity("success", HttpStatus.OK);
+    }
+    else {
+      return new ResponseEntity("fail", HttpStatus.OK);
     }
   }
 

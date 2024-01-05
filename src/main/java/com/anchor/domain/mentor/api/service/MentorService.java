@@ -93,7 +93,10 @@ public class MentorService {
         pageable);
   }
 
-  public void register(MentorRegisterInfo mentorRegisterInfo) {
+  public Mentor register(MentorRegisterInfo mentorRegisterInfo) {
+    if (mentorRepository.findByCompanyEmail(mentorRegisterInfo.getCompanyEmail()).isPresent()) {
+      throw new IllegalStateException("이미 존재하는 이메일");
+    }
     Mentor dbInsertMentor = Mentor.builder()
         .companyEmail(mentorRegisterInfo.getCompanyEmail())
         .career(mentorRegisterInfo.getCareer())
@@ -102,6 +105,7 @@ public class MentorService {
         .accountName(mentorRegisterInfo.getAccountName())
         .build();
     mentorRepository.save(dbInsertMentor);
+    return dbInsertMentor;
   }
 
 }
