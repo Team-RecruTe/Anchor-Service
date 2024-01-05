@@ -8,6 +8,7 @@ import com.anchor.domain.payment.domain.Payup;
 import com.anchor.domain.user.domain.User;
 import com.anchor.global.util.BaseEntity;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -46,9 +47,6 @@ public class Mentor extends BaseEntity {
 
   @Column(length = 20, nullable = false)
   private String bankName;
-
-  @Column(length = 20, nullable = false)
-  private String accountName;
 
   @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
   @JoinColumn(name = "mentor_introduction_id")
