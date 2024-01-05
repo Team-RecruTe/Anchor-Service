@@ -1,12 +1,12 @@
 package com.anchor.domain.payment.api.controller;
 
+import com.anchor.domain.payment.api.controller.request.PaymentCancelInfo;
 import com.anchor.domain.payment.api.controller.request.PaymentResultInfo;
 import com.anchor.domain.payment.api.controller.request.RequiredPaymentInfo;
 import com.anchor.domain.payment.api.service.PaymentService;
 import com.anchor.domain.payment.api.service.response.PaidMentoringInfo;
 import com.anchor.domain.payment.api.service.response.PaymentValidationInfo;
 import com.anchor.global.auth.SessionUser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,8 +26,7 @@ public class PaymentController {
    * 결제 금액을 검증합니다.
    */
   @PostMapping("/validation")
-  public ResponseEntity<PaymentValidationInfo> paymentValidation(@RequestBody PaymentResultInfo paymentResultInfo)
-      throws JsonProcessingException {
+  public ResponseEntity<PaymentValidationInfo> paymentValidation(@RequestBody PaymentResultInfo paymentResultInfo) {
     String validationResult = paymentService.validatePaymentResult(paymentResultInfo);
 
     PaymentValidationInfo paymentValidationInfo = new PaymentValidationInfo(paymentResultInfo, validationResult);
@@ -63,6 +62,19 @@ public class PaymentController {
           .body(paidMentoringInfo);
 
     }
+  }
+
+  /**
+   * 결제 취소를 진행합니다.
+   */
+  @PostMapping("/cancel")
+  public String paymentCancelProcess(@RequestBody PaymentCancelInfo paymentCancelInfo, HttpSession session) {
+
+    SessionUser sessionUser = getSessionUserFromSession(session);
+
+    boolean result = paymentService.paymentCancelRequest(paymentCancelInfo.getMentoringCancelInfos(), sessionUser);
+
+    return result ? "success" : "fail";
   }
 
   private SessionUser getSessionUserFromSession(HttpSession session) {

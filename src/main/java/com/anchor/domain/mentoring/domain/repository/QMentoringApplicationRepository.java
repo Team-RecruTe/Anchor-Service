@@ -6,6 +6,12 @@ import java.util.Optional;
 
 public interface QMentoringApplicationRepository {
 
-  Optional<MentoringApplication> findAppliedMentoringByTimeAndUserId(LocalDateTime startDateTime,
-      LocalDateTime endDateTime, Long userId);
+  Optional<MentoringApplication> findAppliedMentoringByTimeAndUserId
+      (LocalDateTime startDateTime, LocalDateTime endDateTime, Long userId);
+
+  Optional<MentoringApplication> findMentoringApplicationByTimeRangeAndUserId
+      (LocalDateTime startDateTime, LocalDateTime endDateTime, Long userId);
+
+  Optional<MentoringApplication> findMentoringApplicationByMentoringId
+      (LocalDateTime startDateTime, LocalDateTime endDateTime, Long mentoringId);
 }
