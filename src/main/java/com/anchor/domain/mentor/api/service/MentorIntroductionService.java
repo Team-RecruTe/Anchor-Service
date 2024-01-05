@@ -1,6 +1,7 @@
 package com.anchor.domain.mentor.api.service;
 
 import com.anchor.domain.mentor.api.controller.request.MentorIntroductionRequest;
+import com.anchor.domain.mentor.api.service.response.MentorInfoResponse;
 import com.anchor.domain.mentor.api.service.response.MentorIntroductionResponse;
 import com.anchor.domain.mentor.domain.MentorIntroduction;
 import com.anchor.domain.mentor.domain.repository.MentorIntroductionRepository;
@@ -30,5 +31,6 @@ public class MentorIntroductionService {
     mentorIntroduction.editDetail(mentorIntroductionRequest.getContents());
     mentorIntroductionRepository.save(mentorIntroduction);
   }
+
 
 }

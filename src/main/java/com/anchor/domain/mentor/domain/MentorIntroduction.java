@@ -23,11 +23,11 @@ public class MentorIntroduction extends BaseEntity {
     this.contents = contents;
   }
 
-  public static MentorIntroduction registerDetail(String contents){
+  public static MentorIntroduction addContents(String contents){
     return new MentorIntroduction(contents);
   }
 
-  public void editDetail(String contents){
+  public void editContents(String contents){
     this.contents = contents;
   }
 

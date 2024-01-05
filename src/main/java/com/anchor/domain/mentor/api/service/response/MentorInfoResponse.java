@@ -17,12 +17,12 @@ public class MentorInfoResponse {
   private String accountName;
 
   //entity -> dto
-  public MentorInfoResponse(Mentor entity){
-    this.companyEmail = entity.getCompanyEmail();
-    this.career = entity.getCareer();
-    this.bankName = entity.getBankName();
-    this.accountNumber = entity.getAccountNumber();
-    this.accountName = entity.getAccountName();
+  public MentorInfoResponse(Mentor mentor){
+    this.companyEmail = mentor.getCompanyEmail();
+    this.career = mentor.getCareer();
+    this.bankName = mentor.getBankName();
+    this.accountNumber = mentor.getAccountNumber();
+    this.accountName = mentor.getAccountName();
   }
 
 }

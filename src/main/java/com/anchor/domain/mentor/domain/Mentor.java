@@ -69,12 +69,19 @@ public class Mentor extends BaseEntity {
     this.accountName = mentorInfoRequest.getAccountName();
   }
 
-  public void registerDetail(MentorIntroductionRequest mentorIntroductionRequest){
-    this.mentorIntroduction = MentorIntroduction.registerDetail(mentorIntroductionRequest.getContents());
+  public void editInfo(MentorInfoRequest mentorInfoRequest){
+    this.career = mentorInfoRequest.getCareer();
+    this.bankName = mentorInfoRequest.getBankName();
+    this.accountNumber = mentorInfoRequest.getAccountNumber();
+    this.accountName = mentorInfoRequest.getAccountName();
   }
 
-  public void editDetail(MentorIntroductionRequest mentorIntroductionRequest){
-    this.mentorIntroduction.editDetail(mentorIntroductionRequest.getContents());
+  public void editContents(MentorIntroductionRequest mentorIntroductionRequest){
+    if(this.mentorIntroduction == null){
+      this.mentorIntroduction = MentorIntroduction.addContents(mentorIntroductionRequest.getContents());
+    } else {
+      this.mentorIntroduction.editContents(mentorIntroductionRequest.getContents());
+    }
   }
 
 
