@@ -14,14 +14,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-@RequestMapping("/mentors/me")
+@RequestMapping("/mentors")
 @RequiredArgsConstructor
 @Controller
 public class MentorViewController {
 
   private final MentorService mentorService;
 
-  @GetMapping("/applied-mentorings")
+  @GetMapping("/me/applied-mentorings")
   public String getMentoringApplications(
       @PageableDefault(direction = Sort.Direction.DESC) Pageable pageable, HttpSession httpSession, Model model) {
     SessionUser user = (SessionUser) httpSession.getAttribute("user");
@@ -31,5 +31,9 @@ public class MentorViewController {
     return "mentoring-dashboard";
   }
 
+  @GetMapping("/register")
+  public String register() {
+    return "/register";
+  }
 
 }
