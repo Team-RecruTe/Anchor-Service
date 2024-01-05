@@ -1,6 +1,5 @@
 package com.anchor.domain.user.api.service;
 
-import com.anchor.domain.mentoring.api.controller.request.MentoringReviewInfo;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
@@ -25,12 +24,15 @@ import com.anchor.global.portone.response.PaymentCancelResult;
 import com.anchor.global.portone.response.PaymentResult;
 import com.anchor.global.util.ExternalApiUtil;
 import com.anchor.global.util.PaymentUtils;
+import com.anchor.global.util.type.DateTimeRange;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
