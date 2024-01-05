@@ -20,6 +20,10 @@ public interface QMentoringApplicationRepository {
   Optional<MentoringApplication> findAppliedMentoringByTimeAndUserId
       (LocalDateTime startDateTime, LocalDateTime endDateTime, Long userId);
 
+  List<MentoringApplication> findUnavailableTimesByMentoringIdAndStatus(Long mentorId, MentoringStatus... statuses);
+
+  Page<AppliedMentoringSearchResult> findAllByMentorId(Long mentorId, Pageable pageable);
+
   Optional<MentoringApplication> findMentoringApplicationByTimeRangeAndUserId
       (LocalDateTime startDateTime, LocalDateTime endDateTime, Long userId);
 

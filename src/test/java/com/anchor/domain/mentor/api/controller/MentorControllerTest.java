@@ -73,7 +73,7 @@ class MentorControllerTest {
 
     String json = objectMapper.writeValueAsString(dateTimeRanges);
 
-    ResultActions perform = mockMvc.perform(post("/me/schedule")
+    ResultActions perform = mockMvc.perform(post("/mentors/me/schedule")
         .with(csrf())
         .session(session)
         .contentType("application/json")

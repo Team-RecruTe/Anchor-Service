@@ -78,7 +78,6 @@ public class MentoringApplication extends BaseEntity {
   }
 
   private boolean isMatchingDateTime(RequiredMentoringStatusInfo requiredMentoringStatusInfo) {
-
     return this.startDateTime.isEqual(requiredMentoringStatusInfo.getStartDateTime())
         &&
         this.endDateTime.isEqual(requiredMentoringStatusInfo.getEndDateTime());

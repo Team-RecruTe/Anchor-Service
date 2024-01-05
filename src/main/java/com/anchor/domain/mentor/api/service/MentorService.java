@@ -34,8 +34,7 @@ public class MentorService {
   }
 
   @Transactional
-  public void changeMentoringStatus(
-      Long id, List<RequiredMentoringStatusInfo> requiredMentoringStatusInfos) {
+  public void changeMentoringStatus(Long id, List<RequiredMentoringStatusInfo> requiredMentoringStatusInfos) {
     Mentor mentor = getMentor(id);
     mentor.getMentorings()
         .forEach(mentoring -> changeStatusAll(mentoring.getId(), requiredMentoringStatusInfos));
@@ -47,15 +46,13 @@ public class MentorService {
     return mentor;
   }
 
-  private void changeStatusAll(
-      Long mentoringId, List<RequiredMentoringStatusInfo> requiredMentoringStatusInfos) {
+  private void changeStatusAll(Long mentoringId, List<RequiredMentoringStatusInfo> requiredMentoringStatusInfos) {
     requiredMentoringStatusInfos.forEach(requiredMentoringStatusInfo -> {
       changeStatus(mentoringId, requiredMentoringStatusInfo);
     });
   }
 
-  private void changeStatus(
-      Long mentoringId, RequiredMentoringStatusInfo requiredMentoringStatusInfo) {
+  private void changeStatus(Long mentoringId, RequiredMentoringStatusInfo requiredMentoringStatusInfo) {
     DateTimeRange mentoringReservedTime = requiredMentoringStatusInfo.getMentoringReservedTime();
     MentoringStatus mentoringStatus = requiredMentoringStatusInfo.getMentoringStatus();
     try {
@@ -67,8 +64,7 @@ public class MentorService {
     }
   }
 
-  private MentoringApplication getMentoringApplication(
-      Long id, DateTimeRange mentoringReservedTime) {
+  private MentoringApplication getMentoringApplication(Long id, DateTimeRange mentoringReservedTime) {
     LocalDateTime startDateTime = mentoringReservedTime.getFrom();
     LocalDateTime endDateTime = mentoringReservedTime.getTo();
     try {
@@ -88,4 +84,8 @@ public class MentorService {
     return MentoringUnavailableTimes.of(unavailableTimes, reservedMentorings);
   }
 
+  public Page<AppliedMentoringSearchResult> getMentoringApplications(Long mentorId, Pageable pageable) {
+    return mentoringApplicationRepository.findAllByMentorId(mentorId,
+        pageable);
+  }
 }

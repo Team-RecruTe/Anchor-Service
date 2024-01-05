@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
-@RequestMapping("/me")
+@RequestMapping("/mentors/me")
 @RequiredArgsConstructor
 @RestController
 public class MentorController {
@@ -55,6 +55,5 @@ public class MentorController {
     return ResponseEntity.ok()
                          .build();
   }
-
 
 }

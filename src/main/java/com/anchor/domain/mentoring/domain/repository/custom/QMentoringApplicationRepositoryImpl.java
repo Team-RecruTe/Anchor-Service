@@ -1,5 +1,8 @@
 package com.anchor.domain.mentoring.domain.repository.custom;
 
+import static com.anchor.domain.mentoring.domain.QMentoringApplication.mentoringApplication;
+
+import com.anchor.domain.mentor.api.service.response.AppliedMentoringSearchResult;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
 import com.querydsl.core.BooleanBuilder;
@@ -10,6 +13,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import static com.anchor.domain.mentoring.domain.QMentoring.mentoring;
 import static com.anchor.domain.mentoring.domain.QMentoringApplication.mentoringApplication;
@@ -37,6 +43,33 @@ public class QMentoringApplicationRepositoryImpl implements QMentoringApplicatio
         .where(mentoringApplication.mentoring.mentor.id.eq(mentorId)
             .and(equalsStatuses(statuses)))
         .fetch();
+  }
+
+  public Page<AppliedMentoringSearchResult> findAllByMentorId(Long mentorId, Pageable pageable) {
+    List<Long> keys = jpaQueryFactory.select(mentoringApplication.id)
+        .from(mentoringApplication)
+        .where(mentoringApplication.mentoring.mentor.id.eq(mentorId))
+        .offset(pageable.getOffset())
+        .limit(pageable.getPageSize())
+        .fetch();
+
+    System.out.println(keys);
+
+    List<MentoringApplication> result = jpaQueryFactory.selectFrom(mentoringApplication)
+        .innerJoin(mentoringApplication.mentoring)
+        .fetchJoin()
+        .innerJoin(mentoringApplication.user)
+        .fetchJoin()
+        .innerJoin(mentoringApplication.payment)
+        .fetchJoin()
+        .where(mentoringApplication.id.in(keys))
+        .fetch();
+
+    List<AppliedMentoringSearchResult> appliedMentoringSearchResults = result.stream()
+        .map(AppliedMentoringSearchResult::of)
+        .toList();
+
+    return new PageImpl<>(appliedMentoringSearchResults, pageable, appliedMentoringSearchResults.size());
   }
 
   @Override
