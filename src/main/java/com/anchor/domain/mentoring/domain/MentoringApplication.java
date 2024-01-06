@@ -84,6 +84,10 @@ public class MentoringApplication extends BaseEntity {
         this.endDateTime.isEqual(requiredMentoringStatusInfo.getEndDateTime());
   }
 
+  public boolean isExistPayment() {
+    return this.payment != null;
+  }
+
   public void changePayment(Payment payment) {
     setPayment(payment);
   }
@@ -112,4 +116,5 @@ public class MentoringApplication extends BaseEntity {
     return Objects.hash(getStartDateTime(), getEndDateTime(), getMentoringStatus(), getMentoring(),
         getPayment(), getUser());
   }
+
 }

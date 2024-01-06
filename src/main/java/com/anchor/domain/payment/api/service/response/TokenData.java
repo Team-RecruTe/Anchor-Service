@@ -2,6 +2,7 @@ package com.anchor.domain.payment.api.service.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,13 @@ public class TokenData implements Serializable {
   private Integer code;
   private String message;
   private TokenDataDetail response;
+
+  @Builder
+  private TokenData(Integer code, String message, TokenDataDetail response) {
+    this.code = code;
+    this.message = message;
+    this.response = response;
+  }
 
   public boolean statusCheck() {
     if (code == null) {
@@ -32,5 +40,11 @@ public class TokenData implements Serializable {
     @JsonProperty("expired_at")
     private Long expiredAt;
 
+    @Builder
+    private TokenDataDetail(String accessToken, Long now, Long expiredAt) {
+      this.accessToken = accessToken;
+      this.now = now;
+      this.expiredAt = expiredAt;
+    }
   }
 }

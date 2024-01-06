@@ -38,13 +38,13 @@ public class MentorService {
       Long id, List<RequiredMentoringStatusInfo> requiredMentoringStatusInfos) {
     Mentor mentor = getMentor(id);
     mentor.getMentorings()
-          .forEach(mentoring -> changeStatusAll(mentoring.getId(), requiredMentoringStatusInfos));
+        .forEach(mentoring -> changeStatusAll(mentoring.getId(), requiredMentoringStatusInfos));
   }
 
   private Mentor getMentor(Long id) {
     Mentor mentor = mentorRepository.findById(id)
-                                    .orElseThrow(
-                                        () -> new NoSuchElementException("일치하는 멘토 정보가 없습니다."));
+        .orElseThrow(
+            () -> new NoSuchElementException("일치하는 멘토 정보가 없습니다."));
     return mentor;
   }
 

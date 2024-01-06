@@ -39,14 +39,11 @@ public class PaymentCancelData implements Serializable {
     @JsonProperty("cancel_amount")
     private Integer cancelAmount;
 
-    @JsonProperty("cancel_reason")
-    private String cancelReason;
 
     @Builder
-    private PaymentCancelDetail(Integer amount, Integer cancelAmount, String cancelReason) {
+    private PaymentCancelDetail(Integer amount, Integer cancelAmount) {
       this.amount = amount;
       this.cancelAmount = cancelAmount;
-      this.cancelReason = cancelReason;
     }
   }
 }
