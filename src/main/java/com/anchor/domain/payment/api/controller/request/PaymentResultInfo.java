@@ -1,6 +1,6 @@
 package com.anchor.domain.payment.api.controller.request;
 
-import com.anchor.domain.payment.api.service.response.SinglePaymentData.PaymentDataDetail;
+import com.anchor.global.portone.response.SinglePaymentData.PaymentDataDetail;
 import java.io.Serializable;
 import lombok.Builder;
 import lombok.Getter;

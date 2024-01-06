@@ -1,7 +1,7 @@
 package com.anchor.domain.payment.api.service;
 
 import com.anchor.domain.payment.api.controller.request.PaymentResultInfo;
-import com.anchor.domain.payment.api.service.response.SinglePaymentData.PaymentDataDetail;
+import com.anchor.global.portone.response.SinglePaymentData.PaymentDataDetail;
 import com.anchor.global.util.ExternalApiUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -8,11 +8,11 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
 import com.anchor.domain.payment.api.controller.request.PaymentResultInfo;
-import com.anchor.domain.payment.api.controller.request.TokenRequest;
-import com.anchor.domain.payment.api.service.response.SinglePaymentData;
-import com.anchor.domain.payment.api.service.response.SinglePaymentData.PaymentDataDetail;
-import com.anchor.domain.payment.api.service.response.TokenData;
-import com.anchor.domain.payment.api.service.response.TokenData.TokenDataDetail;
+import com.anchor.global.portone.request.TokenRequest;
+import com.anchor.global.portone.response.SinglePaymentData;
+import com.anchor.global.portone.response.SinglePaymentData.PaymentDataDetail;
+import com.anchor.global.portone.response.TokenData;
+import com.anchor.global.portone.response.TokenData.TokenDataDetail;
 import com.anchor.global.util.ExternalApiClient;
 import com.anchor.global.util.ExternalApiUtil;
 import org.junit.jupiter.api.BeforeEach;
