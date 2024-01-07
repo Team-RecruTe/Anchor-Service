@@ -1,7 +1,9 @@
 package com.anchor.domain.payment.domain;
 
+import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationInfo;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.global.util.BaseEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -25,6 +27,9 @@ public class Payment extends BaseEntity {
   @Column(nullable = false, unique = true)
   private String merchantUid;
 
+  @Column(nullable = false, unique = true)
+  private String orderUid;
+
   @Column(nullable = false)
   private Integer amount;
 
@@ -34,7 +39,7 @@ public class Payment extends BaseEntity {
   @Column(nullable = false)
   private PaymentStatus paymentStatus;
 
-  @OneToOne(fetch = FetchType.LAZY)
+  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
   @JoinColumn(name = "mentoring_application_id")
   private MentoringApplication mentoringApplication;
 
@@ -43,14 +48,25 @@ public class Payment extends BaseEntity {
       PaymentStatus paymentStatus, MentoringApplication mentoringApplication) {
     this.impUid = impUid;
     this.merchantUid = merchantUid;
+    this.orderUid = "anchor_" + merchantUid.substring(merchantUid.indexOf('_'));
     this.amount = amount;
-    this.cancelAmount = cancelAmount;
-    this.paymentStatus = paymentStatus;
-    addMentoringApplication(mentoringApplication);
+    this.cancelAmount = cancelAmount == null ? 0 : cancelAmount;
+    this.paymentStatus = paymentStatus == null ? PaymentStatus.SUCCESS : paymentStatus;
+    this.mentoringApplication = mentoringApplication;
   }
 
-  private void addMentoringApplication(MentoringApplication mentoringApplication) {
+  public Payment(MentoringApplicationInfo applicationInfo, MentoringApplication mentoringApplication) {
+    this.impUid = applicationInfo.getImpUid();
+    this.merchantUid = applicationInfo.getMerchantUid();
+    this.orderUid = "anchor_" + applicationInfo.getMerchantUid()
+        .substring(merchantUid.indexOf('_'));
+    this.amount = applicationInfo.getAmount();
+    this.cancelAmount = 0;
+    this.paymentStatus = PaymentStatus.SUCCESS;
     this.mentoringApplication = mentoringApplication;
-    this.mentoringApplication.changePayment(this);
+  }
+
+  public boolean isCancelled() {
+    return this.paymentStatus.equals(PaymentStatus.CANCELLED);
   }
 }

@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 
 import com.anchor.domain.mentor.domain.Career;
 import com.anchor.domain.mentor.domain.Mentor;
+import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
 import com.anchor.domain.mentoring.api.service.response.ApplicationUnavailableTime;
@@ -35,9 +36,10 @@ import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
 import com.anchor.domain.mentoring.domain.MentoringUnavailableTime;
-import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
 import com.anchor.domain.mentoring.domain.repository.MentoringUnavailableTimeRepository;
+import com.anchor.domain.payment.domain.Payment;
+import com.anchor.domain.payment.domain.repository.PaymentRepository;
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
@@ -63,7 +65,7 @@ class MentoringServiceTest {
   @Mock
   private MentoringRepository mentoringRepository;
   @Mock
-  private MentoringApplicationRepository mentoringApplicationRepository;
+  private PaymentRepository paymentRepository;
   @Mock
   private UserRepository userRepository;
   @Mock
@@ -228,17 +230,12 @@ class MentoringServiceTest {
   }
 
   @Test
-  @DisplayName("멘토링 신청이 완료되면 멘토링 신청내역을 저장하고, 성공하면 MentoringApplicationResponse객체를 반환한다.")
+  @DisplayName("멘토링 신청이 완료되면 멘토링 신청내역을 저장하고, 성공하면 AppliedMentoringInfo객체를 반환한다.")
   void saveMentoringApplicationIsTrueTest() {
     //given
     SessionUser sessionUser = new SessionUser(user);
 
     Long mentoringId = 1L;
-
-    MentoringApplicationTime applicationTime = MentoringApplicationTime.builder()
-        .date(createMentoringApplicationDate())
-        .time(createMentoringApplicationTime())
-        .build();
 
     Mentoring mentoring = Mentoring.builder()
         .title(MENTORING_TITLE)
@@ -247,28 +244,32 @@ class MentoringServiceTest {
         .mentor(mentor)
         .build();
 
-    MentoringApplication mentoringApplication = MentoringApplication.builder()
-        .mentoring(mentoring)
-        .mentoringStatus(MentoringStatus.WAITING)
-        .user(user)
+    MentoringApplicationInfo applicationInfo = MentoringApplicationInfo.builder()
+        .amount(10_000)
+        .impUid("testImpUid")
+        .merchantUid("test_Merchant")
+        .startDateTime(LocalDateTime.of(2024, 1, 3, 13, 0, 0))
+        .endDateTime(LocalDateTime.of(2024, 1, 3, 14, 0, 0))
         .build();
 
-    MentoringUnavailableTime unavailableTime = new MentoringUnavailableTime(mentoringApplication,
-        mentoring);
+    MentoringApplication mentoringApplication = new MentoringApplication(applicationInfo, null, mentoring,
+        Payment.builder()
+            .amount(10_000)
+            .merchantUid("toss_testMerchant")
+            .build(), user);
+
+    MentoringUnavailableTime unavailableTime = new MentoringUnavailableTime(mentoringApplication, mentoring);
 
     given(mentoringRepository.findById(anyLong())).willReturn(Optional.of(mentoring));
 
     given(userRepository.findByEmail(anyString())).willReturn(Optional.of(user));
-
-    given(mentoringApplicationRepository.save(any(MentoringApplication.class)))
-        .willReturn(mentoringApplication);
 
     given(mentoringUnavailableTimeRepository.save(any(MentoringUnavailableTime.class)))
         .willReturn(unavailableTime);
 
     //when
     AppliedMentoringInfo appliedMentoringInfo =
-        mentoringService.saveMentoringApplication(sessionUser, mentoringId, applicationTime);
+        mentoringService.saveMentoringApplication(sessionUser, mentoringId, applicationInfo);
 
     //then
     assertThat(appliedMentoringInfo)
@@ -288,9 +289,12 @@ class MentoringServiceTest {
 
     Long mentoringId = 1L;
 
-    MentoringApplicationTime applicationTime = MentoringApplicationTime.builder()
-        .date(createMentoringApplicationDate())
-        .time(createMentoringApplicationTime())
+    MentoringApplicationInfo applicationInfo = MentoringApplicationInfo.builder()
+        .amount(10_000)
+        .impUid("testImpUid")
+        .merchantUid("testMerchant")
+        .startDateTime(LocalDateTime.of(2024, 1, 3, 13, 0, 0))
+        .endDateTime(LocalDateTime.of(2024, 1, 3, 14, 0, 0))
         .build();
 
     given(mentoringRepository.findById(mentoringId)).willThrow(
@@ -298,7 +302,7 @@ class MentoringServiceTest {
 
     //when then
     assertThatThrownBy(
-        () -> mentoringService.saveMentoringApplication(sessionUser, mentoringId, applicationTime))
+        () -> mentoringService.saveMentoringApplication(sessionUser, mentoringId, applicationInfo))
         .isInstanceOf(NoSuchElementException.class)
         .hasMessage(mentoringId + "에 해당하는 멘토링이 존재하지 않습니다.");
   }
@@ -311,9 +315,12 @@ class MentoringServiceTest {
 
     Long mentoringId = 1L;
 
-    MentoringApplicationTime applicationTime = MentoringApplicationTime.builder()
-        .date(createMentoringApplicationDate())
-        .time(createMentoringApplicationTime())
+    MentoringApplicationInfo applicationInfo = MentoringApplicationInfo.builder()
+        .amount(10_000)
+        .impUid("testImpUid")
+        .merchantUid("testMerchant")
+        .startDateTime(LocalDateTime.of(2024, 1, 3, 13, 0, 0))
+        .endDateTime(LocalDateTime.of(2024, 1, 3, 14, 0, 0))
         .build();
 
     Mentoring mentoring = Mentoring.builder()
@@ -328,7 +335,7 @@ class MentoringServiceTest {
 
     //when then
     assertThatThrownBy(
-        () -> mentoringService.saveMentoringApplication(sessionUser, mentoringId, applicationTime))
+        () -> mentoringService.saveMentoringApplication(sessionUser, mentoringId, applicationInfo))
         .isInstanceOf(NoSuchElementException.class)
         .hasMessage(sessionUser.getEmail() + "에 해당하는 회원이 존재하지 않습니다.");
   }
@@ -343,6 +350,7 @@ class MentoringServiceTest {
     MentoringApplicationTime applicationTime = MentoringApplicationTime.builder()
         .date(LocalDate.of(2024, 1, 3))
         .time(LocalTime.of(13, 0))
+        .durationTime("1h30m")
         .build();
 
     //when
@@ -371,6 +379,7 @@ class MentoringServiceTest {
     MentoringApplicationTime applicationTime = MentoringApplicationTime.builder()
         .date(LocalDate.of(2024, 1, 2))
         .time(LocalTime.of(13, 0))
+        .durationTime("1h")
         .build();
 
     //when
@@ -397,6 +406,7 @@ class MentoringServiceTest {
     MentoringApplicationTime applicationTime = MentoringApplicationTime.builder()
         .date(LocalDate.of(2024, 1, 3))
         .time(LocalTime.of(13, 0))
+        .durationTime("1h")
         .build();
 
     sessionList.add(applicationTime.convertToMentoringUnavailableTimeResponse());

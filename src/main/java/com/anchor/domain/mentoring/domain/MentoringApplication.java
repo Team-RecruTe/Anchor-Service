@@ -1,6 +1,6 @@
 package com.anchor.domain.mentoring.domain;
 
-import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
+import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationInfo;
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.domain.user.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
 import com.anchor.domain.user.domain.User;
@@ -50,7 +50,7 @@ public class MentoringApplication extends BaseEntity {
 
   @Builder
   private MentoringApplication(LocalDateTime startDateTime, LocalDateTime endDateTime, MentoringStatus mentoringStatus,
-                               Mentoring mentoring, Payment payment, User user) {
+      Mentoring mentoring, Payment payment, User user) {
     this.startDateTime = startDateTime;
     this.endDateTime = endDateTime;
     this.mentoringStatus = mentoringStatus;
@@ -60,10 +60,10 @@ public class MentoringApplication extends BaseEntity {
   }
 
 
-  public MentoringApplication(MentoringApplicationTime mentoringApplicationTime,
+  public MentoringApplication(MentoringApplicationInfo applicationInfo,
       MentoringStatus mentoringStatus, Mentoring mentoring, Payment payment, User user) {
-    this.startDateTime = mentoringApplicationTime.getFromDateTime();
-    this.endDateTime = mentoringApplicationTime.getToDateTime();
+    this.startDateTime = applicationInfo.getStartDateTime();
+    this.endDateTime = applicationInfo.getEndDateTime();
     this.mentoringStatus = mentoringStatus == null ? MentoringStatus.WAITING : mentoringStatus;
     this.mentoring = mentoring;
     this.payment = payment;

@@ -1,5 +1,6 @@
 package com.anchor.domain.mentoring.api.controller;
 
+import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
@@ -12,6 +13,7 @@ import com.anchor.domain.mentoring.api.service.response.MentoringDefaultInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringDeleteResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
+import com.anchor.domain.mentoring.api.service.response.MentoringPaymentInfo;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.util.type.Link;
 import jakarta.servlet.http.HttpSession;
@@ -125,8 +127,8 @@ public class MentoringController {
    */
   @PostMapping("/{id}/apply")
   public ResponseEntity<AppliedMentoringInfo> mentoringApplicationSave
-  (@PathVariable("id") Long id, @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
-
+  (@PathVariable("id") Long id, @RequestBody MentoringApplicationInfo applicationInfo, HttpSession session) {
+    //MentoringApplicationInfo 사용
     SessionUser sessionUser = (SessionUser) session.getAttribute("user");
 
     if (sessionUser == null) {
@@ -134,14 +136,14 @@ public class MentoringController {
     }
 
     AppliedMentoringInfo appliedMentoringInfo =
-        mentoringService.saveMentoringApplication(sessionUser, id, applicationTime);
+        mentoringService.saveMentoringApplication(sessionUser, id, applicationInfo);
 
     if (appliedMentoringInfo != null) {
 
       List<ApplicationUnavailableTime> sessionApplicationUnavailableTimeList =
           getSessionUnavailableTimeList(session, id);
 
-      mentoringService.removeApplicationTimeFromSession(sessionApplicationUnavailableTimeList, applicationTime);
+      mentoringService.removeApplicationTimeFromSession(sessionApplicationUnavailableTimeList, applicationInfo);
 
       updateSessionUnavailableTimeList(session, id, sessionApplicationUnavailableTimeList);
 
@@ -157,7 +159,7 @@ public class MentoringController {
    * 멘토링 신청과정입니다. 결제진행중인 시간대를 다른 회원이 신청하지 못하도록 잠금처리 합니다.
    */
   @PostMapping("/{id}/apply-process")
-  public String mentoringTimeSessionSave(
+  public ResponseEntity<MentoringPaymentInfo> mentoringTimeSessionSave(
       @PathVariable("id") Long id,
       @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
 
@@ -165,8 +167,11 @@ public class MentoringController {
 
     mentoringService.addApplicationTimeFromSession(sessionApplicationUnavailableTimeList, applicationTime);
 
+    MentoringPaymentInfo mentoringPaymentInfo = mentoringService.createPaymentInfo(id, applicationTime);
+
     updateSessionUnavailableTimeList(session, id, sessionApplicationUnavailableTimeList);
-    return SUCCESS;
+    return ResponseEntity.ok()
+        .body(mentoringPaymentInfo);
   }
 
   /**
