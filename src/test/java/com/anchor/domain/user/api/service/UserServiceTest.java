@@ -24,12 +24,15 @@ import com.anchor.domain.mentoring.domain.MentoringStatus;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.domain.payment.domain.PaymentStatus;
+import com.anchor.domain.payment.domain.repository.PaymentRepository;
 import com.anchor.domain.user.api.controller.request.MentoringStatusInfo;
 import com.anchor.domain.user.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
 import com.anchor.domain.user.api.service.response.AppliedMentoringInfo;
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
+import com.anchor.global.portone.response.PaymentCancelData.PaymentCancelDetail;
+import com.anchor.global.util.ExternalApiUtil;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -53,6 +56,11 @@ class UserServiceTest {
   UserRepository userRepository;
   @Mock
   MentoringApplicationRepository mentoringApplicationRepository;
+
+  @Mock
+  PaymentRepository paymentRepository;
+  @Mock
+  ExternalApiUtil apiUtil;
 
   @InjectMocks
   UserService userService;
@@ -170,6 +178,11 @@ class UserServiceTest {
           }
         });
 
+    given(apiUtil.paymentCancel(any(Payment.class))).willReturn(PaymentCancelDetail.builder()
+        .amount(100)
+        .cancelAmount(100)
+        .build());
+
     //when
     boolean result = userService.changeAppliedMentoringStatus(sessionUser, changeRequest);
 
@@ -242,6 +255,11 @@ class UserServiceTest {
           }
         });
 
+    given(apiUtil.paymentCancel(any(Payment.class))).willReturn(PaymentCancelDetail.builder()
+        .amount(100)
+        .cancelAmount(100)
+        .build());
+
     //when
     boolean result = userService.changeAppliedMentoringStatus(sessionUser, changeRequest);
 
@@ -290,6 +308,11 @@ class UserServiceTest {
             return null;
           }
         });
+
+    given(apiUtil.paymentCancel(any(Payment.class))).willReturn(PaymentCancelDetail.builder()
+        .amount(100)
+        .cancelAmount(100)
+        .build());
 
     //when
     boolean result = userService.changeAppliedMentoringStatus(sessionUser, changeRequest);
@@ -346,6 +369,7 @@ class UserServiceTest {
               .date(LocalDate.parse(APPLICATION_DATE, DATE_FORMATTER)
                   .plusDays(i))
               .time(LocalTime.parse(APPLICATION_TIME, TIME_FORMATTER))
+              .durationTime("1h")
               .build());
     }
 
@@ -364,6 +388,11 @@ class UserServiceTest {
               .mentoring(mentoring)
               .user(user)
               .mentoringStatus(MentoringStatus.APPROVAL)
+              .payment(Payment.builder()
+                  .impUid("test_impUid")
+                  .merchantUid("toss_merchant")
+                  .amount(100)
+                  .build())
               .build());
     }
 

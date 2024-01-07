@@ -5,6 +5,7 @@ import com.anchor.domain.payment.domain.Payment;
 import com.anchor.global.portone.request.ApiPaymentCancelData;
 import com.anchor.global.portone.request.TokenRequest;
 import com.anchor.global.portone.response.PaymentCancelData;
+import com.anchor.global.portone.response.PaymentCancelData.PaymentCancelDetail;
 import com.anchor.global.portone.response.SinglePaymentData;
 import com.anchor.global.portone.response.SinglePaymentData.PaymentDataDetail;
 import com.anchor.global.portone.response.TokenData;
@@ -50,7 +51,7 @@ public class ExternalApiUtil {
   }
 
 
-  public boolean paymentCancel(Payment payment) {
+  public PaymentCancelDetail paymentCancel(Payment payment) {
     String accessToken = getAccessToken();
 
     ApiPaymentCancelData apiPaymentCancelData = new ApiPaymentCancelData(payment);
@@ -62,7 +63,7 @@ public class ExternalApiUtil {
 
     if (paymentCancelData.statusCheck()) {
 
-      return true;
+      return paymentCancelData.getResponse();
     } else {
 
       throw new RuntimeException(paymentCancelData.getMessage());

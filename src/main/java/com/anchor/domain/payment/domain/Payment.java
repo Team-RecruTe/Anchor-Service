@@ -2,6 +2,7 @@ package com.anchor.domain.payment.domain;
 
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationInfo;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
+import com.anchor.global.portone.response.PaymentCancelData.PaymentCancelDetail;
 import com.anchor.global.util.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -69,4 +70,10 @@ public class Payment extends BaseEntity {
   public boolean isCancelled() {
     return this.paymentStatus.equals(PaymentStatus.CANCELLED);
   }
+
+  public void editPaymentCancelStatus(PaymentCancelDetail cancelDetail) {
+    this.paymentStatus = PaymentStatus.CANCELLED;
+    this.cancelAmount = cancelDetail.getCancelAmount();
+  }
+
 }
