@@ -92,10 +92,6 @@ public class MentoringApplication extends BaseEntity {
     setPayment(payment);
   }
 
-  public boolean isExistPayment() {
-    return this.payment != null;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {
