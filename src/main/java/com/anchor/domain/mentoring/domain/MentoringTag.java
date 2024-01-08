@@ -7,7 +7,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -23,15 +22,8 @@ public class MentoringTag extends BaseEntity {
   @JoinColumn(name = "mentoring_id")
   private Mentoring mentoring;
 
-  @Builder
-  private MentoringTag(String tag, Mentoring mentoring) {
+  public MentoringTag(String tag) {
     this.tag = tag;
-    setMentoring(mentoring);
   }
 
-  private void setMentoring(Mentoring mentoring) {
-    this.mentoring = mentoring;
-    mentoring.getMentoringTag()
-        .add(this);
-  }
 }

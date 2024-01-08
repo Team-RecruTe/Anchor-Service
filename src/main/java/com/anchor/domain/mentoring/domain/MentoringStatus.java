@@ -14,4 +14,9 @@ public enum MentoringStatus {
 
   private final String description;
 
+  public boolean isEqualTo(String status) {
+    return status.toUpperCase()
+        .equals(this.name());
+  }
+
 }
