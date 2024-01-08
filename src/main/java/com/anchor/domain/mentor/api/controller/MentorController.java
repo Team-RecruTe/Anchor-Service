@@ -34,8 +34,7 @@ public class MentorController {
                         .build());
     return ResponseEntity.ok(result);
   }
-
-
+  
   @PostMapping("/schedule")
   public ResponseEntity<String> registerUnavailableTimes(
       @Valid @RequestBody MentoringUnavailableTimeInfo mentoringUnavailableTimeInfo, HttpSession httpSession) {

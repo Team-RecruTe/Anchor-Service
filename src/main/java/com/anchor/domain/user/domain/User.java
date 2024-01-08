@@ -8,7 +8,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import java.util.ArrayList;
@@ -35,7 +34,6 @@ public class User extends BaseEntity {
   private UserRole role;
 
   @OneToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "mentor_id")
   private Mentor mentor;
 
   @OneToMany(mappedBy = "user")
