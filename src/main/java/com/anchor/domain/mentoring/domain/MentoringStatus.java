@@ -30,7 +30,7 @@ public enum MentoringStatus {
 
   public boolean isEqualTo(String status) {
     return status.toUpperCase()
-        .equals(this.name());
+                 .equals(this.name());
   }
 
 }
