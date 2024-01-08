@@ -24,10 +24,14 @@ public abstract class BaseEntity {
   private Long id;
 
   @CreatedDate
-  @Column(updatable = false)
+  @Column(updatable = false, columnDefinition = "datetime")
   private LocalDateTime createDate;
 
   @LastModifiedDate
+  @Column(columnDefinition = "datetime")
   private LocalDateTime updateDate;
-  
+
+  protected BaseEntity(Long id) {
+    this.id = id;
+  }
 }

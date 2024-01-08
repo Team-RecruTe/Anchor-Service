@@ -1,6 +1,8 @@
 package com.anchor.domain.mentoring.domain;
 
+import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationInfo;
 import com.anchor.domain.payment.domain.Payment;
+import com.anchor.domain.user.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
 import com.anchor.domain.user.domain.User;
 import com.anchor.global.util.BaseEntity;
 import jakarta.persistence.Column;
@@ -12,21 +14,23 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class MentoringApplication extends BaseEntity {
 
-  @Column(nullable = false)
-  LocalDateTime startDateTime;
+  @Column(nullable = false, columnDefinition = "datetime")
+  private LocalDateTime startDateTime;
 
-  @Column(nullable = false)
-  LocalDateTime endDateTime;
+  @Column(nullable = false, columnDefinition = "datetime")
+  private LocalDateTime endDateTime;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -37,10 +41,11 @@ public class MentoringApplication extends BaseEntity {
   private Mentoring mentoring;
 
   @OneToOne(mappedBy = "mentoringApplication")
+  @Setter(AccessLevel.PRIVATE)
   private Payment payment;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "mentoring_application_id")
+  @JoinColumn(name = "user_id")
   private User user;
 
   @Builder
@@ -52,9 +57,55 @@ public class MentoringApplication extends BaseEntity {
     this.mentoring = mentoring;
     this.payment = payment;
     this.user = user;
+
+    this.user.getMentoringApplicationList()
+        .add(this);
+  }
+
+
+  public MentoringApplication(MentoringApplicationInfo applicationInfo,
+      MentoringStatus mentoringStatus, Mentoring mentoring, Payment payment, User user) {
+    this.startDateTime = applicationInfo.getStartDateTime();
+    this.endDateTime = applicationInfo.getEndDateTime();
+    this.mentoringStatus = mentoringStatus == null ? MentoringStatus.WAITING : mentoringStatus;
+    this.mentoring = mentoring;
+    this.payment = payment;
+    this.user = user;
   }
 
   public void changeStatus(MentoringStatus mentoringStatus) {
     this.mentoringStatus = mentoringStatus;
+  }
+
+  private boolean isMatchingDateTime(RequiredMentoringStatusInfo requiredMentoringStatusInfo) {
+
+    return this.startDateTime.isEqual(requiredMentoringStatusInfo.getStartDateTime())
+        &&
+        this.endDateTime.isEqual(requiredMentoringStatusInfo.getEndDateTime());
+  }
+
+  public void changePayment(Payment payment) {
+    setPayment(payment);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof MentoringApplication that)) {
+      return false;
+    }
+    return Objects.equals(getStartDateTime(), that.getStartDateTime())
+        && Objects.equals(getEndDateTime(), that.getEndDateTime())
+        && getMentoringStatus() == that.getMentoringStatus() && Objects.equals(
+        getMentoring(), that.getMentoring()) && Objects.equals(getPayment(),
+        that.getPayment()) && Objects.equals(getUser(), that.getUser());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getStartDateTime(), getEndDateTime(), getMentoringStatus(), getMentoring(),
+        getPayment(), getUser());
   }
 }

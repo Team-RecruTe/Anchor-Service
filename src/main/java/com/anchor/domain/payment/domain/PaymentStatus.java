@@ -8,8 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum PaymentStatus {
 
   SUCCESS("성공"),
-  CANCELLED("취소"),
-  PAYUP("정산완료");
+  CANCELLED("취소");
 
   private final String description;
 
