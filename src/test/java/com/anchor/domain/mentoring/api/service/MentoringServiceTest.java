@@ -86,7 +86,6 @@ class MentoringServiceTest {
         .build();
 
     mentor = Mentor.builder()
-        .id(1L)
         .companyEmail("testCompany@test.com")
         .accountName("계좌명")
         .accountNumber("12345678")
@@ -492,5 +491,5 @@ class MentoringServiceTest {
 
     return sessionList;
   }
-}
 
+}
