@@ -67,7 +67,7 @@ class MentorInfoServiceTest {
 
     // When : 아래 코드를 실행하고
     // mentorInfoService.findMentors(mentorId) 메서드를 호출하고, 이 메서드는 mentorInfoRepository.findById(mentorId)를 호출한다.
-    MentorInfoResponse mentorInfoResponse = mentorInfoService.findMentors(mentorId);
+    MentorInfoResponse mentorInfoResponse = mentorInfoService.findMentor(mentorId);
 
     // Then : 위의 결과와 실제 Mentor 객체의 정보를 비교
     assertEquals(mentor.getCompanyEmail(), mentorInfoResponse.getCompanyEmail());
@@ -101,7 +101,7 @@ class MentorInfoServiceTest {
     when(mentorInfoRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
     // When
-    mentorInfoService.editMentorsInfo(mentorId, request);
+    mentorInfoService.editInfo(mentorId, request);
 
     // Then
     // Repository의 save 메서드가 한 번 호출되었는지 확인
