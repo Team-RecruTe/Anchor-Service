@@ -4,7 +4,6 @@ import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationIn
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
-import com.anchor.domain.mentoring.api.service.MentoringService;
 import com.anchor.domain.mentoring.api.service.response.ApplicationUnavailableTime;
 import com.anchor.domain.mentoring.api.service.response.AppliedMentoringInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
