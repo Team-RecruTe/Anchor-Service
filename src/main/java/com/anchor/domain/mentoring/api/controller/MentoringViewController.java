@@ -27,6 +27,7 @@ public class MentoringViewController {
     model.addAttribute("mentoringContents", result);
 
     return "mentoring-edit";
+
   }
 
 }
