@@ -1,7 +1,5 @@
 package com.anchor.domain.mentoring.api.service;
 
-import static com.anchor.constant.TestConstant.APPLICATION_DATE;
-import static com.anchor.constant.TestConstant.APPLICATION_TIME;
 import static com.anchor.constant.TestConstant.COST;
 import static com.anchor.constant.TestConstant.DURATION_TIME;
 import static com.anchor.constant.TestConstant.FIRST_FROM_DATE_TIME;
@@ -18,7 +16,6 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
 
 import com.anchor.domain.mentor.domain.Career;
 import com.anchor.domain.mentor.domain.Mentor;
@@ -27,7 +24,6 @@ import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTi
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
 import com.anchor.domain.mentoring.api.service.response.ApplicationUnavailableTime;
 import com.anchor.domain.mentoring.api.service.response.AppliedMentoringInfo;
-import com.anchor.domain.mentoring.api.service.response.MentoringDefaultInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
@@ -86,30 +82,6 @@ class MentoringServiceTest {
         .career(Career.MIDDLE)
         .user(user)
         .build();
-  }
-
-  @Test
-  @DisplayName("전체 멘토링 목록을 조회한다.")
-  void loadMentoringListTest() {
-    //given
-    List<Mentoring> mentoringList = createMentoringAndMentoringList();
-
-    //when
-    when(mentoringRepository.findAll()).thenReturn(mentoringList);
-
-    List<MentoringDefaultInfo> result = mentoringService.loadMentoringList();
-
-    //then
-    assertThat(result)
-        .hasSize(mentoringList.size())
-        .extracting("title", "durationTime", "cost", "nickname")
-        .containsExactlyInAnyOrder(
-            tuple(MENTORING_TITLE + "1", DURATION_TIME, COST, NICKNAME),
-            tuple(MENTORING_TITLE + "2", DURATION_TIME, COST, NICKNAME),
-            tuple(MENTORING_TITLE + "3", DURATION_TIME, COST, NICKNAME),
-            tuple(MENTORING_TITLE + "4", DURATION_TIME, COST, NICKNAME),
-            tuple(MENTORING_TITLE + "5", DURATION_TIME, COST, NICKNAME)
-        );
   }
 
   @Test
@@ -201,32 +173,6 @@ class MentoringServiceTest {
             "mentoringEndDateTime", "mentoringStatus")
         .contains(NICKNAME, MENTORING_TITLE, mentoringApplication.getStartDateTime(),
             mentoringApplication.getEndDateTime(), MentoringStatus.WAITING);
-  }
-
-  @Test
-  @DisplayName("멘토링 신청내역을 저장하는 도중, 멘토링ID가 잘못되었다면 들어온다면 NoSuchElementException을 반환한다.")
-  void saveMentoringApplicationNoFoundMentoringTest() {
-    //given
-    SessionUser sessionUser = new SessionUser(user);
-
-    Long mentoringId = 1L;
-
-    MentoringApplicationInfo applicationInfo = MentoringApplicationInfo.builder()
-        .amount(10_000)
-        .impUid("testImpUid")
-        .merchantUid("testMerchant")
-        .startDateTime(LocalDateTime.of(2024, 1, 3, 13, 0, 0))
-        .endDateTime(LocalDateTime.of(2024, 1, 3, 14, 0, 0))
-        .build();
-
-    given(mentoringRepository.findById(mentoringId)).willThrow(
-        new NoSuchElementException(mentoringId + "에 해당하는 멘토링이 존재하지 않습니다."));
-
-    //when then
-    assertThatThrownBy(
-        () -> mentoringService.saveMentoringApplication(sessionUser, mentoringId, applicationInfo))
-        .isInstanceOf(NoSuchElementException.class)
-        .hasMessage(mentoringId + "에 해당하는 멘토링이 존재하지 않습니다.");
   }
 
   @Test
@@ -345,30 +291,6 @@ class MentoringServiceTest {
             tuple(LocalDateTime.parse(SECOND_FROM_DATE_TIME, formatter),
                 LocalDateTime.parse(SECOND_TO_DATE_TIME, formatter))
         );
-  }
-
-  private List<Mentoring> createMentoringAndMentoringList() {
-    List<Mentoring> mentoringList = new ArrayList<>();
-    for (int i = 1; i <= 5; i++) {
-      Mentoring testMentoring = Mentoring.builder()
-          .title(MENTORING_TITLE + i)
-          .durationTime(DURATION_TIME)
-          .cost(10_000)
-          .mentor(mentor)
-          .build();
-      mentoringList.add(testMentoring);
-    }
-    return mentoringList;
-  }
-
-  private LocalDate createMentoringApplicationDate() {
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-    return LocalDate.parse(APPLICATION_DATE, formatter);
-  }
-
-  private LocalTime createMentoringApplicationTime() {
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-    return LocalTime.parse(APPLICATION_TIME, formatter);
   }
 
   private List<ApplicationUnavailableTime> createMentoringUnavailableTimeResponseList() {

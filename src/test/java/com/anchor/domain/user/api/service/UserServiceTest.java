@@ -493,6 +493,8 @@ class UserServiceTest {
 
       mentoringApplications.add(
           MentoringApplication.builder()
+              .startDateTime(applicationTime.getFromDateTime())
+              .endDateTime(applicationTime.getToDateTime())
               .mentoring(mentoring)
               .user(user)
               .payment(Payment.builder()
