@@ -315,8 +315,7 @@ class MentorDataTest {
           .amount(10000)
           .impUid(UUID.randomUUID()
               .toString())
-          .merchantUid(UUID.randomUUID()
-              .toString())
+          .merchantUid("toss_" + UUID.randomUUID())
           .build();
       mentoringApplication.connectPayment(payment);
       paymentRepository.save(payment);

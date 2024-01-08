@@ -1,6 +1,8 @@
 package com.anchor.domain.mentoring.domain.repository.custom;
 
+import static com.anchor.domain.mentoring.domain.QMentoring.mentoring;
 import static com.anchor.domain.mentoring.domain.QMentoringApplication.mentoringApplication;
+import static com.anchor.domain.payment.domain.QPayment.payment;
 
 import com.anchor.domain.mentor.api.service.response.AppliedMentoringSearchResult;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
@@ -17,9 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-import static com.anchor.domain.mentoring.domain.QMentoring.mentoring;
-import static com.anchor.domain.mentoring.domain.QMentoringApplication.mentoringApplication;
-import static com.anchor.domain.payment.domain.QPayment.payment;
 
 @RequiredArgsConstructor
 @Repository
@@ -35,14 +34,6 @@ public class QMentoringApplicationRepositoryImpl implements QMentoringApplicatio
             .and(mentoringApplication.startDateTime.eq(startDateTime))
             .and(mentoringApplication.endDateTime.eq(endDateTime)))
         .fetchOne();
-  }
-
-  @Override
-  public List<MentoringApplication> findTimesByMentoringIdAndStatus(Long mentorId, MentoringStatus... statuses) {
-    return jpaQueryFactory.selectFrom(mentoringApplication)
-        .where(mentoringApplication.mentoring.mentor.id.eq(mentorId)
-            .and(equalsStatuses(statuses)))
-        .fetch();
   }
 
   public Page<AppliedMentoringSearchResult> findAllByMentorId(Long mentorId, Pageable pageable) {
@@ -74,51 +65,60 @@ public class QMentoringApplicationRepositoryImpl implements QMentoringApplicatio
 
   @Override
   public Optional<MentoringApplication> findAppliedMentoringByTimeAndUserId(
-          LocalDateTime startDateTime,
-          LocalDateTime endDateTime, Long userId) {
+      LocalDateTime startDateTime,
+      LocalDateTime endDateTime, Long userId) {
 
-      return Optional.ofNullable(
-              jpaQueryFactory.selectFrom(mentoringApplication)
-                      .join(mentoringApplication.mentoring, mentoring)
-                      .fetchJoin()
-                      .join(mentoringApplication.payment, payment)
-                      .fetchJoin()
-                      .where(mentoringApplication.startDateTime.eq(startDateTime)
-                              .and(mentoringApplication.endDateTime.eq(endDateTime))
-                              .and(mentoringApplication.user.id.eq(userId))
-                      )
-                      .fetchOne());
+    return Optional.ofNullable(
+        jpaQueryFactory.selectFrom(mentoringApplication)
+            .join(mentoringApplication.mentoring, mentoring)
+            .fetchJoin()
+            .join(mentoringApplication.payment, payment)
+            .fetchJoin()
+            .where(mentoringApplication.startDateTime.eq(startDateTime)
+                .and(mentoringApplication.endDateTime.eq(endDateTime))
+                .and(mentoringApplication.user.id.eq(userId))
+            )
+            .fetchOne());
 
+  }
+
+  @Override
+  public List<MentoringApplication> findUnavailableTimesByMentoringIdAndStatus(Long mentorId,
+      MentoringStatus... statuses) {
+    return jpaQueryFactory.selectFrom(mentoringApplication)
+        .where(mentoringApplication.mentoring.mentor.id.eq(mentorId)
+            .and(equalsStatuses(statuses)))
+        .fetch();
   }
 
   @Override
   public Optional<MentoringApplication> findMentoringApplicationByTimeRangeAndUserId
-          (LocalDateTime startDateTime, LocalDateTime endDateTime, Long userId) {
-      return Optional.ofNullable(
-              jpaQueryFactory.selectFrom(mentoringApplication)
-                      .join(mentoringApplication.payment, payment)
-                      .fetchJoin()
-                      .where(mentoringApplication.startDateTime.eq(startDateTime)
-                              .and(mentoringApplication.endDateTime.eq(endDateTime))
-                              .and(mentoringApplication.user.id.eq(userId)))
-                      .fetchOne()
-      );
+      (LocalDateTime startDateTime, LocalDateTime endDateTime, Long userId) {
+    return Optional.ofNullable(
+        jpaQueryFactory.selectFrom(mentoringApplication)
+            .join(mentoringApplication.payment, payment)
+            .fetchJoin()
+            .where(mentoringApplication.startDateTime.eq(startDateTime)
+                .and(mentoringApplication.endDateTime.eq(endDateTime))
+                .and(mentoringApplication.user.id.eq(userId)))
+            .fetchOne()
+    );
   }
 
   @Override
   public Optional<MentoringApplication> findMentoringApplicationByMentoringId(
-          LocalDateTime startDateTime,
-          LocalDateTime endDateTime, Long mentoringId) {
+      LocalDateTime startDateTime,
+      LocalDateTime endDateTime, Long mentoringId) {
 
-      return Optional.ofNullable(
-              jpaQueryFactory.selectFrom(mentoringApplication)
-                      .join(mentoringApplication.payment, payment)
-                      .fetchJoin()
-                      .where(mentoringApplication.startDateTime.eq(startDateTime)
-                              .and(mentoringApplication.endDateTime.eq(endDateTime))
-                              .and(mentoringApplication.mentoring.id.eq(mentoringId)))
-                      .fetchOne()
-      );
+    return Optional.ofNullable(
+        jpaQueryFactory.selectFrom(mentoringApplication)
+            .join(mentoringApplication.payment, payment)
+            .fetchJoin()
+            .where(mentoringApplication.startDateTime.eq(startDateTime)
+                .and(mentoringApplication.endDateTime.eq(endDateTime))
+                .and(mentoringApplication.mentoring.id.eq(mentoringId)))
+            .fetchOne()
+    );
   }
 
   private BooleanBuilder equalsStatuses(MentoringStatus... statuses) {

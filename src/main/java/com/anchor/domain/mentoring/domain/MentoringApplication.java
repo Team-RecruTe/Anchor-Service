@@ -34,7 +34,7 @@ public class MentoringApplication extends BaseEntity {
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private MentoringStatus mentoringStatus;
+  private MentoringStatus mentoringStatus = MentoringStatus.WAITING;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "mentoring_id")
@@ -49,8 +49,8 @@ public class MentoringApplication extends BaseEntity {
   private User user;
 
   @Builder
-  private MentoringApplication(LocalDateTime startDateTime, LocalDateTime endDateTime, MentoringStatus mentoringStatus,
-      Mentoring mentoring, Payment payment, User user) {
+  private MentoringApplication(LocalDateTime startDateTime, LocalDateTime endDateTime, Mentoring mentoring,
+      Payment payment, User user) {
     this.startDateTime = startDateTime;
     this.endDateTime = endDateTime;
     this.mentoringStatus = mentoringStatus;
@@ -71,6 +71,10 @@ public class MentoringApplication extends BaseEntity {
     this.mentoring = mentoring;
     this.payment = payment;
     this.user = user;
+  }
+
+  public void connectPayment(Payment payment) {
+    this.payment = payment;
   }
 
   public void changeStatus(MentoringStatus mentoringStatus) {

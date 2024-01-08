@@ -1,6 +1,7 @@
 package com.anchor.domain.mentoring.api.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 import com.anchor.domain.mentor.domain.Career;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentor.domain.repository.MentorRepository;
@@ -36,7 +37,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.ActiveProfiles;
 
 @DisplayName("멘토링 서비스 테스트 - DB 의존성 포함")
-@Import({QueryDslConfig.class, MentoringService.class, ObjectMapper.class})
+@Import({QueryDslConfig.class, MentoringService.class, ObjectMapper.class, PayNumberFactory.class})
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @ActiveProfiles("test")
 @DataJpaTest

@@ -1,6 +1,7 @@
 package com.anchor.domain.mentor.api.service;
 
 import com.anchor.domain.mentor.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
+import com.anchor.domain.mentor.api.service.response.AppliedMentoringSearchResult;
 import com.anchor.domain.mentor.api.service.response.MentoringUnavailableTimes;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentor.domain.repository.MentorRepository;
@@ -17,6 +18,8 @@ import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.NonUniqueResultException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -77,7 +80,7 @@ public class MentorService {
 
   public MentoringUnavailableTimes getUnavailableTimes(Long mentorId) {
     List<MentoringUnavailableTime> unavailableTimes = mentorRepository.findUnavailableTimes(mentorId);
-    List<MentoringApplication> reservedMentorings = mentoringApplicationRepository.findTimesByMentoringIdAndStatus(
+    List<MentoringApplication> reservedMentorings = mentoringApplicationRepository.findUnavailableTimesByMentoringIdAndStatus(
         mentorId, MentoringStatus.APPROVAL,
         MentoringStatus.WAITING);
 

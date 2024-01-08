@@ -71,7 +71,6 @@ class UserServiceTest {
   @BeforeEach
   void initUserAndSessionUser() {
     user = User.builder()
-        .id(1L)
         .nickname(NICKNAME)
         .email(USER_EMAIL)
         .image("testImage")
@@ -387,7 +386,6 @@ class UserServiceTest {
           MentoringApplication.builder()
               .mentoring(mentoring)
               .user(user)
-              .mentoringStatus(MentoringStatus.APPROVAL)
               .payment(Payment.builder()
                   .impUid("test_impUid")
                   .merchantUid("toss_merchant")
