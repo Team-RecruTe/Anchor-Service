@@ -11,9 +11,8 @@ public class MentorIntroductionResponse {
 
   private String contents;
 
-  //entity -> dto
-  public MentorIntroductionResponse(MentorIntroduction entity){
-    this.contents = entity.getContents();
+  public MentorIntroductionResponse(MentorIntroduction mentorIntroduction){
+    this.contents = mentorIntroduction.getContents();
   }
 
 }

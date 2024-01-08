@@ -1,8 +1,10 @@
 package com.anchor.domain.mentor.api.controller;
 
 import com.anchor.domain.mentor.api.service.MentorInfoService;
+import com.anchor.domain.mentor.api.service.response.MentorContents;
 import com.anchor.domain.mentor.api.service.response.MentorInfoResponse;
 import com.anchor.global.auth.SessionUser;
+import com.anchor.global.util.view.ViewResolver;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -17,32 +19,26 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class MentorInfoViewController {
 
   private final MentorInfoService mentorInfoService;
-  //private final MentorIntroductionService mentorIntroductionService;
+  private final ViewResolver viewResolver;
 
-  @GetMapping("/{id}") //방문자
-  public String viewMentorPage(@PathVariable Long id, Model model) {
-    MentorInfoResponse result = mentorInfoService.findMentor(id);
-    model.addAttribute("mentorInfo", result);
-    return "멘토 정보 페이지 조회 성공";
-  }
-
-  @GetMapping("/me/info")
-  public String viewMyInfoPage(HttpSession httpSession) {
-    //MentorInfoResponse mentorInfoResponse = mentorInfoService.
-    //model.addAttribute();
-    SessionUser user = (SessionUser) httpSession.getAttribute("user");
-    MentorInfoResponse result = mentorInfoService.findMentor(user.getMentorId());
-    return "멘토 필수정보 페이지 조회 성공";
+  @GetMapping("/{id}")
+  public String viewMentorPage(@PathVariable Long id, Model model){
+    MentorInfoResponse mentorInfoResponse = mentorInfoService.findInfo(id);
+    model.addAttribute("mentorInfo",mentorInfoResponse);
+    return viewResolver.getViewPath("mentor", "info");
   }
 
   @GetMapping("/me/introduction")
-  public String viewMyIntroductionPage(HttpSession httpSession) { //Model model
-    //MentorIntroductionResponse mentorIntroductionResponse = mentorIntroductionService.findMentors(id);
-    //model.addAttribute();
+  public String viewMyIntroductionPage(HttpSession httpSession, Model model){
     SessionUser user = (SessionUser) httpSession.getAttribute("user");
-    MentorInfoResponse result = mentorInfoService.findMentor(user.getMentorId());
-    return "멘토 소개글 페이지 조회 성공";
+    MentorInfoResponse mentorInfoResponse = mentorInfoService.findInfo(user.getMentorId());
+    Long mentorIntroductionId = mentorInfoResponse.getMentorIntroduction() != null ? mentorInfoResponse.getMentorIntroduction().getId() : null;
+    if (mentorIntroductionId != null) {
+      MentorContents mentorContents = mentorInfoService.getContents(user.getMentorId(),mentorIntroductionId);
+      model.addAttribute("mentorContents",mentorContents);
+      return viewResolver.getViewPath("mentor", "contents-edit");
+    }
+    return viewResolver.getViewPath("common", "home");
   }
-
 
 }
