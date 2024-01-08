@@ -22,8 +22,9 @@ public class MentoringTag extends BaseEntity {
   @JoinColumn(name = "mentoring_id")
   private Mentoring mentoring;
 
-  public MentoringTag(String tag) {
+  public MentoringTag(String tag, Mentoring mentoring) {
     this.tag = tag;
+    this.mentoring = mentoring;
   }
 
 }
