@@ -26,5 +26,5 @@ public class MentoringDetail extends BaseEntity {
   public void editDetail(String contents) {
     this.contents = contents;
   }
-
+  
 }
