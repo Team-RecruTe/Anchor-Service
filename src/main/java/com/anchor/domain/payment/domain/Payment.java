@@ -42,15 +42,15 @@ public class Payment extends BaseEntity {
   @OneToOne(mappedBy = "payment", fetch = FetchType.LAZY)
   private MentoringApplication mentoringApplication;
 
+  @OneToOne(mappedBy = "payment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  private Payup payup;
+
   @Builder
-  private Payment(String impUid, String merchantUid, Integer amount, Integer cancelAmount,
-      PaymentStatus paymentStatus, MentoringApplication mentoringApplication) {
+  private Payment(String impUid, String merchantUid, Integer amount, MentoringApplication mentoringApplication) {
     this.impUid = impUid;
     this.merchantUid = merchantUid;
     this.orderUid = "anchor_" + merchantUid.substring(merchantUid.indexOf('_'));
     this.amount = amount;
-    this.cancelAmount = cancelAmount == null ? 0 : cancelAmount;
-    this.paymentStatus = paymentStatus == null ? PaymentStatus.SUCCESS : paymentStatus;
     this.mentoringApplication = mentoringApplication;
   }
 

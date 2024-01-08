@@ -53,7 +53,6 @@ public class MentoringApplication extends BaseEntity {
       Payment payment, User user) {
     this.startDateTime = startDateTime;
     this.endDateTime = endDateTime;
-    this.mentoringStatus = mentoringStatus;
     this.mentoring = mentoring;
     this.payment = payment;
     this.user = user;

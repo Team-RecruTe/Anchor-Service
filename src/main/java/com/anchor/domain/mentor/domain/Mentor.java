@@ -4,6 +4,8 @@ import com.anchor.domain.mentor.api.controller.request.MentorInfoRequest;
 import com.anchor.domain.mentor.api.controller.request.MentorIntroductionRequest;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.user.domain.User;
+import com.anchor.domain.payment.domain.Payup;
+import com.anchor.domain.user.domain.User;
 import com.anchor.global.util.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -63,6 +65,9 @@ public class Mentor extends BaseEntity {
       cascade = CascadeType.ALL
   )
   private Set<MentorSchedule> mentorSchedule = new HashSet<>();
+
+  @OneToMany(mappedBy = "mentor", cascade = CascadeType.ALL)
+  private List<Payup> payups = new ArrayList<>();
 
   @Builder
   private Mentor(String companyEmail, Career career, String accountNumber, String accountName, String bankName,

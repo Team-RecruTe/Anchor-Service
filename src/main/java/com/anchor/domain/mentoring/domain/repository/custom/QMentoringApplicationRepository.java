@@ -29,4 +29,6 @@ public interface QMentoringApplicationRepository {
 
   Optional<MentoringApplication> findMentoringApplicationByMentoringId
       (LocalDateTime startDateTime, LocalDateTime endDateTime, Long mentoringId);
+
+    List<MentoringApplication> findPayupListByCompleteAndLastMonth(MentoringStatus status, LocalDateTime lastMonth, LocalDateTime thisMonth);
 }
