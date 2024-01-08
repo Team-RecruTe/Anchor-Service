@@ -42,8 +42,7 @@ public class User extends BaseEntity {
   private List<MentoringApplication> mentoringApplicationList = new ArrayList<>();
 
   @Builder
-  public User(Long id, String email, String nickname, String image, UserRole role) {
-    super(id);
+  public User(String email, String nickname, String image, UserRole role) {
     this.email = email;
     this.nickname = nickname;
     this.image = image;
