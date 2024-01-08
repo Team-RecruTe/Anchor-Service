@@ -11,4 +11,5 @@ public interface MentoringApplicationRepository extends JpaRepository<MentoringA
 
   Optional<MentoringApplication> findByStartDateTimeAndEndDateTimeAndUserId(LocalDateTime startDateTime,
       LocalDateTime endDateTime, Long userId);
+
 }
