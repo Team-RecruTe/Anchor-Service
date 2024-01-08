@@ -30,8 +30,8 @@ public class MentorController {
     SessionUser user = (SessionUser) httpSession.getAttribute("user");
     MentoringUnavailableTimes result = mentorService.getUnavailableTimes(user.getMentorId());
     result.addLinks(Link.builder()
-        .setLink("self", "/me/schedule")
-        .build());
+                        .setLink("self", "/me/schedule")
+                        .build());
     return ResponseEntity.ok(result);
   }
 
@@ -42,18 +42,19 @@ public class MentorController {
     SessionUser user = (SessionUser) httpSession.getAttribute("user");
     mentorService.setUnavailableTimes(user.getMentorId(), mentoringUnavailableTimeInfo.getDateTimeRanges());
     log.info("IsEmpty: {}", mentoringUnavailableTimeInfo.getDateTimeRanges()
-        .isEmpty());
+                                                        .isEmpty());
     return ResponseEntity.ok()
-        .build();
+                         .build();
   }
 
   @PostMapping("/applied-mentorings")
-  public ResponseEntity<String> changeMentoringStatus(@RequestBody MentoringStatusInfo mentoringStatusInfo,
+  public ResponseEntity<String> changeMentoringStatus(
+      @RequestBody MentoringStatusInfo mentoringStatusInfo,
       HttpSession httpSession) {
     SessionUser user = (SessionUser) httpSession.getAttribute("user");
     mentorService.changeMentoringStatus(user.getMentorId(), mentoringStatusInfo.getRequiredMentoringStatusInfos());
     return ResponseEntity.ok()
-        .build();
+                         .build();
   }
 
 

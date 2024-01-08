@@ -137,8 +137,10 @@ class MentorDataTest {
     User savedUser = userRepository.save(user);
 
     MentoringApplication mentoringApplication = MentoringApplication.builder()
-        .startDateTime(LocalDateTime.of(2023, 12, 12, 20, 30, 0))
-        .endDateTime(LocalDateTime.of(2023, 12, 12, 21, 30, 0))
+        .startDateTime(
+            LocalDateTime.of(2023, 12, 12, 20, 30, 0))
+        .endDateTime(
+            LocalDateTime.of(2023, 12, 12, 21, 30, 0))
         .user(savedUser)
         .mentoring(mentoring)
         .payment(null)
@@ -148,11 +150,17 @@ class MentorDataTest {
 
     List<RequiredMentoringStatusInfo> requiredMentoringStatusInfos = new ArrayList<>();
     RequiredMentoringStatusInfo requiredMentoringStatusInfo = RequiredMentoringStatusInfo.builder()
-        .mentoringReservedTime(DateTimeRange.of(
-            LocalDateTime.of(2023, 12, 12, 20, 30, 0),
-            LocalDateTime.of(2023, 12, 12, 21, 30, 0)
-        ))
-        .mentoringStatus(MentoringStatus.CANCELLED.name())
+        .mentoringReservedTime(
+            DateTimeRange.of(
+                LocalDateTime.of(
+                    2023, 12, 12, 20,
+                    30, 0),
+                LocalDateTime.of(
+                    2023, 12, 12, 21,
+                    30, 0)
+            ))
+        .mentoringStatus(
+            MentoringStatus.CANCELLED.name())
         .build();
     requiredMentoringStatusInfos.add(requiredMentoringStatusInfo);
 
@@ -196,8 +204,10 @@ class MentorDataTest {
     User savedUser = userRepository.save(user);
 
     MentoringApplication mentoringApplication = MentoringApplication.builder()
-        .startDateTime(LocalDateTime.of(2023, 12, 12, 20, 30, 0))
-        .endDateTime(LocalDateTime.of(2023, 12, 12, 21, 30, 0))
+        .startDateTime(
+            LocalDateTime.of(2023, 12, 12, 20, 30, 0))
+        .endDateTime(
+            LocalDateTime.of(2023, 12, 12, 21, 30, 0))
         .user(savedUser)
         .mentoring(mentoring)
         .payment(null)
@@ -207,11 +217,17 @@ class MentorDataTest {
 
     List<RequiredMentoringStatusInfo> requiredMentoringStatusInfos = new ArrayList<>();
     RequiredMentoringStatusInfo requiredMentoringStatusInfo = RequiredMentoringStatusInfo.builder()
-        .mentoringReservedTime(DateTimeRange.of(
-            LocalDateTime.of(2023, 12, 12, 20, 30, 0),
-            LocalDateTime.of(2023, 12, 12, 21, 30, 0)
-        ))
-        .mentoringStatus(MentoringStatus.APPROVAL.name())
+        .mentoringReservedTime(
+            DateTimeRange.of(
+                LocalDateTime.of(
+                    2023, 12, 12, 20,
+                    30, 0),
+                LocalDateTime.of(
+                    2023, 12, 12, 21,
+                    30, 0)
+            ))
+        .mentoringStatus(
+            MentoringStatus.APPROVAL.name())
         .build();
     requiredMentoringStatusInfos.add(requiredMentoringStatusInfo);
 

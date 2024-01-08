@@ -1,6 +1,7 @@
 package com.anchor.global.util;
 
 
+import com.anchor.domain.payment.api.controller.request.PaymentResultInfo;
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.global.portone.request.ApiPaymentCancelData;
 import com.anchor.global.portone.request.TokenRequest;
@@ -29,8 +30,7 @@ public class ExternalApiUtil {
   @Value("${payment.imp-secret}")
   private String impSecret;
 
-  public PaymentDataDetail getPaymentDataDetail(
-      com.anchor.domain.payment.api.controller.request.PaymentResultInfo paymentResultInfo) {
+  public PaymentDataDetail getPaymentDataDetail(PaymentResultInfo paymentResultInfo) {
     String accessToken = getAccessToken();
 
     String paymentDataRequestUrl = createPaymentDataRequestUrl(paymentResultInfo.getImpUid());

@@ -34,7 +34,8 @@ public class MentorService {
   }
 
   @Transactional
-  public void changeMentoringStatus(Long id, List<RequiredMentoringStatusInfo> requiredMentoringStatusInfos) {
+  public void changeMentoringStatus(
+      Long id, List<RequiredMentoringStatusInfo> requiredMentoringStatusInfos) {
     Mentor mentor = getMentor(id);
     mentor.getMentorings()
         .forEach(mentoring -> changeStatusAll(mentoring.getId(), requiredMentoringStatusInfos));
@@ -42,21 +43,25 @@ public class MentorService {
 
   private Mentor getMentor(Long id) {
     Mentor mentor = mentorRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("일치하는 멘토 정보가 없습니다."));
+        .orElseThrow(
+            () -> new NoSuchElementException("일치하는 멘토 정보가 없습니다."));
     return mentor;
   }
 
-  private void changeStatusAll(Long mentoringId, List<RequiredMentoringStatusInfo> requiredMentoringStatusInfos) {
+  private void changeStatusAll(
+      Long mentoringId, List<RequiredMentoringStatusInfo> requiredMentoringStatusInfos) {
     requiredMentoringStatusInfos.forEach(requiredMentoringStatusInfo -> {
       changeStatus(mentoringId, requiredMentoringStatusInfo);
     });
   }
 
-  private void changeStatus(Long mentoringId, RequiredMentoringStatusInfo requiredMentoringStatusInfo) {
+  private void changeStatus(
+      Long mentoringId, RequiredMentoringStatusInfo requiredMentoringStatusInfo) {
     DateTimeRange mentoringReservedTime = requiredMentoringStatusInfo.getMentoringReservedTime();
     MentoringStatus mentoringStatus = requiredMentoringStatusInfo.getMentoringStatus();
     try {
-      MentoringApplication mentoringApplication = getMentoringApplication(mentoringId, mentoringReservedTime);
+      MentoringApplication mentoringApplication = getMentoringApplication(
+          mentoringId, mentoringReservedTime);
       mentoringApplication.changeStatus(mentoringStatus);
       mentoringApplicationRepository.save(mentoringApplication);
     } catch (NullPointerException | PersistenceException e) {
@@ -64,11 +69,13 @@ public class MentorService {
     }
   }
 
-  private MentoringApplication getMentoringApplication(Long id, DateTimeRange mentoringReservedTime) {
+  private MentoringApplication getMentoringApplication(
+      Long id, DateTimeRange mentoringReservedTime) {
     LocalDateTime startDateTime = mentoringReservedTime.getFrom();
     LocalDateTime endDateTime = mentoringReservedTime.getTo();
     try {
-      return mentoringApplicationRepository.findByMentoringIdAndProgressTime(id, startDateTime, endDateTime);
+      return mentoringApplicationRepository.findByMentoringIdAndProgressTime(
+          id, startDateTime, endDateTime);
     } catch (NonUniqueResultException e) {
       log.warn("Exception: {}", e);
       throw new RuntimeException(e);
@@ -76,7 +83,8 @@ public class MentorService {
   }
 
   public MentoringUnavailableTimes getUnavailableTimes(Long mentorId) {
-    List<MentoringUnavailableTime> unavailableTimes = mentorRepository.findUnavailableTimes(mentorId);
+    List<MentoringUnavailableTime> unavailableTimes = mentorRepository.findUnavailableTimes(
+        mentorId);
     List<MentoringApplication> reservedMentorings = mentoringApplicationRepository.findTimesByMentoringIdAndStatus(
         mentorId, MentoringStatus.APPROVAL,
         MentoringStatus.WAITING);
