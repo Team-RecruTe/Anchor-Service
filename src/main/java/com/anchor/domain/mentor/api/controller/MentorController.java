@@ -78,6 +78,7 @@ public class MentorController {
   @PostMapping("/register/email/auth")
   public ResponseEntity emailVerify(String userEmailCode) {
     String emailCode = (String) session.getAttribute("ecode");
+    log.info("auth session email code==="+emailCode);
     if (userEmailCode.equals(emailCode)) {
       return new ResponseEntity("success", HttpStatus.OK);
     }
