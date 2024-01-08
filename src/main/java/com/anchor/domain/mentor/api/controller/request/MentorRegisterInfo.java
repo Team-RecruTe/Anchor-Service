@@ -9,6 +9,7 @@ import lombok.Getter;
 
 @Getter
 public class MentorRegisterInfo {
+
   @Email
   private String companyEmail;
 
@@ -23,13 +24,13 @@ public class MentorRegisterInfo {
   private String accountName;
 
   @Builder
-  public MentorRegisterInfo(String companyEmail, Career career, String accountNumber, String bankName, String accountName) {
+  public MentorRegisterInfo(String companyEmail, Career career, String accountNumber, String bankName,
+      String accountName) {
     this.companyEmail = companyEmail;
     this.career = career;
     this.accountNumber = accountNumber;
     this.bankName = bankName;
     this.accountName = accountName;
-
   }
 
 }
