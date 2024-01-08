@@ -49,4 +49,5 @@ public class MentoringUnavailableTime extends BaseEntity {
             dateTimeRange.getTo()))
         .toList();
   }
+
 }

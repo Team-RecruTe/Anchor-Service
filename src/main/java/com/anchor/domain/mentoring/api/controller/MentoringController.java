@@ -4,6 +4,7 @@ import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationIn
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
+import com.anchor.domain.mentoring.api.service.MentoringService;
 import com.anchor.domain.mentoring.api.service.response.ApplicationUnavailableTime;
 import com.anchor.domain.mentoring.api.service.response.AppliedMentoringInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
@@ -79,7 +80,6 @@ public class MentoringController {
     return ResponseEntity.ok(result);
   }
 
-
   @GetMapping("")
   public ResponseEntity<List<MentoringDefaultInfo>> mentoringList() {
     List<MentoringDefaultInfo> mentoringDefaultInfoList = mentoringService.loadMentoringList();
@@ -117,7 +117,6 @@ public class MentoringController {
     if (sessionUser == null) {
       throw new RuntimeException("로그인 정보가 없습니다. 잘못된 접근입니다.");
     }
-
     AppliedMentoringInfo appliedMentoringInfo =
         mentoringService.saveMentoringApplication(sessionUser, id, applicationInfo);
 
