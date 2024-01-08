@@ -1,5 +1,6 @@
 package com.anchor.domain.mentor.api.service;
 
+import com.anchor.domain.mentor.api.controller.request.MentorRegisterInfo;
 import com.anchor.domain.mentor.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
 import com.anchor.domain.mentor.api.service.response.AppliedMentoringSearchResult;
 import com.anchor.domain.mentor.api.service.response.MentoringUnavailableTimes;
@@ -91,4 +92,20 @@ public class MentorService {
     return mentoringApplicationRepository.findAllByMentorId(mentorId,
         pageable);
   }
+
+  public Mentor register(MentorRegisterInfo mentorRegisterInfo) {
+    if (mentorRepository.findByCompanyEmail(mentorRegisterInfo.getCompanyEmail()).isPresent()) {
+      throw new IllegalStateException("이미 존재하는 이메일");
+    }
+    Mentor dbInsertMentor = Mentor.builder()
+        .companyEmail(mentorRegisterInfo.getCompanyEmail())
+        .career(mentorRegisterInfo.getCareer())
+        .accountNumber(mentorRegisterInfo.getAccountNumber())
+        .bankName(mentorRegisterInfo.getBankName())
+        .accountName(mentorRegisterInfo.getAccountName())
+        .build();
+    mentorRepository.save(dbInsertMentor);
+    return dbInsertMentor;
+  }
+
 }
