@@ -1,15 +1,15 @@
-package com.anchor.domain.mentoring.api.controller.request;
+package com.anchor.domain.mentoring.api.service.response;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class MentoringContents {
+public class MentoringContentsResult {
 
   private String contents;
 
-  public MentoringContents(String contents) {
+  public MentoringContentsResult(String contents) {
     this.contents = contents;
   }
 

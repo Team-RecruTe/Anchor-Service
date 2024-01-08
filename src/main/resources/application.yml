@@ -1,7 +1,7 @@
 ### default Profile ###
 spring:
   profiles:
-    active: test
+    active: local
     include:
       - oauth
       - session
