@@ -3,6 +3,7 @@ package com.anchor.domain.mentoring.api.controller;
 import com.anchor.domain.mentoring.api.service.MentoringService;
 import com.anchor.domain.mentoring.api.service.response.MentoringContents;
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
+import com.anchor.global.util.view.ViewResolver;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,12 +22,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class MentoringViewController {
 
+  private final ViewResolver viewResolver;
   private final MentoringService mentoringService;
-  private final boolean aBoolean = false;
 
   @GetMapping
   public String viewMentoringPage(
-      @RequestParam(value = "tag", required = aBoolean) List<String> tags,
+      @RequestParam(value = "tag", required = false) List<String> tags,
       @RequestParam(value = "keyword", required = false) String keyword,
       @PageableDefault(size = 16,
           sort = {"id", "totalApplicationNumber"}, direction = Sort.Direction.DESC) Pageable pageable,
@@ -34,10 +35,8 @@ public class MentoringViewController {
   ) {
     Page<MentoringSearchResult> result = mentoringService.getMentorings(tags, keyword, pageable);
     model.addAttribute("mentorings", result);
-
-    return "mentoring-edit";
+    return viewResolver.getViewName("mentoring-edit");
   }
-
 
   @GetMapping("/new")
   public String viewMentoringCreationPage() {
@@ -48,8 +47,7 @@ public class MentoringViewController {
   public String viewMentoringEditPage(@PathVariable Long id, Model model) {
     MentoringContents result = mentoringService.getContents(id);
     model.addAttribute("mentoringContents", result);
-
-    return "mentoring-edit";
+    return viewResolver.getViewName("mentoring/mentoring-edit");
   }
 
 }

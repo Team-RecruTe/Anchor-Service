@@ -1,9 +1,7 @@
 package com.anchor.domain.mentor.api.controller;
 
 import com.anchor.domain.mentor.api.service.MentorInfoService;
-import com.anchor.domain.mentor.api.service.MentorIntroductionService;
 import com.anchor.domain.mentor.api.service.response.MentorInfoResponse;
-import com.anchor.domain.mentor.api.service.response.MentorIntroductionResponse;
 import com.anchor.global.auth.SessionUser;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -22,14 +20,14 @@ public class MentorInfoViewController {
   //private final MentorIntroductionService mentorIntroductionService;
 
   @GetMapping("/{id}") //방문자
-  public String viewMentorPage(@PathVariable Long id, Model model){
-    MentorInfoResponse result = mentorInfoService.findMentors(id);
-    model.addAttribute("mentorInfo",result);
+  public String viewMentorPage(@PathVariable Long id, Model model) {
+    MentorInfoResponse result = mentorInfoService.findMentor(id);
+    model.addAttribute("mentorInfo", result);
     return "멘토 정보 페이지 조회 성공";
   }
 
   @GetMapping("/me/info")
-  public String viewMyInfoPage(HttpSession httpSession){
+  public String viewMyInfoPage(HttpSession httpSession) {
     //MentorInfoResponse mentorInfoResponse = mentorInfoService.
     //model.addAttribute();
     SessionUser user = (SessionUser) httpSession.getAttribute("user");
@@ -38,14 +36,13 @@ public class MentorInfoViewController {
   }
 
   @GetMapping("/me/introduction")
-  public String viewMyIntroductionPage(HttpSession httpSession){ //Model model
+  public String viewMyIntroductionPage(HttpSession httpSession) { //Model model
     //MentorIntroductionResponse mentorIntroductionResponse = mentorIntroductionService.findMentors(id);
     //model.addAttribute();
     SessionUser user = (SessionUser) httpSession.getAttribute("user");
     MentorInfoResponse result = mentorInfoService.findMentor(user.getMentorId());
     return "멘토 소개글 페이지 조회 성공";
   }
-
 
 
 }

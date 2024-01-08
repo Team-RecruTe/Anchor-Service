@@ -1,7 +1,6 @@
 package com.anchor.domain.mentor.api.service;
 
 import com.anchor.domain.mentor.api.controller.request.MentorIntroductionRequest;
-import com.anchor.domain.mentor.api.service.response.MentorInfoResponse;
 import com.anchor.domain.mentor.api.service.response.MentorIntroductionResponse;
 import com.anchor.domain.mentor.domain.MentorIntroduction;
 import com.anchor.domain.mentor.domain.repository.MentorIntroductionRepository;
@@ -18,7 +17,7 @@ public class MentorIntroductionService {
   @Transactional(readOnly = true) //select
   public MentorIntroductionResponse findMentors(Long id) {
     MentorIntroduction mentorIntroduction = mentorIntroductionRepository.findById(id)
-        .orElseThrow(()-> new RuntimeException("멘토 소개글 페이지를 조회하실 수 없습니다."));
+        .orElseThrow(() -> new RuntimeException("멘토 소개글 페이지를 조회하실 수 없습니다."));
 
     return new MentorIntroductionResponse(mentorIntroduction);
   }
@@ -26,9 +25,9 @@ public class MentorIntroductionService {
   @Transactional
   public void editContents(Long id, MentorIntroductionRequest mentorIntroductionRequest) {
     MentorIntroduction mentorIntroduction = mentorIntroductionRepository.findById(id)
-        .orElseThrow(()-> new RuntimeException("멘토 소개글 페이지를 조회하실 수 없습니다."));
+        .orElseThrow(() -> new RuntimeException("멘토 소개글 페이지를 조회하실 수 없습니다."));
 
-    mentorIntroduction.editDetail(mentorIntroductionRequest.getContents());
+    mentorIntroduction.editContents(mentorIntroductionRequest.getContents());
     mentorIntroductionRepository.save(mentorIntroduction);
   }
 

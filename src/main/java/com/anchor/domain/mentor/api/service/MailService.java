@@ -19,11 +19,12 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 public class MailService {
-  @Value("${spring.mail.username}")
-  String sender;
 
   private final JavaMailSender javaMailSender;
   private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+  @Value("${spring.mail.username}")
+  private String sender;
 
   @Async("emailAsync")
   public CompletableFuture<String> sendMail(MailDto mailDto) {

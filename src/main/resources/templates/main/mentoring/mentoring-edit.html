@@ -6,15 +6,13 @@
   <link href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" rel="stylesheet"/>
 </head>
 <body>
-<p th:text="${mentoringContent.getContents()}"></p>
-[[${mentoringContent.getContents()}]]
-[(${mentoringContent.getContents()})]
-
+<p th:text="${mentoringContents.getContents()}"></p>
+[[${mentoringContents.getContents()}]]
+[(${mentoringContents.getContents()})]
 <h2 style="text-align: center;">TOAST UI Editor 글쓰기 페이지</h2>
 
 <!-- 에디터를 적용할 요소 (컨테이너) -->
 <div id="content">
-
 </div>
 
 <!-- TUI 에디터 JS CDN -->
