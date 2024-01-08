@@ -127,7 +127,7 @@ class MentoringControllerTest {
     session.setAttribute("user", new SessionUser());
     RestClient restClient = RestClient.create();
     byte[] image = new byte[0];
-    
+
     MockMultipartFile file = new MockMultipartFile("image", "image.png", MediaType.IMAGE_PNG_VALUE,
         new ByteArrayInputStream(image));
 

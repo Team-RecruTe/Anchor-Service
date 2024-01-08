@@ -34,11 +34,12 @@ public class Payment extends BaseEntity {
   @Column(nullable = false)
   private Integer amount;
 
-  private Integer cancelAmount;
+  @Column(nullable = false)
+  private Integer cancelAmount = 0;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private PaymentStatus paymentStatus;
+  private PaymentStatus paymentStatus = PaymentStatus.SUCCESS;
 
   @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
   @JoinColumn(name = "mentoring_application_id")
