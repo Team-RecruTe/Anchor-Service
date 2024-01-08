@@ -3,7 +3,6 @@ package com.anchor.domain.mentoring.api.service;
 import com.anchor.domain.mentor.domain.Career;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentor.domain.repository.MentorRepository;
-import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
@@ -36,12 +35,6 @@ public class MentoringTest {
         .accountNumber("123456")
         .companyEmail("asd@naver.com")
         .bankName("한국은행")
-        .build();
-
-    MentoringBasicInfo mentoringBasicInfo = MentoringBasicInfo.builder()
-        .title("제목입니다!")
-        .durationTime("2h")
-        .cost(14000)
         .build();
     mentorRepository.save(mentor);
 

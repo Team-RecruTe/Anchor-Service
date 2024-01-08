@@ -62,7 +62,6 @@ public class Mentor extends BaseEntity {
     this.accountNumber = accountNumber;
     this.accountName = accountName;
     this.bankName = bankName;
-    this.user = user;
   }
 
 }

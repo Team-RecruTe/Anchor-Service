@@ -91,4 +91,5 @@ public class MentorService {
 
     return MentoringUnavailableTimes.of(unavailableTimes, reservedMentorings);
   }
+
 }
