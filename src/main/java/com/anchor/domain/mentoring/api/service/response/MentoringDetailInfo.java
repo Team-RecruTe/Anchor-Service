@@ -29,19 +29,14 @@ public class MentoringDetailInfo {
   }
 
   public MentoringDetailInfo(Mentoring mentoring) {
-
     this.title = mentoring.getTitle();
-
     this.durationTime = mentoring.getDurationTime();
-
     this.content = mentoring.getMentoringDetail()
         .getContents();
-
     this.nickname = mentoring.getMentor()
         .getUser()
         .getNickname();
     this.cost = mentoring.getCost();
-
     this.tags = mentoring.getMentoringTags()
         .stream()
         .map(MentoringTag::getTag)

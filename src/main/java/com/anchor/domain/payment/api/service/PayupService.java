@@ -28,7 +28,8 @@ public class PayupService {
   public void payupProcess(MentoringStatus status) {
     LocalDateTime now = LocalDateTime.now();
 
-    LocalDateTime thisMonth = LocalDateTime.of(now.toLocalDate().withDayOfMonth(1), LocalTime.MIN);
+    LocalDateTime thisMonth = LocalDateTime.of(now.toLocalDate()
+        .withDayOfMonth(1), LocalTime.MIN);
     //지난달 1일 00시 00분 00초
     LocalDateTime lastMonth = thisMonth.minusMonths(1L);
 
@@ -56,5 +57,6 @@ public class PayupService {
     }
 
   }
+
 
 }

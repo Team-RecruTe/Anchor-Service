@@ -28,7 +28,6 @@ import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
 import com.anchor.domain.payment.domain.Payment;
-import com.anchor.domain.payment.domain.PaymentStatus;
 import com.anchor.domain.payment.domain.repository.PaymentRepository;
 import com.anchor.domain.user.api.controller.request.MentoringStatusInfo;
 import com.anchor.domain.user.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
@@ -462,7 +461,6 @@ class UserServiceTest {
               .impUid("test_impUid")
               .merchantUid("test_merchantUid")
               .amount(10_000)
-              .paymentStatus(PaymentStatus.SUCCESS)
               .mentoringApplication(mentoringApplication)
               .build());
     }

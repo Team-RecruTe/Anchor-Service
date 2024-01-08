@@ -154,7 +154,7 @@ public class MentoringController {
   /**
    * 멘토링 신청 도중 결제실패 또는 취소시 잠금상태였던 시간대를 해제합니다.
    */
-  @PostMapping("/{id}/apply-cancel")
+  @PutMapping("/{id}/apply-cancel")
   public String mentoringTimeSessionRemove(@PathVariable("id") Long id,
       @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
     List<ApplicationUnavailableTime> sessionApplicationUnavailableTimeList = getSessionUnavailableTimeList(session, id);

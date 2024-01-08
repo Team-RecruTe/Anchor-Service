@@ -46,7 +46,7 @@ public class MentoringService {
   private final UserRepository userRepository;
   private final MentorRepository mentorRepository;
   private final PaymentRepository paymentRepository;
-  private final PayNumberFactory payNumberFactory;
+  private final PayNumberCreator payNumberCreator;
 
   @Transactional
   public MentoringCreateResult create(Long mentorId, MentoringBasicInfo mentoringBasicInfo) {
@@ -132,8 +132,8 @@ public class MentoringService {
     String today = LocalDate.now()
         .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
     List<Payment> paymentList = paymentRepository.findPaymentListStartWithToday(today);
-    String merchantUid = payNumberFactory.createMerchantUid(paymentList, today);
-    String impCode = payNumberFactory.getImpCode();
+    String merchantUid = payNumberCreator.getMerchantUid(paymentList, today);
+    String impCode = payNumberCreator.getImpCode();
     return MentoringPaymentInfo.builder()
         .amount(cost)
         .impCode(impCode)

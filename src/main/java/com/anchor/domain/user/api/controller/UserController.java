@@ -4,17 +4,13 @@ import com.anchor.domain.user.api.controller.request.MentoringStatusInfo;
 import com.anchor.domain.user.api.controller.request.UserNicknameRequest;
 import com.anchor.domain.user.api.service.UserService;
 import com.anchor.domain.user.api.service.response.AppliedMentoringInfo;
-import com.anchor.domain.user.api.service.response.UserInfoResponse;
 import com.anchor.global.auth.SessionUser;
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -71,7 +67,7 @@ public class UserController {
   /**
    * 신청한 멘토링의 상태를 변경합니다. 취소, 또는 완료로 변경가능합니다.
    */
-  @PostMapping("/me/applied-mentorings")
+  @PutMapping("/me/applied-mentorings")
   public String appliedMentoringStatusChange(@RequestBody MentoringStatusInfo mentoringStatus,
       HttpSession session) {
 

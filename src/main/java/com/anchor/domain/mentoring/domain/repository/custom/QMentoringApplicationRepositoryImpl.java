@@ -1,16 +1,14 @@
 package com.anchor.domain.mentoring.domain.repository.custom;
 
+import static com.anchor.domain.mentor.domain.QMentor.mentor;
 import static com.anchor.domain.mentoring.domain.QMentoring.mentoring;
 import static com.anchor.domain.mentoring.domain.QMentoringApplication.mentoringApplication;
 import static com.anchor.domain.payment.domain.QPayment.payment;
+import static com.anchor.domain.payment.domain.QPayup.payup;
 
 import com.anchor.domain.mentor.api.service.response.AppliedMentoringSearchResult;
-import com.anchor.domain.mentor.domain.QMentor;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
-import com.anchor.domain.mentoring.domain.QMentoring;
-import com.anchor.domain.payment.domain.QPayment;
-import com.anchor.domain.payment.domain.QPayup;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -21,7 +19,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -91,25 +88,6 @@ public class QMentoringApplicationRepositoryImpl implements QMentoringApplicatio
   }
 
   @Override
-  public Optional<MentoringApplication> findAppliedMentoringByTimeAndUserId(
-      LocalDateTime startDateTime,
-      LocalDateTime endDateTime, Long userId) {
-
-    return Optional.ofNullable(
-        jpaQueryFactory.selectFrom(mentoringApplication)
-            .join(mentoringApplication.mentoring, mentoring)
-            .fetchJoin()
-            .join(mentoringApplication.payment, payment)
-            .fetchJoin()
-            .where(mentoringApplication.startDateTime.eq(startDateTime)
-                .and(mentoringApplication.endDateTime.eq(endDateTime))
-                .and(mentoringApplication.user.id.eq(userId))
-            )
-            .fetchOne());
-
-  }
-
-  @Override
   public List<MentoringApplication> findUnavailableTimesByMentoringIdAndStatus(Long mentorId,
       MentoringStatus... statuses) {
     return jpaQueryFactory.selectFrom(mentoringApplication)
@@ -119,47 +97,23 @@ public class QMentoringApplicationRepositoryImpl implements QMentoringApplicatio
   }
 
   @Override
-  public Optional<MentoringApplication> findMentoringApplicationByTimeRangeAndUserId
-      (LocalDateTime startDateTime, LocalDateTime endDateTime, Long userId) {
-    return Optional.ofNullable(
-        jpaQueryFactory.selectFrom(mentoringApplication)
-            .join(mentoringApplication.payment, payment)
-            .fetchJoin()
-            .where(mentoringApplication.startDateTime.eq(startDateTime)
-                .and(mentoringApplication.endDateTime.eq(endDateTime))
-                .and(mentoringApplication.user.id.eq(userId)))
-            .fetchOne()
-    );
-  }
-
-  @Override
-  public Optional<MentoringApplication> findMentoringApplicationByMentoringId(
-      LocalDateTime startDateTime,
-      LocalDateTime endDateTime, Long mentoringId) {
-
-    return Optional.ofNullable(
-        jpaQueryFactory.selectFrom(mentoringApplication)
-            .join(mentoringApplication.payment, payment)
-            .fetchJoin()
-            .where(mentoringApplication.startDateTime.eq(startDateTime)
-                .and(mentoringApplication.endDateTime.eq(endDateTime))
-                .and(mentoringApplication.mentoring.id.eq(mentoringId)))
-            .fetchOne()
-    );
-  }
-
-  @Override
-  public List<MentoringApplication> findPayupListByCompleteAndLastMonth(MentoringStatus status, LocalDateTime lastMonth, LocalDateTime thisMonth) {
+  public List<MentoringApplication> findPayupListByCompleteAndLastMonth(MentoringStatus status, LocalDateTime lastMonth,
+      LocalDateTime thisMonth) {
 
     return jpaQueryFactory.selectFrom(mentoringApplication)
-        .join(mentoringApplication.mentoring, QMentoring.mentoring).fetchJoin()
-        .join(QMentoring.mentoring.mentor, QMentor.mentor).fetchJoin()
-        .join(mentoringApplication.payment, QPayment.payment).fetchJoin()
-        .join(QPayment.payment.payup, QPayup.payup).fetchJoin()
+        .join(mentoringApplication.mentoring, mentoring)
+        .fetchJoin()
+        .join(mentoring.mentor, mentor)
+        .fetchJoin()
+        .join(mentoringApplication.payment, payment)
+        .fetchJoin()
+        .join(payment.payup, payup)
+        .fetchJoin()
         .where(
             mentoringApplication.mentoringStatus.eq(status)
                 .and(mentoringApplication.updateDate.between(lastMonth, thisMonth))
-        ).fetch();
+        )
+        .fetch();
   }
 
   private BooleanBuilder equalsStatuses(MentoringStatus... statuses) {
