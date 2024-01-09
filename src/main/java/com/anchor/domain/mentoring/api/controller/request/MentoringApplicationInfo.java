@@ -1,8 +1,11 @@
 package com.anchor.domain.mentoring.api.controller.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import lombok.Builder;
@@ -21,10 +24,14 @@ public class MentoringApplicationInfo implements Serializable {
 
   private Integer amount;
 
-  @JsonFormat(shape = Shape.STRING, pattern = "yyyy/MM/dd HH:mm:ss", timezone = "Asia/Seoul")
+  @JsonSerialize(using = LocalDateTimeSerializer.class)
+  @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
   private LocalDateTime startDateTime;
 
-  @JsonFormat(shape = Shape.STRING, pattern = "yyyy/MM/dd HH:mm:ss", timezone = "Asia/Seoul")
+  @JsonSerialize(using = LocalDateTimeSerializer.class)
+  @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
   private LocalDateTime endDateTime;
 
   @Builder
