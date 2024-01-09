@@ -20,9 +20,8 @@ public class ImageController {
 
   @PostMapping
   public ResponseEntity<S3ImageUrl> uploadImage(@Valid @ModelAttribute ImageFile imageFile) {
-
-      S3ImageUrl s3ImageUrl = imageService.save(imageFile);
-      return ResponseEntity.ok(s3ImageUrl);
-
+    S3ImageUrl s3ImageUrl = imageService.save(imageFile);
+    return ResponseEntity.ok(s3ImageUrl);
   }
+
 }

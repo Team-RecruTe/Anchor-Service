@@ -81,7 +81,7 @@ public class MentoringService {
   @Transactional(readOnly = true)
   public MentoringContents getContents(Long id) {
     Mentoring mentoring = getMentoringById(id);
-    return new MentoringContents(mentoring.getContents(), mentoring.getTags());
+    return new MentoringContents(mentoring.getTitle(), mentoring.getContents(), mentoring.getTags());
   }
 
   /**

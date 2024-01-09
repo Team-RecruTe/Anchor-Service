@@ -43,7 +43,7 @@ public class MentoringViewController {
     return "mentoring-edit";
   }
 
-  @GetMapping("/{id}/edit")
+  @GetMapping("/{id}/contents/edit")
   public String viewMentoringEditPage(@PathVariable Long id, Model model) {
     MentoringContents result = mentoringService.getContents(id);
     model.addAttribute("mentoringContents", result);
