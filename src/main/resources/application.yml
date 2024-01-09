@@ -4,7 +4,7 @@ spring:
     active: local
     include:
       - aws
-
+      - pay
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${MYSQL_URL}

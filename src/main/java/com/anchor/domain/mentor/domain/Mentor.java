@@ -90,10 +90,10 @@ public class Mentor extends BaseEntity {
   }
 
   public void editContents(MentorContentsRequest mentorContentsRequest) {
-    if (this.mentorIntroduction == null) {
-      this.mentorIntroduction = MentorIntroduction.addContents(mentorContentsRequest.getContents());
-    } else {
-      this.mentorIntroduction.editContents(mentorContentsRequest.getContents());
+        if (this.mentorIntroduction == null) {
+          this.mentorIntroduction = MentorIntroduction.addContents(mentorContentsRequest.getContents());
+        } else {
+          this.mentorIntroduction.editContents(mentorContentsRequest.getContents());
     }
   }
 
