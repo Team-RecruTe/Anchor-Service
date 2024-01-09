@@ -2,6 +2,7 @@ package com.anchor.domain.mentoring.domain.repository.custom;
 
 import static com.anchor.domain.mentoring.domain.QMentoring.mentoring;
 import static com.querydsl.core.types.dsl.Expressions.numberTemplate;
+import static com.anchor.domain.mentoring.domain.QMentoringTag.mentoringTag;
 
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
 import com.anchor.domain.mentoring.domain.Mentoring;
@@ -84,6 +85,23 @@ public class QMentoringRepositoryImpl implements QMentoringRepository {
     return new PageImpl<>(mentoringSearchResults, pageable, mentoringSearchResults.size());
   }
 
+  @Override
+  public List<Mentoring> findPopularMentoringTags() {
+
+    List<Long> mentoringIds = jpaQueryFactory.select(mentoring.id)
+        .from(mentoring)
+        .orderBy(mentoring.totalApplicationNumber.desc())
+        .offset(0)
+        .limit(10)
+        .fetch();
+
+    return jpaQueryFactory.selectFrom(mentoring)
+        .join(mentoring.mentoringTags, mentoringTag)
+        .fetchJoin()
+        .where(mentoring.id.in(mentoringIds))
+        .fetch();
+  }
+
   public List<MentoringSearchResult> findTopMentorings() {
     List<Mentoring> result = jpaQueryFactory.selectFrom(mentoring)
         .orderBy(mentoring.totalApplicationNumber.desc())
@@ -134,10 +152,10 @@ public class QMentoringRepositoryImpl implements QMentoringRepository {
   }
 
   private BooleanExpression equalTag(String tag) {
-    if (tag != null && !tag.isBlank()) {
+    if (StringUtils.hasText(tag)) {
       return mentoring.mentoringTags.any().tag.eq(tag);
     }
-    return null;
+    return Expressions.TRUE;
   }
 
   private static class Searchable {
