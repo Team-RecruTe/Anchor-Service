@@ -68,13 +68,20 @@ public class UserController {
    * 신청한 멘토링의 상태를 변경합니다. 취소, 또는 완료로 변경가능합니다.
    */
   @PutMapping("/me/applied-mentorings")
-  public String appliedMentoringStatusChange(@RequestBody MentoringStatusInfo mentoringStatus,
+  public ResponseEntity<String> appliedMentoringStatusChange(@RequestBody MentoringStatusInfo mentoringStatus,
       HttpSession session) {
 
     SessionUser sessionUser = getSessionUserFromSession(session);
 
-    return userService.changeAppliedMentoringStatus(sessionUser, mentoringStatus) ?
-        SUCCESS : FAILURE;
+    boolean changeStatusResult = userService.changeAppliedMentoringStatus(sessionUser, mentoringStatus);
+
+    if (changeStatusResult) {
+      return ResponseEntity.ok()
+          .body(SUCCESS);
+    } else {
+      return ResponseEntity.badRequest()
+          .build();
+    }
   }
 
 

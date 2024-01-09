@@ -87,11 +87,9 @@ public class UserService {
     List<RequiredMentoringStatusInfo> mentoringStatusList = changeRequest.getMentoringStatusList();
     mentoringStatusList.forEach(status -> {
       try {
-
         if (status.mentoringStatusIsCanceledOrComplete()) {
           changeStatus(user, status);
         }
-
       } catch (NoSuchElementException | IllegalArgumentException e) {
         log.warn(e.getMessage());
       }
