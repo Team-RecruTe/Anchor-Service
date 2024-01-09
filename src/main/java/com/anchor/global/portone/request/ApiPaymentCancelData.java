@@ -3,10 +3,10 @@ package com.anchor.global.portone.request;
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.global.portone.response.PaymentCancelData.PaymentCancelDetail;
 import com.anchor.global.portone.response.SinglePaymentData.PaymentDataDetail;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import net.minidev.json.annotate.JsonIgnore;
 
 @Getter
 @NoArgsConstructor
