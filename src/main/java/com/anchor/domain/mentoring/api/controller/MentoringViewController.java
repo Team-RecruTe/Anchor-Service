@@ -35,7 +35,7 @@ public class MentoringViewController {
   ) {
     Page<MentoringSearchResult> result = mentoringService.getMentorings(tags, keyword, pageable);
     model.addAttribute("mentorings", result);
-    return viewResolver.getViewName("mentoring-edit");
+    return viewResolver.getViewPath("mentoring", "mentoring-edit");
   }
 
   @GetMapping("/new")
@@ -47,7 +47,7 @@ public class MentoringViewController {
   public String viewMentoringEditPage(@PathVariable Long id, Model model) {
     MentoringContents result = mentoringService.getContents(id);
     model.addAttribute("mentoringContents", result);
-    return viewResolver.getViewName("mentoring/mentoring-edit");
+    return viewResolver.getViewPath("mentoring", "mentoring-edit");
   }
 
 }
