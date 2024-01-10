@@ -7,7 +7,6 @@
 <head>
   <title>멘토링 조회</title>
   <meta charset="UTF-8">
-  <link href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" rel="stylesheet"/>
 </head>
 <div layout:fragment="content">
   <div class="container">
@@ -52,16 +51,18 @@
         <div class="row">
           <th:block th:each="mentoring: ${mentoringDefaultInfo.mentoringInfos}">
             <div class="col-md-3 mb-2">
-              <div class="card">
+              <div class="card" style="width: 14rem; height: 16rem">
                 <div class="card-body d-flex flex-column ">
                   <!-- Title -->
-                  <h6 class="card-title mb-3" th:text="${mentoring.mentoringInfo.title}">타이틀</h6>
+                  <h6 class="card-title mb-3">
+                    <a class="text-decoration-none text-dark"
+                       th:href="@{/mentorings/{id}(id=${mentoring.mentoringInfo.id})}"
+                       th:text="${mentoring.mentoringInfo.title}">타이틀</a></h6>
 
                   <!-- Career and Nickname -->
                   <p class="card-text mb-1 mr-2" th:text="${mentoring.mentorInfo.career}"></p>
                   <a class="card-text mb-1" th:href="@{/mentors/{id}(id=${mentoring.mentorInfo.id})}"
                      th:text="${mentoring.mentorInfo.mentorNickname}">닉네임</a>
-
 
                   <!-- Image -->
                   <img alt="멘토이미지" class="card-img-bottom mb-2 mt-auto" style="width: 50px; height: 50px;"
