@@ -1,6 +1,5 @@
 package com.anchor.domain.mentoring.api.service.response;
 
-import com.anchor.domain.mentoring.domain.MentoringUnavailableTime;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -17,11 +16,6 @@ public class ApplicationUnavailableTime implements Serializable {
   private ApplicationUnavailableTime(LocalDateTime fromDateTime, LocalDateTime toDateTime) {
     this.fromDateTime = fromDateTime;
     this.toDateTime = toDateTime;
-  }
-
-  public ApplicationUnavailableTime(MentoringUnavailableTime unavailableTime) {
-    this.fromDateTime = unavailableTime.getFromDateTime();
-    this.toDateTime = unavailableTime.getToDateTime();
   }
 
   @Override

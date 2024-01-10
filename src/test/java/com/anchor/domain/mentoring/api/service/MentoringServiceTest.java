@@ -15,12 +15,9 @@ import static com.anchor.constant.TestConstant.USER_EMAIL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.anchor.domain.mentor.domain.Career;
@@ -35,9 +32,7 @@ import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
-import com.anchor.domain.mentoring.domain.MentoringUnavailableTime;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
-import com.anchor.domain.mentoring.domain.repository.MentoringUnavailableTimeRepository;
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.domain.payment.domain.repository.PaymentRepository;
 import com.anchor.domain.user.domain.User;
@@ -68,8 +63,6 @@ class MentoringServiceTest {
   private PaymentRepository paymentRepository;
   @Mock
   private UserRepository userRepository;
-  @Mock
-  private MentoringUnavailableTimeRepository mentoringUnavailableTimeRepository;
 
   @InjectMocks
   private MentoringService mentoringService;
@@ -167,68 +160,6 @@ class MentoringServiceTest {
   }
 
   @Test
-  @DisplayName("멘토링ID를 입력하면 멘토링 불가일자와 시간을 반환한다.")
-  void loadMentoringUnavailableTimeTest() {
-    //given
-    Long inputMentoringId = 1L;
-    List<MentoringUnavailableTime> unavailableTimes = createMentoringUnavailableTime(
-        mentor);
-
-    Mentoring mentoring = Mentoring.builder()
-        .title(MENTORING_TITLE)
-        .durationTime(DURATION_TIME)
-        .cost(10_000)
-        .mentor(mentor)
-        .build();
-    given(mentoringRepository.findById(anyLong())).willReturn(Optional.of(mentoring));
-    given(mentoringUnavailableTimeRepository.findByMentorId(anyLong())).willReturn(unavailableTimes);
-
-    //when
-    List<ApplicationUnavailableTime> result =
-        mentoringService.loadMentoringUnavailableTime(inputMentoringId);
-
-    //then
-    assertThat(result)
-        .hasSize(unavailableTimes.size())
-        .extracting("fromDateTime", "toDateTime")
-        .containsExactly(
-
-            tuple(unavailableTimes.get(0)
-                    .getFromDateTime(),
-                unavailableTimes.get(0)
-                    .getToDateTime()),
-
-            tuple(unavailableTimes.get(1)
-                    .getFromDateTime(),
-                unavailableTimes.get(1)
-                    .getToDateTime())
-        );
-  }
-
-  @Test
-  @DisplayName("멘토링 불가일자가 없다면 null을 반환한다.")
-  void loadMentoringUnavailableTimeIsNullTest() {
-    //given
-    Long inputMentoringId = 1L;
-
-    Mentoring mentoring = Mentoring.builder()
-        .title(MENTORING_TITLE)
-        .durationTime(DURATION_TIME)
-        .cost(10_000)
-        .mentor(mentor)
-        .build();
-
-    given(mentoringRepository.findById(anyLong())).willReturn(Optional.of(mentoring));
-
-    //when
-    List<ApplicationUnavailableTime> result =
-        mentoringService.loadMentoringUnavailableTime(inputMentoringId);
-
-    //then
-    assertThat(result).isNull();
-  }
-
-  @Test
   @DisplayName("멘토링 신청이 완료되면 멘토링 신청내역을 저장하고, 성공하면 AppliedMentoringInfo객체를 반환한다.")
   void saveMentoringApplicationIsTrueTest() {
     //given
@@ -257,14 +188,8 @@ class MentoringServiceTest {
             .merchantUid("toss_testMerchant")
             .build(), user);
 
-    MentoringUnavailableTime unavailableTime = new MentoringUnavailableTime(mentoringApplication, mentoring);
-
     given(mentoringRepository.findById(anyLong())).willReturn(Optional.of(mentoring));
-
     given(userRepository.findByEmail(anyString())).willReturn(Optional.of(user));
-
-    given(mentoringUnavailableTimeRepository.save(any(MentoringUnavailableTime.class)))
-        .willReturn(unavailableTime);
 
     //when
     AppliedMentoringInfo appliedMentoringInfo =
@@ -276,8 +201,6 @@ class MentoringServiceTest {
             "mentoringEndDateTime", "mentoringStatus")
         .contains(NICKNAME, MENTORING_TITLE, mentoringApplication.getStartDateTime(),
             mentoringApplication.getEndDateTime(), MentoringStatus.WAITING);
-
-    verify(mentoringUnavailableTimeRepository, times(1)).save(any(MentoringUnavailableTime.class));
   }
 
   @Test
@@ -436,25 +359,6 @@ class MentoringServiceTest {
       mentoringList.add(testMentoring);
     }
     return mentoringList;
-  }
-
-  private List<MentoringUnavailableTime> createMentoringUnavailableTime(Mentor mentor) {
-    List<MentoringUnavailableTime> unavailableTimes = new ArrayList<>();
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-
-    LocalDateTime fromDateTime1 = LocalDateTime.parse(FIRST_FROM_DATE_TIME, formatter);
-    LocalDateTime toDateTime1 = LocalDateTime.parse(FIRST_TO_DATE_TIME, formatter);
-
-    LocalDateTime fromDateTime2 = LocalDateTime.parse(SECOND_FROM_DATE_TIME, formatter);
-    LocalDateTime toDateTime2 = LocalDateTime.parse(SECOND_TO_DATE_TIME, formatter);
-
-    MentoringUnavailableTime firstUnavailableTime = new MentoringUnavailableTime(fromDateTime1, toDateTime1, mentor);
-    MentoringUnavailableTime secondUnavailableTime = new MentoringUnavailableTime(fromDateTime2, toDateTime2, mentor);
-
-    unavailableTimes.add(firstUnavailableTime);
-    unavailableTimes.add(secondUnavailableTime);
-
-    return unavailableTimes;
   }
 
   private LocalDate createMentoringApplicationDate() {
