@@ -3,6 +3,8 @@ spring:
   profiles:
     active: local
     include:
+      - oauth
+      - session
       - aws
       - pay
   datasource:
