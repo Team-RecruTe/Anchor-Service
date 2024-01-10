@@ -1,10 +1,13 @@
 package com.anchor.domain.user.api.controller;
 
 import com.anchor.domain.user.api.controller.request.MentoringStatusInfo;
+import com.anchor.domain.user.api.controller.request.UserImageRequest;
 import com.anchor.domain.user.api.controller.request.UserNicknameRequest;
 import com.anchor.domain.user.api.service.UserService;
+import com.anchor.domain.user.api.service.response.AppliedMentoringInfo;
 import com.anchor.global.auth.SessionUser;
 import jakarta.servlet.http.HttpSession;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;

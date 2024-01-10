@@ -80,6 +80,34 @@ public class UserService {
     userRepository.delete(user);
   }
 
+  @Transactional
+  public UserInfoResponse getProfile(String email){
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(()->{
+          return new RuntimeException("해당 유저를 찾을 수 없습니다.");
+        });
+    return new UserInfoResponse(user);
+  }
+
+  @Transactional
+  public void editNickname(String email, UserNicknameRequest userNicknameRequest){
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(()->{
+          return new RuntimeException("해당 유저를 찾을 수 없습니다.");
+        });
+    user.editNickname(userNicknameRequest);
+    userRepository.save(user);
+  }
+
+  @Transactional
+  public void deleteUser(String email){
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(()->{
+          return new RuntimeException("해당 유저를 찾을 수 없습니다.");
+        });
+    userRepository.delete(user);
+  }
+
   @Transactional(readOnly = true)
   public Page<AppliedMentoringInfo> loadAppliedMentoringList(SessionUser sessionUser, Pageable pageable) {
     User user = getUser(sessionUser);
