@@ -95,21 +95,25 @@ public class MentoringController {
   @GetMapping("/{id}")
   public ResponseEntity<MentoringDetailInfo> mentoringDetail(
       @PathVariable("id") Long id) {
-    MentoringDetailInfo mentoringDetailInfo = mentoringService.loadMentoringDetail(id);
+    MentoringDetailInfo mentoringDetailInfo = mentoringService.getMentoringDetailInfo(id);
     return ResponseEntity.ok()
         .body(mentoringDetailInfo);
   }
 
-//  @GetMapping("/{id}/apply")
-//  public ResponseEntity<List<ApplicationUnavailableTime>> mentoringApplicationPage(
-//      @PathVariable("id") Long id, HttpSession session) {
-//    List<ApplicationUnavailableTime> applicationUnavailableTimeList = mentoringService.loadMentoringUnavailableTime(id);
-//    List<ApplicationUnavailableTime> sessionApplicationUnavailableTimeList = getSessionUnavailableTimeList(session, id);
-//    sessionApplicationUnavailableTimeList.addAll(applicationUnavailableTimeList);
-//    updateSessionUnavailableTimeList(session, id, sessionApplicationUnavailableTimeList);
-//    return ResponseEntity.ok()
-//        .body(sessionApplicationUnavailableTimeList);
-//  }
+
+  /**
+   * 멘토링 신청페이지로 이동합니다. 응답으로 멘토링 불가시간을 클라이언트로 전달합니다.
+   */
+/*  @GetMapping("/{id}/apply")
+  public ResponseEntity<List<ApplicationUnavailableTime>> mentoringApplicationPage(
+      @PathVariable("id") Long id, HttpSession session) {
+    List<ApplicationUnavailableTime> unavailableTimeList = mentoringService.getMentoringUnavailableTimeList(id);
+    List<ApplicationUnavailableTime> sessionUnavailableTimeList = getSessionUnavailableTimeList(session, id);
+    sessionUnavailableTimeList.addAll(unavailableTimeList);
+    updateSessionUnavailableTimeList(session, id, sessionUnavailableTimeList);
+    return ResponseEntity.ok()
+        .body(sessionUnavailableTimeList);
+  }*/
 
   /**
    * 멘토링 결제 완료가 되면 멘토링 신청이력을 저장합니다.
@@ -125,10 +129,10 @@ public class MentoringController {
         mentoringService.saveMentoringApplication(sessionUser, id, applicationInfo);
 
     if (appliedMentoringInfo != null) {
-      List<ApplicationUnavailableTime> sessionApplicationUnavailableTimeList =
+      List<ApplicationUnavailableTime> sessionUnavailableTimeList =
           getSessionUnavailableTimeList(session, id);
-      mentoringService.removeApplicationTimeFromSession(sessionApplicationUnavailableTimeList, applicationInfo);
-      updateSessionUnavailableTimeList(session, id, sessionApplicationUnavailableTimeList);
+      mentoringService.removeApplicationTimeFromSession(sessionUnavailableTimeList, applicationInfo);
+      updateSessionUnavailableTimeList(session, id, sessionUnavailableTimeList);
       return ResponseEntity.ok()
           .body(appliedMentoringInfo);
     }
@@ -167,10 +171,10 @@ public class MentoringController {
 
   private List<ApplicationUnavailableTime> getSessionUnavailableTimeList(
       HttpSession session, Long id) {
-    List<ApplicationUnavailableTime> sessionApplicationunavailableTimeList =
+    List<ApplicationUnavailableTime> sessionUnavailableTimeList =
         (List<ApplicationUnavailableTime>) session.getAttribute(String.valueOf(id));
-    return sessionApplicationunavailableTimeList == null ?
-        new ArrayList<>() : sessionApplicationunavailableTimeList;
+    return sessionUnavailableTimeList == null ?
+        new ArrayList<>() : sessionUnavailableTimeList;
   }
 
   private void updateSessionUnavailableTimeList(HttpSession session, Long id,

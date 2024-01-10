@@ -11,7 +11,6 @@ import com.anchor.domain.mentoring.api.service.response.AppliedMentoringInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringContents;
 import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
-import com.anchor.domain.mentoring.api.service.response.MentoringDefaultInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringDeleteResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
@@ -20,6 +19,7 @@ import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
 import com.anchor.domain.mentoring.api.service.response.TopMentoring;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
+import com.anchor.domain.mentoring.domain.MentoringTag;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.domain.payment.domain.repository.PaymentRepository;
@@ -31,6 +31,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -86,22 +88,21 @@ public class MentoringService {
     return new MentoringContents(mentoring.getTitle(), mentoring.getContents(), mentoring.getTags());
   }
 
-  /**
-   * 현재 저장되어있는 모든 멘토링을 조회합니다.
-   */
   @Transactional(readOnly = true)
-  public List<MentoringDefaultInfo> loadMentoringList() {
-    List<Mentoring> mentoringList = mentoringRepository.findAll();
+  public Set<String> getPopularMentoringTags() {
+    List<Mentoring> mentoringList = mentoringRepository.findPopularMentoringTags();
     return mentoringList.stream()
-        .map(MentoringDefaultInfo::new)
-        .toList();
+        .flatMap(mentoring -> mentoring.getMentoringTags()
+            .stream())
+        .map(MentoringTag::getTag)
+        .collect(Collectors.toSet());
   }
 
   /**
    * 입력한 ID를 통해 멘토링 상세정보를 조회합니다.
    */
   @Transactional(readOnly = true)
-  public MentoringDetailInfo loadMentoringDetail(Long id) {
+  public MentoringDetailInfo getMentoringDetailInfo(Long id) {
     Mentoring findMentoring = getMentoringById(id);
     return new MentoringDetailInfo(findMentoring);
   }
@@ -109,20 +110,21 @@ public class MentoringService {
   /**
    * 멘토링 신청페이지 조회시, 신청 불가능한 시간을 데이터베이스에서 조회합니다.
    */
-//  @Transactional(readOnly = true)
-//  public List<ApplicationUnavailableTime> loadMentoringUnavailableTime(Long id) {
-//    Mentoring findMentoring = getMentoringById(id);
-//    List<MentoringUnavailableTime> mentoringUnavailableTime = mentoringUnavailableTimeRepository.findByMentorId(
-//        findMentoring.getMentor()
-//            .getId());
-//    return mentoringUnavailableTime
-//        .isEmpty() ?
-//        null :
-//        mentoringUnavailableTime
-//            .stream()
-//            .map(ApplicationUnavailableTime::new)
-//            .toList();
-//  }
+/*  @Transactional(readOnly = true)
+  public List<ApplicationUnavailableTime> getMentoringUnavailableTimeList(Long id) {
+    Mentoring findMentoring = getMentoringById(id);
+    List<MentoringUnavailableTime> mentoringUnavailableTime = mentoringUnavailableTimeRepository.findByMentorId(
+        findMentoring.getMentor()
+            .getId());
+    return mentoringUnavailableTime
+        .isEmpty() ?
+        null :
+        mentoringUnavailableTime
+            .stream()
+            .map(ApplicationUnavailableTime::new)
+            .toList();
+  }*/
+
   public MentoringPaymentInfo createPaymentInfo(Long mentoringId, MentoringApplicationTime applicationTime) {
     Mentoring mentoring = getMentoringById(mentoringId);
     Integer cost = mentoring.getCost();
