@@ -3,6 +3,8 @@ package com.anchor.domain.mentoring.api.controller;
 import com.anchor.domain.mentoring.api.service.MentoringService;
 import com.anchor.domain.mentoring.api.service.response.MentoringContents;
 import com.anchor.domain.mentoring.api.service.response.MentoringDefaultInfo;
+import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
+import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo.MentoringDetailSearchResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.util.view.ViewResolver;
@@ -44,6 +46,17 @@ public class MentoringViewController {
 
     model.addAttribute("mentoringDefaultInfo", mentoringDefaultInfo);
     return viewResolver.getViewPath("mentoring", "mentoring-search");
+  }
+
+  @GetMapping("/{id}")
+  public String viewMentoringDetailPage(@PathVariable("id") Long id, Model model) {
+    MentoringDetailSearchResult mentoringDetailSearchResult = mentoringService.getMentoringDetailInfo(id);
+    Set<String> popularMentoringTags = mentoringService.getPopularMentoringTags();
+
+    MentoringDetailInfo mentoringDetailInfo = MentoringDetailInfo.of(mentoringDetailSearchResult, popularMentoringTags);
+
+    model.addAttribute("mentoringDetail", mentoringDetailInfo);
+    return viewResolver.getViewPath("mentoring", "mentoring-detail");
   }
 
   @GetMapping("/new")

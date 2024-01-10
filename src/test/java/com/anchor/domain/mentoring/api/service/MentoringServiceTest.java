@@ -24,7 +24,7 @@ import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTi
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
 import com.anchor.domain.mentoring.api.service.response.ApplicationUnavailableTime;
 import com.anchor.domain.mentoring.api.service.response.AppliedMentoringInfo;
-import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
+import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo.MentoringDetailSearchResult;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
@@ -102,7 +102,7 @@ class MentoringServiceTest {
     given(mentoringRepository.findById(anyLong())).willReturn(Optional.of(mentoring));
 
     //when
-    MentoringDetailInfo result = mentoringService.getMentoringDetailInfo(inputMentoringId);
+    MentoringDetailSearchResult result = mentoringService.getMentoringDetailInfo(inputMentoringId);
 
     //then
     assertThat(result)

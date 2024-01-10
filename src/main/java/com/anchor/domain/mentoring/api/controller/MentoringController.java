@@ -10,7 +10,6 @@ import com.anchor.domain.mentoring.api.service.response.AppliedMentoringInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringDeleteResult;
-import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringPaymentInfo;
 import com.anchor.domain.mentoring.api.service.response.TopMentoring;
@@ -90,14 +89,6 @@ public class MentoringController {
         .setLink("self", "/mentorings/rank")
         .build());
     return ResponseEntity.ok(result);
-  }
-
-  @GetMapping("/{id}")
-  public ResponseEntity<MentoringDetailInfo> mentoringDetail(
-      @PathVariable("id") Long id) {
-    MentoringDetailInfo mentoringDetailInfo = mentoringService.getMentoringDetailInfo(id);
-    return ResponseEntity.ok()
-        .body(mentoringDetailInfo);
   }
 
 

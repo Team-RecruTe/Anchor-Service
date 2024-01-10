@@ -1,6 +1,9 @@
 package com.anchor.domain.mentoring.domain.repository.custom;
 
+import static com.anchor.domain.mentor.domain.QMentor.mentor;
 import static com.anchor.domain.mentoring.domain.QMentoring.mentoring;
+import static com.anchor.domain.mentoring.domain.QMentoringDetail.mentoringDetail;
+import static com.anchor.domain.user.domain.QUser.user;
 import static com.querydsl.core.types.dsl.Expressions.numberTemplate;
 import static com.anchor.domain.mentoring.domain.QMentoringTag.mentoringTag;
 
@@ -119,6 +122,20 @@ public class QMentoringRepositoryImpl implements QMentoringRepository {
         .toList();
 
     return topMentorings;
+  }
+
+  public Mentoring findMentoringDetailInfo(Long id) {
+    return jpaQueryFactory.selectFrom(mentoring)
+        .join(mentoring.mentor, mentor)
+        .fetchJoin()
+        .join(mentoring.mentoringDetail, mentoringDetail)
+        .fetchJoin()
+        .join(mentoring.mentoringTags, mentoringTag)
+        .fetchJoin()
+        .join(mentor.user, user)
+        .fetchJoin()
+        .where(mentoring.id.eq(id))
+        .fetchOne();
   }
 
   private long from(Pageable pageable) {

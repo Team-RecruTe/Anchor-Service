@@ -14,4 +14,6 @@ public interface QMentoringRepository {
 
   List<Mentoring> findPopularMentoringTags();
 
+  Mentoring findMentoringDetailInfo(Long id);
+
 }

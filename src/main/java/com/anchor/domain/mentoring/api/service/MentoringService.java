@@ -12,7 +12,7 @@ import com.anchor.domain.mentoring.api.service.response.MentoringContents;
 import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringDeleteResult;
-import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
+import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo.MentoringDetailSearchResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringPaymentInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
@@ -102,9 +102,9 @@ public class MentoringService {
    * 입력한 ID를 통해 멘토링 상세정보를 조회합니다.
    */
   @Transactional(readOnly = true)
-  public MentoringDetailInfo getMentoringDetailInfo(Long id) {
-    Mentoring findMentoring = getMentoringById(id);
-    return new MentoringDetailInfo(findMentoring);
+  public MentoringDetailSearchResult getMentoringDetailInfo(Long id) {
+    Mentoring findMentoring = mentoringRepository.findMentoringDetailInfo(id);
+    return MentoringDetailSearchResult.of(findMentoring);
   }
 
   /**
