@@ -188,9 +188,9 @@
           contentType: "application/json; charset=utf-8",
         }).done(function (resp) {
           if(resp.status===500){
-            alert("회원정보수정 실패");
+            alert("회원 탈퇴 실패");
           } else {
-            alert("회원정보수정 성공");
+            alert("회원 탈퇴 성공");
             location.href="/users/me";
           }
         }).fail(function (error) {
@@ -200,7 +200,7 @@
       },
     }
 
-  index.init();
+    index.init();
   </script>
 </div>
 
