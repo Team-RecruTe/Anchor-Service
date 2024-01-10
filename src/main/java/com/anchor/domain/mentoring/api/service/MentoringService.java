@@ -19,9 +19,7 @@ import com.anchor.domain.mentoring.api.service.response.MentoringPaymentInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
-import com.anchor.domain.mentoring.domain.MentoringUnavailableTime;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
-import com.anchor.domain.mentoring.domain.repository.MentoringUnavailableTimeRepository;
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.domain.payment.domain.repository.PaymentRepository;
 import com.anchor.domain.user.domain.User;
@@ -43,7 +41,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class MentoringService {
 
   private final MentoringRepository mentoringRepository;
-  private final MentoringUnavailableTimeRepository mentoringUnavailableTimeRepository;
   private final UserRepository userRepository;
   private final MentorRepository mentorRepository;
   private final PaymentRepository paymentRepository;
@@ -109,21 +106,20 @@ public class MentoringService {
   /**
    * 멘토링 신청페이지 조회시, 신청 불가능한 시간을 데이터베이스에서 조회합니다.
    */
-  @Transactional(readOnly = true)
-  public List<ApplicationUnavailableTime> loadMentoringUnavailableTime(Long id) {
-    Mentoring findMentoring = getMentoringById(id);
-    List<MentoringUnavailableTime> mentoringUnavailableTime = mentoringUnavailableTimeRepository.findByMentorId(
-        findMentoring.getMentor()
-            .getId());
-    return mentoringUnavailableTime
-        .isEmpty() ?
-        null :
-        mentoringUnavailableTime
-            .stream()
-            .map(ApplicationUnavailableTime::new)
-            .toList();
-  }
-
+//  @Transactional(readOnly = true)
+//  public List<ApplicationUnavailableTime> loadMentoringUnavailableTime(Long id) {
+//    Mentoring findMentoring = getMentoringById(id);
+//    List<MentoringUnavailableTime> mentoringUnavailableTime = mentoringUnavailableTimeRepository.findByMentorId(
+//        findMentoring.getMentor()
+//            .getId());
+//    return mentoringUnavailableTime
+//        .isEmpty() ?
+//        null :
+//        mentoringUnavailableTime
+//            .stream()
+//            .map(ApplicationUnavailableTime::new)
+//            .toList();
+//  }
   public MentoringPaymentInfo createPaymentInfo(Long mentoringId, MentoringApplicationTime applicationTime) {
     Mentoring mentoring = getMentoringById(mentoringId);
     Integer cost = mentoring.getCost();
@@ -158,7 +154,6 @@ public class MentoringService {
         new MentoringApplication(applicationInfo, null, findMentoring, null, loginUser);
     Payment payment = new Payment(applicationInfo, mentoringApplication);
     paymentRepository.save(payment);
-    saveMentoringUnavailableTime(mentoringApplication, findMentoring);
     return new AppliedMentoringInfo(mentoringApplication, payment);
   }
 
@@ -204,12 +199,6 @@ public class MentoringService {
   @Transactional
   public Page<MentoringSearchResult> getMentorings(List<String> tags, String keyword, Pageable pageable) {
     return mentoringRepository.findMentorings(tags, keyword, pageable);
-  }
-
-  private void saveMentoringUnavailableTime(MentoringApplication mentoringApplication, Mentoring findMentoring) {
-    MentoringUnavailableTime saveMentoringUnavailableTime =
-        new MentoringUnavailableTime(mentoringApplication, findMentoring);
-    mentoringUnavailableTimeRepository.save(saveMentoringUnavailableTime);
   }
 
 }

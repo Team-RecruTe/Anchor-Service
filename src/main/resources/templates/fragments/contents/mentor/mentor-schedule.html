@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko"
+      layout:decorate="~{layout/default}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+>
+<head>
+  <title>멘토 스케줄 페이지</title>
+  <style>
+    button.toastui-calendar-edit-button, div.toastui-calendar-vertical-line {
+      display: none !important;
+    }
+
+    .tui-datepicker {
+      z-index: 100
+    }
+
+    #calendar {
+      height: 800px;
+      width: 1200px;
+    }
+
+    #fixed-time-selector {
+      width: 446px;
+    }
+
+    .sidebar hr {
+      margin: 1rem 0;
+    }
+
+    .app-column nav {
+      flex: 0 1 4rem;
+      border-bottom: 1px solid #e5e5e5;
+    }
+
+    .navbar {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    .navbar .dropdown {
+      margin-right: 1rem;
+    }
+
+    .navbar .dropdown .toastui-calendar-icon {
+      margin-left: 0.5rem;
+    }
+
+    .button.prev, .button.next {
+      padding: 0.8rem;
+    }
+
+    .navbar .button + .button {
+      margin-left: 0.25rem;
+    }
+
+    input:disabled + label {
+      color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .toastui-calendar-template-time strong {
+      color: inherit;
+    }
+
+  </style>
+  <link href="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet"/>
+  <link
+      href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.min.css"
+      rel="stylesheet"
+  />
+  <link
+      href="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.min.css"
+      rel="stylesheet"
+  />
+</head>
+<body>
+<div class="d-flex justify-content-center" layout:fragment="content">
+  <div class="d-flex flex-column align-items-center" id="fixed-time-selector">
+    <!--    <input class="form-control" id="fixed-title" placeholder="title" type="text">-->
+    <div class="d-flex justify-content-evenly w-100" id="date-time-picker">
+      <div id="start-date">
+        <span>시작</span>
+        <div class="tui-datepicker-input tui-datetime-input tui-has-focus">
+          <input aria-label="Date-Time" id="start-date-target" type="text"/>
+          <span class="tui-ico-date"></span>
+        </div>
+        <div id="start-date-container" style="margin-top: -1px;"></div>
+      </div>
+      <div id="end-date">
+        <span>종료</span>
+        <div class="tui-datepicker-input tui-datetime-input tui-has-focus">
+          <input aria-label="Date-Time" id="end-date-target" type="text"/>
+          <span class="tui-ico-date"></span>
+        </div>
+        <div id="end-date-container" style="margin-top: -1px;"></div>
+      </div>
+    </div>
+    <div>
+      <button class="btn btn-primary" id="add-fixed-time-btn" type="button">추가하기</button>
+      <button class="btn btn-primary" id="save-fixed-time-btn" type="button">저장하기</button>
+    </div>
+  </div>
+  <div class="d-flex flex-column">
+    <nav class="navbar">
+      <button class="button is-rounded prev">
+        <img alt="prev" src="./images/ic-arrow-line-left.png" srcset="
+                  /images/cal/ic-arrow-line-left@2x.png 2x,
+                  /images/cal/ic-arrow-line-left@3x.png 3x
+                ">
+      </button>
+      <button class="button is-rounded today">Today</button>
+      <button class="button is-rounded next">
+        <img alt="prev" src="./images/ic-arrow-line-right.png" srcset="
+                  /images/cal/ic-arrow-line-right@2x.png 2x,
+                  /images/cal/ic-arrow-line-right@3x.png 3x
+                ">
+      </button>
+    </nav>
+    <div id="calendar"></div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.3/moment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chance/1.1.8/chance.min.js"></script>
+  <script src="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.min.js"></script>
+  <script src="https://uicdn.toast.com/tui.date-picker/latest/tui-date-picker.min.js"></script>
+  <script src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
+  <!--  <script src="/js/mentor/tui-app.js"></script>-->
+  <script>
+    const tuiCalendar = tui.Calendar
+    const tuiDatePicker = tui.DatePicker
+
+    const startContainer = document.getElementById('start-date-container');
+    const startTarget = document.getElementById('start-date-target');
+    const endContainer = document.getElementById('end-date-container');
+    const endTarget = document.getElementById('end-date-target');
+
+    startPicker = new tuiDatePicker(startContainer, {
+      date: new Date(),
+      input: {
+        element: startTarget,
+        format: "yyyy-MM-dd HH:mm a"
+      },
+      timePicker: {
+        // layoutType: 'tab',
+        inputType: 'spinbox',
+        minuteStep: 10
+      }
+    })
+    endPicker = new tuiDatePicker(endContainer, {
+      date: new Date(),
+      input: {
+        element: endTarget,
+        format: "yyyy-MM-dd HH:mm a"
+      },
+      timePicker: {
+        // layoutType: 'tab',
+        inputType: 'spinbox',
+        minuteStep: 10
+      }
+    })
+
+    const calendarContainer = document.querySelector('#calendar')
+    const calendar = new tuiCalendar(calendarContainer, {
+      defaultView: 'month',
+      // useFormPopup: true,
+      useDetailPopup: true,
+      isReadOnly: true,
+      timezone: {
+        zones: [
+          {
+            timezoneName: 'Asia/Seoul',
+            displayLabel: 'Seoul',
+          },
+        ]
+      },
+      usageStatistics: false
+    });
+
+    const prevButton = document.querySelector('.prev');
+    const nextButton = document.querySelector('.next');
+    const todayButton = document.querySelector('.today');
+
+    prevButton.addEventListener('click', function () {
+      calendar.prev();
+    });
+    nextButton.addEventListener('click', function () {
+      calendar.next();
+    });
+    todayButton.addEventListener('click', function () {
+      calendar.today();
+    });
+
+    let events = [];
+    calendar.on('beforeDeleteEvent', (eventObj) => {
+      events = events.filter((event) => {
+        return (event.id !== eventObj.id)
+      });
+      calendar.deleteEvent(eventObj.id, eventObj.calendarId);
+      console.log(events)
+    });
+    axios.get("/mentors/me/schedule")
+    .then(res => {
+      console.log(res.data)
+      const unavailables = res.data.unavailables
+      for (const range of unavailables) {
+        const end = new Date(range.to)
+        const endHH = end.getHours().toString().padStart(2, '0')
+        const endMM = end.getMinutes().toString().padStart(2, '0')
+        const event = {
+          id: range.from,
+          calendarId: 'unavailable',
+          title: '~ ' + endHH + ':' + endMM + ' :: 불가능',
+          isAllday: false,
+          category: 'time',
+          start: range.from,
+          end: range.to,
+          attendees: ['멘토'],
+          state: '불가능',
+          backgroundColor: '#f55d42'
+        }
+        events.push(event)
+      }
+      const applications = res.data.applications
+      for (const range of applications) {
+        const end = new Date(range.to)
+        const endHH = end.getHours().toString().padStart(2, '0')
+        const endMM = end.getMinutes().toString().padStart(2, '0')
+        const event = {
+          id: range.from,
+          calendarId: 'application',
+          title: '~ ' + endHH + ':' + endMM + ' :: 멘토링',
+          isAllday: false,
+          category: 'time',
+          start: range.from,
+          end: range.to,
+          isReadOnly: true,
+          attendees: ['멘티'],
+          state: '멘토링',
+          backgroundColor: '#42f551',
+        }
+        events.push(event)
+      }
+      console.log(events)
+      calendar.createEvents(events)
+    }).catch(error => {
+      console.log(error)
+      alert('에러입니다.');
+    })
+
+    const addFixedTimeButton = document.querySelector('#add-fixed-time-btn')
+    addFixedTimeButton.addEventListener('click', (e) => {
+      const startDateTime = startPicker.getDate()
+      startDateTime.setHours(startDateTime.getHours() + 9)
+      const endDateTime = endPicker.getDate()
+      const endHH = endDateTime.getHours().toString().padStart(2, '0')
+      const endMM = endDateTime.getMinutes().toString().padStart(2, '0')
+      endDateTime.setHours(endDateTime.getHours() + 9)
+      const event = {
+        id: range.from,
+        calendarId: 'unavailable',
+        title: '~ ' + endHH + ':' + endMM + ' :: 불가능',
+        isAllday: false,
+        category: 'time',
+        start: startDateTime.toISOString().substring(0, 19),
+        end: endDateTime.toISOString().substring(0, 19),
+        attendees: ['멘토'],
+        state: '불가능',
+        backgroundColor: '#fa7f7f'
+      }
+
+      events.push(event)
+      calendar.createEvents([event])
+    })
+
+    const saveFixedTimeButton = document.querySelector('#save-fixed-time-btn')
+    saveFixedTimeButton.addEventListener('click', (e) => {
+      const dateTimeRanges = [];
+      for (const event of events) {
+        if (event.calendarId === 'unavailable') {
+          dateTimeRanges.push({
+            from: event.start,
+            to: event.end
+          })
+        }
+      }
+    })
+  </script>
+</div>
+</body>
+</html>

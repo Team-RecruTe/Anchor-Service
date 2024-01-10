@@ -21,11 +21,6 @@ class MentorServiceTest {
   @MockBean
   private MentorRepository mentorRepository;
 
-//  @BeforeEach
-//  void setUp() {
-//    mentorService = new MentorService(mentorRepository);
-//  }
-
   @Test
   @DisplayName("멘토 등록 성공")
   void registerSuccess() {

@@ -3,12 +3,10 @@ package com.anchor.domain.mentor.api.service;
 import com.anchor.domain.mentor.api.controller.request.MentorRegisterInfo;
 import com.anchor.domain.mentor.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
 import com.anchor.domain.mentor.api.service.response.AppliedMentoringSearchResult;
-import com.anchor.domain.mentor.api.service.response.MentoringUnavailableTimes;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentor.domain.repository.MentorRepository;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
-import com.anchor.domain.mentoring.domain.MentoringUnavailableTime;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
 import com.anchor.global.util.type.DateTimeRange;
 import jakarta.persistence.PersistenceException;
@@ -30,12 +28,6 @@ public class MentorService {
 
   private final MentorRepository mentorRepository;
   private final MentoringApplicationRepository mentoringApplicationRepository;
-
-  @Transactional
-  public void setUnavailableTimes(Long id, List<DateTimeRange> unavailableTimes) {
-    mentorRepository.deleteUnavailableTimes(id);
-    mentorRepository.saveUnavailableTimesWithBatch(id, unavailableTimes);
-  }
 
   @Transactional
   public void changeMentoringStatus(Long id, List<RequiredMentoringStatusInfo> requiredMentoringStatusInfos) {
@@ -79,22 +71,14 @@ public class MentorService {
     }
   }
 
-  public MentoringUnavailableTimes getUnavailableTimes(Long mentorId) {
-    List<MentoringUnavailableTime> unavailableTimes = mentorRepository.findUnavailableTimes(mentorId);
-    List<MentoringApplication> reservedMentorings = mentoringApplicationRepository.findUnavailableTimesByMentoringIdAndStatus(
-        mentorId, MentoringStatus.APPROVAL,
-        MentoringStatus.WAITING);
-
-    return MentoringUnavailableTimes.of(unavailableTimes, reservedMentorings);
-  }
-
   public Page<AppliedMentoringSearchResult> getMentoringApplications(Long mentorId, Pageable pageable) {
     return mentoringApplicationRepository.findAllByMentorId(mentorId,
         pageable);
   }
 
   public Mentor register(MentorRegisterInfo mentorRegisterInfo) {
-    if (mentorRepository.findByCompanyEmail(mentorRegisterInfo.getCompanyEmail()).isPresent()) {
+    if (mentorRepository.findByCompanyEmail(mentorRegisterInfo.getCompanyEmail())
+        .isPresent()) {
       throw new IllegalStateException("이미 존재하는 이메일");
     }
     Mentor dbInsertMentor = Mentor.builder()

@@ -19,7 +19,7 @@ public abstract class MentoringStatusUtils {
     return mentoringStatusSet.stream()
         .filter(mentoringStatus -> mentoringStatus.isEqualTo(status))
         .findAny()
-        .orElseThrow(() -> new NoSuchElementException("일치하는 상태가 없습다."));
+        .orElseThrow(() -> new NoSuchElementException("일치하는 상태가 없습니다."));
   }
   
 }

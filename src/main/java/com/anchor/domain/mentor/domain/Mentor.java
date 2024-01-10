@@ -15,7 +15,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -55,6 +57,12 @@ public class Mentor extends BaseEntity {
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
   private User user;
+
+  @OneToMany(
+      mappedBy = "mentor",
+      cascade = CascadeType.ALL
+  )
+  private Set<MentorSchedule> mentorSchedule = new HashSet<>();
 
   @Builder
   private Mentor(String companyEmail, Career career, String accountNumber, String accountName, String bankName,
