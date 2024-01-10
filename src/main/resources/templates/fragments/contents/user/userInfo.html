@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko"
+      layout:decorate="~{layout/default}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+>
+<head>
+  <title>Anchor-service</title>
+</head>
+
+<div layout:fragment="content" class="main">
+  <h2 style="text-align: center;">회원 정보 조회 페이지</h2>
+
+  <div class="container">
+    <div class="text-center mb-4">
+      <img src="https://anchor-image-stroage.s3.ap-northeast-2.amazonaws.com/%EA%B3%A0%EC%8A%B4%EB%8F%84%EC%B9%98_1704431943574.jpg" class="img-fluid rounded" alt="" id="userImageUrl"> <!--삭제-->
+      <input type="file" id="profileImageInput" class="d-none"> <!--th:type="file" name="profileImageUrl" id="profileSelect"-->
+      <br>
+      <label for="profileImageInput" class="btn btn-sm btn-primary mt-2">프로필 사진 수정</label>
+    </div>
+
+    <!--
+
+          <td>
+            <div>
+              <th:block th:if="${userInfo.image==null}">
+                  <img src="/images/harry.jpeg" class="img-fluid rounded" alt="" id="userImage">
+              </th:block>
+              <th:block th:unless="${userInfo.image==null}">
+                <img src="" th:src="@{|/upload/${userInfo}|}" class="img-fluid rounded" alt="" id="userImageUrl">
+              </th:block>
+            </div>
+          </td>
+-->
+
+
+
+    <table class="table table-striped">
+      <tbody>
+        <tr>
+          <th scope="row">이메일</th>
+          <td >harry@naver.com</td> <!--th:text="${userInfo.email}"-->
+        </tr>
+
+        <tr>
+          <th scope="row">별명</th>
+          <td>
+            <input class="form-control" th:type="text" name="nickName" placeholder="해리포터"> <!--th:value="${userInfo.nickname}-->
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="mt-5 d-flex justify-content-center" >
+      <a class="btn btn-primary mx-1" id="btnUserModify">회원 정보 수정</a>
+      <a class="btn btn-danger mx-1" id="btnUserDelete">회원 탈퇴</a>
+    </div>
+
+  </div>
+
+  <script th:inline="javascript">
+
+  </script>
+
+</div>
+
+</html>
