@@ -85,7 +85,6 @@ public class UserService {
     userRepository.delete(user);
   }
 
-
   @Transactional(readOnly = true)
   public Page<AppliedMentoringInfo> loadAppliedMentoringList(SessionUser sessionUser, Pageable pageable) {
     User user = getUser(sessionUser);
