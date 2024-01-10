@@ -9,12 +9,18 @@ import static com.anchor.constant.TestConstant.TIME_FORMATTER;
 import static com.anchor.constant.TestConstant.USER_EMAIL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
@@ -27,8 +33,11 @@ import com.anchor.domain.payment.domain.PaymentStatus;
 import com.anchor.domain.payment.domain.repository.PaymentRepository;
 import com.anchor.domain.user.api.controller.request.MentoringStatusInfo;
 import com.anchor.domain.user.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
+import com.anchor.domain.user.api.controller.request.UserNicknameRequest;
 import com.anchor.domain.user.api.service.response.AppliedMentoringInfo;
+import com.anchor.domain.user.api.service.response.UserInfoResponse;
 import com.anchor.domain.user.domain.User;
+import com.anchor.domain.user.domain.UserRole;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.portone.response.PaymentCancelData.PaymentCancelDetail;
@@ -67,13 +76,10 @@ class UserServiceTest {
   UserService userService;
 
 
-
-
-
   private User user;
   private SessionUser sessionUser;
 
-  private UserInfoResponse userInfoResponse(User user){
+  private UserInfoResponse userInfoResponse(User user) {
     return new UserInfoResponse(user);
   }
 
@@ -145,7 +151,6 @@ class UserServiceTest {
     // when, then
     assertThrows(RuntimeException.class, () -> userService.editNickname(userEmail, userNicknameRequest));
   }
-
 
 
   @DisplayName("유저 삭제 - 성공")
@@ -571,129 +576,5 @@ class UserServiceTest {
       );
     }
     return statusList;
-=======
-  @InjectMocks
-  private UserService userService;
-
-  @Mock
-  private UserRepository userRepository;
-
-
-  @BeforeAll
-  static void beforeAll(){
-    System.out.println("Start Test");
-  }
-
-  @AfterAll
-  static void afterAll(){
-    System.out.println("End Test");
-  }
-
-
-  private UserInfoResponse userInfoResponse(User user){
-    return new UserInfoResponse(user);
-  }
-
-
-  @DisplayName("회원 정보 조회 - 성공")
-  @Test
-  void getProfile() {
-    //given
-    String userEmail = "mark@smtown";
-    User user = User.builder()
-        .email(userEmail)
-        .nickname("mark")
-        .role(UserRole.USER)
-        .build();
-    userRepository.save(user);
-    when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
-
-    // when
-    UserInfoResponse userInfoResponse = userService.getProfile(userEmail);
-
-    // then
-    assertNotNull(userInfoResponse);
-    assertEquals("mark", userInfoResponse.getNickname());
-    assertEquals(userEmail, userInfoResponse.getEmail());
-    assertEquals(UserRole.USER, userInfoResponse.getRole());
-
-  }
-
-  @DisplayName("회원 정보 조회 - 실패 (유저를 찾을 수 없음)")
-  @Test
-  void getProfile_Fail_UserNotFound() {
-    // given
-    String userEmail = "nonexistent@smtown";
-    when(userRepository.findByEmail(userEmail)).thenReturn(Optional.empty());
-
-    // when, then
-    assertThrows(RuntimeException.class, () -> userService.getProfile(userEmail));
-  }
-
-
-  @DisplayName("닉네임 수정 - 성공")
-  @Test
-  void editNickname_Success() {
-    // given
-    String userEmail = "mark@smtown";
-    User user = User.builder()
-        .email(userEmail)
-        .nickname("mark")
-        .role(UserRole.USER)
-        .build();
-    when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
-    UserNicknameRequest userNicknameRequest = new UserNicknameRequest("newMark");
-
-    // when
-    assertDoesNotThrow(() -> userService.editNickname(userEmail, userNicknameRequest));
-
-    // then
-    assertEquals("newMark", user.getNickname());
-  }
-
-  @DisplayName("닉네임 수정 - 실패 (유저를 찾을 수 없음)")
-  @Test
-  void editNickname_Fail_UserNotFound() {
-    // given
-    String userEmail = "nonexistent@smtown";
-    UserNicknameRequest userNicknameRequest = new UserNicknameRequest("newMark");
-    when(userRepository.findByEmail(userEmail)).thenReturn(Optional.empty());
-
-    // when, then
-    assertThrows(RuntimeException.class, () -> userService.editNickname(userEmail, userNicknameRequest));
-  }
-
-
-
-  @DisplayName("유저 삭제 - 성공")
-  @Test
-  void deleteUser_Success() {
-    // given
-    String userEmail = "mark@smtown";
-    User user = User.builder()
-        .email(userEmail)
-        .nickname("mark")
-        .role(UserRole.USER)
-        .build();
-    when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
-
-    // when
-    assertDoesNotThrow(() -> userService.deleteUser(userEmail));
-
-    // then
-    verify(userRepository, times(1)).delete(user);
-  }
-
-  @DisplayName("유저 삭제 - 실패 (유저를 찾을 수 없음)")
-  @Test
-  void deleteUser_Fail_UserNotFound() {
-    // given
-    String userEmail = "nonexistent@smtown";
-    when(userRepository.findByEmail(userEmail)).thenReturn(Optional.empty());
-
-    // when, then
-    assertThrows(RuntimeException.class, () -> userService.deleteUser(userEmail));
-    verify(userRepository, never()).delete(any());
->>>>>>> 15a509f (git commit -m ")
   }
 }

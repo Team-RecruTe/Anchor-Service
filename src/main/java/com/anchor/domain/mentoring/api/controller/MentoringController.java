@@ -90,17 +90,16 @@ public class MentoringController {
         .body(mentoringDetailInfo);
   }
 
-
-  @GetMapping("/{id}/apply")
-  public ResponseEntity<List<ApplicationUnavailableTime>> mentoringApplicationPage(
-      @PathVariable("id") Long id, HttpSession session) {
-    List<ApplicationUnavailableTime> applicationUnavailableTimeList = mentoringService.loadMentoringUnavailableTime(id);
-    List<ApplicationUnavailableTime> sessionApplicationUnavailableTimeList = getSessionUnavailableTimeList(session, id);
-    sessionApplicationUnavailableTimeList.addAll(applicationUnavailableTimeList);
-    updateSessionUnavailableTimeList(session, id, sessionApplicationUnavailableTimeList);
-    return ResponseEntity.ok()
-        .body(sessionApplicationUnavailableTimeList);
-  }
+//  @GetMapping("/{id}/apply")
+//  public ResponseEntity<List<ApplicationUnavailableTime>> mentoringApplicationPage(
+//      @PathVariable("id") Long id, HttpSession session) {
+//    List<ApplicationUnavailableTime> applicationUnavailableTimeList = mentoringService.loadMentoringUnavailableTime(id);
+//    List<ApplicationUnavailableTime> sessionApplicationUnavailableTimeList = getSessionUnavailableTimeList(session, id);
+//    sessionApplicationUnavailableTimeList.addAll(applicationUnavailableTimeList);
+//    updateSessionUnavailableTimeList(session, id, sessionApplicationUnavailableTimeList);
+//    return ResponseEntity.ok()
+//        .body(sessionApplicationUnavailableTimeList);
+//  }
 
   /**
    * 멘토링 결제 완료가 되면 멘토링 신청이력을 저장합니다.
