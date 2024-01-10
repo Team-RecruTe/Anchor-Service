@@ -102,7 +102,7 @@ class MentoringServiceTest {
     given(mentoringRepository.findById(anyLong())).willReturn(Optional.of(mentoring));
 
     //when
-    MentoringDetailInfo result = mentoringService.loadMentoringDetail(inputMentoringId);
+    MentoringDetailInfo result = mentoringService.getMentoringDetailInfo(inputMentoringId);
 
     //then
     assertThat(result)
@@ -125,7 +125,7 @@ class MentoringServiceTest {
 
     //when then
     assertThatThrownBy(
-        () -> mentoringService.loadMentoringDetail(inputWrongMentoringId)).isInstanceOf(
+        () -> mentoringService.getMentoringDetailInfo(inputWrongMentoringId)).isInstanceOf(
             NoSuchElementException.class)
         .hasMessage(noSuchElementExceptionMessage);
 

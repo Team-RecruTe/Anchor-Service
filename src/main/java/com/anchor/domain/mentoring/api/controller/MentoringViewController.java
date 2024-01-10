@@ -2,11 +2,13 @@ package com.anchor.domain.mentoring.api.controller;
 
 import com.anchor.domain.mentoring.api.service.MentoringService;
 import com.anchor.domain.mentoring.api.service.response.MentoringContents;
+import com.anchor.domain.mentoring.api.service.response.MentoringDefaultInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.util.view.ViewResolver;
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,9 +37,13 @@ public class MentoringViewController {
           sort = {"totalApplicationNumber"}, direction = Sort.Direction.DESC) Pageable pageable,
       Model model
   ) {
-    Page<MentoringSearchResult> result = mentoringService.getMentorings(tags, keyword, pageable);
-    model.addAttribute("mentorings", result);
-    return viewResolver.getViewPath("mentoring", "contents-edit");
+    Page<MentoringSearchResult> mentoringSearchResults = mentoringService.getMentorings(tags, keyword, pageable);
+    Set<String> popularMentoringTags = mentoringService.getPopularMentoringTags();
+
+    MentoringDefaultInfo mentoringDefaultInfo = MentoringDefaultInfo.of(mentoringSearchResults, popularMentoringTags);
+
+    model.addAttribute("mentoringDefaultInfo", mentoringDefaultInfo);
+    return viewResolver.getViewPath("mentoring", "mentoring-search");
   }
 
   @GetMapping("/new")
@@ -52,5 +58,4 @@ public class MentoringViewController {
     model.addAttribute("mentoringContents", result);
     return viewResolver.getViewPath("mentoring", "contents-edit");
   }
-
 }
