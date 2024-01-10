@@ -25,12 +25,11 @@ public class UserViewController {
   private final ViewResolver viewResolver;
 
   @GetMapping("/me")
-  public String getInfo(Model model, HttpSession httpSession) {
-    SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user"); //email, nickname, image
-    String email = sessionUser.getEmail();
-    UserInfoResponse userInfoResponse = userService.getProfile(email);
-    model.addAttribute("user", userInfoResponse);
-    return "내 프로필 페이지 조회";
+  public String getInfo(Model model, HttpSession httpSession){
+    SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
+    UserInfoResponse userInfoResponse = userService.getProfile(sessionUser.getEmail());
+    model.addAttribute("userInfo", userInfoResponse);
+    return viewResolver.getViewPath("user", "userInfo");
   }
 
   /**
