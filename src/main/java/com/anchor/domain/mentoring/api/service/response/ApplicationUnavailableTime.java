@@ -1,5 +1,6 @@
 package com.anchor.domain.mentoring.api.service.response;
 
+import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -28,6 +29,11 @@ public class ApplicationUnavailableTime implements Serializable {
   private ApplicationUnavailableTime(LocalDateTime fromDateTime, LocalDateTime toDateTime) {
     this.fromDateTime = fromDateTime;
     this.toDateTime = toDateTime;
+  }
+
+  public ApplicationUnavailableTime(MentoringApplication application) {
+    this.fromDateTime = application.getStartDateTime();
+    this.toDateTime = application.getEndDateTime();
   }
 
   @Override

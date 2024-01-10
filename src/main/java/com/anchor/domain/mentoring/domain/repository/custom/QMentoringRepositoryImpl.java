@@ -2,14 +2,16 @@ package com.anchor.domain.mentoring.domain.repository.custom;
 
 import static com.anchor.domain.mentor.domain.QMentor.mentor;
 import static com.anchor.domain.mentoring.domain.QMentoring.mentoring;
+import static com.anchor.domain.mentoring.domain.QMentoringApplication.mentoringApplication;
 import static com.anchor.domain.mentoring.domain.QMentoringDetail.mentoringDetail;
+import static com.anchor.domain.mentoring.domain.QMentoringTag.mentoringTag;
 import static com.anchor.domain.user.domain.QUser.user;
 import static com.querydsl.core.types.dsl.Expressions.numberTemplate;
-import static com.anchor.domain.mentoring.domain.QMentoringTag.mentoringTag;
 
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -22,6 +24,7 @@ import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -124,8 +127,8 @@ public class QMentoringRepositoryImpl implements QMentoringRepository {
     return topMentorings;
   }
 
-  public Mentoring findMentoringDetailInfo(Long id) {
-    return jpaQueryFactory.selectFrom(mentoring)
+  public Optional<Mentoring> findMentoringDetailInfo(Long id) {
+    return Optional.ofNullable(jpaQueryFactory.selectFrom(mentoring)
         .join(mentoring.mentor, mentor)
         .fetchJoin()
         .join(mentoring.mentoringDetail, mentoringDetail)
@@ -135,7 +138,20 @@ public class QMentoringRepositoryImpl implements QMentoringRepository {
         .join(mentor.user, user)
         .fetchJoin()
         .where(mentoring.id.eq(id))
+        .fetchOne());
+  }
+  
+  public Long findMentorIdByMentoringId(Long id) {
+    return jpaQueryFactory.select(mentoring.mentor.id)
+        .from(mentoring)
+        .where(mentoring.id.eq(id))
         .fetchOne();
+  }
+
+  public List<MentoringApplication> findMentoringApplications(Long id) {
+    return jpaQueryFactory.selectFrom(mentoringApplication)
+        .where(mentoringApplication.mentoring.id.eq(id))
+        .fetch();
   }
 
   private long from(Pageable pageable) {
@@ -144,6 +160,23 @@ public class QMentoringRepositoryImpl implements QMentoringRepository {
 
   private long to(Pageable pageable) {
     return from(pageable) + pageable.getPageSize();
+  }
+  
+  private BooleanBuilder equalsWith(List<String> tags) {
+    BooleanBuilder builder = new BooleanBuilder();
+    if (!CollectionUtils.isEmpty(tags)) {
+      tags.stream()
+          .map(this::equalTag)
+          .forEach(builder::or);
+    }
+    return builder;
+  }
+
+  private BooleanExpression equalTag(String tag) {
+    if (StringUtils.hasText(tag)) {
+      return mentoring.mentoringTags.any().tag.eq(tag);
+    }
+    return Expressions.TRUE;
   }
 
   private OrderSpecifier[] getOrderSpecifier(Sort sort) {
@@ -158,19 +191,9 @@ public class QMentoringRepositoryImpl implements QMentoringRepository {
     return orders.toArray(OrderSpecifier[]::new);
   }
 
-  private BooleanBuilder equalsWith(List<String> tags) {
-    BooleanBuilder builder = new BooleanBuilder();
-    if (!CollectionUtils.isEmpty(tags)) {
-      tags.stream()
-          .map(this::equalTag)
-          .forEach(builder::or);
-    }
-    return builder;
-  }
-
-  private BooleanExpression equalTag(String tag) {
-    if (StringUtils.hasText(tag)) {
-      return mentoring.mentoringTags.any().tag.eq(tag);
+  private BooleanExpression containsTitle(String keyword) {
+    if (StringUtils.hasText(keyword)) {
+      return mentoring.title.contains(keyword);
     }
     return Expressions.TRUE;
   }

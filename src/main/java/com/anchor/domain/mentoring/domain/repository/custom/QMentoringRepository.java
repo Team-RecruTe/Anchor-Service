@@ -2,7 +2,9 @@ package com.anchor.domain.mentoring.domain.repository.custom;
 
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
 import com.anchor.domain.mentoring.domain.Mentoring;
+import com.anchor.domain.mentoring.domain.MentoringApplication;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -14,6 +16,9 @@ public interface QMentoringRepository {
 
   List<Mentoring> findPopularMentoringTags();
 
-  Mentoring findMentoringDetailInfo(Long id);
+  Optional<Mentoring> findMentoringDetailInfo(Long id);
 
+  Long findMentorIdByMentoringId(Long id);
+
+  List<MentoringApplication> findMentoringApplications(Long id);
 }

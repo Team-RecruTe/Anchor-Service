@@ -29,6 +29,7 @@ import com.anchor.global.auth.SessionUser;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -39,6 +40,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @RequiredArgsConstructor
 @Service
@@ -103,7 +105,8 @@ public class MentoringService {
    */
   @Transactional(readOnly = true)
   public MentoringDetailSearchResult getMentoringDetailInfo(Long id) {
-    Mentoring findMentoring = mentoringRepository.findMentoringDetailInfo(id);
+    Mentoring findMentoring = mentoringRepository.findMentoringDetailInfo(id)
+        .orElseThrow(() -> new NoSuchElementException(id + "에 해당하는 멘토링이 존재하지 않습니다."));
     return MentoringDetailSearchResult.of(findMentoring);
   }
 
@@ -111,18 +114,25 @@ public class MentoringService {
    * 멘토링 신청페이지 조회시, 신청 불가능한 시간을 데이터베이스에서 조회합니다.
    */
 /*  @Transactional(readOnly = true)
-  public List<ApplicationUnavailableTime> getMentoringUnavailableTimeList(Long id) {
-    Mentoring findMentoring = getMentoringById(id);
-    List<MentoringUnavailableTime> mentoringUnavailableTime = mentoringUnavailableTimeRepository.findByMentorId(
-        findMentoring.getMentor()
-            .getId());
-    return mentoringUnavailableTime
-        .isEmpty() ?
-        null :
-        mentoringUnavailableTime
-            .stream()
-            .map(ApplicationUnavailableTime::new)
-            .toList();
+  public Set<ApplicationUnavailableTime> getMentoringUnavailableTimes(Long id) {
+    Long mentorId = mentoringRepository.findMentorIdByMentoringId(id);
+    List<MentoringUnavailableTime> unavailableTimes = mentorRepository.findUnavailableTimes(mentorId);
+    List<MentoringApplication> mentoringApplications = mentoringRepository.findMentoringApplications(id);
+    Set<ApplicationUnavailableTime> unavailableTimeSet = new HashSet<>();
+
+    if (!CollectionUtils.isEmpty(unavailableTimes)) {
+      unavailableTimes.stream()
+          .map(ApplicationUnavailableTime::new)
+          .forEach(unavailableTimeSet::add);
+    }
+
+    if (!CollectionUtils.isEmpty(mentoringApplications)) {
+      mentoringApplications.stream()
+          .map(ApplicationUnavailableTime::new)
+          .forEach(unavailableTimeSet::add);
+    }
+
+    return unavailableTimeSet;
   }*/
 
   public MentoringPaymentInfo createPaymentInfo(Long mentoringId, MentoringApplicationTime applicationTime) {
@@ -164,21 +174,21 @@ public class MentoringService {
 
 
   public void addApplicationTimeFromSession
-      (List<ApplicationUnavailableTime> sessionList, MentoringApplicationTime applicationTime) {
+      (Set<ApplicationUnavailableTime> sessionUnavailableTimes, MentoringApplicationTime applicationTime) {
     ApplicationUnavailableTime targetMentoringApplicationUnavailableTime = applicationTime.convertToMentoringUnavailableTimeResponse();
-    if (!sessionList.contains(targetMentoringApplicationUnavailableTime)) {
-      sessionList.add(targetMentoringApplicationUnavailableTime);
+    if (!sessionUnavailableTimes.contains(targetMentoringApplicationUnavailableTime)) {
+      sessionUnavailableTimes.add(targetMentoringApplicationUnavailableTime);
     }
   }
 
   public boolean removeApplicationTimeFromSession
-      (List<ApplicationUnavailableTime> sessionList, MentoringApplicationTime applicationTime) {
+      (Set<ApplicationUnavailableTime> sessionList, MentoringApplicationTime applicationTime) {
     ApplicationUnavailableTime targetMentoringApplicationUnavailableTime = applicationTime.convertToMentoringUnavailableTimeResponse();
     return sessionList.remove(targetMentoringApplicationUnavailableTime);
   }
 
   public void removeApplicationTimeFromSession
-      (List<ApplicationUnavailableTime> sessionList, MentoringApplicationInfo applicationInfo) {
+      (Set<ApplicationUnavailableTime> sessionList, MentoringApplicationInfo applicationInfo) {
     ApplicationUnavailableTime targetMentoringApplicationUnavailableTime = ApplicationUnavailableTime.builder()
         .fromDateTime(applicationInfo.getStartDateTime())
         .toDateTime(applicationInfo.getEndDateTime())

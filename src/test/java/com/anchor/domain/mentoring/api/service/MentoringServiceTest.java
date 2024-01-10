@@ -19,6 +19,7 @@ import static org.mockito.BDDMockito.given;
 
 import com.anchor.domain.mentor.domain.Career;
 import com.anchor.domain.mentor.domain.Mentor;
+import com.anchor.domain.mentor.domain.repository.MentorRepository;
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
@@ -38,10 +39,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -59,6 +61,8 @@ class MentoringServiceTest {
   private PaymentRepository paymentRepository;
   @Mock
   private UserRepository userRepository;
+  @Mock
+  private MentorRepository mentorRepository;
 
   @InjectMocks
   private MentoringService mentoringService;
@@ -99,14 +103,14 @@ class MentoringServiceTest {
 
     mentoring.editContents(new MentoringContentsInfo("테스트내용", List.of("백엔드", "자바")));
 
-    given(mentoringRepository.findById(anyLong())).willReturn(Optional.of(mentoring));
+    given(mentoringRepository.findMentoringDetailInfo(anyLong())).willReturn(Optional.of(mentoring));
 
     //when
     MentoringDetailSearchResult result = mentoringService.getMentoringDetailInfo(inputMentoringId);
 
     //then
     assertThat(result)
-        .extracting("title", "content", "durationTime", "nickname", "cost")
+        .extracting("title", "content", "durationTime", "mentorNickname", "cost")
         .contains(MENTORING_TITLE, MENTORING_CONTENT, DURATION_TIME, NICKNAME, COST);
     assertThat(result.getTags())
         .hasSize(2)
@@ -119,9 +123,6 @@ class MentoringServiceTest {
     //given
     Long inputWrongMentoringId = 999L;
     String noSuchElementExceptionMessage = inputWrongMentoringId + "에 해당하는 멘토링이 존재하지 않습니다.";
-
-    given(mentoringRepository.findById(anyLong())).willThrow(
-        new NoSuchElementException(noSuchElementExceptionMessage));
 
     //when then
     assertThatThrownBy(
@@ -213,7 +214,7 @@ class MentoringServiceTest {
   void addMentoringApplicationTimeFromSession() {
     //given
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-    List<ApplicationUnavailableTime> sessionList = createMentoringUnavailableTimeResponseList();
+    Set<ApplicationUnavailableTime> sessionList = createMentoringUnavailableTimeResponseList();
 
     MentoringApplicationTime applicationTime = MentoringApplicationTime.builder()
         .date(LocalDate.of(2024, 1, 3))
@@ -242,7 +243,7 @@ class MentoringServiceTest {
   void notAddMentoringApplicationTimeFromSessionIsDuplicate() {
     //given
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-    List<ApplicationUnavailableTime> sessionList = createMentoringUnavailableTimeResponseList();
+    Set<ApplicationUnavailableTime> sessionList = createMentoringUnavailableTimeResponseList();
 
     MentoringApplicationTime applicationTime = MentoringApplicationTime.builder()
         .date(LocalDate.of(2024, 1, 2))
@@ -269,7 +270,7 @@ class MentoringServiceTest {
   void removeMentoringApplicationTimeFromSession() {
     //given
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-    List<ApplicationUnavailableTime> sessionList = createMentoringUnavailableTimeResponseList();
+    Set<ApplicationUnavailableTime> sessionList = createMentoringUnavailableTimeResponseList();
 
     MentoringApplicationTime applicationTime = MentoringApplicationTime.builder()
         .date(LocalDate.of(2024, 1, 3))
@@ -293,8 +294,8 @@ class MentoringServiceTest {
         );
   }
 
-  private List<ApplicationUnavailableTime> createMentoringUnavailableTimeResponseList() {
-    List<ApplicationUnavailableTime> sessionList = new ArrayList<>();
+  private Set<ApplicationUnavailableTime> createMentoringUnavailableTimeResponseList() {
+    Set<ApplicationUnavailableTime> sessionList = new HashSet<>();
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 
     LocalDateTime fromDateTime1 = LocalDateTime.parse(FIRST_FROM_DATE_TIME, formatter);
