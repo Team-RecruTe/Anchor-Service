@@ -1,35 +1,41 @@
 package com.anchor.domain.mentoring.api.service;
 
 import com.anchor.domain.mentor.domain.Mentor;
+import com.anchor.domain.mentor.domain.MentorSchedule;
 import com.anchor.domain.mentor.domain.repository.MentorRepository;
+import com.anchor.domain.mentor.domain.repository.MentorScheduleRepository;
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
+import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationUserInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
-import com.anchor.domain.mentoring.api.service.response.ApplicationUnavailableTime;
+import com.anchor.domain.mentoring.api.service.response.ApplicationTimeInfo;
+import com.anchor.domain.mentoring.api.service.response.ApplicationTimeInfo.MentorActiveTime;
 import com.anchor.domain.mentoring.api.service.response.AppliedMentoringInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringContents;
 import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
+import com.anchor.domain.mentoring.api.service.response.MentoringDefaultInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringDeleteResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo.MentoringDetailSearchResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
+import com.anchor.domain.mentoring.api.service.response.MentoringPayConfirmInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringPaymentInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
 import com.anchor.domain.mentoring.api.service.response.TopMentoring;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringTag;
+import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.domain.payment.domain.repository.PaymentRepository;
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
+import com.anchor.global.util.type.DateTimeRange;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -40,7 +46,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 @RequiredArgsConstructor
 @Service
@@ -50,6 +55,8 @@ public class MentoringService {
   private final UserRepository userRepository;
   private final MentorRepository mentorRepository;
   private final PaymentRepository paymentRepository;
+  private final MentorScheduleRepository mentorScheduleRepository;
+  private final MentoringApplicationRepository mentoringApplicationRepository;
   private final PayNumberCreator payNumberCreator;
 
   @Transactional
@@ -111,50 +118,56 @@ public class MentoringService {
   }
 
   /**
-   * 멘토링 신청페이지 조회시, 신청 불가능한 시간을 데이터베이스에서 조회합니다.
+   * 멘토링 신청페이지에서 사용할 멘토링 정보를 조회합니다.
    */
-/*  @Transactional(readOnly = true)
-  public Set<ApplicationUnavailableTime> getMentoringUnavailableTimes(Long id) {
-    Long mentorId = mentoringRepository.findMentorIdByMentoringId(id);
-    List<MentoringUnavailableTime> unavailableTimes = mentorRepository.findUnavailableTimes(mentorId);
-    List<MentoringApplication> mentoringApplications = mentoringRepository.findMentoringApplications(id);
-    Set<ApplicationUnavailableTime> unavailableTimeSet = new HashSet<>();
+  @Transactional(readOnly = true)
+  public MentoringDefaultInfo getMentoringDefaultInfo(Long id) {
+    Mentoring mentoring = getMentoringById(id);
+    return MentoringDefaultInfo.of(mentoring);
+  }
 
-    if (!CollectionUtils.isEmpty(unavailableTimes)) {
-      unavailableTimes.stream()
-          .map(ApplicationUnavailableTime::new)
-          .forEach(unavailableTimeSet::add);
-    }
+  /**
+   * 멘토의 활동시간과 이미 신청된 멘토링시간을 조회합니다.
+   */
+  @Transactional(readOnly = true)
+  public ApplicationTimeInfo getMentoringActiveTimes(Long id) {
 
-    if (!CollectionUtils.isEmpty(mentoringApplications)) {
-      mentoringApplications.stream()
-          .map(ApplicationUnavailableTime::new)
-          .forEach(unavailableTimeSet::add);
-    }
+    List<MentoringApplication> mentoringApplications = mentoringApplicationRepository.findByMentoringId(id);
 
-    return unavailableTimeSet;
-  }*/
+    List<DateTimeRange> mentoringUnavailables = mentoringApplications.stream()
+        .map(application -> DateTimeRange.of(application.getStartDateTime(), application.getEndDateTime()))
+        .toList();
 
-  public MentoringPaymentInfo createPaymentInfo(Long mentoringId, MentoringApplicationTime applicationTime) {
-    Mentoring mentoring = getMentoringById(mentoringId);
-    Integer cost = mentoring.getCost();
-    LocalDateTime startDateTime = applicationTime.getFromDateTime();
-    LocalDateTime endDateTime = applicationTime.getToDateTime();
-    String buyerTel = null; // 현재 번호 컬럼이 없으므로 임시로 지정
-    String today = LocalDate.now()
-        .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-    List<Payment> paymentList = paymentRepository.findPaymentListStartWithToday(today);
-    String merchantUid = payNumberCreator.getMerchantUid(paymentList, today);
+    List<MentorSchedule> mentorSchedules = mentorScheduleRepository.findMentorScheduleByMentorId(id);
+
+    List<MentorActiveTime> mentorActiveTimes = mentorSchedules.stream()
+        .map(MentorActiveTime::of)
+        .toList();
+
+    return ApplicationTimeInfo.of(mentoringUnavailables, mentorActiveTimes);
+  }
+
+  /**
+   * 멘토링 결제페이지에 필요한 정보를 조회한 후 반환합니다.
+   */
+  @Transactional(readOnly = true)
+  public MentoringPayConfirmInfo getMentoringConfirmInfo(Long id, MentoringApplicationTime applicationTime,
+      SessionUser sessionUser) {
+    User user = getUser(sessionUser);
+    Mentoring mentoring = getMentoringById(id);
+    return MentoringPayConfirmInfo.of(user, mentoring, applicationTime);
+  }
+
+  /**
+   * 멘토링 결제에 필요한 정보를 생성합니다.
+   */
+  @Transactional(readOnly = true)
+  public MentoringPaymentInfo createPaymentInfo(Long id, DateTimeRange myAppliedMentoringTimeRange,
+      MentoringApplicationUserInfo userInfo) {
+    Mentoring mentoring = getMentoringById(id);
+    String merchantUid = createMerchantUid();
     String impCode = payNumberCreator.getImpCode();
-    return MentoringPaymentInfo.builder()
-        .amount(cost)
-        .impCode(impCode)
-        .merchantUid(merchantUid)
-        .buyerTel(buyerTel)
-        .startDateTime(startDateTime)
-        .endDateTime(endDateTime)
-        .build();
-
+    return MentoringPaymentInfo.of(mentoring, myAppliedMentoringTimeRange, userInfo, merchantUid, impCode);
   }
 
   /**
@@ -162,38 +175,31 @@ public class MentoringService {
    */
   @Transactional
   public AppliedMentoringInfo saveMentoringApplication(SessionUser sessionUser,
-      Long mentoringId, MentoringApplicationInfo applicationInfo) {
-    Mentoring findMentoring = getMentoringById(mentoringId);
+      Long id, MentoringApplicationInfo applicationInfo) {
+    Mentoring findMentoring = getMentoringById(id);
     User loginUser = getUser(sessionUser);
-    MentoringApplication mentoringApplication =
-        new MentoringApplication(applicationInfo, null, findMentoring, null, loginUser);
-    Payment payment = new Payment(applicationInfo, mentoringApplication);
-    paymentRepository.save(payment);
+    Payment payment = new Payment(applicationInfo);
+    MentoringApplication mentoringApplication = new MentoringApplication(applicationInfo, findMentoring, payment,
+        loginUser);
+    mentoringApplicationRepository.save(mentoringApplication);
     return new AppliedMentoringInfo(mentoringApplication, payment);
   }
 
-
+  /**
+   * 세션에 결제진행중인 멘토링시간을 등록해 다른 회원이 해당시간에 신청하지 못하게 잠금처리합니다.
+   */
   public void addApplicationTimeFromSession
-      (Set<ApplicationUnavailableTime> sessionUnavailableTimes, MentoringApplicationTime applicationTime) {
-    ApplicationUnavailableTime targetMentoringApplicationUnavailableTime = applicationTime.convertToMentoringUnavailableTimeResponse();
-    if (!sessionUnavailableTimes.contains(targetMentoringApplicationUnavailableTime)) {
-      sessionUnavailableTimes.add(targetMentoringApplicationUnavailableTime);
-    }
+  (Set<DateTimeRange> sessionUnavailableTimes, MentoringApplicationTime applicationTime) {
+    DateTimeRange applicationTimeRange = applicationTime.convertDateTimeRange();
+    sessionUnavailableTimes.add(applicationTimeRange);
   }
 
-  public boolean removeApplicationTimeFromSession
-      (Set<ApplicationUnavailableTime> sessionList, MentoringApplicationTime applicationTime) {
-    ApplicationUnavailableTime targetMentoringApplicationUnavailableTime = applicationTime.convertToMentoringUnavailableTimeResponse();
-    return sessionList.remove(targetMentoringApplicationUnavailableTime);
-  }
-
-  public void removeApplicationTimeFromSession
-      (Set<ApplicationUnavailableTime> sessionList, MentoringApplicationInfo applicationInfo) {
-    ApplicationUnavailableTime targetMentoringApplicationUnavailableTime = ApplicationUnavailableTime.builder()
-        .fromDateTime(applicationInfo.getStartDateTime())
-        .toDateTime(applicationInfo.getEndDateTime())
-        .build();
-    sessionList.remove(targetMentoringApplicationUnavailableTime);
+  /**
+   * 세션에서 신청하던 멘토링 시간대를 삭제합니다.
+   */
+  public void removeApplicationTimeFromSession(Set<DateTimeRange> sessionUnavailableTimes,
+      DateTimeRange myDateTimeRange) {
+    sessionUnavailableTimes.remove(myDateTimeRange);
   }
 
   private Mentor getMentorById(Long id) {
@@ -227,4 +233,12 @@ public class MentoringService {
     List<MentoringSearchResult> topMentorings = mentoringRepository.findTopMentorings();
     return new TopMentoring(topMentorings);
   }
+  private String createMerchantUid() {
+    String today = LocalDate.now()
+        .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+    List<Payment> paymentList = paymentRepository.findPaymentListStartWithToday(today);
+    return payNumberCreator.getMerchantUid(paymentList, today);
+  }
+
 }

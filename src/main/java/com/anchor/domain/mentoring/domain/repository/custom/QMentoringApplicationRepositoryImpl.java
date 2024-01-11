@@ -116,6 +116,14 @@ public class QMentoringApplicationRepositoryImpl implements QMentoringApplicatio
         .fetch();
   }
 
+
+  @Override
+  public List<MentoringApplication> findByMentoringId(Long mentoringId) {
+    return jpaQueryFactory.selectFrom(mentoringApplication)
+        .where(mentoringApplication.mentoring.id.eq(mentoringId))
+        .fetch();
+  }
+
   private BooleanBuilder equalsStatuses(MentoringStatus... statuses) {
     BooleanBuilder builder = new BooleanBuilder();
     Arrays.stream(statuses)

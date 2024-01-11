@@ -78,7 +78,6 @@ values (1, now(), now(), 10000, 0, 'SUCCESS', 'anchor_12344567', 'imp_253462345'
        (13, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562357', 'imp_4563255', 'toss_34562357');
 commit;
 
-
 #### 멘토링 신청내역 등록
 start transaction;
 insert into mentoring_application(id, start_date_time, end_date_time, create_date, update_date,
@@ -96,4 +95,15 @@ values (1, '2024-01-03 15:00:00', '2024-01-03 16:30:00', now(), now(), 'COMPLETE
        (11, '2024-01-15 13:00:00', '2024-01-15 14:30:00', now(), now(), 'WAITING', 2, 1, 11),
        (12, '2024-01-16 13:00:00', '2024-01-16 14:30:00', now(), now(), 'WAITING', 2, 1, 12),
        (13, '2024-01-17 13:00:00', '2024-01-17 14:30:00', now(), now(), 'WAITING', 2, 1, 13);
+commit;
+
+#### 멘토링 결제내역 등록
+start transaction;
+insert into payment(id, create_date, update_date, amount, cancel_amount, payment_status, order_uid, imp_uid,
+                    merchant_uid, mentoring_application_id)
+values (1, now(), now(), 10000, 0, 'SUCCESS', 'anchor_12344567', 'imp_253462345', 'toss_12344567', 1);
+
+insert into payment(id, create_date, update_date, amount, cancel_amount, payment_status, order_uid, imp_uid,
+                    merchant_uid, mentoring_application_id)
+values (2, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562345', 'imp_4563244', 'toss_34562345', 2);
 commit;

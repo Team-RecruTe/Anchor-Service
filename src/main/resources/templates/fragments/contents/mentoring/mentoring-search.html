@@ -2,8 +2,7 @@
 <html lang="ko"
       layout:decorate="~{layout/default}"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      xmlns:th="http://www.thymeleaf.org"
->
+      xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>멘토링 조회</title>
   <meta charset="UTF-8">
@@ -33,7 +32,7 @@
               <div aria-labelledby="headingOne" class="accordion-collapse collapse" data-bs-parent="#accordionExample"
                    id="collapseOne">
                 <div class="accordion-body">
-                  <th:block th:each="tag: ${mentoringDefaultInfo.tags}">
+                  <th:block th:each="tag: ${mentoringSearchInfo.tags}">
                     <input autocomplete="off" class="btn-check" name="tag"
                            th:id="'btn-check-outlined '+${tagStat.count}"
                            th:value="${tag}" type="checkbox">
@@ -49,7 +48,7 @@
 
       <div class="col-lg-9">
         <div class="row row-cols-2 row-cols2-md-3 row-cols-lg-4">
-          <th:block th:each="mentoring: ${mentoringDefaultInfo.mentoringInfos}">
+          <th:block th:each="mentoring: ${mentoringSearchInfo.mentoringInfos}">
             <div class="col-mb-4 mb-2">
               <div class="card" style="width: 14rem; height: 16rem">
                 <div class="card-body d-flex flex-column ">
@@ -68,7 +67,7 @@
                   <img alt="멘토이미지" class="card-img-bottom mb-2 mt-auto" style="width: 50px; height: 50px;"
                        th:src="${mentoring.mentorInfo.mentorImage}">
 
-                  <!-- Tags (Up to 2 tags horizontally) -->
+                  <!-- Tags -->
                   <div class="d-flex flex-wrap">
                     <th:block th:if="${mentoring.mentoringInfo.mentoringTags.isEmpty()}">
                       <span>태그 x</span>

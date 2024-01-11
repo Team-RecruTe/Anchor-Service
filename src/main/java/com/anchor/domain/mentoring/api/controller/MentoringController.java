@@ -2,10 +2,11 @@ package com.anchor.domain.mentoring.api.controller;
 
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
+import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationUserInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
 import com.anchor.domain.mentoring.api.service.MentoringService;
-import com.anchor.domain.mentoring.api.service.response.ApplicationUnavailableTime;
+import com.anchor.domain.mentoring.api.service.response.ApplicationTimeInfo;
 import com.anchor.domain.mentoring.api.service.response.AppliedMentoringInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
@@ -14,6 +15,7 @@ import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringPaymentInfo;
 import com.anchor.domain.mentoring.api.service.response.TopMentoring;
 import com.anchor.global.auth.SessionUser;
+import com.anchor.global.util.type.DateTimeRange;
 import com.anchor.global.util.type.Link;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -24,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -38,7 +41,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class MentoringController {
 
   private static final String SUCCESS = "success";
-  private static final String FAILURE = "failure";
   private final MentoringService mentoringService;
 
   @PostMapping
@@ -91,20 +93,67 @@ public class MentoringController {
     return ResponseEntity.ok(result);
   }
 
+  /**
+   * 멘토의 활동시간과 해당 멘토링의 신청내역, 세션에 저장된 결제중인 멘토링시간대를 조회합니다. 해당 멘토링의 신청대기 또는 완료된 시간대를 조회한 후 활동시간과 신청내역 시간을 분리해서 클라이언트로
+   * 전달합니다.
+   */
+  @GetMapping("/{id}/reservation-time")
+  public ResponseEntity<ApplicationTimeInfo> mentoringActiveTime(@PathVariable("id") Long id, HttpSession session) {
+
+    ApplicationTimeInfo mentoringActiveTimes = mentoringService.getMentoringActiveTimes(id);
+
+    Set<DateTimeRange> sessionUnavailableTimes = getSessionUnavailableTimes(session, id);
+
+    sessionUnavailableTimes.forEach(mentoringActiveTimes::add);
+    updateSessionUnavailableTime(session, id, sessionUnavailableTimes);
+    return ResponseEntity.ok()
+        .body(mentoringActiveTimes);
+  }
 
   /**
-   * 멘토링 신청페이지로 이동합니다. 응답으로 멘토링 불가시간을 클라이언트로 전달합니다.
+   * 신청중인 멘토링 시간을 잠금처리하고, 세션에 멘토링 신청중인 데이터를 저장합니다.
    */
-/*  @GetMapping("/{id}/apply")
-  public ResponseEntity<Set<ApplicationUnavailableTime>> mentoringApplicationPage(
-      @PathVariable("id") Long id, HttpSession session) {
-    Set<ApplicationUnavailableTime> unavailableTimes = mentoringService.getMentoringUnavailableTimes(id);
-    Set<ApplicationUnavailableTime> sessionUnavailableTimes = getSessionUnavailableTimes(session, id);
-    sessionUnavailableTimes.addAll(unavailableTimes);
-    updateSessionUnavailableTimes(session, id, sessionUnavailableTimes);
+  @PostMapping("/{id}/lock")
+  public ResponseEntity<String> applicationTimeLock(@PathVariable("id") Long id,
+      @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
+
+    Set<DateTimeRange> sessionUnavailableTimes = getSessionUnavailableTimes(session, id);
+
+    mentoringService.addApplicationTimeFromSession(sessionUnavailableTimes, applicationTime);
+    updateSessionUnavailableTime(session, id, sessionUnavailableTimes);
+
+    saveMentoringTimeInSession(session, applicationTime);
+
     return ResponseEntity.ok()
-        .body(sessionUnavailableTimes);
-  }*/
+        .body(SUCCESS);
+  }
+
+  /**
+   * 멘토링 신청 도중 결제실패 또는 취소시 잠금상태였던 시간대를 해제합니다.
+   */
+  @PutMapping("/{id}/unlock")
+  public ResponseEntity<String> mentoringTimeSessionRemove(@PathVariable("id") Long id, HttpSession session) {
+    Set<DateTimeRange> sessionUnavailableTimes = getSessionUnavailableTimes(session, id);
+    DateTimeRange myAppliedMentoringTimeRange = getMyAppliedMentoringTimeRange(session);
+    mentoringService.removeApplicationTimeFromSession(sessionUnavailableTimes, myAppliedMentoringTimeRange);
+    updateSessionUnavailableTime(session, id, sessionUnavailableTimes);
+
+    return ResponseEntity.ok()
+        .body(SUCCESS);
+  }
+
+  /**
+   * 포트원 결제 API를 실행하기 위한 데이터를 응답데이터로 반환합니다.
+   */
+  @PostMapping("/{id}/payment-process")
+  public ResponseEntity<MentoringPaymentInfo> mentoringTimeSessionSave(
+      @PathVariable("id") Long id, @RequestBody MentoringApplicationUserInfo userInfo, HttpSession session) {
+    DateTimeRange myAppliedMentoringTimeRange = getMyAppliedMentoringTimeRange(session);
+    MentoringPaymentInfo mentoringPaymentInfo = mentoringService.createPaymentInfo(id, myAppliedMentoringTimeRange,
+        userInfo);
+    return ResponseEntity.ok()
+        .body(mentoringPaymentInfo);
+  }
 
   /**
    * 멘토링 결제 완료가 되면 멘토링 신청이력을 저장합니다.
@@ -112,17 +161,19 @@ public class MentoringController {
   @PostMapping("/{id}/apply")
   public ResponseEntity<AppliedMentoringInfo> mentoringApplicationSave
   (@PathVariable("id") Long id, @RequestBody MentoringApplicationInfo applicationInfo, HttpSession session) {
-    SessionUser sessionUser = (SessionUser) session.getAttribute("user");
-    if (sessionUser == null) {
-      throw new RuntimeException("로그인 정보가 없습니다. 잘못된 접근입니다.");
-    }
+    SessionUser sessionUser = getSessionUser(session);
+
+    DateTimeRange myAppliedMentoringTimeRange = getMyAppliedMentoringTimeRange(session);
+
+    applicationInfo.addApplicationTime(myAppliedMentoringTimeRange);
+
     AppliedMentoringInfo appliedMentoringInfo =
         mentoringService.saveMentoringApplication(sessionUser, id, applicationInfo);
 
     if (appliedMentoringInfo != null) {
-      Set<ApplicationUnavailableTime> sessionUnavailableTimes = getSessionUnavailableTimes(session, id);
-      mentoringService.removeApplicationTimeFromSession(sessionUnavailableTimes, applicationInfo);
-      updateSessionUnavailableTimes(session, id, sessionUnavailableTimes);
+      Set<DateTimeRange> sessionUnavailableTimes = getSessionUnavailableTimes(session, id);
+      mentoringService.removeApplicationTimeFromSession(sessionUnavailableTimes, myAppliedMentoringTimeRange);
+
       return ResponseEntity.ok()
           .body(appliedMentoringInfo);
     }
@@ -131,44 +182,40 @@ public class MentoringController {
         .build();
   }
 
-  /**
-   * 멘토링 신청과정입니다. 결제진행중인 시간대를 다른 회원이 신청하지 못하도록 잠금처리 합니다.
-   */
-  @PostMapping("/{id}/apply-process")
-  public ResponseEntity<MentoringPaymentInfo> mentoringTimeSessionSave(
-      @PathVariable("id") Long id, @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
-    Set<ApplicationUnavailableTime> sessionUnavailableTimes = getSessionUnavailableTimes(session, id);
-    mentoringService.addApplicationTimeFromSession(sessionUnavailableTimes, applicationTime);
-    MentoringPaymentInfo mentoringPaymentInfo = mentoringService.createPaymentInfo(id, applicationTime);
-    updateSessionUnavailableTimes(session, id, sessionUnavailableTimes);
-    return ResponseEntity.ok()
-        .body(mentoringPaymentInfo);
+  private SessionUser getSessionUser(HttpSession session) {
+    SessionUser sessionUser = (SessionUser) session.getAttribute("user");
+    if (sessionUser == null) {
+      throw new RuntimeException("로그인 정보가 존재하지 않습니다.");
+    }
+    return sessionUser;
   }
 
-  /**
-   * 멘토링 신청 도중 결제실패 또는 취소시 잠금상태였던 시간대를 해제합니다.
-   */
-  @PutMapping("/{id}/apply-cancel")
-  public String mentoringTimeSessionRemove(@PathVariable("id") Long id,
-      @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
-    Set<ApplicationUnavailableTime> sessionApplicationUnavailableTimeList = getSessionUnavailableTimes(session, id);
-    boolean removeResult = mentoringService.removeApplicationTimeFromSession(sessionApplicationUnavailableTimeList,
-        applicationTime);
-    updateSessionUnavailableTimes(session, id, sessionApplicationUnavailableTimeList);
-    return removeResult ? SUCCESS : FAILURE;
-  }
-
-  private Set<ApplicationUnavailableTime> getSessionUnavailableTimes(HttpSession session, Long id) {
-    Object sessionUnavailableTime = session.getAttribute(String.valueOf(id));
-    if (Objects.nonNull(sessionUnavailableTime)) {
-      return (Set<ApplicationUnavailableTime>) sessionUnavailableTime;
+  private Set<DateTimeRange> getSessionUnavailableTimes(HttpSession session, Long id) {
+    Object attribute = session.getAttribute(String.valueOf(id));
+    if (Objects.nonNull(attribute)) {
+      return (Set<DateTimeRange>) attribute;
     }
     return new HashSet<>();
   }
 
-  private void updateSessionUnavailableTimes(HttpSession session, Long id,
-      Set<ApplicationUnavailableTime> sessionUnavailableTimes) {
+  private void updateSessionUnavailableTime(HttpSession session, Long id,
+      Set<DateTimeRange> sessionUnavailableTimes) {
     session.setAttribute(String.valueOf(id), sessionUnavailableTimes);
+  }
+
+  private void saveMentoringTimeInSession(HttpSession session, MentoringApplicationTime applicationTime) {
+    SessionUser sessionUser = getSessionUser(session);
+    session.setAttribute(sessionUser.getEmail(), applicationTime.convertDateTimeRange());
+  }
+
+  private DateTimeRange getMyAppliedMentoringTimeRange(HttpSession session) {
+    SessionUser sessionUser = getSessionUser(session);
+    Object attribute = session.getAttribute(sessionUser.getEmail());
+    if (Objects.nonNull(attribute)) {
+      return (DateTimeRange) attribute;
+    } else {
+      throw new RuntimeException("신청중이던 시간이 존재하지 않습니다.");
+    }
   }
 
 }

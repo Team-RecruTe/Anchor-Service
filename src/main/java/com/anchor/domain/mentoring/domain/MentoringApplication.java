@@ -61,13 +61,13 @@ public class MentoringApplication extends BaseEntity {
         .add(this);
   }
 
-  public MentoringApplication(MentoringApplicationInfo applicationInfo,
-      MentoringStatus mentoringStatus, Mentoring mentoring, Payment payment, User user) {
+  public MentoringApplication(MentoringApplicationInfo applicationInfo, Mentoring mentoring, Payment payment,
+      User user) {
     this.startDateTime = applicationInfo.getStartDateTime();
     this.endDateTime = applicationInfo.getEndDateTime();
-    this.mentoringStatus = mentoringStatus == null ? MentoringStatus.WAITING : mentoringStatus;
     this.mentoring = mentoring;
     this.payment = payment;
+    this.payment.addMentoringApplication(this);
     this.user = user;
   }
 

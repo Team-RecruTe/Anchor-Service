@@ -133,14 +133,14 @@ public class QMentoringRepositoryImpl implements QMentoringRepository {
         .fetchJoin()
         .join(mentoring.mentoringDetail, mentoringDetail)
         .fetchJoin()
-        .join(mentoring.mentoringTags, mentoringTag)
+        .leftJoin(mentoring.mentoringTags, mentoringTag)
         .fetchJoin()
         .join(mentor.user, user)
         .fetchJoin()
         .where(mentoring.id.eq(id))
         .fetchOne());
   }
-  
+
   public Long findMentorIdByMentoringId(Long id) {
     return jpaQueryFactory.select(mentoring.mentor.id)
         .from(mentoring)
@@ -161,7 +161,7 @@ public class QMentoringRepositoryImpl implements QMentoringRepository {
   private long to(Pageable pageable) {
     return from(pageable) + pageable.getPageSize();
   }
-  
+
   private BooleanBuilder equalsWith(List<String> tags) {
     BooleanBuilder builder = new BooleanBuilder();
     if (!CollectionUtils.isEmpty(tags)) {

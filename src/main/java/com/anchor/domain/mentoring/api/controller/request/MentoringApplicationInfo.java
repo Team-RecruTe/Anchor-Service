@@ -1,11 +1,8 @@
 package com.anchor.domain.mentoring.api.controller.request;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.anchor.global.util.type.DateTimeRange;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import lombok.Builder;
@@ -24,23 +21,21 @@ public class MentoringApplicationInfo implements Serializable {
 
   private Integer amount;
 
-  @JsonSerialize(using = LocalDateTimeSerializer.class)
-  @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+  @JsonIgnore
   private LocalDateTime startDateTime;
 
-  @JsonSerialize(using = LocalDateTimeSerializer.class)
-  @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+  @JsonIgnore
   private LocalDateTime endDateTime;
 
   @Builder
-  private MentoringApplicationInfo(String impUid, String merchantUid, Integer amount, LocalDateTime startDateTime,
-      LocalDateTime endDateTime) {
+  private MentoringApplicationInfo(String impUid, String merchantUid, Integer amount) {
     this.impUid = impUid;
     this.merchantUid = merchantUid;
     this.amount = amount;
-    this.startDateTime = startDateTime;
-    this.endDateTime = endDateTime;
+  }
+
+  public void addApplicationTime(DateTimeRange dateTimeRange) {
+    this.startDateTime = dateTimeRange.getFrom();
+    this.endDateTime = dateTimeRange.getTo();
   }
 }
