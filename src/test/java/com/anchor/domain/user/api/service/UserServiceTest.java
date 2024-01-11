@@ -8,7 +8,6 @@ import static com.anchor.constant.TestConstant.NICKNAME;
 import static com.anchor.constant.TestConstant.TIME_FORMATTER;
 import static com.anchor.constant.TestConstant.USER_EMAIL;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -473,12 +472,8 @@ class UserServiceTest {
 
     for (int i = 0; i < 5; i++) {
       applications.add(
-          MentoringApplicationTime.builder()
-              .date(LocalDate.parse(APPLICATION_DATE, DATE_FORMATTER)
-                  .plusDays(i))
-              .time(LocalTime.parse(APPLICATION_TIME, TIME_FORMATTER))
-              .durationTime("1h")
-              .build());
+          MentoringApplicationTime.of(LocalDate.parse(APPLICATION_DATE, DATE_FORMATTER)
+              .plusDays(i), LocalTime.parse(APPLICATION_TIME, TIME_FORMATTER), "1h"));
     }
 
     return applications;
@@ -538,6 +533,7 @@ class UserServiceTest {
 
       if (i <= 2) {
         startDateTime = applicationTimes.get(i)
+
             .getFromDateTime();
 
       }

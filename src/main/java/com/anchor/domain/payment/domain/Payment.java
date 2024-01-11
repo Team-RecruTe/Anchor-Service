@@ -57,7 +57,7 @@ public class Payment extends BaseEntity {
   public Payment(MentoringApplicationInfo applicationInfo) {
     this.impUid = applicationInfo.getImpUid();
     this.merchantUid = applicationInfo.getMerchantUid();
-    this.orderUid = "anchor_" + applicationInfo.getMerchantUid()
+    this.orderUid = "anchor" + applicationInfo.getMerchantUid()
         .substring(merchantUid.indexOf('_'));
     this.amount = applicationInfo.getAmount();
     this.cancelAmount = 0;

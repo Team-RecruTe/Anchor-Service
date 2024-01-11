@@ -13,6 +13,7 @@ import static com.anchor.constant.TestConstant.USER_EMAIL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -23,18 +24,19 @@ import com.anchor.domain.mentor.domain.repository.MentorRepository;
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
-import com.anchor.domain.mentoring.api.service.response.ApplicationUnavailableTime;
 import com.anchor.domain.mentoring.api.service.response.AppliedMentoringInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo.MentoringDetailSearchResult;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
+import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.domain.payment.domain.repository.PaymentRepository;
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
+import com.anchor.global.util.type.DateTimeRange;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -63,6 +65,8 @@ class MentoringServiceTest {
   private UserRepository userRepository;
   @Mock
   private MentorRepository mentorRepository;
+  @Mock
+  private MentoringApplicationRepository mentoringApplicationRepository;
 
   @InjectMocks
   private MentoringService mentoringService;
@@ -151,19 +155,19 @@ class MentoringServiceTest {
         .amount(10_000)
         .impUid("testImpUid")
         .merchantUid("test_Merchant")
-        .startDateTime(LocalDateTime.of(2024, 1, 3, 13, 0, 0))
-        .endDateTime(LocalDateTime.of(2024, 1, 3, 14, 0, 0))
         .build();
 
-    MentoringApplication mentoringApplication = new MentoringApplication(applicationInfo, null, mentoring,
-        Payment.builder()
-            .amount(10_000)
-            .merchantUid("toss_testMerchant")
-            .build(), user);
+    applicationInfo.addApplicationTime(
+        DateTimeRange.of(LocalDateTime.of(2024, 1, 3, 13, 0, 0), LocalDateTime.of(2024, 1, 3, 14, 0, 0)));
+
+    MentoringApplication mentoringApplication = new MentoringApplication(applicationInfo, mentoring, Payment.builder()
+        .amount(10_000)
+        .merchantUid("toss_testMerchant")
+        .build(), user);
 
     given(mentoringRepository.findById(anyLong())).willReturn(Optional.of(mentoring));
     given(userRepository.findByEmail(anyString())).willReturn(Optional.of(user));
-
+    given(mentoringApplicationRepository.save(any(MentoringApplication.class))).willReturn(mentoringApplication);
     //when
     AppliedMentoringInfo appliedMentoringInfo =
         mentoringService.saveMentoringApplication(sessionUser, mentoringId, applicationInfo);
@@ -188,9 +192,10 @@ class MentoringServiceTest {
         .amount(10_000)
         .impUid("testImpUid")
         .merchantUid("testMerchant")
-        .startDateTime(LocalDateTime.of(2024, 1, 3, 13, 0, 0))
-        .endDateTime(LocalDateTime.of(2024, 1, 3, 14, 0, 0))
         .build();
+
+    applicationInfo.addApplicationTime(
+        DateTimeRange.of(LocalDateTime.of(2024, 1, 3, 13, 0, 0), LocalDateTime.of(2024, 1, 3, 14, 0, 0)));
 
     Mentoring mentoring = Mentoring.builder()
         .title(MENTORING_TITLE)
@@ -214,13 +219,10 @@ class MentoringServiceTest {
   void addMentoringApplicationTimeFromSession() {
     //given
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-    Set<ApplicationUnavailableTime> sessionList = createMentoringUnavailableTimeResponseList();
+    Set<DateTimeRange> sessionList = createMentoringUnavailableTimeResponseList();
 
-    MentoringApplicationTime applicationTime = MentoringApplicationTime.builder()
-        .date(LocalDate.of(2024, 1, 3))
-        .time(LocalTime.of(13, 0))
-        .durationTime("1h30m")
-        .build();
+    MentoringApplicationTime applicationTime = MentoringApplicationTime.of(LocalDate.of(2024, 1, 3),
+        LocalTime.of(13, 0), "1h30m");
 
     //when
     mentoringService.addApplicationTimeFromSession(sessionList, applicationTime);
@@ -228,13 +230,15 @@ class MentoringServiceTest {
     //then
     assertThat(sessionList)
         .hasSize(3)
-        .extracting("fromDateTime", "toDateTime")
+        .extracting("from", "to")
         .containsExactly(
             tuple(LocalDateTime.parse(FIRST_FROM_DATE_TIME, formatter),
                 LocalDateTime.parse(FIRST_TO_DATE_TIME, formatter)),
             tuple(LocalDateTime.parse(SECOND_FROM_DATE_TIME, formatter),
                 LocalDateTime.parse(SECOND_TO_DATE_TIME, formatter)),
-            tuple(applicationTime.getFromDateTime(), applicationTime.getToDateTime())
+            tuple(applicationTime
+                .getFromDateTime(), applicationTime
+                .getToDateTime())
         );
   }
 
@@ -243,20 +247,17 @@ class MentoringServiceTest {
   void notAddMentoringApplicationTimeFromSessionIsDuplicate() {
     //given
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-    Set<ApplicationUnavailableTime> sessionList = createMentoringUnavailableTimeResponseList();
+    Set<DateTimeRange> sessionList = createMentoringUnavailableTimeResponseList();
 
-    MentoringApplicationTime applicationTime = MentoringApplicationTime.builder()
-        .date(LocalDate.of(2024, 1, 2))
-        .time(LocalTime.of(13, 0))
-        .durationTime("1h")
-        .build();
+    MentoringApplicationTime applicationTime = MentoringApplicationTime.of(LocalDate.of(2024, 1, 2),
+        LocalTime.of(13, 0), "1h");
 
     //when
     mentoringService.addApplicationTimeFromSession(sessionList, applicationTime);
     //then
     assertThat(sessionList)
         .hasSize(2)
-        .extracting("fromDateTime", "toDateTime")
+        .extracting("from", "to")
         .containsExactly(
             tuple(LocalDateTime.parse(FIRST_FROM_DATE_TIME, formatter),
                 LocalDateTime.parse(FIRST_TO_DATE_TIME, formatter)),
@@ -270,22 +271,19 @@ class MentoringServiceTest {
   void removeMentoringApplicationTimeFromSession() {
     //given
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-    Set<ApplicationUnavailableTime> sessionList = createMentoringUnavailableTimeResponseList();
+    Set<DateTimeRange> sessionList = createMentoringUnavailableTimeResponseList();
 
-    MentoringApplicationTime applicationTime = MentoringApplicationTime.builder()
-        .date(LocalDate.of(2024, 1, 3))
-        .time(LocalTime.of(13, 0))
-        .durationTime("1h")
-        .build();
+    MentoringApplicationTime applicationTime = MentoringApplicationTime.of(LocalDate.of(2024, 1, 3),
+        LocalTime.of(13, 0), "1h");
 
-    sessionList.add(applicationTime.convertToMentoringUnavailableTimeResponse());
+    sessionList.add(applicationTime.convertDateTimeRange());
 
     //when
-    mentoringService.removeApplicationTimeFromSession(sessionList, applicationTime);
+    mentoringService.removeApplicationTimeFromSession(sessionList, applicationTime.convertDateTimeRange());
     //then
     assertThat(sessionList)
         .hasSize(2)
-        .extracting("fromDateTime", "toDateTime")
+        .extracting("from", "to")
         .containsExactly(
             tuple(LocalDateTime.parse(FIRST_FROM_DATE_TIME, formatter),
                 LocalDateTime.parse(FIRST_TO_DATE_TIME, formatter)),
@@ -294,8 +292,8 @@ class MentoringServiceTest {
         );
   }
 
-  private Set<ApplicationUnavailableTime> createMentoringUnavailableTimeResponseList() {
-    Set<ApplicationUnavailableTime> sessionList = new HashSet<>();
+  private Set<DateTimeRange> createMentoringUnavailableTimeResponseList() {
+    Set<DateTimeRange> sessionList = new HashSet<>();
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 
     LocalDateTime fromDateTime1 = LocalDateTime.parse(FIRST_FROM_DATE_TIME, formatter);
@@ -304,14 +302,8 @@ class MentoringServiceTest {
     LocalDateTime fromDateTime2 = LocalDateTime.parse(SECOND_FROM_DATE_TIME, formatter);
     LocalDateTime toDateTime2 = LocalDateTime.parse(SECOND_TO_DATE_TIME, formatter);
 
-    ApplicationUnavailableTime response1 = ApplicationUnavailableTime.builder()
-        .fromDateTime(fromDateTime1)
-        .toDateTime(toDateTime1)
-        .build();
-    ApplicationUnavailableTime response2 = ApplicationUnavailableTime.builder()
-        .fromDateTime(fromDateTime2)
-        .toDateTime(toDateTime2)
-        .build();
+    DateTimeRange response1 = DateTimeRange.of(fromDateTime1, toDateTime1);
+    DateTimeRange response2 = DateTimeRange.of(fromDateTime2, toDateTime2);
 
     sessionList.add(response1);
     sessionList.add(response2);
