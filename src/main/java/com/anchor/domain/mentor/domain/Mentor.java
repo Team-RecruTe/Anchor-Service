@@ -1,7 +1,7 @@
 package com.anchor.domain.mentor.domain;
 
 import com.anchor.domain.mentor.api.controller.request.MentorInfoRequest;
-import com.anchor.domain.mentor.api.service.response.MentorContents;
+import com.anchor.domain.mentor.api.controller.request.MentorContentsRequest;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.payment.domain.Payup;
 import com.anchor.domain.user.domain.User;
@@ -40,10 +40,10 @@ public class Mentor extends BaseEntity {
   private String accountNumber;
 
   @Column(length = 20, nullable = false)
-  private String accountName;
+  private String bankName;
 
   @Column(length = 20, nullable = false)
-  private String bankName;
+  private String accountName;
 
   @OneToOne(
       fetch = FetchType.LAZY,
@@ -89,11 +89,11 @@ public class Mentor extends BaseEntity {
     this.accountName = mentorInfoRequest.getAccountName();
   }
 
-  public void editContents(MentorContents mentorContents) {
-    if (this.mentorIntroduction == null) {
-      this.mentorIntroduction = MentorIntroduction.addContents(mentorContents.getContents());
-    } else {
-      this.mentorIntroduction.editContents(mentorContents.getContents());
+  public void editContents(MentorContentsRequest mentorContentsRequest) {
+        if (this.mentorIntroduction == null) {
+          this.mentorIntroduction = MentorIntroduction.addContents(mentorContentsRequest.getContents());
+        } else {
+          this.mentorIntroduction.editContents(mentorContentsRequest.getContents());
     }
   }
 
