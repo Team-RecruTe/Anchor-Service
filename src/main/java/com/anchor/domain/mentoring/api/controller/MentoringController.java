@@ -13,6 +13,7 @@ import com.anchor.domain.mentoring.api.service.response.MentoringDeleteResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringPaymentInfo;
+import com.anchor.domain.mentoring.api.service.response.TopMentoring;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.util.type.Link;
 import jakarta.servlet.http.HttpSession;
@@ -78,6 +79,15 @@ public class MentoringController {
     MentoringContentsEditResult result = mentoringService.editContents(id, mentoringContentsInfo);
     result.addLinks(Link.builder()
         .setLink("self", String.format("/mentorings/%d/contents", result.getId()))
+        .build());
+    return ResponseEntity.ok(result);
+  }
+
+  @GetMapping("/rank")
+  public ResponseEntity<TopMentoring> getTopMentoring() {
+    TopMentoring result = mentoringService.getTopMentorings();
+    result.addLinks(Link.builder()
+        .setLink("self", "/mentorings/rank")
         .build());
     return ResponseEntity.ok(result);
   }
