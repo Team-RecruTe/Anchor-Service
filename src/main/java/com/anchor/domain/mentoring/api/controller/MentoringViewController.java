@@ -106,7 +106,7 @@ public class MentoringViewController {
         sessionUser);
 
     model.addAttribute("confirmInfo", mentoringConfirmInfo);
-    return "fragments/contents/mentoring/mentoring-payment";
+    return viewResolver.getViewPath("mentoring", "mentoring-payment");
   }
 
 
