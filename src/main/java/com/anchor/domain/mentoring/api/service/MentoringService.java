@@ -17,6 +17,7 @@ import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringPaymentInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
+import com.anchor.domain.mentoring.api.service.response.TopMentoring;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
@@ -77,7 +78,7 @@ public class MentoringService {
     return new MentoringContentsEditResult(savedMentoring.getId());
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   public MentoringContents getContents(Long id) {
     Mentoring mentoring = getMentoringById(id);
     return new MentoringContents(mentoring.getContents(), mentoring.getTags());
@@ -196,9 +197,14 @@ public class MentoringService {
         .orElseThrow(() -> new NoSuchElementException(sessionUser.getEmail() + "에 해당하는 회원이 존재하지 않습니다."));
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   public Page<MentoringSearchResult> getMentorings(List<String> tags, String keyword, Pageable pageable) {
     return mentoringRepository.findMentorings(tags, keyword, pageable);
   }
 
+  @Transactional(readOnly = true)
+  public TopMentoring getTopMentorings() {
+    List<MentoringSearchResult> topMentorings = mentoringRepository.findTopMentorings();
+    return new TopMentoring(topMentorings);
+  }
 }

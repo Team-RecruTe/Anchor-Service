@@ -9,4 +9,6 @@ public interface QMentoringRepository {
 
   Page<MentoringSearchResult> findMentorings(List<String> tags, String keyword, Pageable pageable);
 
+  List<MentoringSearchResult> findTopMentorings();
+
 }
