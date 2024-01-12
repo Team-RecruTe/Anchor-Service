@@ -38,13 +38,17 @@ dependencies {
     implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
     runtimeOnly 'com.mysql:mysql-connector-j'
 
+    // Redis
+    implementation 'org.springframework.session:spring-session-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis:3.2.1'
+
     // Spring Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
     // Mail
     implementation 'org.springframework.boot:spring-boot-starter-mail'
-    
+
     // AWS
     implementation 'io.awspring.cloud:spring-cloud-starter-aws:2.4.4'
 
