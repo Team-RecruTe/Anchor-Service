@@ -33,10 +33,10 @@
           <div class="card-body">
             <h2 class="card-title">구매자 정보</h2>
             <hr>
-            <p class="card-text">닉네임 : </p>
-            <span id="user-nickname" th:text="${confirmInfo.buyerInfo.userNickname}"></span>
-            <p class="card-text">이메일 : </p>
-            <span id="user-email" th:text="${confirmInfo.buyerInfo.userEmail}"></span>
+            <span class="card-text" id="user-nickname" th:text="'닉네임 : '+${confirmInfo.buyerInfo.userNickname}"></span>
+            <br/>
+            <span class="card-text" id="user-email" th:text="'이메일 : '+${confirmInfo.buyerInfo.userEmail}"></span>
+            <br/>
             <label for="user-tel" th:text="'전화번호 : '">전화번호</label>
             <input class="card-text" id="user-tel" name="tel" placeholder="전화번호를 입력하세요." type="number">
           </div>
