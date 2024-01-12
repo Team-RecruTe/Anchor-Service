@@ -3,8 +3,10 @@ package com.anchor.domain.mentoring.api.controller;
 import com.anchor.domain.mentoring.api.service.MentoringService;
 import com.anchor.domain.mentoring.api.service.response.MentoringContents;
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
+import com.anchor.domain.mentoring.domain.MentoringReview;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+@Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/mentorings")
 @Controller
@@ -52,4 +55,11 @@ public class MentoringViewController {
     return "mentoring-edit";
   }
 
+  @GetMapping("/{id}/reviews")
+  public String viewReviewPage(@PathVariable("id") Long mentoringId, Model model) {
+    List<MentoringReview> reviewList = mentoringService.getMentoringReviews(mentoringId);
+    model.addAttribute("reviewList", reviewList);
+    log.info("reviewList===" + reviewList);
+    return "/mentoring-review";
+  }
 }

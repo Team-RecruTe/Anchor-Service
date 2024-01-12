@@ -52,7 +52,6 @@ public class UserController {
         SUCCESS : FAILURE;
   }
 
-
   private SessionUser getSessionUserFromSession(HttpSession session) {
     SessionUser sessionUser = (SessionUser) session.getAttribute("user");
     if (sessionUser == null) {
@@ -60,4 +59,5 @@ public class UserController {
     }
     return sessionUser;
   }
+
 }

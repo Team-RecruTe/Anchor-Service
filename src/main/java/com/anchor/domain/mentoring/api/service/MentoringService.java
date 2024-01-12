@@ -19,8 +19,10 @@ import com.anchor.domain.mentoring.api.service.response.MentoringPaymentInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
+import com.anchor.domain.mentoring.domain.MentoringReview;
 import com.anchor.domain.mentoring.domain.MentoringUnavailableTime;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
+import com.anchor.domain.mentoring.domain.repository.MentoringReviewRepository;
 import com.anchor.domain.mentoring.domain.repository.MentoringUnavailableTimeRepository;
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.domain.payment.domain.repository.PaymentRepository;
@@ -48,6 +50,12 @@ public class MentoringService {
   private final MentorRepository mentorRepository;
   private final PaymentRepository paymentRepository;
   private final PayNumberFactory payNumberFactory;
+  private final MentoringReviewRepository mentoringReviewRepository;
+
+  public List<MentoringReview> getMentoringReviews(Long mentoringId) {
+    List<MentoringReview> reviewList = mentoringReviewRepository.getReviewList(mentoringId);
+    return reviewList;
+  }
 
   @Transactional
   public MentoringCreateResult create(Long mentorId, MentoringBasicInfo mentoringBasicInfo) {

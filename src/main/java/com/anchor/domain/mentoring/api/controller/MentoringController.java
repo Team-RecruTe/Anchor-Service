@@ -9,7 +9,6 @@ import com.anchor.domain.mentoring.api.service.response.ApplicationUnavailableTi
 import com.anchor.domain.mentoring.api.service.response.AppliedMentoringInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
-import com.anchor.domain.mentoring.api.service.response.MentoringDefaultInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringDeleteResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
@@ -83,13 +82,6 @@ public class MentoringController {
     return ResponseEntity.ok(result);
   }
 
-  @GetMapping("")
-  public ResponseEntity<List<MentoringDefaultInfo>> mentoringList() {
-    List<MentoringDefaultInfo> mentoringDefaultInfoList = mentoringService.loadMentoringList();
-    return ResponseEntity.ok()
-        .body(mentoringDefaultInfoList);
-  }
-
   @GetMapping("/{id}")
   public ResponseEntity<MentoringDetailInfo> mentoringDetail(
       @PathVariable("id") Long id) {
@@ -97,7 +89,6 @@ public class MentoringController {
     return ResponseEntity.ok()
         .body(mentoringDetailInfo);
   }
-
 
   @GetMapping("/{id}/apply")
   public ResponseEntity<List<ApplicationUnavailableTime>> mentoringApplicationPage(

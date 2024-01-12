@@ -19,23 +19,23 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 public class MailService {
-  @Value("${spring.mail.username}")
-  String sender;
 
   private final JavaMailSender javaMailSender;
   private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+  @Value("${spring.mail.username}")
+  String sender;
 
   @Async("emailAsync")
   public CompletableFuture<String> sendMail(MailDto mailDto) {
     CompletableFuture<String> future = new CompletableFuture<>();
     MimeMessage message = javaMailSender.createMimeMessage();
+    scheduler.schedule(() -> future.completeExceptionally(new TimeoutException("작업 시간 초과")), 5, TimeUnit.SECONDS);
     try {
       message.setFrom(sender);
       message.setRecipients(MimeMessage.RecipientType.TO, mailDto.getReceiver());
       message.setSubject(mailDto.getTitle());
       message.setText(mailDto.getContent(), "UTF-8", "html");
       javaMailSender.send(message);
-      scheduler.schedule(() -> future.completeExceptionally(new TimeoutException("작업 시간 초과")), 5, TimeUnit.SECONDS);
     } catch (MessagingException e) {
       throw new RuntimeException(e);
     }

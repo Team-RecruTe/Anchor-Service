@@ -1,8 +1,11 @@
 package com.anchor.domain.user.api.service;
 
+import com.anchor.domain.mentoring.api.controller.request.MentoringReviewInfo;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
+import com.anchor.domain.mentoring.domain.MentoringReview;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
+import com.anchor.domain.mentoring.domain.repository.MentoringReviewRepository;
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.domain.payment.domain.repository.PaymentRepository;
 import com.anchor.domain.user.api.controller.request.MentoringStatusInfo;
@@ -16,6 +19,7 @@ import com.anchor.global.util.ExternalApiUtil;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,6 +34,16 @@ public class UserService {
   private final MentoringApplicationRepository mentoringApplicationRepository;
   private final PaymentRepository paymentRepository;
   private final ExternalApiUtil apiUtil;
+  private final MentoringReviewRepository mentoringReviewRepository;
+
+  public void writeReview(Long id, MentoringReviewInfo mentoringReviewInfo) {
+    Optional<MentoringApplication> mentoringApplication = mentoringApplicationRepository.findById(id);
+    MentoringReview dbMentoringReviewInsert = MentoringReview.builder()
+        .contents(mentoringReviewInfo.getContents())
+        .mentoringApplication(mentoringApplication.get())
+        .build();
+    mentoringReviewRepository.save(dbMentoringReviewInsert);
+  }
 
   @Transactional(readOnly = true)
   public List<AppliedMentoringInfo> loadAppliedMentoringList(SessionUser sessionUser) {
@@ -45,7 +59,6 @@ public class UserService {
             .map(AppliedMentoringInfo::new)
             .toList();
   }
-
 
   @Transactional
   public boolean changeAppliedMentoringStatus(SessionUser sessionUser, MentoringStatusInfo changeRequest) {

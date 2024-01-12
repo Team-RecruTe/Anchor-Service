@@ -13,6 +13,7 @@ public class AppliedMentoringInfo {
   private String mentorNickname;
   private String mentoringTitle;
   private String impUid;
+  private Long mentoringApplicationId;
 
   @Builder
   private AppliedMentoringInfo(LocalDateTime startDateTime, LocalDateTime endDateTime,
@@ -33,6 +34,7 @@ public class AppliedMentoringInfo {
         .getNickname();
     this.mentoringTitle = mentoringApplication.getMentoring()
         .getTitle();
+    this.mentoringApplicationId = mentoringApplication.getId();
     this.impUid = mentoringApplication.getPayment()
         .getImpUid();
   }

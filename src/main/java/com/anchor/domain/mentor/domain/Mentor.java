@@ -3,7 +3,9 @@ package com.anchor.domain.mentor.domain;
 import com.anchor.domain.mentor.api.controller.request.MentorInfoRequest;
 import com.anchor.domain.mentor.api.controller.request.MentorIntroductionRequest;
 import com.anchor.domain.mentoring.domain.Mentoring;
+import com.anchor.domain.user.domain.User;
 import com.anchor.global.util.BaseEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -37,6 +39,9 @@ public class Mentor extends BaseEntity {
   @Column(length = 20, nullable = false)
   private String bankName;
 
+  @Column(length = 20, nullable = false)
+  private String accountName;
+
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "mentor_introduction_id")
   private MentorIntroduction mentorIntroduction;
@@ -69,20 +74,19 @@ public class Mentor extends BaseEntity {
     this.accountName = mentorInfoRequest.getAccountName();
   }
 
-  public void editInfo(MentorInfoRequest mentorInfoRequest){
+  public void editInfo(MentorInfoRequest mentorInfoRequest) {
     this.career = mentorInfoRequest.getCareer();
     this.bankName = mentorInfoRequest.getBankName();
     this.accountNumber = mentorInfoRequest.getAccountNumber();
     this.accountName = mentorInfoRequest.getAccountName();
   }
 
-  public void editContents(MentorIntroductionRequest mentorIntroductionRequest){
-    if(this.mentorIntroduction == null){
+  public void editContents(MentorIntroductionRequest mentorIntroductionRequest) {
+    if (this.mentorIntroduction == null) {
       this.mentorIntroduction = MentorIntroduction.addContents(mentorIntroductionRequest.getContents());
     } else {
       this.mentorIntroduction.editContents(mentorIntroductionRequest.getContents());
     }
   }
-
 
 }
