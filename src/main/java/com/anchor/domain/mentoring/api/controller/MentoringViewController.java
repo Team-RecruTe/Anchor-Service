@@ -49,9 +49,7 @@ public class MentoringViewController {
   ) {
     Page<MentoringSearchResult> mentoringSearchResults = mentoringService.getMentorings(tags, keyword, pageable);
     Set<String> popularMentoringTags = mentoringService.getPopularMentoringTags();
-
     MentoringSearchInfo mentoringSearchInfo = MentoringSearchInfo.of(mentoringSearchResults, popularMentoringTags);
-
     model.addAttribute("mentoringSearchInfo", mentoringSearchInfo);
     return viewResolver.getViewPath("mentoring", "mentoring-search");
   }
@@ -63,9 +61,7 @@ public class MentoringViewController {
   public String viewMentoringDetailPage(@PathVariable("id") Long id, Model model) {
     MentoringDetailSearchResult mentoringDetailSearchResult = mentoringService.getMentoringDetailInfo(id);
     Set<String> popularMentoringTags = mentoringService.getPopularMentoringTags();
-
     MentoringDetailInfo mentoringDetailInfo = MentoringDetailInfo.of(mentoringDetailSearchResult, popularMentoringTags);
-
     model.addAttribute("mentoringDetail", mentoringDetailInfo);
     return viewResolver.getViewPath("mentoring", "mentoring-detail");
   }
@@ -99,18 +95,14 @@ public class MentoringViewController {
   @PostMapping("/{id}/payment")
   public String viewMentoringPayment(@PathVariable("id") Long id,
       @ModelAttribute MentoringApplicationTime applicationTime, HttpSession session, Model model) {
-
-    SessionUser sessionUser = getSessionUserFromSession(session);
-
+    SessionUser sessionUser = getSessionUser(session);
     MentoringPayConfirmInfo mentoringConfirmInfo = mentoringService.getMentoringConfirmInfo(id, applicationTime,
         sessionUser);
-
     model.addAttribute("confirmInfo", mentoringConfirmInfo);
     return viewResolver.getViewPath("mentoring", "mentoring-payment");
   }
 
-
-  private SessionUser getSessionUserFromSession(HttpSession session) {
+  private SessionUser getSessionUser(HttpSession session) {
     SessionUser sessionUser = (SessionUser) session.getAttribute("user");
     if (sessionUser == null) {
       throw new RuntimeException("로그인 정보가 없습니다. 잘못된 접근입니다.");

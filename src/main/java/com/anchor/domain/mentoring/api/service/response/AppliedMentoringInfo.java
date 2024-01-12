@@ -2,7 +2,6 @@ package com.anchor.domain.mentoring.api.service.response;
 
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
-import com.anchor.domain.payment.domain.Payment;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -31,7 +30,7 @@ public class AppliedMentoringInfo {
   private String orderUid;
   private Integer amount;
 
-  public AppliedMentoringInfo(MentoringApplication mentoringApplication, Payment payment) {
+  public AppliedMentoringInfo(MentoringApplication mentoringApplication) {
     this.mentorNickname = mentoringApplication.getMentoring()
         .getMentor()
         .getUser()
@@ -41,7 +40,9 @@ public class AppliedMentoringInfo {
     this.mentoringStartDateTime = mentoringApplication.getStartDateTime();
     this.mentoringEndDateTime = mentoringApplication.getEndDateTime();
     this.mentoringStatus = mentoringApplication.getMentoringStatus();
-    this.amount = payment.getAmount();
-    this.orderUid = payment.getOrderUid();
+    this.amount = mentoringApplication.getPayment()
+        .getAmount();
+    this.orderUid = mentoringApplication.getPayment()
+        .getOrderUid();
   }
 }

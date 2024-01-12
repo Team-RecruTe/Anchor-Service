@@ -15,13 +15,9 @@ import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringPaymentInfo;
 import com.anchor.domain.mentoring.api.service.response.TopMentoring;
 import com.anchor.global.auth.SessionUser;
-import com.anchor.global.util.type.DateTimeRange;
 import com.anchor.global.util.type.Link;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -94,18 +90,12 @@ public class MentoringController {
   }
 
   /**
-   * 멘토의 활동시간과 해당 멘토링의 신청내역, 세션에 저장된 결제중인 멘토링시간대를 조회합니다. 해당 멘토링의 신청대기 또는 완료된 시간대를 조회한 후 활동시간과 신청내역 시간을 분리해서 클라이언트로
+   * 멘토의 활동시간과 해당 멘토링의 신청내역, Redis에 저장된 결제중인 멘토링시간대를 조회합니다. 해당 멘토링의 신청대기 또는 완료된 시간대를 조회한 후 활동시간과 신청내역 시간을 분리해서 클라이언트로
    * 전달합니다.
    */
   @GetMapping("/{id}/reservation-time")
-  public ResponseEntity<ApplicationTimeInfo> mentoringActiveTime(@PathVariable("id") Long id, HttpSession session) {
-
+  public ResponseEntity<ApplicationTimeInfo> mentoringActiveTime(@PathVariable("id") Long id) {
     ApplicationTimeInfo mentoringActiveTimes = mentoringService.getMentoringActiveTimes(id);
-
-    Set<DateTimeRange> sessionUnavailableTimes = getSessionUnavailableTimes(session, id);
-
-    sessionUnavailableTimes.forEach(mentoringActiveTimes::add);
-    updateSessionUnavailableTime(session, id, sessionUnavailableTimes);
     return ResponseEntity.ok()
         .body(mentoringActiveTimes);
   }
@@ -116,28 +106,35 @@ public class MentoringController {
   @PostMapping("/{id}/lock")
   public ResponseEntity<String> applicationTimeLock(@PathVariable("id") Long id,
       @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
-
-    Set<DateTimeRange> sessionUnavailableTimes = getSessionUnavailableTimes(session, id);
-
-    mentoringService.addApplicationTimeFromSession(sessionUnavailableTimes, applicationTime);
-    updateSessionUnavailableTime(session, id, sessionUnavailableTimes);
-
-    saveMentoringTimeInSession(session, applicationTime);
-
+    SessionUser sessionUser = getSessionUser(session);
+    mentoringService.lock(id, sessionUser, applicationTime);
     return ResponseEntity.ok()
         .body(SUCCESS);
   }
 
   /**
-   * 멘토링 신청 도중 결제실패 또는 취소시 잠금상태였던 시간대를 해제합니다.
+   * 결제중인 멘토링 시간대의 잠금 유효시간을 갱신합니다.
+   */
+  @PutMapping("/{id}/refresh")
+  public ResponseEntity<String> refreshPaymentTime(@PathVariable("id") Long id, HttpSession session) {
+    SessionUser sessionUser = getSessionUser(session);
+    boolean refreshResult = mentoringService.refresh(id, sessionUser);
+    if (refreshResult) {
+      return ResponseEntity.ok()
+          .build();
+    } else {
+      return ResponseEntity.badRequest()
+          .body("이미 예약시간이 만료되었습니다. 홈페이지로 이동합니다.");
+    }
+  }
+
+  /**
+   * 멘토링 신청 도중 페이지를 벗어나거나, 시간이 만료되면 잠금을 해제합니다.
    */
   @PutMapping("/{id}/unlock")
   public ResponseEntity<String> mentoringTimeSessionRemove(@PathVariable("id") Long id, HttpSession session) {
-    Set<DateTimeRange> sessionUnavailableTimes = getSessionUnavailableTimes(session, id);
-    DateTimeRange myAppliedMentoringTimeRange = getMyAppliedMentoringTimeRange(session);
-    mentoringService.removeApplicationTimeFromSession(sessionUnavailableTimes, myAppliedMentoringTimeRange);
-    updateSessionUnavailableTime(session, id, sessionUnavailableTimes);
-
+    SessionUser sessionUser = getSessionUser(session);
+    mentoringService.unlock(id, sessionUser);
     return ResponseEntity.ok()
         .body(SUCCESS);
   }
@@ -148,9 +145,8 @@ public class MentoringController {
   @PostMapping("/{id}/payment-process")
   public ResponseEntity<MentoringPaymentInfo> mentoringTimeSessionSave(
       @PathVariable("id") Long id, @RequestBody MentoringApplicationUserInfo userInfo, HttpSession session) {
-    DateTimeRange myAppliedMentoringTimeRange = getMyAppliedMentoringTimeRange(session);
-    MentoringPaymentInfo mentoringPaymentInfo = mentoringService.createPaymentInfo(id, myAppliedMentoringTimeRange,
-        userInfo);
+    SessionUser sessionUser = getSessionUser(session);
+    MentoringPaymentInfo mentoringPaymentInfo = mentoringService.createPaymentInfo(id, userInfo, sessionUser);
     return ResponseEntity.ok()
         .body(mentoringPaymentInfo);
   }
@@ -162,22 +158,12 @@ public class MentoringController {
   public ResponseEntity<AppliedMentoringInfo> mentoringApplicationSave
   (@PathVariable("id") Long id, @RequestBody MentoringApplicationInfo applicationInfo, HttpSession session) {
     SessionUser sessionUser = getSessionUser(session);
-
-    DateTimeRange myAppliedMentoringTimeRange = getMyAppliedMentoringTimeRange(session);
-
-    applicationInfo.addApplicationTime(myAppliedMentoringTimeRange);
-
     AppliedMentoringInfo appliedMentoringInfo =
         mentoringService.saveMentoringApplication(sessionUser, id, applicationInfo);
-
     if (appliedMentoringInfo != null) {
-      Set<DateTimeRange> sessionUnavailableTimes = getSessionUnavailableTimes(session, id);
-      mentoringService.removeApplicationTimeFromSession(sessionUnavailableTimes, myAppliedMentoringTimeRange);
-
       return ResponseEntity.ok()
           .body(appliedMentoringInfo);
     }
-
     return ResponseEntity.badRequest()
         .build();
   }
@@ -188,34 +174,6 @@ public class MentoringController {
       throw new RuntimeException("로그인 정보가 존재하지 않습니다.");
     }
     return sessionUser;
-  }
-
-  private Set<DateTimeRange> getSessionUnavailableTimes(HttpSession session, Long id) {
-    Object attribute = session.getAttribute(String.valueOf(id));
-    if (Objects.nonNull(attribute)) {
-      return (Set<DateTimeRange>) attribute;
-    }
-    return new HashSet<>();
-  }
-
-  private void updateSessionUnavailableTime(HttpSession session, Long id,
-      Set<DateTimeRange> sessionUnavailableTimes) {
-    session.setAttribute(String.valueOf(id), sessionUnavailableTimes);
-  }
-
-  private void saveMentoringTimeInSession(HttpSession session, MentoringApplicationTime applicationTime) {
-    SessionUser sessionUser = getSessionUser(session);
-    session.setAttribute(sessionUser.getEmail(), applicationTime.convertDateTimeRange());
-  }
-
-  private DateTimeRange getMyAppliedMentoringTimeRange(HttpSession session) {
-    SessionUser sessionUser = getSessionUser(session);
-    Object attribute = session.getAttribute(sessionUser.getEmail());
-    if (Objects.nonNull(attribute)) {
-      return (DateTimeRange) attribute;
-    } else {
-      throw new RuntimeException("신청중이던 시간이 존재하지 않습니다.");
-    }
   }
 
 }

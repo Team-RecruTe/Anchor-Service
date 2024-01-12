@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  let currentUri = String(window.location.pathname);
+  let currentUri = window.location.pathname;
 
   let requestUri = currentUri.replace(/\/apply$/, '/reservation-time');
 
@@ -13,10 +13,8 @@ document.getElementById('submitButton').addEventListener('click', () => {
 });
 
 function applicationTimeLock() {
-  // /mentorings/{id}/apply
-  let currentUri = String(window.location.pathname);
+  let currentUri = window.location.pathname;
 
-  // /mentorings{id}/lock
   let requestUri = currentUri.replace(/\/apply$/, '/lock');
 
   let inputDate = document.getElementById('date').value;

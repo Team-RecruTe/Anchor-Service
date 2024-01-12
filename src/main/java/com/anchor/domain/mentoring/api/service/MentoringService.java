@@ -10,7 +10,6 @@ import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationUs
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
 import com.anchor.domain.mentoring.api.service.response.ApplicationTimeInfo;
-import com.anchor.domain.mentoring.api.service.response.ApplicationTimeInfo.MentorActiveTime;
 import com.anchor.domain.mentoring.api.service.response.AppliedMentoringInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringContents;
 import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
@@ -33,6 +32,7 @@ import com.anchor.domain.payment.domain.repository.PaymentRepository;
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
+import com.anchor.global.redis.ApplicationLockClient;
 import com.anchor.global.util.type.DateTimeRange;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -57,6 +57,7 @@ public class MentoringService {
   private final PaymentRepository paymentRepository;
   private final MentorScheduleRepository mentorScheduleRepository;
   private final MentoringApplicationRepository mentoringApplicationRepository;
+  private final ApplicationLockClient applicationLockClient;
   private final PayNumberCreator payNumberCreator;
 
   @Transactional
@@ -127,24 +128,16 @@ public class MentoringService {
   }
 
   /**
-   * 멘토의 활동시간과 이미 신청된 멘토링시간을 조회합니다.
+   * 멘토의 활동시간과 이미 신청된 멘토링시간, 결제중인 멘토링시간을 조회합니다.
    */
   @Transactional(readOnly = true)
   public ApplicationTimeInfo getMentoringActiveTimes(Long id) {
-
+    Mentor mentor = getMentoringById(id).getMentor();
+    String pattern = ApplicationLockClient.createMatchPattern(mentor);
+    List<DateTimeRange> paymentTimes = applicationLockClient.findByKeyword(pattern);
     List<MentoringApplication> mentoringApplications = mentoringApplicationRepository.findByMentoringId(id);
-
-    List<DateTimeRange> mentoringUnavailables = mentoringApplications.stream()
-        .map(application -> DateTimeRange.of(application.getStartDateTime(), application.getEndDateTime()))
-        .toList();
-
     List<MentorSchedule> mentorSchedules = mentorScheduleRepository.findMentorScheduleByMentorId(id);
-
-    List<MentorActiveTime> mentorActiveTimes = mentorSchedules.stream()
-        .map(MentorActiveTime::of)
-        .toList();
-
-    return ApplicationTimeInfo.of(mentoringUnavailables, mentorActiveTimes);
+    return ApplicationTimeInfo.create(mentoringApplications, mentorSchedules, paymentTimes);
   }
 
   /**
@@ -162,12 +155,15 @@ public class MentoringService {
    * 멘토링 결제에 필요한 정보를 생성합니다.
    */
   @Transactional(readOnly = true)
-  public MentoringPaymentInfo createPaymentInfo(Long id, DateTimeRange myAppliedMentoringTimeRange,
-      MentoringApplicationUserInfo userInfo) {
+  public MentoringPaymentInfo createPaymentInfo(Long id, MentoringApplicationUserInfo userInfo,
+      SessionUser sessionUser) {
     Mentoring mentoring = getMentoringById(id);
+    Mentor mentor = mentoring.getMentor();
+    String key = ApplicationLockClient.createKey(mentor, sessionUser);
+    DateTimeRange myApplicationLockTime = applicationLockClient.findByKey(key);
     String merchantUid = createMerchantUid();
     String impCode = payNumberCreator.getImpCode();
-    return MentoringPaymentInfo.of(mentoring, myAppliedMentoringTimeRange, userInfo, merchantUid, impCode);
+    return MentoringPaymentInfo.of(mentoring, myApplicationLockTime, userInfo, merchantUid, impCode);
   }
 
   /**
@@ -176,30 +172,51 @@ public class MentoringService {
   @Transactional
   public AppliedMentoringInfo saveMentoringApplication(SessionUser sessionUser,
       Long id, MentoringApplicationInfo applicationInfo) {
-    Mentoring findMentoring = getMentoringById(id);
+    Mentoring mentoring = getMentoringById(id);
+    Mentor mentor = mentoring.getMentor();
+    String key = ApplicationLockClient.createKey(mentor, sessionUser);
+    DateTimeRange myApplicationLockTime = applicationLockClient.findByKey(key);
+    applicationInfo.addApplicationTime(myApplicationLockTime);
     User loginUser = getUser(sessionUser);
     Payment payment = new Payment(applicationInfo);
-    MentoringApplication mentoringApplication = new MentoringApplication(applicationInfo, findMentoring, payment,
+    MentoringApplication mentoringApplication = new MentoringApplication(applicationInfo, mentoring, payment,
         loginUser);
     mentoringApplicationRepository.save(mentoringApplication);
-    return new AppliedMentoringInfo(mentoringApplication, payment);
+    applicationLockClient.remove(key);
+    return new AppliedMentoringInfo(mentoringApplication);
   }
 
   /**
-   * 세션에 결제진행중인 멘토링시간을 등록해 다른 회원이 해당시간에 신청하지 못하게 잠금처리합니다.
+   * Redis에 결제진행중인 시간대를 저장합니다.
    */
-  public void addApplicationTimeFromSession
-  (Set<DateTimeRange> sessionUnavailableTimes, MentoringApplicationTime applicationTime) {
-    DateTimeRange applicationTimeRange = applicationTime.convertDateTimeRange();
-    sessionUnavailableTimes.add(applicationTimeRange);
+  public void lock(Long id, SessionUser sessionUser, MentoringApplicationTime applicationTime) {
+    DateTimeRange dateTimeRange = applicationTime.convertDateTimeRange();
+    Mentor mentor = getMentoringById(id).getMentor();
+    String key = ApplicationLockClient.createKey(mentor, sessionUser);
+    applicationLockClient.save(key, dateTimeRange);
   }
 
   /**
-   * 세션에서 신청하던 멘토링 시간대를 삭제합니다.
+   * Redis에 저장되어있던 시간대를 삭제합니다.
    */
-  public void removeApplicationTimeFromSession(Set<DateTimeRange> sessionUnavailableTimes,
-      DateTimeRange myDateTimeRange) {
-    sessionUnavailableTimes.remove(myDateTimeRange);
+  public void unlock(Long id, SessionUser sessionUser) {
+    Mentor mentor = getMentoringById(id).getMentor();
+    String key = ApplicationLockClient.createKey(mentor, sessionUser);
+    applicationLockClient.remove(key);
+  }
+
+  /**
+   * 결제진행중인 시간 잠금 유효시간을 갱신합니다.
+   */
+  public boolean refresh(Long id, SessionUser sessionUser) {
+    Mentor mentor = getMentoringById(id).getMentor();
+    String key = ApplicationLockClient.createKey(mentor, sessionUser);
+    try {
+      applicationLockClient.refresh(key);
+      return true;
+    } catch (RuntimeException e) {
+      return false;
+    }
   }
 
   private Mentor getMentorById(Long id) {
@@ -233,6 +250,7 @@ public class MentoringService {
     List<MentoringSearchResult> topMentorings = mentoringRepository.findTopMentorings();
     return new TopMentoring(topMentorings);
   }
+
   private String createMerchantUid() {
     String today = LocalDate.now()
         .format(DateTimeFormatter.ofPattern("yyyyMMdd"));

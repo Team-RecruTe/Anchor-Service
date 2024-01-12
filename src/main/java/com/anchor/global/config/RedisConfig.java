@@ -1,6 +1,5 @@
 package com.anchor.global.config;
 
-import com.anchor.global.util.type.DateTimeRange;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,8 +44,8 @@ public class RedisConfig {
   }
 
   @Bean
-  public RedisTemplate<String, DateTimeRange> redisTemplate() {
-    RedisTemplate<String, DateTimeRange> redisTemplate = new RedisTemplate<>();
+  public RedisTemplate<String, ?> redisTemplate() {
+    RedisTemplate<String, ?> redisTemplate = new RedisTemplate<>();
     redisTemplate.setConnectionFactory(redisStorageConnectionFactory());
     redisTemplate.setKeySerializer(new StringRedisSerializer());
     redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());

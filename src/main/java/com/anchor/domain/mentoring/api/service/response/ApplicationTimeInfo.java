@@ -2,6 +2,7 @@ package com.anchor.domain.mentoring.api.service.response;
 
 import com.anchor.domain.mentor.domain.ActiveStatus;
 import com.anchor.domain.mentor.domain.MentorSchedule;
+import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.global.util.type.DateTimeRange;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,6 +12,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import lombok.Getter;
@@ -30,14 +32,19 @@ public class ApplicationTimeInfo {
     this.activeTimes = activeTimes;
   }
 
-  public static ApplicationTimeInfo of(List<DateTimeRange> unavailableTimes, List<MentorActiveTime> activeTimes) {
-    return new ApplicationTimeInfo(unavailableTimes, activeTimes);
-  }
+  public static ApplicationTimeInfo create(List<MentoringApplication> applications, List<MentorSchedule> schedules,
+      List<DateTimeRange> paymentTimes) {
+    List<MentorActiveTime> mentorActiveTimes = schedules.stream()
+        .map(MentorActiveTime::of)
+        .toList();
 
-  public void add(DateTimeRange dateTimeRange) {
-    if (Objects.nonNull(dateTimeRange)) {
-      unavailableTimes.add(dateTimeRange);
-    }
+    List<DateTimeRange> unavailableTimes = new ArrayList<>();
+    applications.stream()
+        .map(application -> DateTimeRange.of(application.getStartDateTime(), application.getEndDateTime()))
+        .forEach(unavailableTimes::add);
+
+    unavailableTimes.addAll(paymentTimes);
+    return new ApplicationTimeInfo(unavailableTimes, mentorActiveTimes);
   }
 
   @Getter
