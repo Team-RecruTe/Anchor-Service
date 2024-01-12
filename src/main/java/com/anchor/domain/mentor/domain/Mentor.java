@@ -40,10 +40,10 @@ public class Mentor extends BaseEntity {
   private String accountNumber;
 
   @Column(length = 20, nullable = false)
-  private String bankName;
+  private String accountName;
 
   @Column(length = 20, nullable = false)
-  private String accountName;
+  private String bankName;
 
   @OneToOne(
       fetch = FetchType.LAZY,
@@ -51,6 +51,7 @@ public class Mentor extends BaseEntity {
   )
   @JoinColumn(name = "mentor_introduction_id")
   private MentorIntroduction mentorIntroduction;
+
 
   @OneToMany(
       mappedBy = "mentor",
@@ -96,6 +97,5 @@ public class Mentor extends BaseEntity {
       this.mentorIntroduction.editContents(mentorContents.getContents());
     }
   }
-
 
 }

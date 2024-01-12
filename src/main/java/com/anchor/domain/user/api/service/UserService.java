@@ -39,7 +39,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserService {
 
-
   private final UserRepository userRepository;
   private final MentoringApplicationRepository mentoringApplicationRepository;
   private final PayupRepository payupRepository;
@@ -82,7 +81,6 @@ public class UserService {
         });
     userRepository.delete(user);
   }
-
 
   @Transactional(readOnly = true)
   public Page<AppliedMentoringInfo> loadAppliedMentoringList(SessionUser sessionUser, Pageable pageable) {
@@ -156,10 +154,10 @@ public class UserService {
     Mentor mentor = mentoring.getMentor();
     Payment payment = application.getPayment();
     Payup payup = Payup.builder()
+        .payupDateTime(LocalDateTime.MIN)
         .mentor(mentor)
         .payment(payment)
         .build();
     payupRepository.save(payup);
   }
-
 }

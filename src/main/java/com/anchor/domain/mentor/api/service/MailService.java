@@ -22,6 +22,8 @@ public class MailService {
 
   private final JavaMailSender javaMailSender;
   private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+  @Value("${spring.mail.username}")
+  String sender;
 
   @Value("${spring.mail.username}")
   private String sender;
