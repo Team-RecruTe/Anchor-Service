@@ -19,9 +19,10 @@ function paymentPageValidation() {
     }
 
     if (!confirmFlag) {
-      let requestUri = currentUri.replace(/\/payment$/, '/unlock');
-      axios.put(requestUri).then(res => location.href = '/');
+      unlock(currentUri);
     }
+  } else {
+    unlock(currentUri);
   }
 }
 
@@ -29,4 +30,9 @@ function currentUriMatcher(currentUri) {
   let uriPattern = /^\/mentorings\/\d+\/payment$/;
 
   return uriPattern.test(currentUri);
+}
+
+function unlock(currentUri) {
+  let requestUri = currentUri.replace(/\/payment$/, '/unlock');
+  axios.delete(requestUri).then(res => location.href = '/');
 }
