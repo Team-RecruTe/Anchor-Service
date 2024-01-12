@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko"
+      layout:decorate="~{layout/default}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+>
+<head>
+  <title>멘토 - 멘토링 신청내역 페이지</title>
+</head>
+<body>
+<div class="d-flex flex-column justify-content-center" layout:fragment="content">
+  <div class="d-flex justify-content-center" id="table-container">
+    <table class="table w-75">
+      <tr th:each="app : ${mentoringApplications}">
+        <td class="align-middle"><input type="checkbox"></td>
+        <td class="align-middle">
+          <a th:href="'/mentorings/' + ${app.mentoringInfo.id}" th:text="${app.mentoringInfo.title}"></a>
+        </td>
+        <td class="align-middle">
+          <img class="rounded-circle" height="32" th:src="${app.userInfo.image}" width="32">
+        </td>
+        <td class="align-middle" th:text="${app.userInfo.nickname}"></td>
+        <td class="align-middle" th:text="${app.userInfo.email}"></td>
+        <td class="align-middle" th:text="${app.paymentInfo.amount}"></td>
+        <td class="align-middle">
+          <span>
+            [[${app.mentoringApplicationInfo.dateTimeRange.from.toString().replace("T", " ")}]] ~
+            [[${app.mentoringApplicationInfo.dateTimeRange.to.toString().replace("T", " ")}]]
+          </span>
+        </td>
+        <td class="align-middle" id="status">
+          <div class="btn-group d-flex justify-content-center">
+            <th:block
+                th:if="${app.mentoringApplicationInfo.status == '완료' || app.mentoringApplicationInfo.status == '취소'}">
+              <span>
+                [[${app.mentoringApplicationInfo.status}]]
+              </span>
+            </th:block>
+            <th:block
+                th:unless="${app.mentoringApplicationInfo.status == '완료' || app.mentoringApplicationInfo.status == '취소'}">
+              <button aria-expanded="false" class="btn dropdown-toggle" data-bs-toggle="dropdown"
+                      id="dropdown-button" type="button">
+                [[${app.mentoringApplicationInfo.status}]]
+              </button>
+              <ul class="dropdown-menu">
+                <li class="dropdown-item" id="approval" th:unless="${app.mentoringApplicationInfo.status == '승인'}">승인
+                </li>
+                <li class="dropdown-item" id="cancel">취소</li>
+              </ul>
+            </th:block>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div>
+    <nav aria-label="Page navigation example">
+      <ul class="pagination justify-content-center">
+      </ul>
+    </nav>
+  </div>
+  <script th:inline="javascript">
+    let currentPage = parseInt(new URLSearchParams(location.search).get("page"))
+    currentPage = currentPage < 1 ? 1 : currentPage
+    const pagenation = document.querySelector('.pagination')
+
+    const createPage = (totalPage, currentPage, content, page) => {
+      const isPrevDisable = currentPage === 1 && content === "Prev"
+      const isCurrentDisable = currentPage === page
+      const isPageDisable = totalPage < page
+      const li = document.createElement("li")
+      const a = document.createElement("a")
+      li.classList.add("page-item")
+      a.classList.add("page-link")
+      a.href = `?page=${page}`
+      a.textContent = content
+      if (isPrevDisable || isCurrentDisable || isPageDisable) {
+        li.classList.add("disabled")
+      }
+      li.appendChild(a)
+      return li
+    }
+
+    const totalPage = 4
+    pagenation.appendChild(createPage(totalPage, currentPage, "Prev", currentPage - 1))
+    if (totalPage === 2) {
+      if (currentPage === 1) {
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage + 1, currentPage + 1))
+      } else {
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage - 1, currentPage - 1))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
+      }
+    } else if (totalPage > 2) {
+      if (currentPage === 1) {
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage + 1, currentPage + 1))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage + 2, currentPage + 2))
+      } else if (currentPage === totalPage) {
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage - 2, currentPage - 2))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage - 1, currentPage - 1))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
+      } else {
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage - 1, currentPage - 1))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage + 1, currentPage + 1))
+      }
+    }
+    pagenation.appendChild(createPage(totalPage, currentPage, "Next", currentPage + 1))
+    const app = [[${mentoringApplications}]]
+    console.log(app)
+  </script>
+</div>
+</body>
+</html>

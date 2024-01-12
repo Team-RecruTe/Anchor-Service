@@ -34,7 +34,7 @@ public class User extends BaseEntity {
   @Enumerated(EnumType.STRING)
   private UserRole role;
 
-  @OneToOne(fetch = FetchType.LAZY)
+  @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
   private Mentor mentor;
 
   @OneToMany(mappedBy = "user")
@@ -52,7 +52,7 @@ public class User extends BaseEntity {
     return role.getKey();
   }
 
-  public void editNickname(UserNicknameRequest userNicknameRequest){
+  public void editNickname(UserNicknameRequest userNicknameRequest) {
     this.nickname = userNicknameRequest.getNickname();
   }
 

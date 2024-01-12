@@ -3,6 +3,7 @@ package com.anchor.domain.mentor.api.service;
 import com.anchor.domain.mentor.api.controller.request.MentorRegisterInfo;
 import com.anchor.domain.mentor.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
 import com.anchor.domain.mentor.api.service.response.AppliedMentoringSearchResult;
+import com.anchor.domain.mentor.api.service.response.MentorOpenCloseTimes;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentor.domain.repository.MentorRepository;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
@@ -10,7 +11,6 @@ import com.anchor.domain.mentoring.domain.MentoringStatus;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
 import com.anchor.global.util.type.DateTimeRange;
 import jakarta.persistence.PersistenceException;
-import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -20,6 +20,7 @@ import org.hibernate.NonUniqueResultException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -92,4 +93,14 @@ public class MentorService {
     return dbInsertMentor;
   }
 
+  @Transactional(readOnly = true)
+  public MentorOpenCloseTimes getMentorSchedule(Long mentorId) {
+    return mentorRepository.findScheduleById(mentorId);
+  }
+
+  @Transactional
+  public void setMentorSchedule(Long mentorId, MentorOpenCloseTimes mentorOpenCloseTimes) {
+    mentorRepository.deleteAllSchedules(mentorId);
+    mentorRepository.saveMentoSchedules(mentorId, mentorOpenCloseTimes);
+  }
 }

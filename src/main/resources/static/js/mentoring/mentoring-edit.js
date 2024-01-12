@@ -86,7 +86,7 @@ const submit = (axios, editor, tags) => {
       }
       window.location.href = "/"
     } else {
-      alert('서버에 문제가 발생했습니다.')
+      alert('url이 반환되지 않았습니다.')
     }
   })
   .catch((error) => {

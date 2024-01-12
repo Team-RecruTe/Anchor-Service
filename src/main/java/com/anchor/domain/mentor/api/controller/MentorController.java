@@ -5,6 +5,7 @@ import com.anchor.domain.mentor.api.controller.request.MentoringStatusInfo;
 import com.anchor.domain.mentor.api.controller.request.RandomCodeMaker;
 import com.anchor.domain.mentor.api.service.MailService;
 import com.anchor.domain.mentor.api.service.MentorService;
+import com.anchor.domain.mentor.api.service.response.MentorOpenCloseTimes;
 import com.anchor.global.auth.SessionUser;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,33 +28,17 @@ public class MentorController {
   private final MailService mailService;
   private final HttpSession session;
 
-  /*
-   * 설계 변경으로 주석 처리
-   */
-//  @GetMapping("/me/schedule")
-//  public ResponseEntity<MentoringUnavailableTimes> getUnavailableTimes(HttpSession httpSession) {
+  @PutMapping("/me/schedule")
+  public ResponseEntity<String> editMentorSchedule(@RequestBody MentorOpenCloseTimes mentorOpenCloseTimes,
+      HttpSession httpSession) {
 //    SessionUser user = (SessionUser) httpSession.getAttribute("user");
-//    MentoringUnavailableTimes result = mentorService.getUnavailableTimes(user.getMentorId());
-//    result.addLinks(Link.builder()
-//        .setLink("self", "/me/schedule")
-//        .build());
-//    return ResponseEntity.ok(result);
-//  }
-//
-//  @PostMapping("/me/schedule")
-//  public ResponseEntity<String> registerUnavailableTimes(
-//      @Valid @RequestBody MentoringUnavailableTimeInfo mentoringUnavailableTimeInfo, HttpSession httpSession) {
-//    SessionUser user = (SessionUser) httpSession.getAttribute("user");
-//    mentorService.setUnavailableTimes(user.getMentorId(), mentoringUnavailableTimeInfo.getDateTimeRanges());
-//    log.info("IsEmpty: {}", mentoringUnavailableTimeInfo.getDateTimeRanges()
-//        .isEmpty());
-//    return ResponseEntity.ok()
-//        .build();
-//  }
+    mentorService.setMentorSchedule(1L, mentorOpenCloseTimes);
+    return ResponseEntity.ok()
+        .build();
+  }
 
   @PostMapping("/me/applied-mentorings")
-  public ResponseEntity<String> changeMentoringStatus(
-      @RequestBody MentoringStatusInfo mentoringStatusInfo,
+  public ResponseEntity<String> changeMentoringStatus(@RequestBody MentoringStatusInfo mentoringStatusInfo,
       HttpSession httpSession) {
     SessionUser user = (SessionUser) httpSession.getAttribute("user");
     mentorService.changeMentoringStatus(user.getMentorId(), mentoringStatusInfo.getRequiredMentoringStatusInfos());
