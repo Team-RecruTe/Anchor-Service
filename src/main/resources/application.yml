@@ -46,6 +46,9 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
+    web:
+      pageable:
+        one-indexed-parameters: true
 
   security:
     oauth2:
@@ -86,6 +89,7 @@ rest-template:
 cloud:
   aws:
     cron: "0 0 3 * * *"
+
 
 #  datasource:
 #    url: jdbc:h2:mem:practical-test
