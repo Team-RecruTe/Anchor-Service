@@ -6,7 +6,7 @@
 <head>
   <title>멘토링 결제</title>
   <meta charset="UTF-8">
-  <script src="/js/axios.min.js"></script>
+  <script src="/js/library/axios.min.js"></script>
   <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
 </head>
 <div layout:fragment="content">
@@ -33,9 +33,15 @@
           <div class="card-body">
             <h2 class="card-title">구매자 정보</h2>
             <hr>
-            <span class="card-text" id="user-nickname" th:text="'닉네임 : '+${confirmInfo.buyerInfo.userNickname}"></span>
+            <div class="row">
+              <span class="col-2 ml-2">닉네임 : </span>
+              <span class="col-10 card-text" id="user-nickname" th:text="${confirmInfo.buyerInfo.userNickname}"></span>
+            </div>
             <br/>
-            <span class="card-text" id="user-email" th:text="'이메일 : '+${confirmInfo.buyerInfo.userEmail}"></span>
+            <div class="row">
+              <span class="col-2">이메일 : </span>
+              <span class="col-10 card-text" id="user-email" th:text="${confirmInfo.buyerInfo.userEmail}"></span>
+            </div>
             <br/>
             <label for="user-tel" th:text="'전화번호 : '">전화번호</label>
             <input class="card-text" id="user-tel" name="tel" placeholder="전화번호를 입력하세요." type="number">
@@ -50,6 +56,6 @@
 
     </div>
   </div>
-  <script src="/js/payment.js"></script>
+  <script src="/js/mentoring/mentoring-payment.js"></script>
 </div>
 </html>

@@ -120,13 +120,13 @@
 
     </div>
   </div>
-  <script src="/js/mentoringSearch.js"></script>
+  <script src="/js/mentoring/mentoring-search.js"></script>
   <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
   <script th:inline="javascript">
     const viewer = new toastui.Editor.factory({
       el: document.getElementById('viewer'), // toast ui editor 적용할 div
       viewer: true, // viewer 사용 여부
-      initialValue: /*[[${mentoringDetail.getMentoringDetailSearchResult().getContent()}]]*/'test' //초기 입력값
+      initialValue: [[${mentoringDetail.getMentoringDetailSearchResult().getContent()}]] //초기 입력값
     });
   </script>
 </div>

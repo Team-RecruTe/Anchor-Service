@@ -6,7 +6,7 @@
 <head>
   <title>멘토링 신청페이지</title>
   <meta charset="UTF-8">
-  <script src="/js/axios.min.js"></script>
+  <script src="/js/library/axios.min.js"></script>
 </head>
 <div layout:fragment="content">
   <h1 th:text="${mentoringDefaultInfo.title}">멘토링 제목</h1>
@@ -19,6 +19,6 @@
     <input id="duration-time" name="durationTime" th:value="${mentoringDefaultInfo.durationTime}" type="hidden">
     <button class="btn btn-primary" id="submitButton" type="button">신청하기</button>
   </form>
-  <script src="/js/mentoring-apply.js"></script>
+  <script src="/js/mentoring/mentoring-apply.js"></script>
 </div>
 </html>

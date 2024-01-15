@@ -21,8 +21,6 @@ function paymentPageValidation() {
     if (!confirmFlag) {
       unlock(currentUri);
     }
-  } else {
-    unlock(currentUri);
   }
 }
 

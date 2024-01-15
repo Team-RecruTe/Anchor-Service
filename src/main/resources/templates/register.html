@@ -3,39 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <title>Title</title>
-  <script src="/js/jquery-3.7.1.min.js"></script>
+  <script src="/js/library/jquery-3.7.1.min.js"></script>
 </head>
 <body>
-  <div class="container">
-    <form action="/mentors" method="post">
+<div class="container">
+  <form action="/mentors" method="post">
     <h2 style="font-weight:700; color:#fff; text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000;">
-        🎀멘토 등록 페이지🎀</h2>
+      🎀멘토 등록 페이지🎀</h2>
     <div>
       <label class="form-label" for="companyEmail">이메일</label>
-      <input type="email" id="companyEmail" name="companyEmail" placeholder="companyEmail">
+      <input id="companyEmail" name="companyEmail" placeholder="companyEmail" type="email">
       <button id="btnEmailSend"
               style="background-color: rgb(255, 144, 202); color:white;">SEND EMAIL
       </button>
     </div>
     <div>
       <label class="form-label" for="emailCheck">이메일 인증</label>
-      <input type="text" id="emailCheck" name="emailCheck" placeholder="emailCheck">
+      <input id="emailCheck" name="emailCheck" placeholder="emailCheck" type="text">
       <button id="btnEmailCheck"
-             style="background-color: rgb(255, 144, 202); color:white;">VERIFY EMAIL
+              style="background-color: rgb(255, 144, 202); color:white;">VERIFY EMAIL
       </button>
     </div>
 
     <div>
       <label class="form-label"> 경력 <br>
-        <input type="radio" name="career" value="JUNIOR"> 1~3년차 <br>
-        <input type="radio" name="career" value="MIDDLE"> 4~6년차 <br>
-        <input type="radio" name="career" value="SENIOR"> 7~9년차 <br>
-        <input type="radio" name="career" value="LEADER"> 10년 이상
-     </label>
+        <input name="career" type="radio" value="JUNIOR"> 1~3년차 <br>
+        <input name="career" type="radio" value="MIDDLE"> 4~6년차 <br>
+        <input name="career" type="radio" value="SENIOR"> 7~9년차 <br>
+        <input name="career" type="radio" value="LEADER"> 10년 이상
+      </label>
     </div>
     <div>
       <label class="form-label">은행명
-        <select name="bankName" id="bankName">
+        <select id="bankName" name="bankName">
           <option value=''>-선택-</option>
 
           <option value='SC제일은행'>SC제일은행</option>
@@ -86,97 +86,95 @@
     </div>
     <div>
       <label class="form-label" for="accountNumber">계좌번호
-      <input type="text" id="accountNumber" name="accountNumber" placeholder="계좌번호를 입력하세요.">
+        <input id="accountNumber" name="accountNumber" placeholder="계좌번호를 입력하세요." type="text">
       </label>
     </div>
     <div>
       <label class="form-label" for="accountName">계좌 소유주</label>
-      <input type="text" id="accountName" name="accountName" placeholder="계좌 소유주명을 입력하세요.">
+      <input id="accountName" name="accountName" placeholder="계좌 소유주명을 입력하세요." type="text">
     </div>
     <div>
       <button id="btnSubmit"
               style="background-color: rgb(255, 144, 202); color:white;">submit
       </button>
     </div>
-    </form>
-  </div>
+  </form>
+</div>
 </body>
 <script>
   let emailVerified = false;
   const bankName = $("#bankName");
-  $("#btnEmailSend").on("click", function(e) {
-	  $.ajax({
-		  url : "/mentors/register/email/send",
-		  data : {
-			  receiver : $("#companyEmail").val(),
-		  },
-		  method: "post",
-		  success : function(data) {
-		    console.log(data);
-		    if (data === "success") {
-		      alert("이메일을 전송하였습니다.");
-		    }
-		    else {
-		      alert("이메일 전송에 실패하였습니다");
-		    }
-		  },
-		  complete : function(data) {
-			  console.log("complete");
-			  console.log(data);
-		  },
-	  });
-	return false;
+  $("#btnEmailSend").on("click", function (e) {
+    $.ajax({
+      url: "/mentors/register/email/send",
+      data: {
+        receiver: $("#companyEmail").val(),
+      },
+      method: "post",
+      success: function (data) {
+        console.log(data);
+        if (data === "success") {
+          alert("이메일을 전송하였습니다.");
+        } else {
+          alert("이메일 전송에 실패하였습니다");
+        }
+      },
+      complete: function (data) {
+        console.log("complete");
+        console.log(data);
+      },
+    });
+    return false;
   });
 
-  $("#btnEmailCheck").on("click", function(e) {
-	  $.ajax({
-		  url : "/mentors/register/email/auth",
-		  data : {
-			  userEmailCode : $("#emailCheck").val(),
-		  },
-		  method: "post",
-		  success : function(data) {
-		    console.log(data);
-		    if (data === "success") {
-		      alert("이메일 인증에 성공하였습니다.");
-		      emailVerified = true;
-		      // 나중에 이메일 쓴 칸도 readonly로 바꾸기
-		      $("#btnEmailSend").attr("disabled", true);
-		      $("#btnEmailCheck").attr("disabled", true);
-		    }
-        else {
+  $("#btnEmailCheck").on("click", function (e) {
+    $.ajax({
+      url: "/mentors/register/email/auth",
+      data: {
+        userEmailCode: $("#emailCheck").val(),
+      },
+      method: "post",
+      success: function (data) {
+        console.log(data);
+        if (data === "success") {
+          alert("이메일 인증에 성공하였습니다.");
+          emailVerified = true;
+          // 나중에 이메일 쓴 칸도 readonly로 바꾸기
+          $("#btnEmailSend").attr("disabled", true);
+          $("#btnEmailCheck").attr("disabled", true);
+        } else {
           alert("이메일 인증에 실패하였습니다.");
         }
-		  },
-		  complete : function(data) {
-			  console.log("complete");
-			  console.log(data);
-		  },
-	  });
-	return false;
+      },
+      complete: function (data) {
+        console.log("complete");
+        console.log(data);
+      },
+    });
+    return false;
   });
-  $("#btnSubmit").on("click", function(e) {
-    if($("#companyEmail").val() === "") {
+  $("#btnSubmit").on("click", function (e) {
+    if ($("#companyEmail").val() === "") {
       alert("이메일 입력은 필수사항이에요.");
       return false;
     }
-    if(emailVerified === false) {
+    if (emailVerified === false) {
       alert("이메일 인증을 완료해주세요.");
       return false;
     }
-    if($(':radio[name="career"]:checked').length < 1) {
+    if ($(':radio[name="career"]:checked').length < 1) {
       alert("아직 경력을 입력하지 않으셨네요.");
       return false;
     }
-    if(bankName.val()==="") {
+    if (bankName.val() === "") {
       alert("본인 계좌의 은행명을 입력해주세요.");
       return false;
     }
-    if(accountNumber.val()==="") {
+    if (accountNumber.val() === "") {
       alert("본인 소유의 계좌번호를 입력해주세요.");
       return false;
     }
-    if(accountName.val()==="") {
+    if (accountName.val() === "") {
       alert("계좌 소유자의 이름을 입력해주세요.");
       return false;
     }
