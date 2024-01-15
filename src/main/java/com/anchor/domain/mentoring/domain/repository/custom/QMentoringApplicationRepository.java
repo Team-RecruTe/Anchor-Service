@@ -3,6 +3,7 @@ package com.anchor.domain.mentoring.domain.repository.custom;
 import com.anchor.domain.mentor.api.service.response.AppliedMentoringSearchResult;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
+import com.anchor.domain.user.api.service.response.AppliedMentoringInfo;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -24,4 +25,6 @@ public interface QMentoringApplicationRepository {
       LocalDateTime thisMonth);
 
   List<MentoringApplication> findByMentoringId(Long mentoringId);
+
+  Page<AppliedMentoringInfo> findByUserId(Long userId, Pageable pageable);
 }

@@ -17,12 +17,15 @@ import com.anchor.global.portone.request.RequiredPaymentCancelData;
 import com.anchor.global.portone.response.PaymentCancelResult;
 import com.anchor.global.portone.response.PaymentResult;
 import com.anchor.global.util.PaymentUtils;
+import com.anchor.global.util.type.DateTimeRange;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,18 +68,9 @@ public class UserService {
   }
 
   @Transactional(readOnly = true)
-  public List<AppliedMentoringInfo> loadAppliedMentoringList(SessionUser sessionUser) {
-
+  public Page<AppliedMentoringInfo> loadAppliedMentoringList(SessionUser sessionUser, Pageable pageable) {
     User user = getUser(sessionUser);
-
-    List<MentoringApplication> mentoringApplicationList = user.getMentoringApplicationList();
-
-    return mentoringApplicationList.isEmpty() ?
-        null :
-        mentoringApplicationList
-            .stream()
-            .map(AppliedMentoringInfo::new)
-            .toList();
+    return mentoringApplicationRepository.findByUserId(user.getId(), pageable);
   }
 
 
@@ -84,7 +78,7 @@ public class UserService {
   public boolean changeAppliedMentoringStatus(SessionUser sessionUser, MentoringStatusInfo changeRequest) {
     User user = getUser(sessionUser);
 
-    List<RequiredMentoringStatusInfo> mentoringStatusList = changeRequest.getMentoringStatusList();
+    List<RequiredMentoringStatusInfo> mentoringStatusList = changeRequest.getRequiredMentoringStatusInfos();
     mentoringStatusList.forEach(status -> {
       try {
         if (status.mentoringStatusIsCanceledOrComplete()) {
@@ -104,8 +98,9 @@ public class UserService {
   }
 
   private void changeStatus(User user, RequiredMentoringStatusInfo mentoringStatusInfo) {
-    LocalDateTime startDateTime = mentoringStatusInfo.getStartDateTime();
-    LocalDateTime endDateTime = mentoringStatusInfo.getEndDateTime();
+    DateTimeRange dateTimeRange = mentoringStatusInfo.getMentoringReservedTime();
+    LocalDateTime startDateTime = dateTimeRange.getFrom();
+    LocalDateTime endDateTime = dateTimeRange.getTo();
     Long userId = user.getId();
 
     MentoringApplication mentoringApplication =

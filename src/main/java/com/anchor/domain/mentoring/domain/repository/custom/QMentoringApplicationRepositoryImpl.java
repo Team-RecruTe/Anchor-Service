@@ -3,12 +3,11 @@ package com.anchor.domain.mentoring.domain.repository.custom;
 import static com.anchor.domain.mentor.domain.QMentor.mentor;
 import static com.anchor.domain.mentoring.domain.QMentoring.mentoring;
 import static com.anchor.domain.mentoring.domain.QMentoringApplication.mentoringApplication;
-import static com.anchor.domain.payment.domain.QPayment.payment;
-import static com.anchor.domain.payment.domain.QPayup.payup;
 
 import com.anchor.domain.mentor.api.service.response.AppliedMentoringSearchResult;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
+import com.anchor.domain.user.api.service.response.AppliedMentoringInfo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -101,13 +100,11 @@ public class QMentoringApplicationRepositoryImpl implements QMentoringApplicatio
       LocalDateTime thisMonth) {
 
     return jpaQueryFactory.selectFrom(mentoringApplication)
-        .join(mentoringApplication.mentoring, mentoring)
+        .join(mentoringApplication.mentoring)
         .fetchJoin()
-        .join(mentoring.mentor, mentor)
+        .join(mentoring.mentor)
         .fetchJoin()
-        .join(mentoringApplication.payment, payment)
-        .fetchJoin()
-        .join(payment.payup, payup)
+        .join(mentoringApplication.payment)
         .fetchJoin()
         .where(
             mentoringApplication.mentoringStatus.eq(status)
@@ -122,6 +119,39 @@ public class QMentoringApplicationRepositoryImpl implements QMentoringApplicatio
     return jpaQueryFactory.selectFrom(mentoringApplication)
         .where(mentoringApplication.mentoring.id.eq(mentoringId))
         .fetch();
+  }
+
+  @Override
+  public Page<AppliedMentoringInfo> findByUserId(Long userId, Pageable pageable) {
+    Long totalElements = jpaQueryFactory.select(mentoringApplication.count())
+        .from(mentoringApplication)
+        .where(mentoringApplication.user.id.eq(userId))
+        .fetchOne();
+
+    List<Long> keys = jpaQueryFactory.select(mentoringApplication.id)
+        .from(mentoringApplication)
+        .where(mentoringApplication.user.id.eq(userId))
+        .offset(pageable.getOffset())
+        .limit(pageable.getPageSize())
+        .fetch();
+
+    List<MentoringApplication> result = jpaQueryFactory.selectFrom(mentoringApplication)
+        .join(mentoringApplication.mentoring)
+        .fetchJoin()
+        .join(mentoringApplication.payment)
+        .fetchJoin()
+        .join(mentoring.mentor)
+        .fetchJoin()
+        .join(mentor.user)
+        .fetchJoin()
+        .where(mentoringApplication.id.in(keys))
+        .fetch();
+
+    List<AppliedMentoringInfo> appliedMentoringInfos = result.stream()
+        .map(AppliedMentoringInfo::of)
+        .toList();
+
+    return new PageImpl<>(appliedMentoringInfos, pageable, totalElements);
   }
 
   private BooleanBuilder equalsStatuses(MentoringStatus... statuses) {

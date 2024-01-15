@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 
 @Getter
-public class AppliedMentoringInfo {
+public class MentoringSaveRequestInfo {
 
   private String mentorNickname;
   private String mentoringTitle;
@@ -30,7 +30,7 @@ public class AppliedMentoringInfo {
   private String orderUid;
   private Integer amount;
 
-  public AppliedMentoringInfo(MentoringApplication mentoringApplication) {
+  public MentoringSaveRequestInfo(MentoringApplication mentoringApplication) {
     this.mentorNickname = mentoringApplication.getMentoring()
         .getMentor()
         .getUser()
