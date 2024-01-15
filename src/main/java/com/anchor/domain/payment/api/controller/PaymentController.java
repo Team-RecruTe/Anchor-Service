@@ -3,6 +3,7 @@ package com.anchor.domain.payment.api.controller;
 import com.anchor.domain.payment.api.controller.request.PaymentResultInfo;
 import com.anchor.domain.payment.api.service.PaymentService;
 import com.anchor.domain.payment.api.service.response.PaymentValidationInfo;
+import com.anchor.global.util.ResponseType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,7 +23,7 @@ public class PaymentController {
    */
   @PostMapping("/validation")
   public ResponseEntity<PaymentValidationInfo> paymentValidation(@RequestBody PaymentResultInfo paymentResultInfo) {
-    String validationResult = paymentService.validatePaymentResult(paymentResultInfo);
+    ResponseType validationResult = paymentService.validatePaymentResult(paymentResultInfo);
 
     PaymentValidationInfo paymentValidationInfo = new PaymentValidationInfo(paymentResultInfo, validationResult);
 

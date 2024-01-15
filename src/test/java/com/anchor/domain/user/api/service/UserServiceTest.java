@@ -40,8 +40,8 @@ import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.UserRole;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
-import com.anchor.global.portone.response.PaymentCancelData.PaymentCancelDetail;
-import com.anchor.global.util.ExternalApiUtil;
+import com.anchor.global.portone.response.PaymentCancelResult.PaymentCancelDetail;
+import com.anchor.global.util.PaymentUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -70,7 +70,7 @@ class UserServiceTest {
   PaymentRepository paymentRepository;
 
   @Mock
-  ExternalApiUtil apiUtil;
+  PaymentUtils apiUtil;
 
   @InjectMocks
   UserService userService;
@@ -293,7 +293,7 @@ class UserServiceTest {
           }
         });
 
-    given(apiUtil.paymentCancel(any(Payment.class))).willReturn(PaymentCancelDetail.builder()
+    given(apiUtil.cancelPayment(any(Payment.class))).willReturn(PaymentCancelDetail.builder()
         .amount(100)
         .cancelAmount(100)
         .build());
@@ -370,7 +370,7 @@ class UserServiceTest {
           }
         });
 
-    given(apiUtil.paymentCancel(any(Payment.class))).willReturn(PaymentCancelDetail.builder()
+    given(apiUtil.cancelPayment(any(Payment.class))).willReturn(PaymentCancelDetail.builder()
         .amount(100)
         .cancelAmount(100)
         .build());
@@ -424,7 +424,7 @@ class UserServiceTest {
           }
         });
 
-    given(apiUtil.paymentCancel(any(Payment.class))).willReturn(PaymentCancelDetail.builder()
+    given(apiUtil.cancelPayment(any(Payment.class))).willReturn(PaymentCancelDetail.builder()
         .amount(100)
         .cancelAmount(100)
         .build());
