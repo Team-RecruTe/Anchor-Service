@@ -572,4 +572,5 @@ class UserServiceTest {
     }
     return statusList;
   }
+
 }

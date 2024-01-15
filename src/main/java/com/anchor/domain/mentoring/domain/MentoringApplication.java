@@ -40,7 +40,7 @@ public class MentoringApplication extends BaseEntity {
   @JoinColumn(name = "mentoring_id")
   private Mentoring mentoring;
 
-  @OneToOne(mappedBy = "mentoringApplication", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
   @JoinColumn(name = "payment_id")
   private Payment payment;
 

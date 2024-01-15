@@ -149,44 +149,43 @@ values (9, 'AI', now(), now(), 5);
 
 insert into mentoring_tag (id, tag, create_date, update_date, mentoring_id)
 values (10, '파이썬', now(), now(), 5);
-
 commit;
-
-#### 멘토링 신청내역 등록
-start transaction;
-insert into mentoring_application(id, start_date_time, end_date_time, create_date, update_date,
-                                  mentoring_status, user_id, mentoring_id)
-values (1, '2024-01-03 15:00:00', '2024-01-03 16:30:00', now(), now(), 'COMPLETE', 2, 1),
-       (2, '2024-01-06 13:00:00', '2024-01-06 14:30:00', now(), now(), 'CANCELLED', 2, 1),
-       (3, '2024-01-07 13:00:00', '2024-01-07 14:30:00', now(), now(), 'CANCELLED', 2, 1),
-       (4, '2024-01-08 13:00:00', '2024-01-08 14:30:00', now(), now(), 'CANCELLED', 2, 1),
-       (5, '2024-01-09 13:00:00', '2024-01-09 14:30:00', now(), now(), 'APPROVAL', 2, 1),
-       (6, '2024-01-10 13:00:00', '2024-01-10 14:30:00', now(), now(), 'APPROVAL', 2, 1),
-       (7, '2024-01-11 13:00:00', '2024-01-11 14:30:00', now(), now(), 'APPROVAL', 2, 1),
-       (8, '2024-01-12 13:00:00', '2024-01-12 14:30:00', now(), now(), 'APPROVAL', 2, 1),
-       (9, '2024-01-13 13:00:00', '2024-01-13 14:30:00', now(), now(), 'APPROVAL', 2, 1),
-       (10, '2024-01-14 13:00:00', '2024-01-14 14:30:00', now(), now(), 'WAITING', 2, 1),
-       (11, '2024-01-15 13:00:00', '2024-01-15 14:30:00', now(), now(), 'WAITING', 2, 1),
-       (12, '2024-01-16 13:00:00', '2024-01-16 14:30:00', now(), now(), 'WAITING', 2, 1),
-       (13, '2024-01-17 13:00:00', '2024-01-17 14:30:00', now(), now(), 'WAITING', 2, 1);
-commit;
-
 
 #### 멘토링 결제내역 등록
 start transaction;
 insert into payment(id, create_date, update_date, amount, cancel_amount, payment_status, order_uid, imp_uid,
-                    merchant_uid, mentoring_application_id)
-values (1, now(), now(), 10000, 0, 'SUCCESS', 'anchor_12344567', 'imp_253462345', 'toss_12344567', 1),
-       (2, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562346', 'imp_4563244', 'toss_34562346', 2),
-       (3, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562347', 'imp_4563245', 'toss_34562347', 3),
-       (4, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562348', 'imp_4563246', 'toss_34562348', 4),
-       (5, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562349', 'imp_4563247', 'toss_34562349', 5),
-       (6, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562350', 'imp_4563248', 'toss_34562350', 6),
-       (7, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562351', 'imp_4563249', 'toss_34562351', 7),
-       (8, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562352', 'imp_4563250', 'toss_34562352', 8),
-       (9, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562353', 'imp_4563251', 'toss_34562353', 9),
-       (10, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562354', 'imp_4563252', 'toss_34562354', 10),
-       (11, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562355', 'imp_4563253', 'toss_34562355', 11),
-       (12, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562356', 'imp_4563254', 'toss_34562356', 12),
-       (13, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562357', 'imp_4563255', 'toss_34562357', 13);
+                    merchant_uid)
+values (1, now(), now(), 10000, 0, 'SUCCESS', 'anchor_12344567', 'imp_253462345', 'toss_12344567'),
+       (2, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562346', 'imp_4563244', 'toss_34562346'),
+       (3, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562347', 'imp_4563245', 'toss_34562347'),
+       (4, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562348', 'imp_4563246', 'toss_34562348'),
+       (5, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562349', 'imp_4563247', 'toss_34562349'),
+       (6, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562350', 'imp_4563248', 'toss_34562350'),
+       (7, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562351', 'imp_4563249', 'toss_34562351'),
+       (8, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562352', 'imp_4563250', 'toss_34562352'),
+       (9, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562353', 'imp_4563251', 'toss_34562353'),
+       (10, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562354', 'imp_4563252', 'toss_34562354'),
+       (11, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562355', 'imp_4563253', 'toss_34562355'),
+       (12, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562356', 'imp_4563254', 'toss_34562356'),
+       (13, now(), now(), 10000, 0, 'SUCCESS', 'anchor_34562357', 'imp_4563255', 'toss_34562357');
+commit;
+
+
+#### 멘토링 신청내역 등록
+start transaction;
+insert into mentoring_application(id, start_date_time, end_date_time, create_date, update_date,
+                                  mentoring_status, user_id, mentoring_id, payment_id)
+values (1, '2024-01-03 15:00:00', '2024-01-03 16:30:00', now(), now(), 'COMPLETE', 2, 1, 1),
+       (2, '2024-01-06 13:00:00', '2024-01-06 14:30:00', now(), now(), 'CANCELLED', 2, 1, 2),
+       (3, '2024-01-07 13:00:00', '2024-01-07 14:30:00', now(), now(), 'CANCELLED', 2, 1, 3),
+       (4, '2024-01-08 13:00:00', '2024-01-08 14:30:00', now(), now(), 'CANCELLED', 2, 1, 4),
+       (5, '2024-01-09 13:00:00', '2024-01-09 14:30:00', now(), now(), 'APPROVAL', 2, 1, 5),
+       (6, '2024-01-10 13:00:00', '2024-01-10 14:30:00', now(), now(), 'APPROVAL', 2, 1, 6),
+       (7, '2024-01-11 13:00:00', '2024-01-11 14:30:00', now(), now(), 'APPROVAL', 2, 1, 7),
+       (8, '2024-01-12 13:00:00', '2024-01-12 14:30:00', now(), now(), 'APPROVAL', 2, 1, 8),
+       (9, '2024-01-13 13:00:00', '2024-01-13 14:30:00', now(), now(), 'APPROVAL', 2, 1, 9),
+       (10, '2024-01-14 13:00:00', '2024-01-14 14:30:00', now(), now(), 'WAITING', 2, 1, 10),
+       (11, '2024-01-15 13:00:00', '2024-01-15 14:30:00', now(), now(), 'WAITING', 2, 1, 11),
+       (12, '2024-01-16 13:00:00', '2024-01-16 14:30:00', now(), now(), 'WAITING', 2, 1, 12),
+       (13, '2024-01-17 13:00:00', '2024-01-17 14:30:00', now(), now(), 'WAITING', 2, 1, 13);
 commit;
