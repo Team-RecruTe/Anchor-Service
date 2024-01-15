@@ -30,7 +30,7 @@ public class MentorViewController {
   @GetMapping("/me/schedule")
   public String getUnavailableTimes(HttpSession httpSession, Model model) {
     SessionUser user = (SessionUser) httpSession.getAttribute("user");
-    MentorOpenCloseTimes result = mentorService.getMentorSchedule(user.getMentorId());
+    MentorOpenCloseTimes result = mentorService.getMentorSchedule(1L);
     model.addAttribute("openCloseTimes", result);
     return viewResolver.getViewPath("mentor", "schedule");
   }

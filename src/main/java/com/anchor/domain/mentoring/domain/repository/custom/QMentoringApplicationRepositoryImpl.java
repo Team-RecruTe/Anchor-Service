@@ -42,6 +42,11 @@ public class QMentoringApplicationRepositoryImpl implements QMentoringApplicatio
   }
 
   public Page<AppliedMentoringSearchResult> findAllByMentorId(Long mentorId, Pageable pageable) {
+    Long totalElements = jpaQueryFactory.select(mentoringApplication.count())
+        .from(mentoringApplication)
+        .where(mentoringApplication.mentoring.mentor.id.eq(mentorId))
+        .fetchOne();
+
     List<Long> keys = jpaQueryFactory.select(mentoringApplication.id)
         .from(mentoringApplication)
         .where(mentoringApplication.mentoring.mentor.id.eq(mentorId))
@@ -50,7 +55,7 @@ public class QMentoringApplicationRepositoryImpl implements QMentoringApplicatio
         .orderBy(getOrderSpecifier(pageable.getSort()))
         .fetch();
 
-    List<MentoringApplication> result = jpaQueryFactory.selectFrom(mentoringApplication)
+    List<MentoringApplication> results = jpaQueryFactory.selectFrom(mentoringApplication)
         .leftJoin(mentoringApplication.mentoring)
         .fetchJoin()
         .leftJoin(mentoringApplication.user)
@@ -61,11 +66,11 @@ public class QMentoringApplicationRepositoryImpl implements QMentoringApplicatio
         .orderBy(getOrderSpecifier(pageable.getSort()))
         .fetch();
 
-    List<AppliedMentoringSearchResult> appliedMentoringSearchResults = result.stream()
-        .map(AppliedMentoringSearchResult::of)
+    List<AppliedMentoringSearchResult> appliedMentoringSearchResults = results.stream()
+        .map(result -> AppliedMentoringSearchResult.of(result))
         .toList();
 
-    return new PageImpl<>(appliedMentoringSearchResults, pageable, appliedMentoringSearchResults.size());
+    return new PageImpl<>(appliedMentoringSearchResults, pageable, totalElements);
   }
 
   private OrderSpecifier[] getOrderSpecifier(Sort sort) {

@@ -48,7 +48,7 @@ public class MentoringViewController {
   @GetMapping("/{id}/contents/edit")
   public String viewMentoringEditPage(@PathVariable Long id, Model model, HttpSession httpSession) {
     SessionUser user = (SessionUser) httpSession.getAttribute("user");
-    MentoringContents result = mentoringService.getContents(id, user.getMentorId());
+    MentoringContents result = mentoringService.getContents(id, 1L);
     model.addAttribute("mentoringContents", result);
     return viewResolver.getViewPath("mentoring", "contents-edit");
   }

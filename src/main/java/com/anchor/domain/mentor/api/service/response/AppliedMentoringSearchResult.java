@@ -20,6 +20,7 @@ public class AppliedMentoringSearchResult extends ResponseDto {
 
   @Builder
   private AppliedMentoringSearchResult(
+      Long totalPage,
       Long id,
       String title,
       String email,

@@ -41,7 +41,7 @@ public class MentorController {
   public ResponseEntity<String> changeMentoringStatus(@RequestBody MentoringStatusInfo mentoringStatusInfo,
       HttpSession httpSession) {
     SessionUser user = (SessionUser) httpSession.getAttribute("user");
-    mentorService.changeMentoringStatus(user.getMentorId(), mentoringStatusInfo.getRequiredMentoringStatusInfos());
+    mentorService.changeMentoringStatus(1L, mentoringStatusInfo.getRequiredMentoringStatusInfos());
     return ResponseEntity.ok()
         .build();
   }
