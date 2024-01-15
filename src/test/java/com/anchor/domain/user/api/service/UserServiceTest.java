@@ -514,7 +514,7 @@ class UserServiceTest {
     for (MentoringApplicationTime applicationTime : applicationTimeList) {
       mentoringStatusList.add(
           RequiredMentoringStatusInfo.builder()
-              .mentoringStatus(MentoringStatus.CANCELLED)
+              .status(MentoringStatus.CANCELLED)
               .startDateTime(applicationTime.getFromDateTime())
               .endDateTime(applicationTime.getToDateTime())
               .build()
