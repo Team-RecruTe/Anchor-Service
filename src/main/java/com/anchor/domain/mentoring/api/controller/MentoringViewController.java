@@ -3,7 +3,9 @@ package com.anchor.domain.mentoring.api.controller;
 import com.anchor.domain.mentoring.api.service.MentoringService;
 import com.anchor.domain.mentoring.api.service.response.MentoringContents;
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
+import com.anchor.global.auth.SessionUser;
 import com.anchor.global.util.view.ViewResolver;
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,19 +37,20 @@ public class MentoringViewController {
   ) {
     Page<MentoringSearchResult> result = mentoringService.getMentorings(tags, keyword, pageable);
     model.addAttribute("mentorings", result);
-    return viewResolver.getViewPath("mentoring", "mentoring-edit");
+    return viewResolver.getViewPath("mentoring", "contents-edit");
   }
 
   @GetMapping("/new")
   public String viewMentoringCreationPage() {
-    return "mentoring-edit";
+    return viewResolver.getViewPath("mentoring", "contents-edit");
   }
 
-  @GetMapping("/{id}/edit")
-  public String viewMentoringEditPage(@PathVariable Long id, Model model) {
-    MentoringContents result = mentoringService.getContents(id);
+  @GetMapping("/{id}/contents/edit")
+  public String viewMentoringEditPage(@PathVariable Long id, Model model, HttpSession httpSession) {
+    SessionUser user = (SessionUser) httpSession.getAttribute("user");
+    MentoringContents result = mentoringService.getContents(id, 1L);
     model.addAttribute("mentoringContents", result);
-    return viewResolver.getViewPath("mentoring", "mentoring-edit");
+    return viewResolver.getViewPath("mentoring", "contents-edit");
   }
 
 }

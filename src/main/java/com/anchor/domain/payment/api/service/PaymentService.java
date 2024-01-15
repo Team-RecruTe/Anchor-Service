@@ -1,8 +1,14 @@
 package com.anchor.domain.payment.api.service;
 
+import com.anchor.domain.mentoring.domain.MentoringStatus;
 import com.anchor.domain.payment.api.controller.request.PaymentResultInfo;
-import com.anchor.global.portone.response.SinglePaymentData.PaymentDataDetail;
-import com.anchor.global.util.ExternalApiUtil;
+import com.anchor.global.portone.request.RequiredPaymentCreateData;
+import com.anchor.global.portone.response.PaymentResult;
+import com.anchor.global.portone.response.SinglePaymentResult;
+import com.anchor.global.util.PaymentUtils;
+import com.anchor.global.util.ResponseType;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -12,16 +18,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PaymentService {
 
-  private static final String SUCCESS = "success";
-  private static final String FAIL = "fail";
+  private final PaymentUtils apiUtil;
 
-  private final ExternalApiUtil apiUtil;
-
-  public String validatePaymentResult(PaymentResultInfo paymentResultInfo) {
-
-    PaymentDataDetail paymentDataDetail = apiUtil.getPaymentDataDetail(paymentResultInfo);
-
-    return paymentResultInfo.paymentDataValidation(paymentDataDetail) ? SUCCESS : FAIL;
+  public ResponseType validatePaymentResult(PaymentResultInfo paymentResultInfo) {
+    RequiredPaymentCreateData requiredPaymentCreateData = new RequiredPaymentCreateData(paymentResultInfo.getImpUid());
+    Optional<PaymentResult> paymentSelectResult = apiUtil.request(MentoringStatus.WAITING, requiredPaymentCreateData);
+    SinglePaymentResult result = (SinglePaymentResult) paymentSelectResult.orElseThrow(
+        () -> new NoSuchElementException("PaymentSelectResult 값이 존재하지 않습니다."));
+    return ResponseType.of(paymentResultInfo.isSameAs(result));
   }
 
 }

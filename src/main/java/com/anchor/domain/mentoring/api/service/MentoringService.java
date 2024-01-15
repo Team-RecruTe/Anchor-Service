@@ -79,9 +79,10 @@ public class MentoringService {
   }
 
   @Transactional(readOnly = true)
-  public MentoringContents getContents(Long id) {
-    Mentoring mentoring = getMentoringById(id);
-    return new MentoringContents(mentoring.getContents(), mentoring.getTags());
+  public MentoringContents getContents(Long id, Long mentorId) {
+    Mentor mentor = getMentorById(mentorId);
+    Mentoring mentoring = getMentoringByIdAndMentor(id, mentor);
+    return new MentoringContents(mentoring.getTitle(), mentoring.getContents(), mentoring.getTags());
   }
 
   /**
@@ -185,6 +186,11 @@ public class MentoringService {
   private Mentor getMentorById(Long id) {
     return mentorRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("일치하는 멘토 정보가 없습니다."));
+  }
+
+  private Mentoring getMentoringByIdAndMentor(Long id, Mentor mentor) {
+    return mentoringRepository.findByIdAndMentor(id, mentor)
+        .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링 정보가 없습니다."));
   }
 
   private Mentoring getMentoringById(Long id) {

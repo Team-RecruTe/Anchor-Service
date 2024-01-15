@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko"
+      layout:decorate="~{layout/default}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+>
+<head>
+  <title>멘토 - 멘토링 에디터 페이지</title>
+  <link href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="d-flex justify-content-center" layout:fragment="content">
+  <!-- 에디터를 적용할 요소 (컨테이너) -->
+  <div class="w-75" id="editor-container">
+    <h2 class="border rounded border-dark-subtle p-2 fs-3 fw-semibold" id="title" style="text-align: center;">멘토링
+      제목</h2>
+    <div id="content">
+    </div>
+    <div class="d-flex justify-content-end align-items-center" id="tags-container">
+      <div id="tags"></div>
+      <input placeholder="태그를 입력하세요" type="text">
+      <button id="tag-add-btn">추가</button>
+    </div>
+    <button class="w-100 btn btn-primary" id="submit-btn" type="button">제출하기</button>
+  </div>
+
+  <!-- TUI 에디터 JS CDN -->
+  <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+  <script src="/js/mentoring/mentoring-edit.js"></script>
+  <script th:inline="javascript">
+    const initContents = (editor, tagEvent, addTag, submitEvent, submit) => {
+      const savedContents = [[${mentoringContents}]];
+      const title = document.querySelector('#title');
+      const tagsContainer = document.querySelector("#tags-container")
+      const tagInput = tagsContainer.querySelector('input')
+      const tags = document.querySelector('#tags');
+      const addButton = document.querySelector('#tag-add-btn');
+      const submitButton = document.querySelector('#submit-btn');
+
+      // 0. 제목 초기화
+      title.textContent = savedContents.title;
+
+      // 1. 에디터 초기화
+      const initalContents = savedContents.contents
+      editor.setHTML(initalContents)
+
+      // 2. 태그 초기화
+      savedContents.tags.forEach((savedTag, idx) => {
+        const tagSpan = document.createElement('span')
+        tagSpan.textContent = savedTag;
+        tagSpan.classList.add('tag-' + idx)
+        tagSpan.classList.add('me-2')
+        tags.appendChild(tagSpan)
+      })
+
+      // 3. 태그 추가 이벤트
+      tagEvent(tags, tagInput, addButton, addTag)
+
+      // 4. 제출 이벤트
+      submitEvent(axios, submitButton, editor, tags, submit)
+    }
+
+    initContents(editor, tagEvent, addTag, submitEvent, submit)
+  </script>
+</div>
+</body>
+</html>

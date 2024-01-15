@@ -8,9 +8,13 @@ import com.anchor.domain.mentor.api.service.response.AppliedMentoringSearchResul
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 @RequiredArgsConstructor
@@ -37,30 +42,48 @@ public class QMentoringApplicationRepositoryImpl implements QMentoringApplicatio
   }
 
   public Page<AppliedMentoringSearchResult> findAllByMentorId(Long mentorId, Pageable pageable) {
+    Long totalElements = jpaQueryFactory.select(mentoringApplication.count())
+        .from(mentoringApplication)
+        .where(mentoringApplication.mentoring.mentor.id.eq(mentorId))
+        .fetchOne();
+
     List<Long> keys = jpaQueryFactory.select(mentoringApplication.id)
         .from(mentoringApplication)
         .where(mentoringApplication.mentoring.mentor.id.eq(mentorId))
         .offset(pageable.getOffset())
         .limit(pageable.getPageSize())
+        .orderBy(getOrderSpecifier(pageable.getSort()))
         .fetch();
 
-    System.out.println(keys);
-
-    List<MentoringApplication> result = jpaQueryFactory.selectFrom(mentoringApplication)
-        .innerJoin(mentoringApplication.mentoring)
+    List<MentoringApplication> results = jpaQueryFactory.selectFrom(mentoringApplication)
+        .leftJoin(mentoringApplication.mentoring)
         .fetchJoin()
-        .innerJoin(mentoringApplication.user)
+        .leftJoin(mentoringApplication.user)
         .fetchJoin()
-        .innerJoin(mentoringApplication.payment)
+        .leftJoin(mentoringApplication.payment)
         .fetchJoin()
         .where(mentoringApplication.id.in(keys))
+        .orderBy(getOrderSpecifier(pageable.getSort()))
         .fetch();
 
-    List<AppliedMentoringSearchResult> appliedMentoringSearchResults = result.stream()
-        .map(AppliedMentoringSearchResult::of)
+    List<AppliedMentoringSearchResult> appliedMentoringSearchResults = results.stream()
+        .map(result -> AppliedMentoringSearchResult.of(result))
         .toList();
 
-    return new PageImpl<>(appliedMentoringSearchResults, pageable, appliedMentoringSearchResults.size());
+    return new PageImpl<>(appliedMentoringSearchResults, pageable, totalElements);
+  }
+
+  private OrderSpecifier[] getOrderSpecifier(Sort sort) {
+    List<OrderSpecifier> orders = new ArrayList<>();
+    sort.stream()
+        .forEach(order -> {
+          PathBuilder<MentoringApplication> orderByExpression = new PathBuilder<>(MentoringApplication.class,
+              "mentoringApplication");
+          Order direction = order.isAscending() ? Order.ASC : Order.DESC;
+          String prop = order.getProperty();
+          orders.add(new OrderSpecifier(direction, orderByExpression.get(prop)));
+        });
+    return orders.toArray(OrderSpecifier[]::new);
   }
 
   @Override

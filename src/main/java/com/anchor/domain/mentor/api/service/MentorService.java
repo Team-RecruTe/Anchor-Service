@@ -3,23 +3,30 @@ package com.anchor.domain.mentor.api.service;
 import com.anchor.domain.mentor.api.controller.request.MentorRegisterInfo;
 import com.anchor.domain.mentor.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
 import com.anchor.domain.mentor.api.service.response.AppliedMentoringSearchResult;
+import com.anchor.domain.mentor.api.service.response.MentorOpenCloseTimes;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentor.domain.repository.MentorRepository;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
+import com.anchor.domain.payment.domain.Payment;
+import com.anchor.global.portone.request.RequiredPaymentCancelData;
+import com.anchor.global.portone.response.PaymentCancelResult;
+import com.anchor.global.portone.response.PaymentResult;
+import com.anchor.global.util.PaymentUtils;
 import com.anchor.global.util.type.DateTimeRange;
 import jakarta.persistence.PersistenceException;
-import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.NonUniqueResultException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -28,6 +35,7 @@ public class MentorService {
 
   private final MentorRepository mentorRepository;
   private final MentoringApplicationRepository mentoringApplicationRepository;
+  private final PaymentUtils paymentUtils;
 
   @Transactional
   public void changeMentoringStatus(Long id, List<RequiredMentoringStatusInfo> requiredMentoringStatusInfos) {
@@ -53,11 +61,21 @@ public class MentorService {
     MentoringStatus mentoringStatus = requiredMentoringStatusInfo.getMentoringStatus();
     try {
       MentoringApplication mentoringApplication = getMentoringApplication(mentoringId, mentoringReservedTime);
+      Payment payment = mentoringApplication.getPayment();
       mentoringApplication.changeStatus(mentoringStatus);
+      cancelPayemntIfCancelled(mentoringStatus, payment);
       mentoringApplicationRepository.save(mentoringApplication);
     } catch (NullPointerException | PersistenceException e) {
       log.warn("Exception: {}", e);
     }
+  }
+
+  private void cancelPayemntIfCancelled(MentoringStatus status, Payment payment) {
+    RequiredPaymentCancelData requiredPaymentCancelData = new RequiredPaymentCancelData(payment);
+    Optional<PaymentResult> paymentCancelResult = paymentUtils.request(status, requiredPaymentCancelData);
+    paymentCancelResult.ifPresent(result -> {
+      payment.editPaymentCancelStatus((PaymentCancelResult) result);
+    });
   }
 
   private MentoringApplication getMentoringApplication(Long id, DateTimeRange mentoringReservedTime) {
@@ -92,4 +110,14 @@ public class MentorService {
     return dbInsertMentor;
   }
 
+  @Transactional(readOnly = true)
+  public MentorOpenCloseTimes getMentorSchedule(Long mentorId) {
+    return mentorRepository.findScheduleById(mentorId);
+  }
+
+  @Transactional
+  public void setMentorSchedule(Long mentorId, MentorOpenCloseTimes mentorOpenCloseTimes) {
+    mentorRepository.deleteAllSchedules(mentorId);
+    mentorRepository.saveMentoSchedules(mentorId, mentorOpenCloseTimes);
+  }
 }

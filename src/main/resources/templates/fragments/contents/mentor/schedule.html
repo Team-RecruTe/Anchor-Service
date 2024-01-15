@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ko"
+      layout:decorate="~{layout/default}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+>
+<head>
+  <title>멘토 - 스케줄 페이지</title>
+  <link href="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.css" rel="stylesheet">
+  <style>
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+<div class="d-flex flex-column justify-content-center" layout:fragment="content">
+  <form class=" d-flex row-column justify-content-center" id="week-container">
+    <div class="form-check me-4">
+      <input checked class="form-check-input" id="monday" name="flexRadioDefault" type="radio">
+      <label class="form-check-label" for="monday">월</label>
+    </div>
+    <div class="form-check me-4">
+      <input class="form-check-input" id="tuesday" name="flexRadioDefault" type="radio">
+      <label class="form-check-label" for="tuesday">화</label>
+    </div>
+    <div class="form-check me-4">
+      <input class="form-check-input" id="wednesday" name="flexRadioDefault" type="radio">
+      <label class="form-check-label" for="wednesday">수</label>
+    </div>
+    <div class="form-check me-4">
+      <input class="form-check-input" id="thursday" name="flexRadioDefault" type="radio">
+      <label class="form-check-label" for="thursday">목</label>
+    </div>
+    <div class="form-check me-4">
+      <input class="form-check-input" id="friday" name="flexRadioDefault" type="radio">
+      <label class="form-check-label" for="friday">금</label>
+    </div>
+    <div class="form-check me-4">
+      <input class="form-check-input" id="saturday" name="flexRadioDefault" type="radio">
+      <label class="form-check-label" for="saturday">토</label>
+    </div>
+    <div class="form-check me-4">
+      <input class="form-check-input" id="sunday" name="flexRadioDefault" type="radio">
+      <label class="form-check-label" for="sunday">일</label>
+    </div>
+  </form>
+  <div class="d-flex justify-content-center" id="times-container">
+    <div id="open-time-picker"></div>
+    <div id="close-time-picker"></div>
+    <button id="add-time-btn" type="button">시간 추가</button>
+  </div>
+  <div class="d-flex flex-column justify-content-center" id="monday-times-container"></div>
+  <div class="d-flex flex-column justify-content-center hidden" id="tuesday-times-container"></div>
+  <div class="d-flex flex-column justify-content-center hidden" id="wednesday-times-container"></div>
+  <div class="d-flex flex-column justify-content-center hidden" id="thursday-times-container"></div>
+  <div class="d-flex flex-column justify-content-center hidden" id="friday-times-container"></div>
+  <div class="d-flex flex-column justify-content-center hidden" id="saturday-times-container"></div>
+  <div class="d-flex flex-column justify-content-center hidden" id="sunday-times-container"></div>
+  <button id="save-btn" type="button">저장하기</button>
+  <script src="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.js"></script>
+  <script th:inline="javascript">
+    const tuiTimePicker = tui.TimePicker;
+    const openTimePickerContainer = document.querySelector('#open-time-picker');
+    const closeTimePickerContainer = document.querySelector('#close-time-picker');
+    const openTimePicker = new tuiTimePicker(openTimePickerContainer, {
+      initialHour: 0,
+      initialMinute: 0,
+      inputType: 'spinbox',
+      hourStep: 1,
+      minuteStep: 30
+    });
+
+    const closeTimePicker = new tuiTimePicker(closeTimePickerContainer, {
+      initialHour: 0,
+      initialMinute: 0,
+      inputType: 'spinbox',
+      hourStep: 1,
+      minuteStep: 30
+    });
+
+    const savedOpenCloseTimes = [[${openCloseTimes}]]
+    const openCloseTimes = savedOpenCloseTimes.days
+    const mondayRadio = document.getElementById("monday");
+    const tuesdayRadio = document.getElementById("tuesday");
+    const wednesdayRadio = document.getElementById("wednesday");
+    const thursdayRadio = document.getElementById("thursday");
+    const fridayRadio = document.getElementById("friday");
+    const saturdayRadio = document.getElementById("saturday");
+    const sundayRadio = document.getElementById("sunday");
+    const mondayContainer = document.getElementById("monday-times-container");
+    const tuesdayContainer = document.getElementById("tuesday-times-container");
+    const wednesdayContainer = document.getElementById("wednesday-times-container");
+    const thursdayContainer = document.getElementById("thursday-times-container");
+    const fridayContainer = document.getElementById("friday-times-container");
+    const saturdayContainer = document.getElementById("saturday-times-container");
+    const sundayContainer = document.getElementById("sunday-times-container");
+
+    const init = (openCloseTimes) => {
+      console.log(openCloseTimes)
+      Object.keys(openCloseTimes).forEach((day) => {
+        if (day === "links") {
+          return
+        }
+        console.log(day)
+        for (const time of openCloseTimes[day]) {
+          console.log(time)
+          const openHour = time.open.hour
+          const openMinute = time.open.minute
+          const closeHour = time.close.hour
+          const closeMinute = time.close.minute
+          const divElement = document.createElement('div');
+          const spanElement = document.createElement('span');
+          divElement.appendChild(spanElement)
+          divElement.classList.add("open-close")
+          spanElement.textContent =
+              `Open: ${openHour.toString().padStart(2, '0')}:${openMinute.toString().padStart(2, '0')}
+          ~ ${closeHour.toString().padStart(2, '0')}:${closeMinute.toString().padStart(2, '0')}`;
+
+          if (day === "MONDAY") {
+            mondayContainer.appendChild(divElement);
+          } else if (day === "TUESDAY") {
+            divElement.classList.add("hidden")
+            tuesdayContainer.appendChild(divElement);
+          } else if (day === "WEDNESDAY") {
+            divElement.classList.add("hidden")
+            wednesdayContainer.appendChild(divElement);
+          } else if (day === "THURSDAY") {
+            divElement.classList.add("hidden")
+            thursdayContainer.appendChild(divElement);
+          } else if (day === "FRIDAY") {
+            divElement.classList.add("hidden")
+            fridayContainer.appendChild(divElement);
+          } else if (day === "SATURDAY") {
+            divElement.classList.add("hidden")
+            saturdayContainer.appendChild(divElement);
+          } else if (day === "SUNDAY") {
+            divElement.classList.add("hidden")
+            sundayContainer.appendChild(divElement);
+          }
+        }
+      })
+
+    }
+
+    init(openCloseTimes)
+
+    const handleChange = () => {
+      const days = [mondayContainer, tuesdayContainer, wednesdayContainer, thursdayContainer, fridayContainer,
+        saturdayContainer, sundayContainer];
+
+      for (const day of days) {
+        if (!day.classList.contains("hidden")) {
+          day.classList.add("hidden");
+          const children = day.querySelectorAll('div')
+          for (const child of children) {
+            child.classList.add("hidden");
+          }
+        }
+      }
+
+      if (mondayRadio.checked) {
+        mondayContainer.classList.remove("hidden");
+        const children = mondayContainer.querySelectorAll('div')
+        for (const child of children) {
+          child.classList.remove("hidden");
+        }
+      } else if (tuesdayRadio.checked) {
+        tuesdayContainer.classList.remove("hidden");
+        const children = tuesdayContainer.querySelectorAll('div')
+        for (const child of children) {
+          child.classList.remove("hidden");
+        }
+      } else if (wednesdayRadio.checked) {
+        wednesdayContainer.classList.remove("hidden");
+        const children = wednesdayContainer.querySelectorAll('div')
+        for (const child of children) {
+          child.classList.remove("hidden");
+        }
+      } else if (thursdayRadio.checked) {
+        thursdayContainer.classList.remove("hidden");
+        const children = thursdayContainer.querySelectorAll('div')
+        for (const child of children) {
+          child.classList.remove("hidden");
+        }
+      } else if (fridayRadio.checked) {
+        fridayContainer.classList.remove("hidden");
+        const children = fridayContainer.querySelectorAll('div')
+        for (const child of children) {
+          child.classList.remove("hidden");
+        }
+      } else if (saturdayRadio.checked) {
+        saturdayContainer.classList.remove("hidden");
+        const children = saturdayContainer.querySelectorAll('div')
+        for (const child of children) {
+          child.classList.remove("hidden");
+        }
+      } else if (sundayRadio.checked) {
+        sundayContainer.classList.remove("hidden");
+        const children = sundayContainer.querySelectorAll('div')
+        for (const child of children) {
+          child.classList.remove("hidden");
+        }
+      }
+    }
+    const weekRadioGroup = document.querySelector('#week-container');
+    weekRadioGroup.addEventListener('change', handleChange)
+
+    const isTimeRangesOverlap = (openCloseTime1, openCloseTime2) => {
+      const closeTime1 = openCloseTime1.close.hour * 60 + openCloseTime1.close.minute;
+      const openTime2 = openCloseTime2.open.hour * 60 + openCloseTime2.open.minute;
+      const closeTime2 = openCloseTime2.close.hour * 60 + openCloseTime2.close.minute;
+      const openTime1 = openCloseTime1.open.hour * 60 + openCloseTime1.open.minute;
+      return closeTime1 >= openTime2 && closeTime2 >= openTime1;
+    }
+
+    const addTime = () => {
+      const openHour = openTimePicker.getHour()
+      const openMinute = openTimePicker.getMinute()
+      const closeHour = closeTimePicker.getHour()
+      const closeMinute = closeTimePicker.getMinute()
+      const openTotalMinutes = openHour * 60 + openMinute;
+      const closeTotalMinutes = closeHour * 60 + closeMinute;
+      const newOpenCloseTime = {
+        open: {
+          hour: openHour,
+          minute: openMinute
+        }, close: {
+          hour: closeHour,
+          minute: closeMinute
+        }
+      }
+
+      if (openTotalMinutes >= closeTotalMinutes) {
+        alert("오픈시간은 닫는시간보다 이전에 있어야 합니다.")
+        return
+      }
+
+      const divElement = document.createElement('div');
+      const spanElement = document.createElement('span');
+      divElement.appendChild(spanElement)
+      divElement.classList.add("open-close")
+      spanElement.textContent =
+          `Open: ${openHour.toString().padStart(2, '0')}:${openMinute.toString().padStart(2, '0')}
+          ~ ${closeHour.toString().padStart(2, '0')}:${closeMinute.toString().padStart(2, '0')}`;
+
+      if (mondayRadio.checked) {
+        for (const openCloseTime of openCloseTimes.MONDAY) {
+          if (isTimeRangesOverlap(openCloseTime, newOpenCloseTime)) {
+            alert("추가된 시간범위와 중복됩니다.")
+            return
+          }
+        }
+        document.querySelector('#monday-times-container').appendChild(divElement);
+        openCloseTimes.MONDAY.push(newOpenCloseTime);
+      } else if (tuesdayRadio.checked) {
+        for (const openCloseTime of openCloseTimes.WEDNESDAY) {
+          if (isTimeRangesOverlap(openCloseTime, newOpenCloseTime)) {
+            alert("추가된 시간범위와 중복됩니다.")
+            return
+          }
+        }
+        document.querySelector('#wednesday-times-container').appendChild(divElement);
+        openCloseTimes.WEDNESDAY.push(newOpenCloseTime);
+      } else if (wednesdayRadio.checked) {
+        for (const openCloseTime of openCloseTimes.TUESDAY) {
+          if (isTimeRangesOverlap(openCloseTime, newOpenCloseTime)) {
+            alert("추가된 시간범위와 중복됩니다.")
+            return
+          }
+        }
+        document.querySelector('#tuesday-times-container').appendChild(divElement);
+        openCloseTimes.TUESDAY.push(newOpenCloseTime);
+      } else if (thursdayRadio.checked) {
+        for (const openCloseTime of openCloseTimes.THURSDAY) {
+          if (isTimeRangesOverlap(openCloseTime, newOpenCloseTime)) {
+            alert("추가된 시간범위와 중복됩니다.")
+            return
+          }
+        }
+        document.querySelector('#thursday-times-container').appendChild(divElement);
+        openCloseTimes.THURSDAY.push(newOpenCloseTime);
+      } else if (fridayRadio.checked) {
+        for (const openCloseTime of openCloseTimes.FRIDAY) {
+          if (isTimeRangesOverlap(openCloseTime, newOpenCloseTime)) {
+            alert("추가된 시간범위와 중복됩니다.")
+            return
+          }
+        }
+        document.querySelector('#friday-times-container').appendChild(divElement);
+        openCloseTimes.FRIDAY.push(newOpenCloseTime);
+      } else if (saturdayRadio.checked) {
+        for (const openCloseTime of openCloseTimes.SATURDAY) {
+          if (isTimeRangesOverlap(openCloseTime, newOpenCloseTime)) {
+            alert("추가된 시간범위와 중복됩니다.")
+            return
+          }
+        }
+        document.querySelector('#saturday-times-container').appendChild(divElement);
+        openCloseTimes.SATURDAY.push(newOpenCloseTime);
+      } else if (sundayRadio.checked) {
+        for (const openCloseTime of openCloseTimes.SUNDAY) {
+          if (isTimeRangesOverlap(openCloseTime, newOpenCloseTime)) {
+            alert("추가된 시간범위와 중복됩니다.")
+            return
+          }
+        }
+        document.querySelector('#sunday-times-container').appendChild(divElement);
+        openCloseTimes.SUNDAY.push(newOpenCloseTime);
+      }
+    }
+    const saveTimes = () => {
+      const json = {
+        days: {},
+      }
+      json.days = openCloseTimes
+      console.log(json)
+      const response = window.confirm("저장하시겠습니까?")
+      if (response) {
+        axios.put("/mentors/me/schedule", json)
+        .then(res => {
+          if (res.status === 200) {
+            alert('저장되었습니다.')
+          } else {
+            alert('요청 중에 문제가 발생했습니다.')
+          }
+        })
+        .catch((error) => {
+          console.error('요청 중 오류가 발생했습니다.', error);
+          alert('요청 중에 문제가 발생했습니다.')
+        });
+      }
+    }
+    const addTimeButton = document.querySelector('#add-time-btn')
+    addTimeButton.addEventListener('click', addTime);
+    const saveButton = document.querySelector('#save-btn')
+    saveButton.addEventListener('click', saveTimes)
+  </script>
+</div>
+<!-- 라디오에 따라 보여주기 -->
+<!-- 라디오에 따라 추가하기 -->
+</body>
+</html>

@@ -7,7 +7,6 @@ spring:
       - session
       - aws
       - pay
-
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${MYSQL_URL}
@@ -44,6 +43,9 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
+    web:
+      pageable:
+        one-indexed-parameters: true
 
   security:
     oauth2:
@@ -80,6 +82,7 @@ rest-template:
   timeout: 5
   max-connection: 50
   max-per-route: 20
+
 
 
 #  datasource:

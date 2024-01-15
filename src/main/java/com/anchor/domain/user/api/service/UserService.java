@@ -13,11 +13,14 @@ import com.anchor.domain.user.api.service.response.UserInfoResponse;
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
-import com.anchor.global.portone.response.PaymentCancelData.PaymentCancelDetail;
-import com.anchor.global.util.ExternalApiUtil;
+import com.anchor.global.portone.request.RequiredPaymentCancelData;
+import com.anchor.global.portone.response.PaymentCancelResult;
+import com.anchor.global.portone.response.PaymentResult;
+import com.anchor.global.util.PaymentUtils;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,7 +34,7 @@ public class UserService {
   private final UserRepository userRepository;
   private final MentoringApplicationRepository mentoringApplicationRepository;
   private final PaymentRepository paymentRepository;
-  private final ExternalApiUtil apiUtil;
+  private final PaymentUtils paymentUtils;
 
   @Transactional
   public UserInfoResponse getProfile(String email) {
@@ -110,29 +113,18 @@ public class UserService {
     MentoringApplication mentoringApplication =
         mentoringApplicationRepository.findByStartDateTimeAndEndDateTimeAndUserId(startDateTime, endDateTime, userId)
             .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링 신청이력이 존재하지 않습니다."));
-
     mentoringApplication.changeStatus(mentoringStatusInfo.getStatus());
-
-    mentoringApplicationRepository.save(mentoringApplication);
-
     MentoringStatus mentoringStatus = mentoringApplication.getMentoringStatus();
-
-    if (mentoringStatus.equals(MentoringStatus.CANCELLED)) {
-      //상태가 캔슬일 시, 캔슬 작업 진행
-      paymentCancelProcess(mentoringApplication);
-    }
-  }
-
-  private void paymentCancelProcess(MentoringApplication mentoringApplication) {
     Payment payment = mentoringApplication.getPayment();
-    if (payment.isCancelled()) {
-      throw new RuntimeException("이미 취소된 결제내역입니다.");
-    }
-    PaymentCancelDetail paymentCancelDetail = apiUtil.paymentCancel(payment);
-
-    payment.editPaymentCancelStatus(paymentCancelDetail);
-
-    paymentRepository.save(payment);
+    cancelPayemntIfCancelled(mentoringStatus, payment);
+    mentoringApplicationRepository.save(mentoringApplication);
   }
 
+  private void cancelPayemntIfCancelled(MentoringStatus status, Payment payment) {
+    RequiredPaymentCancelData requiredPaymentCancelData = new RequiredPaymentCancelData(payment);
+    Optional<PaymentResult> paymentCancelResult = paymentUtils.request(status, requiredPaymentCancelData);
+    paymentCancelResult.ifPresent(result -> {
+      payment.editPaymentCancelStatus((PaymentCancelResult) result);
+    });
+  }
 }

@@ -2,15 +2,13 @@ package com.anchor.domain.payment.domain;
 
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationInfo;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
-import com.anchor.global.portone.response.PaymentCancelData.PaymentCancelDetail;
+import com.anchor.global.portone.response.PaymentCancelResult;
 import com.anchor.global.util.BaseEntity;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -41,8 +39,7 @@ public class Payment extends BaseEntity {
   @Column(nullable = false)
   private PaymentStatus paymentStatus = PaymentStatus.SUCCESS;
 
-  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-  @JoinColumn(name = "mentoring_application_id")
+  @OneToOne(mappedBy = "payment", fetch = FetchType.LAZY)
   private MentoringApplication mentoringApplication;
 
   @Builder
@@ -72,9 +69,9 @@ public class Payment extends BaseEntity {
     return this.paymentStatus.equals(PaymentStatus.CANCELLED);
   }
 
-  public void editPaymentCancelStatus(PaymentCancelDetail cancelDetail) {
+  public void editPaymentCancelStatus(PaymentCancelResult PaymentCancelDetail) {
     this.paymentStatus = PaymentStatus.CANCELLED;
-    this.cancelAmount = cancelDetail.getCancelAmount();
+    this.cancelAmount = PaymentCancelDetail.getCancelAmount();
   }
 
 }

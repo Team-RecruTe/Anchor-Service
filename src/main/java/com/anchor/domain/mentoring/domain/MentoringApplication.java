@@ -5,6 +5,7 @@ import com.anchor.domain.payment.domain.Payment;
 import com.anchor.domain.user.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
 import com.anchor.domain.user.domain.User;
 import com.anchor.global.util.BaseEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -19,7 +20,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -40,8 +40,8 @@ public class MentoringApplication extends BaseEntity {
   @JoinColumn(name = "mentoring_id")
   private Mentoring mentoring;
 
-  @OneToOne(mappedBy = "mentoringApplication")
-  @Setter(AccessLevel.PRIVATE)
+  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+  @JoinColumn(name = "payment_id")
   private Payment payment;
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -61,7 +61,6 @@ public class MentoringApplication extends BaseEntity {
     this.user.getMentoringApplicationList()
         .add(this);
   }
-
 
   public MentoringApplication(MentoringApplicationInfo applicationInfo,
       MentoringStatus mentoringStatus, Mentoring mentoring, Payment payment, User user) {
@@ -85,14 +84,6 @@ public class MentoringApplication extends BaseEntity {
     return this.startDateTime.isEqual(requiredMentoringStatusInfo.getStartDateTime())
         &&
         this.endDateTime.isEqual(requiredMentoringStatusInfo.getEndDateTime());
-  }
-
-  public boolean isExistPayment() {
-    return this.payment != null;
-  }
-
-  public void changePayment(Payment payment) {
-    setPayment(payment);
   }
 
   @Override

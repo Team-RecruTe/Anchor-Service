@@ -14,12 +14,13 @@ import lombok.Getter;
 public class AppliedMentoringSearchResult extends ResponseDto {
 
   private MentoringInfo mentoringInfo;
-  private MentorInfo mentorInfo;
+  private UserInfo userInfo;
   private PaymentInfo paymentInfo;
   private MentoringApplicationInfo mentoringApplicationInfo;
 
   @Builder
   private AppliedMentoringSearchResult(
+      Long totalPage,
       Long id,
       String title,
       String email,
@@ -30,7 +31,7 @@ public class AppliedMentoringSearchResult extends ResponseDto {
       String status
   ) {
     this.mentoringInfo = new MentoringInfo(id, title);
-    this.mentorInfo = new MentorInfo(email, nickname, image);
+    this.userInfo = new UserInfo(email, nickname, image);
     this.paymentInfo = new PaymentInfo(amount);
     this.mentoringApplicationInfo = new MentoringApplicationInfo(range, status);
   }
@@ -39,6 +40,7 @@ public class AppliedMentoringSearchResult extends ResponseDto {
     Mentoring mentoring = mentoringApplication.getMentoring();
     User user = mentoringApplication.getUser();
     Payment payment = mentoringApplication.getPayment();
+
     return AppliedMentoringSearchResult.builder()
         .id(mentoring.getId())
         .title(mentoring.getTitle())
@@ -48,7 +50,7 @@ public class AppliedMentoringSearchResult extends ResponseDto {
         .amount(payment.getAmount())
         .range(DateTimeRange.of(mentoringApplication.getStartDateTime(), mentoringApplication.getEndDateTime()))
         .status(mentoringApplication.getMentoringStatus()
-            .name())
+            .getDescription())
         .build();
   }
 
@@ -63,7 +65,7 @@ public class AppliedMentoringSearchResult extends ResponseDto {
 
   @Getter
   @AllArgsConstructor
-  private static class MentorInfo {
+  private static class UserInfo {
 
     private String email;
     private String nickname;
