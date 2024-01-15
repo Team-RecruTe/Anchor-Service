@@ -14,7 +14,6 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -49,7 +48,7 @@ public class ApplicationTimeInfo {
 
   @Getter
   @NoArgsConstructor
-  public static class MentorActiveTime {
+  static class MentorActiveTime {
 
     @JsonSerialize(using = LocalTimeSerializer.class)
     @JsonDeserialize(using = LocalTimeDeserializer.class)
@@ -80,23 +79,6 @@ public class ApplicationTimeInfo {
     public static MentorActiveTime of(MentorSchedule mentorSchedule) {
       return new MentorActiveTime(mentorSchedule.getOpenTime(), mentorSchedule.getCloseTime(),
           mentorSchedule.getDayOfWeek(), mentorSchedule.getActiveStatus());
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) {
-        return true;
-      }
-      if (!(o instanceof MentorActiveTime that)) {
-        return false;
-      }
-      return Objects.equals(getOpenTime(), that.getOpenTime()) && Objects.equals(getCloseTime(),
-          that.getCloseTime()) && getDayOfWeek() == that.getDayOfWeek() && getActiveStatus() == that.getActiveStatus();
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(getOpenTime(), getCloseTime(), getDayOfWeek(), getActiveStatus());
     }
   }
 

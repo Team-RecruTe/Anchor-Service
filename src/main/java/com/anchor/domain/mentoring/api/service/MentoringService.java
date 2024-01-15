@@ -10,7 +10,6 @@ import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationUs
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
 import com.anchor.domain.mentoring.api.service.response.ApplicationTimeInfo;
-import com.anchor.domain.mentoring.api.service.response.AppliedMentoringInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringContents;
 import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
@@ -20,6 +19,7 @@ import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo.Ment
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringPayConfirmInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringPaymentInfo;
+import com.anchor.domain.mentoring.api.service.response.MentoringSaveRequestInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
 import com.anchor.domain.mentoring.api.service.response.TopMentoring;
 import com.anchor.domain.mentoring.domain.Mentoring;
@@ -170,7 +170,7 @@ public class MentoringService {
    * 멘토링 신청이 완료되면 멘토링 신청내역을 저장합니다.
    */
   @Transactional
-  public AppliedMentoringInfo saveMentoringApplication(SessionUser sessionUser,
+  public MentoringSaveRequestInfo saveMentoringApplication(SessionUser sessionUser,
       Long id, MentoringApplicationInfo applicationInfo) {
     Mentoring mentoring = getMentoringById(id);
     Mentor mentor = mentoring.getMentor();
@@ -183,7 +183,7 @@ public class MentoringService {
         loginUser);
     mentoringApplicationRepository.save(mentoringApplication);
     applicationLockClient.remove(key);
-    return new AppliedMentoringInfo(mentoringApplication);
+    return new MentoringSaveRequestInfo(mentoringApplication);
   }
 
   /**

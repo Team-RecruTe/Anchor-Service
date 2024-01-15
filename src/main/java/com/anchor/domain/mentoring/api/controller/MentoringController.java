@@ -7,12 +7,12 @@ import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
 import com.anchor.domain.mentoring.api.service.MentoringService;
 import com.anchor.domain.mentoring.api.service.response.ApplicationTimeInfo;
-import com.anchor.domain.mentoring.api.service.response.AppliedMentoringInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringDeleteResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringPaymentInfo;
+import com.anchor.domain.mentoring.api.service.response.MentoringSaveRequestInfo;
 import com.anchor.domain.mentoring.api.service.response.TopMentoring;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.util.type.Link;
@@ -106,7 +106,7 @@ public class MentoringController {
   @PostMapping("/{id}/lock")
   public ResponseEntity<String> applicationTimeLock(@PathVariable("id") Long id,
       @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
-    SessionUser sessionUser = getSessionUser(session);
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
     mentoringService.lock(id, sessionUser, applicationTime);
     return ResponseEntity.ok()
         .body(SUCCESS);
@@ -117,7 +117,7 @@ public class MentoringController {
    */
   @PutMapping("/{id}/refresh")
   public ResponseEntity<String> refreshPaymentTime(@PathVariable("id") Long id, HttpSession session) {
-    SessionUser sessionUser = getSessionUser(session);
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
     boolean refreshResult = mentoringService.refresh(id, sessionUser);
     if (refreshResult) {
       return ResponseEntity.ok()
@@ -133,7 +133,7 @@ public class MentoringController {
    */
   @DeleteMapping("/{id}/unlock")
   public ResponseEntity<String> mentoringTimeSessionRemove(@PathVariable("id") Long id, HttpSession session) {
-    SessionUser sessionUser = getSessionUser(session);
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
     mentoringService.unlock(id, sessionUser);
     return ResponseEntity.ok()
         .body(SUCCESS);
@@ -145,7 +145,7 @@ public class MentoringController {
   @PostMapping("/{id}/payment-process")
   public ResponseEntity<MentoringPaymentInfo> mentoringTimeSessionSave(
       @PathVariable("id") Long id, @RequestBody MentoringApplicationUserInfo userInfo, HttpSession session) {
-    SessionUser sessionUser = getSessionUser(session);
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
     MentoringPaymentInfo mentoringPaymentInfo = mentoringService.createPaymentInfo(id, userInfo, sessionUser);
     return ResponseEntity.ok()
         .body(mentoringPaymentInfo);
@@ -155,25 +155,17 @@ public class MentoringController {
    * 멘토링 결제 완료가 되면 멘토링 신청이력을 저장합니다.
    */
   @PostMapping("/{id}/apply")
-  public ResponseEntity<AppliedMentoringInfo> mentoringApplicationSave
+  public ResponseEntity<MentoringSaveRequestInfo> mentoringApplicationSave
   (@PathVariable("id") Long id, @RequestBody MentoringApplicationInfo applicationInfo, HttpSession session) {
-    SessionUser sessionUser = getSessionUser(session);
-    AppliedMentoringInfo appliedMentoringInfo =
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
+    MentoringSaveRequestInfo mentoringSaveRequestInfo =
         mentoringService.saveMentoringApplication(sessionUser, id, applicationInfo);
-    if (appliedMentoringInfo != null) {
+    if (mentoringSaveRequestInfo != null) {
       return ResponseEntity.ok()
-          .body(appliedMentoringInfo);
+          .body(mentoringSaveRequestInfo);
     }
     return ResponseEntity.badRequest()
         .build();
-  }
-
-  private SessionUser getSessionUser(HttpSession session) {
-    SessionUser sessionUser = (SessionUser) session.getAttribute("user");
-    if (sessionUser == null) {
-      throw new RuntimeException("로그인 정보가 존재하지 않습니다.");
-    }
-    return sessionUser;
   }
 
 }

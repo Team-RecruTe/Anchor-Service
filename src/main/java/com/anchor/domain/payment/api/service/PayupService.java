@@ -6,7 +6,6 @@ import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
 import com.anchor.domain.payment.domain.Payment;
-import com.anchor.domain.payment.domain.Payup;
 import com.anchor.domain.payment.domain.repository.PayupRepository;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -50,9 +49,9 @@ public class PayupService {
       Integer amount = payment.getAmount();
 
       // 정산처리(송금)이 완료되었다고 가정
-      Payup payup = payment.getPayup();
-      payup.changeStatusToComplete();
-      payupRepository.save(payup);
+//      Payup payup = payment.getPayup();
+//      payup.changeStatusToComplete();
+//      payupRepository.save(payup);
 
     }
 

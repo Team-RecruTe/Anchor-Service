@@ -24,8 +24,8 @@ import com.anchor.domain.mentor.domain.repository.MentorRepository;
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
-import com.anchor.domain.mentoring.api.service.response.AppliedMentoringInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo.MentoringDetailSearchResult;
+import com.anchor.domain.mentoring.api.service.response.MentoringSaveRequestInfo;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
@@ -169,11 +169,11 @@ class MentoringServiceTest {
     given(userRepository.findByEmail(anyString())).willReturn(Optional.of(user));
     given(mentoringApplicationRepository.save(any(MentoringApplication.class))).willReturn(mentoringApplication);
     //when
-    AppliedMentoringInfo appliedMentoringInfo =
+    MentoringSaveRequestInfo mentoringSaveRequestInfo =
         mentoringService.saveMentoringApplication(sessionUser, mentoringId, applicationInfo);
 
     //then
-    assertThat(appliedMentoringInfo)
+    assertThat(mentoringSaveRequestInfo)
         .extracting("mentorNickname", "mentoringTitle", "mentoringStartDateTime",
             "mentoringEndDateTime", "mentoringStatus")
         .contains(NICKNAME, MENTORING_TITLE, mentoringApplication.getStartDateTime(),

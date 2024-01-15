@@ -2,7 +2,6 @@ package com.anchor.domain.mentoring.domain;
 
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationInfo;
 import com.anchor.domain.payment.domain.Payment;
-import com.anchor.domain.user.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
 import com.anchor.domain.user.domain.User;
 import com.anchor.global.util.BaseEntity;
 import jakarta.persistence.CascadeType;
@@ -77,12 +76,6 @@ public class MentoringApplication extends BaseEntity {
 
   public void changeStatus(MentoringStatus mentoringStatus) {
     this.mentoringStatus = mentoringStatus;
-  }
-
-  private boolean isMatchingDateTime(RequiredMentoringStatusInfo requiredMentoringStatusInfo) {
-    return this.startDateTime.isEqual(requiredMentoringStatusInfo.getStartDateTime())
-        &&
-        this.endDateTime.isEqual(requiredMentoringStatusInfo.getEndDateTime());
   }
 
   @Override

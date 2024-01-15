@@ -42,9 +42,6 @@ public class Payment extends BaseEntity {
   @OneToOne(mappedBy = "payment", fetch = FetchType.LAZY)
   private MentoringApplication mentoringApplication;
 
-  @OneToOne(mappedBy = "payment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-  private Payup payup;
-
   @Builder
   private Payment(String impUid, String merchantUid, Integer amount, MentoringApplication mentoringApplication) {
     this.impUid = impUid;
