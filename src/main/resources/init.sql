@@ -151,3 +151,10 @@ values (1, '2024-01-03 15:00:00', '2024-01-03 16:30:00', now(), now(), 'COMPLETE
        (12, '2024-01-16 13:00:00', '2024-01-16 14:30:00', now(), now(), 'WAITING', 2, 1, 12),
        (13, '2024-01-17 13:00:00', '2024-01-17 14:30:00', now(), now(), 'WAITING', 2, 1, 13);
 commit;
+
+#### 정산 데이터 등록
+start transaction;
+insert into payup(id, create_date, update_date, amount, payup_status, payup_date_time, mentor_id, payment_id)
+values (1, now(), now(), 10000, 'WAITING', '2024-01-05 15:00:00', 1, 1),
+       (2, now(), now(), 10000, 'COMPLETE', '2024-01-10 18:00:00', 1, 2);
+commit;
