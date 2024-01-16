@@ -118,6 +118,16 @@ public class UserService {
   }
 
   @Transactional
+  public void uploadImage(String email, UserImageRequest userImageRequest){
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(()->{
+          return new RuntimeException("해당 유저를 찾을 수 없습니다.");
+        });
+    user.uploadImage(userImageRequest);
+    userRepository.save(user);
+  }
+
+  @Transactional
   public void deleteUser(String email){
     User user = userRepository.findByEmail(email)
         .orElseThrow(()->{
