@@ -28,7 +28,9 @@ import com.anchor.domain.mentoring.domain.MentoringTag;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
 import com.anchor.domain.payment.domain.Payment;
+import com.anchor.domain.payment.domain.Payup;
 import com.anchor.domain.payment.domain.repository.PaymentRepository;
+import com.anchor.domain.payment.domain.repository.PayupRepository;
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
@@ -59,6 +61,7 @@ public class MentoringService {
   private final MentoringApplicationRepository mentoringApplicationRepository;
   private final ApplicationLockClient applicationLockClient;
   private final PayNumberCreator payNumberCreator;
+  private final PayupRepository payupRepository;
 
   @Transactional
   public MentoringCreateResult create(Long mentorId, MentoringBasicInfo mentoringBasicInfo) {
@@ -181,7 +184,13 @@ public class MentoringService {
     Payment payment = new Payment(applicationInfo);
     MentoringApplication mentoringApplication = new MentoringApplication(applicationInfo, mentoring, payment,
         loginUser);
-    mentoringApplicationRepository.save(mentoringApplication);
+    MentoringApplication save = mentoringApplicationRepository.save(mentoringApplication);
+    Payup payup = Payup.builder()
+        .mentor(mentor)
+        .amount(applicationInfo.getAmount())
+        .payment(save.getPayment())
+        .build();
+    payupRepository.save(payup);
     applicationLockClient.remove(key);
     return new MentoringSaveRequestInfo(mentoringApplication);
   }

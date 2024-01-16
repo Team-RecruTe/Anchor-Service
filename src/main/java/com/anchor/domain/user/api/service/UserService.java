@@ -106,18 +106,16 @@ public class UserService {
     MentoringApplication mentoringApplication =
         mentoringApplicationRepository.findByStartDateTimeAndEndDateTimeAndUserId(startDateTime, endDateTime, userId)
             .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링 신청이력이 존재하지 않습니다."));
-    mentoringApplication.changeStatus(mentoringStatusInfo.getStatus());
+    mentoringApplication.changeStatus(mentoringStatusInfo.getMentoringStatus());
     MentoringStatus mentoringStatus = mentoringApplication.getMentoringStatus();
     Payment payment = mentoringApplication.getPayment();
-    cancelPayemntIfCancelled(mentoringStatus, payment);
+    cancelPaymentIfCancelled(mentoringStatus, payment);
     mentoringApplicationRepository.save(mentoringApplication);
   }
 
-  private void cancelPayemntIfCancelled(MentoringStatus status, Payment payment) {
+  private void cancelPaymentIfCancelled(MentoringStatus status, Payment payment) {
     RequiredPaymentCancelData requiredPaymentCancelData = new RequiredPaymentCancelData(payment);
     Optional<PaymentResult> paymentCancelResult = paymentUtils.request(status, requiredPaymentCancelData);
-    paymentCancelResult.ifPresent(result -> {
-      payment.editPaymentCancelStatus((PaymentCancelResult) result);
-    });
+    paymentCancelResult.ifPresent(result -> payment.editPaymentCancelStatus((PaymentCancelResult) result));
   }
 }

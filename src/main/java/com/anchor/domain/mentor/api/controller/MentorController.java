@@ -6,8 +6,12 @@ import com.anchor.domain.mentor.api.controller.request.RandomCodeMaker;
 import com.anchor.domain.mentor.api.service.MailService;
 import com.anchor.domain.mentor.api.service.MentorService;
 import com.anchor.domain.mentor.api.service.response.MentorOpenCloseTimes;
+import com.anchor.domain.mentor.api.service.response.MentorPayupResult;
 import com.anchor.global.auth.SessionUser;
+import com.anchor.global.util.type.DateTimeRange;
 import jakarta.servlet.http.HttpSession;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -70,4 +74,20 @@ public class MentorController {
     }
   }
 
+  @PostMapping("/me/payup")
+  public ResponseEntity<MentorPayupResult> getTest(
+      @RequestBody DateTimeRange calendarMonthRange, HttpSession session) {
+    SessionUser sessionUser = new SessionUser();
+    if (isFutureDate(calendarMonthRange)) {
+      return ResponseEntity.ok(new MentorPayupResult());
+    }
+    MentorPayupResult payupInfos = mentorService.getMentorPayupResult(calendarMonthRange, sessionUser);
+    return ResponseEntity.ok(payupInfos);
+  }
+
+  private boolean isFutureDate(DateTimeRange calendarMonthRange) {
+    return calendarMonthRange.getFrom()
+        .isAfter(LocalDateTime.now()
+            .with(TemporalAdjusters.lastDayOfMonth()));
+  }
 }

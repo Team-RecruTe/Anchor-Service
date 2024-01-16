@@ -55,4 +55,9 @@ public class MentorViewController {
     mentorService.register(mentorRegisterInfo);
     return "멘토 등록 완료. 로그인 페이지로 이동해주세요.";
   }
+
+  @GetMapping("/me/payup")
+  public String viewPayupPage() {
+    return viewResolver.getViewPath("mentor", "payup");
+  }
 }

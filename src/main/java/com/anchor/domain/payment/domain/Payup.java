@@ -27,7 +27,7 @@ public class Payup extends BaseEntity {
   private LocalDateTime payupDateTime;
 
   @Enumerated(EnumType.STRING)
-  private PayupStatus payupStatus;
+  private PayupStatus payupStatus = PayupStatus.WAITING;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "mentor_id")
@@ -38,10 +38,13 @@ public class Payup extends BaseEntity {
   private Payment payment;
 
   @Builder
-  private Payup(Integer amount, LocalDateTime payupDateTime, PayupStatus payupStatus) {
+  private Payup(Integer amount, LocalDateTime payupDateTime, Mentor mentor, Payment payment) {
     this.amount = amount;
     this.payupDateTime = payupDateTime;
-    this.payupStatus = payupStatus;
+    this.mentor = mentor;
+    this.mentor.getPayups()
+        .add(this);
+    this.payment = payment;
   }
 
   public void changeStatusToComplete() {
