@@ -26,7 +26,6 @@ import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
 import com.anchor.domain.mentoring.api.service.response.TopMentoring;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
-import com.anchor.domain.mentoring.domain.MentoringReview;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
 import com.anchor.domain.mentoring.domain.repository.MentoringReviewRepository;
 import com.anchor.domain.mentoring.domain.MentoringDetail;
@@ -68,8 +67,8 @@ public class MentoringService {
   private final ApplicationLockClient applicationLockClient;
   private final PayNumberCreator payNumberCreator;
 
-  public List<MentoringReview> getMentoringReviews(Long mentoringId) {
-    List<MentoringReview> reviewList = mentoringReviewRepository.getReviewList(mentoringId);
+  public List<MentoringReviewInfoInterface> getMentoringReviews(Long mentoringId) {
+    List<MentoringReviewInfoInterface> reviewList = mentoringReviewRepository.getReviewList(mentoringId);
     return reviewList;
   }
 
