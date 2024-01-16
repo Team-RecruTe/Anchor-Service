@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <title>Title</title>
 </head>
 <body>
 <h1>멘토링 리뷰 페이지</h1>
+<th:block th:each="item:${reviewList}">
+  <h2 th:text="${item.getContents()}"></h2>
+</th:block>
 </body>
 </html>

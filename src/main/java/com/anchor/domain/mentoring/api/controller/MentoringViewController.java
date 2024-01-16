@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/mentorings")
 @Controller
@@ -94,14 +93,6 @@ public class MentoringViewController {
     return viewResolver.getViewPath("mentoring", "mentoring-payment");
   }
 
-  @GetMapping("/{id}/reviews")
-  public String viewReviewPage(@PathVariable("id") Long mentoringId, Model model) {
-    List<MentoringReview> reviewList = mentoringService.getMentoringReviews(mentoringId);
-    model.addAttribute("reviewList", reviewList);
-    log.info("reviewList===" + reviewList);
-    return "/mentoring-review";
-  }
-
   private SessionUser getSessionUser(HttpSession session) {
     SessionUser sessionUser = (SessionUser) session.getAttribute("user");
     if (sessionUser == null) {
@@ -109,5 +100,4 @@ public class MentoringViewController {
     }
     return sessionUser;
   }
-
 }
