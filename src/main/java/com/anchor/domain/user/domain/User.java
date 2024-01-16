@@ -35,7 +35,7 @@ public class User extends BaseEntity {
   @Enumerated(EnumType.STRING)
   private UserRole role;
 
-  @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+  @OneToOne(fetch = FetchType.LAZY)
   private Mentor mentor;
 
   @OneToMany(mappedBy = "user")
