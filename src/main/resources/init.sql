@@ -31,7 +31,8 @@ values (1, 1, '09:00', '12:00', 'OPEN', 'MONDAY', now(), now()),
        (7, 1, '09:00', '12:00', 'OPEN', 'SATURDAY', now(), now()),
        (8, 1, '14:00', '21:00', 'OPEN', 'SATURDAY', now(), now()),
        (9, 1, '09:00', '12:00', 'OPEN', 'SUNDAY', now(), now()),
-       (10, 1, '14:00', '21:00', 'OPEN', 'SUNDAY', now(), now());
+       (10, 1, '14:00', '21:00', 'OPEN', 'SUNDAY', now(), now()),
+       (11, 1, '13:00', '15:00', 'OPEN', 'THURSDAY', now(), now());
 commit;
 
 #### 멘토링 상세내용 등록

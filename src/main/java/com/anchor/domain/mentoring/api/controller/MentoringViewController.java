@@ -3,7 +3,6 @@ package com.anchor.domain.mentoring.api.controller;
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
 import com.anchor.domain.mentoring.api.service.MentoringService;
 import com.anchor.domain.mentoring.api.service.response.MentoringContents;
-import com.anchor.domain.mentoring.api.service.response.MentoringDefaultInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo.MentoringDetailSearchResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringPayConfirmInfo;
@@ -77,16 +76,6 @@ public class MentoringViewController {
     MentoringContents result = mentoringService.getContents(id, 1L);
     model.addAttribute("mentoringContents", result);
     return viewResolver.getViewPath("mentoring", "contents-edit");
-  }
-
-  /**
-   * 멘토링 신청페이지를 조회합니다.
-   */
-  @GetMapping("{id}/apply")
-  public String viewMentoringUnavailableTimes(@PathVariable("id") Long id, Model model) {
-    MentoringDefaultInfo mentoringDefaultInfo = mentoringService.getMentoringDefaultInfo(id);
-    model.addAttribute("mentoringDefaultInfo", mentoringDefaultInfo);
-    return viewResolver.getViewPath("mentoring", "mentoring-apply");
   }
 
   /**
