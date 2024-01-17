@@ -4,6 +4,7 @@ import com.anchor.domain.mentor.domain.ActiveStatus;
 import com.anchor.domain.mentor.domain.MentorSchedule;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.global.util.type.DateTimeRange;
+import com.anchor.global.util.type.TimeRange;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -11,9 +12,13 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -22,28 +27,55 @@ import lombok.NoArgsConstructor;
 public class ApplicationTimeInfo {
 
 
-  private List<DateTimeRange> unavailableTimes;
+  private Map<LocalDate, List<TimeRange>> unavailableTimes;
+  private Map<DayOfWeek, List<MentorActiveTime>> activeTimes;
 
-  private List<MentorActiveTime> activeTimes;
 
-  private ApplicationTimeInfo(List<DateTimeRange> unavailableTimes, List<MentorActiveTime> activeTimes) {
+  private ApplicationTimeInfo(Map<LocalDate, List<TimeRange>> unavailableTimes,
+      Map<DayOfWeek, List<MentorActiveTime>> activeTimes) {
     this.unavailableTimes = unavailableTimes;
     this.activeTimes = activeTimes;
   }
 
   public static ApplicationTimeInfo create(List<MentoringApplication> applications, List<MentorSchedule> schedules,
       List<DateTimeRange> paymentTimes) {
-    List<MentorActiveTime> mentorActiveTimes = schedules.stream()
-        .map(MentorActiveTime::of)
-        .toList();
+    Map<LocalDate, List<TimeRange>> unavailableTimeMap = createUnavailableTimeMap(applications, paymentTimes);
+    Map<DayOfWeek, List<MentorActiveTime>> activeTimeMap = createActiveTimeMap(schedules);
+    return new ApplicationTimeInfo(unavailableTimeMap, activeTimeMap);
+  }
 
-    List<DateTimeRange> unavailableTimes = new ArrayList<>();
+  private static Map<LocalDate, List<TimeRange>> createUnavailableTimeMap(List<MentoringApplication> applications,
+      List<DateTimeRange> paymentTimes) {
+    Map<LocalDate, List<TimeRange>> unavailableTimeMap = new HashMap<>();
     applications.stream()
         .map(application -> DateTimeRange.of(application.getStartDateTime(), application.getEndDateTime()))
-        .forEach(unavailableTimes::add);
+        .forEach(dateTimeRange -> addUnavailableTimes(dateTimeRange, unavailableTimeMap));
+    paymentTimes.forEach(dateTimeRange -> addUnavailableTimes(dateTimeRange, unavailableTimeMap));
+    return unavailableTimeMap;
+  }
 
-    unavailableTimes.addAll(paymentTimes);
-    return new ApplicationTimeInfo(unavailableTimes, mentorActiveTimes);
+  private static void addUnavailableTimes(DateTimeRange dateTimeRange,
+      Map<LocalDate, List<TimeRange>> unavailableTimeMap) {
+    LocalDate startDay = dateTimeRange.getFrom()
+        .toLocalDate();
+    TimeRange timeRange = TimeRange.of(dateTimeRange);
+    List<TimeRange> unavailableTimes = unavailableTimeMap.computeIfAbsent(startDay, key -> new ArrayList<>());
+    unavailableTimes.add(timeRange);
+  }
+
+  private static Map<DayOfWeek, List<MentorActiveTime>> createActiveTimeMap(List<MentorSchedule> schedules) {
+    Map<DayOfWeek, List<MentorActiveTime>> activeTimeMap = new EnumMap<>(DayOfWeek.class);
+    schedules.stream()
+        .map(MentorActiveTime::of)
+        .forEach(mentorActiveTime -> addMentorActiveTimes(mentorActiveTime, activeTimeMap));
+    return activeTimeMap;
+  }
+
+  private static void addMentorActiveTimes(MentorActiveTime mentorActiveTime,
+      Map<DayOfWeek, List<MentorActiveTime>> activeTimeMap) {
+    List<MentorActiveTime> mentorActiveTimes = activeTimeMap.computeIfAbsent(mentorActiveTime.dayOfWeek,
+        key -> new ArrayList<>());
+    mentorActiveTimes.add(mentorActiveTime);
   }
 
   @Getter
