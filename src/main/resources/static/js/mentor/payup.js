@@ -60,9 +60,10 @@ function getPayupInfos(calendar) {
   let todayDate = calendar.getDate().toDate();
   let today = parseDateTime(todayDate);
   let events = [];
-  axios.post('/mentors/me/payup', {
-    from: today,
-    to: today
+  axios.get('/mentors/me/payup-info', {
+    params: {
+      currentMonth: today
+    }
   })
   .then(res => {
     let data = res.data;
