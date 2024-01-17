@@ -32,6 +32,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -208,6 +209,7 @@ public class MentoringService {
     return mentoringRepository.findMentorings(tags, keyword, pageable);
   }
 
+  @Cacheable(cacheNames = "topMentoring", key = "'topMentoring'")
   @Transactional(readOnly = true)
   public TopMentoring getTopMentorings() {
     List<MentoringSearchResult> topMentorings = mentoringRepository.findTopMentorings();
