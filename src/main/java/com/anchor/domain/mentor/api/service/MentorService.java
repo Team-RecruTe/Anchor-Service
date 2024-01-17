@@ -132,12 +132,12 @@ public class MentorService {
   }
 
   @Transactional(readOnly = true)
-  public MentorPayupResult getMentorPayupResult(DateTimeRange calendarRange, SessionUser sessionUser) {
+  public MentorPayupResult getMentorPayupResult(LocalDateTime currentMonth, SessionUser sessionUser) {
 //    Long mentorId = sessionUser.getMentorId();
     Long mentorId = 1L;
     DateTimeRange actualCalendarRange = DateTimeRange.of(
-        getFirstDayOfMonth(calendarRange.getFrom()),
-        getFirstDayOfNextMonth(calendarRange.getFrom())
+        getFirstDayOfMonth(currentMonth),
+        getFirstDayOfNextMonth(currentMonth)
     );
     Map<LocalDateTime, Integer> dailyTotalAmountMap = new HashMap<>();
     Map<LocalDateTime, List<PayupInfo>> dailyPayupInfoMap = new HashMap<>();

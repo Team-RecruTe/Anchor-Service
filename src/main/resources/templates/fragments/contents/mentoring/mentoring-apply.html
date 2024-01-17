@@ -7,18 +7,72 @@
   <title>멘토링 신청페이지</title>
   <meta charset="UTF-8">
   <script src="/js/library/axios/axios.min.js"></script>
+  <link href="/css/library/toast/tui-date-picker.min.css" rel="stylesheet">
+  <link href="/css/library/toast/tui-time-picker.min.css" rel="stylesheet">
+  <style>
+    .datepicker-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #datepicker-wrapper {
+      border-radius: 50px;
+    }
+
+    .radio {
+      width: 4rem;
+    }
+  </style>
 </head>
-<div layout:fragment="content">
+<div layout:fragment="content" style="height: 50rem">
   <h1 th:text="${mentoringDefaultInfo.title}">멘토링 제목</h1>
 
   <form id="form" method="post" th:action="@{/mentorings/{id}/payment(id=${mentoringDefaultInfo.mentoringId})} ">
-    <label for="date">날짜 선택:</label>
-    <input id="date" name="date" type="date">
-    <label for="time">시간 선택:</label>
-    <input id="time" name="time" type="time">
     <input id="duration-time" name="durationTime" th:value="${mentoringDefaultInfo.durationTime}" type="hidden">
-    <button class="btn btn-primary" id="submitButton" type="button">신청하기</button>
+    <div class="row">
+      <div class="col-6">
+        <div class="datepicker-container">
+          <div class="tui-datepicker-input tui-datetime-input tui-has-focus">
+            <input aria-label="Date-Time" id="datepicker-input" type="text">
+            <span class="tui-ico-date"></span>
+            <div id="datepicker-wrapper" style="margin-top: -1px;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6">
+        <!--        8번 반복-->
+        <div class="row">
+          <div class="input-group">
+            <input autocomplete="off" class="btn-check radio" id="08:00" name="options-outlined"
+                   type="radio">
+            <label class="btn btn-outline-primary radio" for="08:00">08:00</label>
+            <input autocomplete="off" class="btn-check radio" id="08:30" name="options-outlined"
+                   type="radio">
+            <label class="btn btn-outline-primary radio" for="08:30">08:30</label>
+            <input autocomplete="off" class="btn-check radio" disabled id="09:00" name="options-outlined"
+                   type="radio">
+            <label class="btn btn-outline-secondary radio" for="09:00">09:00</label>
+          </div>
+          <div class="input-group">
+            <input autocomplete="off" class="btn-check radio" id="10:00" name="options-outlined"
+                   type="radio">
+            <label class="btn btn-outline-primary radio" for="10:00">10:00</label>
+            <input autocomplete="off" class="btn-check radio" disabled id="10:30" name="options-outlined"
+                   type="radio">
+            <label class="btn btn-outline-secondary radio " for="10:30">10:30</label>
+            <input autocomplete="off" class="btn-check radio" id="11:00" name="options-outlined"
+                   type="radio">
+            <label class="btn btn-outline-primary radio" for="11:00">11:00</label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <button class="btn btn-primary justify-content-end" id="submitButton" type="button">신청하기</button>
   </form>
+  <script src="/js/library/toast/tui-date-picker.min.js"></script>
+  <script src="/js/library/toast/tui-time-picker.min.js"></script>
   <script src="/js/mentoring/mentoring-apply.js"></script>
 </div>
 </html>
