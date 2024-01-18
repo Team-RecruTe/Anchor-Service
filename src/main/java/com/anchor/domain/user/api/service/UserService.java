@@ -43,16 +43,18 @@ public class UserService {
   private final PaymentUtils paymentUtils;
 
   @Transactional
-  public UserInfoResponse getProfile(String email) {
+  public UserInfoResponse getProfile(String email){
     User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new RuntimeException("해당 유저를 찾을 수 없습니다."));
+        .orElseThrow(()->{
+          return new RuntimeException("해당 유저를 찾을 수 없습니다.");
+        });
     return new UserInfoResponse(user);
   }
 
   @Transactional
-  public void editNickname(String email, UserNicknameRequest userNicknameRequest) {
+  public void editNickname(String email, UserNicknameRequest userNicknameRequest){
     User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> {
+        .orElseThrow(()->{
           return new RuntimeException("해당 유저를 찾을 수 없습니다.");
         });
     user.editNickname(userNicknameRequest);
@@ -60,37 +62,19 @@ public class UserService {
   }
 
   @Transactional
-  public void deleteUser(String email) {
+  public void uploadImage(String email, UserImageRequest userImageRequest){
     User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> {
+        .orElseThrow(()->{
           return new RuntimeException("해당 유저를 찾을 수 없습니다.");
         });
-    userRepository.delete(user);
-  }
-
-  @Transactional
-  public UserInfoResponse getProfile(String email) {
-    User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> {
-          return new RuntimeException("해당 유저를 찾을 수 없습니다.");
-        });
-    return new UserInfoResponse(user);
-  }
-
-  @Transactional
-  public void editNickname(String email, UserNicknameRequest userNicknameRequest) {
-    User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> {
-          return new RuntimeException("해당 유저를 찾을 수 없습니다.");
-        });
-    user.editNickname(userNicknameRequest);
+    user.uploadImage(userImageRequest);
     userRepository.save(user);
   }
 
   @Transactional
-  public void deleteUser(String email) {
+  public void deleteUser(String email){
     User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> {
+        .orElseThrow(()->{
           return new RuntimeException("해당 유저를 찾을 수 없습니다.");
         });
     userRepository.delete(user);
@@ -168,10 +152,10 @@ public class UserService {
     Mentor mentor = mentoring.getMentor();
     Payment payment = application.getPayment();
     Payup payup = Payup.builder()
-        .payupDateTime(LocalDateTime.MIN)
         .mentor(mentor)
         .payment(payment)
         .build();
     payupRepository.save(payup);
   }
+
 }
