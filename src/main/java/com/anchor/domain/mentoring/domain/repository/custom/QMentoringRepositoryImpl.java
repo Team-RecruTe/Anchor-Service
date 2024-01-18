@@ -2,7 +2,6 @@ package com.anchor.domain.mentoring.domain.repository.custom;
 
 import static com.anchor.domain.mentor.domain.QMentor.mentor;
 import static com.anchor.domain.mentoring.domain.QMentoring.mentoring;
-import static com.anchor.domain.mentoring.domain.QMentoringApplication.mentoringApplication;
 import static com.anchor.domain.mentoring.domain.QMentoringDetail.mentoringDetail;
 import static com.anchor.domain.mentoring.domain.QMentoringTag.mentoringTag;
 import static com.anchor.domain.user.domain.QUser.user;
@@ -11,7 +10,6 @@ import static com.querydsl.core.types.dsl.Expressions.numberTemplate;
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -141,19 +139,6 @@ public class QMentoringRepositoryImpl implements QMentoringRepository {
         .fetchOne());
   }
 
-  public Long findMentorIdByMentoringId(Long id) {
-    return jpaQueryFactory.select(mentoring.mentor.id)
-        .from(mentoring)
-        .where(mentoring.id.eq(id))
-        .fetchOne();
-  }
-
-  public List<MentoringApplication> findMentoringApplications(Long id) {
-    return jpaQueryFactory.selectFrom(mentoringApplication)
-        .where(mentoringApplication.mentoring.id.eq(id))
-        .fetch();
-  }
-
   private long from(Pageable pageable) {
     return pageable.getOffset();
   }
@@ -189,13 +174,6 @@ public class QMentoringRepositoryImpl implements QMentoringRepository {
           orders.add(new OrderSpecifier(direction, orderByExpression.get(prop)));
         });
     return orders.toArray(OrderSpecifier[]::new);
-  }
-
-  private BooleanExpression containsTitle(String keyword) {
-    if (StringUtils.hasText(keyword)) {
-      return mentoring.title.contains(keyword);
-    }
-    return Expressions.TRUE;
   }
 
   private static class Searchable {
