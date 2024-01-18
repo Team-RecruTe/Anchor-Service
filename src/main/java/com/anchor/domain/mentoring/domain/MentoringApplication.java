@@ -68,6 +68,8 @@ public class MentoringApplication extends BaseEntity {
     this.payment = payment;
     this.payment.addMentoringApplication(this);
     this.user = user;
+    this.user.getMentoringApplicationList()
+        .add(this);
   }
 
   public void connectPayment(Payment payment) {

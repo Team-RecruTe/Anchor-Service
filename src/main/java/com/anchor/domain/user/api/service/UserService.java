@@ -1,10 +1,13 @@
 package com.anchor.domain.user.api.service;
 
+import com.anchor.domain.mentor.domain.Mentor;
+import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
 import com.anchor.domain.payment.domain.Payment;
-import com.anchor.domain.payment.domain.repository.PaymentRepository;
+import com.anchor.domain.payment.domain.Payup;
+import com.anchor.domain.payment.domain.repository.PayupRepository;
 import com.anchor.domain.user.api.controller.request.MentoringStatusInfo;
 import com.anchor.domain.user.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
 import com.anchor.domain.user.api.controller.request.UserNicknameRequest;
@@ -36,7 +39,7 @@ public class UserService {
 
   private final UserRepository userRepository;
   private final MentoringApplicationRepository mentoringApplicationRepository;
-  private final PaymentRepository paymentRepository;
+  private final PayupRepository payupRepository;
   private final PaymentUtils paymentUtils;
 
   @Transactional
@@ -107,15 +110,37 @@ public class UserService {
         mentoringApplicationRepository.findByStartDateTimeAndEndDateTimeAndUserId(startDateTime, endDateTime, userId)
             .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링 신청이력이 존재하지 않습니다."));
     mentoringApplication.changeStatus(mentoringStatusInfo.getMentoringStatus());
-    MentoringStatus mentoringStatus = mentoringApplication.getMentoringStatus();
-    Payment payment = mentoringApplication.getPayment();
-    cancelPaymentIfCancelled(mentoringStatus, payment);
+    processMentoringStatus(mentoringApplication);
     mentoringApplicationRepository.save(mentoringApplication);
   }
 
-  private void cancelPaymentIfCancelled(MentoringStatus status, Payment payment) {
+  private void processMentoringStatus(MentoringApplication mentoringApplication) {
+    MentoringStatus mentoringStatus = mentoringApplication.getMentoringStatus();
+    if (mentoringStatus.equals(MentoringStatus.CANCELLED)) {
+      cancelPaymentIfCancelled(mentoringApplication);
+    }
+    if (mentoringStatus.equals(MentoringStatus.COMPLETE)) {
+      savePayup(mentoringApplication);
+    }
+  }
+
+  private void cancelPaymentIfCancelled(MentoringApplication application) {
+    MentoringStatus status = application.getMentoringStatus();
+    Payment payment = application.getPayment();
     RequiredPaymentCancelData requiredPaymentCancelData = new RequiredPaymentCancelData(payment);
     Optional<PaymentResult> paymentCancelResult = paymentUtils.request(status, requiredPaymentCancelData);
     paymentCancelResult.ifPresent(result -> payment.editPaymentCancelStatus((PaymentCancelResult) result));
+  }
+
+  private void savePayup(MentoringApplication application) {
+    Mentoring mentoring = application.getMentoring();
+    Mentor mentor = mentoring.getMentor();
+    Payment payment = application.getPayment();
+    Payup payup = Payup.builder()
+        .payupDateTime(LocalDateTime.MIN)
+        .mentor(mentor)
+        .payment(payment)
+        .build();
+    payupRepository.save(payup);
   }
 }

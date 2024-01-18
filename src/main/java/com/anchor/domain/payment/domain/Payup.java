@@ -38,8 +38,8 @@ public class Payup extends BaseEntity {
   private Payment payment;
 
   @Builder
-  private Payup(Integer amount, LocalDateTime payupDateTime, Mentor mentor, Payment payment) {
-    this.amount = amount;
+  private Payup(LocalDateTime payupDateTime, Mentor mentor, Payment payment) {
+    this.amount = payment.getAmount();
     this.payupDateTime = payupDateTime;
     this.mentor = mentor;
     this.mentor.getPayups()

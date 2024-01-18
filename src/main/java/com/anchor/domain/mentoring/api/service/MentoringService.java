@@ -28,7 +28,6 @@ import com.anchor.domain.mentoring.domain.MentoringTag;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
 import com.anchor.domain.payment.domain.Payment;
-import com.anchor.domain.payment.domain.Payup;
 import com.anchor.domain.payment.domain.repository.PaymentRepository;
 import com.anchor.domain.payment.domain.repository.PayupRepository;
 import com.anchor.domain.user.domain.User;
@@ -184,13 +183,7 @@ public class MentoringService {
     Payment payment = new Payment(applicationInfo);
     MentoringApplication mentoringApplication = new MentoringApplication(applicationInfo, mentoring, payment,
         loginUser);
-    MentoringApplication save = mentoringApplicationRepository.save(mentoringApplication);
-    Payup payup = Payup.builder()
-        .mentor(mentor)
-        .amount(applicationInfo.getAmount())
-        .payment(save.getPayment())
-        .build();
-    payupRepository.save(payup);
+    mentoringApplicationRepository.save(mentoringApplication);
     applicationLockClient.remove(key);
     return new MentoringSaveRequestInfo(mentoringApplication);
   }
