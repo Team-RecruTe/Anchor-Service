@@ -1,9 +1,5 @@
 package com.anchor.domain.user.api.controller;
 
-import com.anchor.domain.mentoring.api.controller.request.MentoringReviewInfo;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import com.anchor.domain.user.api.service.UserService;
 import com.anchor.domain.user.api.service.response.AppliedMentoringInfo;
 import com.anchor.domain.user.api.service.response.UserInfoResponse;
@@ -50,17 +46,6 @@ public class UserViewController {
 
     model.addAttribute("mentoringApplications", appliedMentoringInfoList);
     return viewResolver.getViewPath("user", "user-mentoring-application");
-  }
-  
-    @GetMapping("/me/applied-mentorings/{id}/review")
-  public String review(@PathVariable Long id) {
-    return "리뷰 작성 페이지로 이동";
-  }
-
-  @PostMapping("/me/applied-mentorings/{id}/review")
-  public String reviewProcess(@PathVariable Long id, @ModelAttribute MentoringReviewInfo mentoringReviewInfo) {
-    userService.writeReview(id, mentoringReviewInfo);
-    return "리뷰 작성 성공";
   }
 
 }

@@ -90,3 +90,4 @@ clean.doLast {
 tasks.named('test') {
     useJUnitPlatform()
 }
+

@@ -91,6 +91,30 @@ class MentoringServiceTest {
   }
 
   @Test
+  @DisplayName("전체 멘토링 목록을 조회한다.")
+  void loadMentoringListTest() {
+    //given
+    List<Mentoring> mentoringList = createMentoringAndMentoringList();
+
+    //when
+    when(mentoringRepository.findAll()).thenReturn(mentoringList);
+
+    List<MentoringDefaultInfo> result = mentoringService.loadMentoringList();
+
+    //then
+    assertThat(result)
+        .hasSize(mentoringList.size())
+        .extracting("title", "durationTime", "cost", "nickname")
+        .containsExactlyInAnyOrder(
+            tuple(MENTORING_TITLE + "1", DURATION_TIME, COST, NICKNAME),
+            tuple(MENTORING_TITLE + "2", DURATION_TIME, COST, NICKNAME),
+            tuple(MENTORING_TITLE + "3", DURATION_TIME, COST, NICKNAME),
+            tuple(MENTORING_TITLE + "4", DURATION_TIME, COST, NICKNAME),
+            tuple(MENTORING_TITLE + "5", DURATION_TIME, COST, NICKNAME)
+        );
+  }
+
+  @Test
   @DisplayName("멘토링 ID를 입력받으면 멘토링 상세정보를 출력한다.")
   void loadMentoringDetailTest() {
     //given
