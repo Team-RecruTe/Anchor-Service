@@ -18,15 +18,15 @@ public class MentorIntroduction extends BaseEntity {
   @Column(nullable = false, columnDefinition = "mediumtext")
   private String contents;
 
-  private MentorIntroduction(String contents){
+  private MentorIntroduction(String contents) {
     this.contents = contents;
   }
 
-  public static MentorIntroduction addContents(String contents){
+  public static MentorIntroduction addContents(String contents) {
     return new MentorIntroduction(contents);
   }
 
-  public void editContents(String contents){
+  public void editContents(String contents) {
     this.contents = contents;
   }
 

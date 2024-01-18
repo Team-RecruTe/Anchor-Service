@@ -43,8 +43,11 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
+      storage:
+        port: ${REDIS_STORAGE_PORT}
+      session:
+        host: ${REDIS_HOST}
+        port: ${REDIS_SESSION_PORT}
     web:
       pageable:
         one-indexed-parameters: true

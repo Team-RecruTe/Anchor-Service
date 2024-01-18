@@ -72,6 +72,7 @@ public class MentoringSearchResult {
 
     private Long id;
     private String title;
+    private Long id;
     private String durationTime;
     private Integer cost;
     private Integer totalApplicationNumber;
