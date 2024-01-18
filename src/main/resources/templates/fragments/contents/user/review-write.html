@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" layout:decorate="~{layout/default}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<div class="main" layout:fragment="content">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-6">
+        <h2 class="mt-5 mb-5"
+            style="font-weight:700; color: #0a58ca">
+          리뷰 작성 페이지</h2>
+        <form method="post" th:action="@{|/users/me/applied-mentorings/${id}/review|}"
+              th:object="${mentoringReviewInfo}">
+          <div class="mb-3">
+            <div class="form-floating">
+              <textarea class="form-control" id="contents" name="contents" placeholder="리뷰를 남겨주세요" style="height: 100px"
+                        th:field="*{contents}"
+                        th:name="contents"
+                        th:value="${mentoringReviewInfo.contents}"></textarea>
+              <label for="contents">리뷰를 남겨주세요</label>
+              <div th:errors="*{contents}" th:if="${#fields.hasErrors('contents')}">please check it
+                again
+              </div>
+            </div>
+          </div>
+          <div class="d-flex justify-content-center mt-5">
+            <button class="btn" id="btnSubmit" style="background-color:#0a58ca; color:white;">WRITE</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+</html>
