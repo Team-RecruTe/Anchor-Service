@@ -32,7 +32,7 @@ public class MentoringViewController {
       @RequestParam(value = "tag", required = false) List<String> tags,
       @RequestParam(value = "keyword", required = false) String keyword,
       @PageableDefault(size = 16,
-          sort = {"id", "totalApplicationNumber"}, direction = Sort.Direction.DESC) Pageable pageable,
+          sort = {"totalApplicationNumber"}, direction = Sort.Direction.DESC) Pageable pageable,
       Model model
   ) {
     Page<MentoringSearchResult> result = mentoringService.getMentorings(tags, keyword, pageable);
