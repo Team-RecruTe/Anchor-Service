@@ -26,14 +26,14 @@ document.addEventListener('DOMContentLoaded', () => {
 // modal 생성 및 초기화
 let modalElement = document.getElementById('myModal');
 document.querySelector('.modal-button').addEventListener('click', (e) => {
-  e.preventDefault();
-
   let modal = new bootstrap.Modal(modalElement);
+  datepicker.open();
   modal.show();
 });
 
 modalElement.addEventListener('hidden.bs.modal', () => {
   buttonContainer.innerHTML = '';
+  datepicker.close();
 });
 
 // Datepicker 객체 생성
@@ -54,16 +54,14 @@ datepicker.on('change', () => {
   buttonContainer.innerHTML = '';
 
   selectedDate = datepicker.getDate();
+  let selectedDayOfWeek = dayOfWeek[selectedDate.getDay()];
 
-  const selectedDay = dayOfWeek[selectedDate.getDay()];
-  const parseSelectedDate = parseDate(selectedDate);
   initializeReservationButtons(selectedDate);
-  updateReservationButtons(selectedDay, activeTimes,
-      unavailableTimes, parseSelectedDate);
-  clickEventHandler();
+  updateReservationButtons(activeTimes, unavailableTimes, parseDate(selectedDate), selectedDayOfWeek);
+  clickEventCreator();
 });
 
-function clickEventHandler() {
+function clickEventCreator() {
   let inputs = document.querySelectorAll('.time-button-group input');
   inputs.forEach((input) => {
     input.addEventListener('click', () => {
@@ -74,97 +72,119 @@ function clickEventHandler() {
 
 // 예약시간 버튼을 생성하고 초기화하는 함수
 function initializeReservationButtons(selectedDate) {
-  // 08:00부터 익일 07:30까지 30분 간격으로 버튼 생성
-  const startTime = new Date(selectedDate);
-  startTime.setHours(0, 0, 0, 0);
 
-  const endTime = new Date(selectedDate);
-  endTime.setDate(endTime.getDate() + 1);
-  endTime.setHours(23, 30, 0, 0);
+  // active time 에 등록된 시간대만 버튼 생성
 
-  for (let row = 0; row < 6; row++) {
+  // 선택한 날짜의 요일
+  let selectedDayOfWeek = dayOfWeek[selectedDate.getDay()];
+
+  // 선택한 요일의 활동시간 리스트 조회
+  let activeTimeInfos = activeTimes[selectedDayOfWeek];
+
+  // status가 OPEN인 버튼만 생성
+  activeTimeInfos.forEach(activeTimeInfo => {
+    let activeStatus = activeTimeInfo.active_status;
+    let openTime = activeTimeInfo.open_time;
+    let closeTime = activeTimeInfo.close_time;
     let div = document.createElement('div');
     div.classList.add('input-group', 'radio-group');
-    for (let col = 0; col < 8; col++) {
-      const formattedTime = formatTime(startTime);
+    if (activeStatus === 'OPEN') {
+      for (let time = openTime; time < closeTime; time = increment30Minutes(time)) {
+        let input = document.createElement('input');
+        input.classList.add('btn-check');
+        input.type = 'radio';
+        input.name = 'time';
+        input.value = time;
+        input.id = time;
 
-      let input = document.createElement('input');
-      input.classList.add('btn-check',);
-      input.type = 'radio';
-      input.name = 'time';
-      input.value = formattedTime;
-      input.id = formattedTime;
-      input.disabled = true;
+        let label = document.createElement('label');
+        label.classList.add('radio', 'btn', 'btn-outline-success');
+        label.htmlFor = time;
+        label.textContent = time;
 
-      let label = document.createElement('label');
-      label.classList.add('radio', 'btn', 'btn-outline-secondary');
-      label.htmlFor = formattedTime;
-      label.textContent = formattedTime;
-
-      div.appendChild(input);
-      div.appendChild(label);
-
-      startTime.setMinutes(startTime.getMinutes() + 30);
+        div.appendChild(input);
+        div.appendChild(label);
+      }
+      buttonContainer.appendChild(div);
     }
-    buttonContainer.appendChild(div);
-  }
+  });
 
 }
 
+let durationTime = document.getElementById('duration-time').value;
+
+function calculateMinutes(durationTime) {
+  const matches = durationTime.match(/(\d+)h(\d+)m/);
+  if (!matches) {
+    return;
+  }
+  const hours = parseInt(matches[1], 10);
+  const minutes = parseInt(matches[2], 10);
+
+  const totalMinutes = hours * 60 + minutes;
+  return Math.ceil(totalMinutes / 30);
+}
+
 // 요일을 확인하고 활동 가능한 시간과 unavailableTimes에 따라 버튼 상태를 조정하는 함수
-function updateReservationButtons(dayOfWeek, activeTimes,
-    unavailableTimes, selectedDate) {
+function updateReservationButtons(activeTimes,
+    unavailableTimes, selectedDate, selectedDayOfWeek) {
   const buttons = document.querySelectorAll('.radio-group input');
   const labels = document.querySelectorAll('.radio-group label');
-
-  let targetActiveTime = activeTimes[dayOfWeek];
-  console.log(targetActiveTime);
-
-  targetActiveTime.forEach((activeTimeInfo) => {
-    let openTime = activeTimeInfo.open_time;
-    let closeTime = activeTimeInfo.close_time;
-    if (activeTimeInfo.active_status === 'OPEN') {
-      for (let time = openTime; time <= closeTime;
-          time = increment30Minutes(time)) {
-        buttons.forEach((button) => {
-          if (button.id === time) {
-            button.disabled = false;
-          }
-        });
-
-        labels.forEach((label) => {
-          if (label.htmlFor === time) {
-            label.classList.remove('btn-outline-secondary');
-            label.classList.add('btn-outline-success');
-          }
-        });
-      }
-    }
-  });
 
   let targetUnavailableTime = unavailableTimes[selectedDate];
   if (targetUnavailableTime !== undefined) {
 
     targetUnavailableTime.forEach((unavailableTime) => {
       let from = unavailableTime.from;
-      console.log(from);
       let to = unavailableTime.to;
 
-      for (let time = decrement1Hours(from); time <= to;
-          time = increment30Minutes(time)) {
+      for (let count = 1; count < calculateMinutes(durationTime); count++) {
+        from = decrement30Minutes(from);
+      }
+
+      for (let time = from; time < to; time = increment30Minutes(time)) {
         buttons.forEach((button) => {
           if (button.id === time) {
-            button.disabled = true;
+            // button.disabled = true;
+            // 수정완료시 활성화
+            button.remove();
           }
         });
 
         labels.forEach((label) => {
           if (label.htmlFor === time && label.classList.contains(
               'btn-outline-success')) {
-            label.classList.remove('btn-outline-success');
-            label.classList.add('btn-outline-secondary');
+            // label.classList.remove('btn-outline-success');
+            // label.classList.add('btn-outline-secondary');
+            label.remove();
           }
         });
+      }
+
+    });
+    console.log(activeTimes);
+    let activeTimeInfos = activeTimes[selectedDayOfWeek];
+    console.log(activeTimeInfos);
+    activeTimeInfos.forEach(activeTimeInfo => {
+      let time = activeTimeInfo.close_time;
+      for (let count = calculateMinutes(durationTime); count > 1; count--) {
+
+        buttons.forEach(button => {
+          if (button.id === time) {
+            // button.disabled = true;
+            button.remove();
+          }
+        });
+
+        labels.forEach(label => {
+          if (label.htmlFor === time) {
+            // label.classList.remove('btn-outline-success');
+            // label.classList.add('btn-outline-secondary');
+            label.remove();
+          }
+        })
+
+        time = decrement30Minutes(time);
       }
 
     });
@@ -182,8 +202,23 @@ function increment30Minutes(timeString) {
 
 function decrement1Hours(timeString) {
   const [hours, minutes] = timeString.split(':').map(Number);
-  const newMinutes = (minutes - 60 + 30) % 60;
-  const newHours = hours + Math.floor((minutes - 60 + 30) / 60);
+  const totalMinutes = hours * 60 + minutes;
+  const newTotalMinutes = Math.max(totalMinutes - 60, 0);
+  const newHours = Math.floor(newTotalMinutes / 60);
+  const newMinutes = newTotalMinutes % 60;
+  const formattedHours = String(newHours).padStart(2, '0');
+  const formattedMinutes = String(newMinutes).padStart(2, '0');
+  return `${formattedHours}:${formattedMinutes}`;
+}
+
+function decrement30Minutes(timeString) {
+  const [hours, minutes] = timeString.split(':').map(Number);
+  const totalMinutes = hours * 60 + minutes;
+  const newTotalMinutes = totalMinutes - 30;
+  // 음수가 되지않게 처리
+  const adjustedMinutes = Math.max(newTotalMinutes, 0);
+  const newHours = Math.floor(adjustedMinutes / 60);
+  const newMinutes = adjustedMinutes % 60;
   const formattedHours = String(newHours).padStart(2, '0');
   const formattedMinutes = String(newMinutes).padStart(2, '0');
   return `${formattedHours}:${formattedMinutes}`;
