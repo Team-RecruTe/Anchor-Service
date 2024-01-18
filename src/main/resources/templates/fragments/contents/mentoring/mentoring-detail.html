@@ -168,6 +168,30 @@
               <button class="btn btn-success modal-button">신청하기</button>
             </div>
           </div>
+
+          <div class="row mt-4">
+            <table class="table">
+              <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">User</th>
+                <th scope="col">Rating</th>
+                <th scope="col">Contents</th>
+              </tr>
+              </thead>
+              <tbody>
+              <th:block th:each="item:${reviewList}">
+                <tr>
+                  <th scope="row">1</th>
+                  <td>Mark</td>
+                  <td>4.5</td>
+                  <td>실력 쌓기 좋은 수업</td>
+                </tr>
+              </th:block>
+              </tbody>
+            </table>
+          </div>
+
         </div>
       </div>
 

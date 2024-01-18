@@ -52,7 +52,6 @@ public class Mentor extends BaseEntity {
   @JoinColumn(name = "mentor_introduction_id")
   private MentorIntroduction mentorIntroduction;
 
-
   @OneToMany(
       mappedBy = "mentor",
       cascade = CascadeType.ALL

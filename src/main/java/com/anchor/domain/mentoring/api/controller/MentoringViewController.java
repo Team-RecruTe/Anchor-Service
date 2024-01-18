@@ -1,6 +1,7 @@
 package com.anchor.domain.mentoring.api.controller;
 
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
+import com.anchor.domain.mentoring.api.controller.request.MentoringReviewInfoInterface;
 import com.anchor.domain.mentoring.api.service.MentoringService;
 import com.anchor.domain.mentoring.api.service.response.MentoringContents;
 import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
@@ -8,14 +9,12 @@ import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo.Ment
 import com.anchor.domain.mentoring.api.service.response.MentoringPayConfirmInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
-import com.anchor.domain.mentoring.domain.MentoringReview;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.util.view.ViewResolver;
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -63,6 +62,8 @@ public class MentoringViewController {
     MentoringDetailSearchResult mentoringDetailSearchResult = mentoringService.getMentoringDetailInfo(id);
     Set<String> popularMentoringTags = mentoringService.getPopularMentoringTags();
     MentoringDetailInfo mentoringDetailInfo = MentoringDetailInfo.of(mentoringDetailSearchResult, popularMentoringTags);
+    List<MentoringReviewInfoInterface> reviewList = mentoringService.getMentoringReviews(id);
+    model.addAttribute("reviewList", reviewList);
     model.addAttribute("mentoringDetail", mentoringDetailInfo);
     return viewResolver.getViewPath("mentoring", "mentoring-detail");
   }

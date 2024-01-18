@@ -11,6 +11,8 @@ import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTi
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationUserInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
+import com.anchor.domain.mentoring.api.controller.request.MentoringReviewInfoInterface;
+import com.anchor.domain.mentoring.api.controller.request.MentoringReviewInfoInterface;
 import com.anchor.domain.mentoring.api.service.response.ApplicationTimeInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringContents;
 import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
@@ -32,6 +34,7 @@ import com.anchor.domain.mentoring.domain.MentoringDetail;
 import com.anchor.domain.mentoring.domain.MentoringTag;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
+import com.anchor.domain.mentoring.domain.repository.MentoringReviewRepository;
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.domain.payment.domain.repository.PaymentRepository;
 import com.anchor.domain.user.domain.User;
@@ -66,6 +69,8 @@ public class MentoringService {
     private final MentoringReviewRepository mentoringReviewRepository;
   private final ApplicationLockClient applicationLockClient;
   private final PayNumberCreator payNumberCreator;
+  private final PayupRepository payupRepository;
+  private final MentoringReviewRepository mentoringReviewRepository;
 
   public List<MentoringReviewInfoInterface> getMentoringReviews(Long mentoringId) {
     List<MentoringReviewInfoInterface> reviewList = mentoringReviewRepository.getReviewList(mentoringId);
