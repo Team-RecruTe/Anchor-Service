@@ -23,10 +23,7 @@ import jakarta.persistence.PersistenceException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -138,11 +135,8 @@ public class MentorService {
         getFirstDayOfMonth(currentMonth),
         getFirstDayOfNextMonth(currentMonth)
     );
-    Map<LocalDateTime, Integer> dailyTotalAmountMap = new HashMap<>();
-    Map<LocalDateTime, List<PayupInfo>> dailyPayupInfoMap = new HashMap<>();
     List<PayupInfo> payupInfos = payupRepository.findAllByMonthRange(actualCalendarRange, mentorId);
-    payupInfos.forEach(info -> handlePayupInfo(info, dailyTotalAmountMap, dailyPayupInfoMap));
-    return new MentorPayupResult(dailyTotalAmountMap, dailyPayupInfoMap);
+    return MentorPayupResult.of(payupInfos);
   }
 
   private LocalDateTime getFirstDayOfMonth(LocalDateTime dateTime) {
@@ -154,16 +148,4 @@ public class MentorService {
     return dateTime.with(TemporalAdjusters.firstDayOfNextMonth())
         .truncatedTo(ChronoUnit.DAYS);
   }
-
-  private void handlePayupInfo(PayupInfo payupInfo,
-      Map<LocalDateTime, Integer> dailyTotalAmountMap, Map<LocalDateTime, List<PayupInfo>> dailyPayupInfoMap) {
-    DateTimeRange mentoringTimeRange = payupInfo.getDateTimeRange();
-    LocalDateTime startDateTime = mentoringTimeRange.getFrom()
-        .truncatedTo(ChronoUnit.DAYS);
-    dailyTotalAmountMap.put(startDateTime,
-        dailyTotalAmountMap.getOrDefault(startDateTime, 0) + payupInfo.getPayupAmount());
-    List<PayupInfo> payupInfos = dailyPayupInfoMap.computeIfAbsent(startDateTime, key -> new ArrayList<>());
-    payupInfos.add(payupInfo);
-  }
-
 }

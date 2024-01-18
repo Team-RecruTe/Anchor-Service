@@ -6,7 +6,6 @@ import static com.anchor.domain.payment.domain.QPayup.payup;
 import static com.anchor.domain.user.domain.QUser.user;
 
 import com.anchor.domain.mentor.api.service.response.MentorPayupResult.PayupInfo;
-import com.anchor.domain.payment.domain.PayupStatus;
 import com.anchor.global.util.type.DateTimeRange;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -28,7 +27,8 @@ public class QPayupRepositoryImpl implements QPayupRepository {
                 mentoringApplication.startDateTime,
                 mentoringApplication.endDateTime,
                 user.nickname,
-                payup.amount
+                payup.amount,
+                payup.payupStatus
             )
         )
         .from(payup)
@@ -39,7 +39,6 @@ public class QPayupRepositoryImpl implements QPayupRepository {
             payup.mentor.id.eq(mentorId)
                 .and(mentoringApplication.startDateTime.goe(dateTimeRange.getFrom()))
                 .and(mentoringApplication.endDateTime.before(dateTimeRange.getTo()))
-                .and(payup.payupStatus.eq(PayupStatus.COMPLETE))
         )
         .orderBy(mentoringApplication.startDateTime.asc())
         .fetch();

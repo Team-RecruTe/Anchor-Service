@@ -69,22 +69,25 @@ function getPayupInfos(calendar) {
     let data = res.data;
     scheduleMap.set(parseYearMonth(todayDate), data.dailyMentoringPayupInfo);
     // 정산된 멘토링 정보가 담길 Array
-    let dayAmount = data.dailyTotalAmount;
-    if (dayAmount !== null) {
-      for (const [day, amount] of Object.entries(dayAmount)) {
-        const event = {
-          id: day,
-          calendarId: day,
-          title: `${amount}` + '원',
-          body: '',
-          isAllday: true,
-          category: 'allday',
-          start: day.replace(/T.*/, ""),
-          end: day.replace(/T.*/, ""),
-          backgroundColor: '#abf7da'
-        };
-        events.push(event);
-      }
+    let dailyTotalAmountMap = data.dailyTotalAmount;
+    if (dailyTotalAmountMap !== null) {
+      Object.entries(dailyTotalAmountMap).forEach(([day, totalAmount]) => {
+        Object.values(totalAmount).forEach((map) => {
+          Object.entries(map).forEach(([status, amount]) => {
+            events.push({
+              id: `${day}_${status}`,
+              calendarId: `${day}_${status}`,
+              title: `${status === 'COMPLETE' ? '정산' : '대기'}: ${amount}` + '원',
+              body: '',
+              isAllday: true,
+              category: 'allday',
+              start: day.replace(/T.*/, ""),
+              end: day.replace(/T.*/, ""),
+              backgroundColor: `${status === 'COMPLETE' ? '#abf7da' : '#a796eb'}`
+            });
+          });
+        });
+      });
     }
     calendar.createEvents(events);
   });
@@ -97,20 +100,24 @@ let modalTitleElement = document.getElementById('modal-title');
 let tableBody = document.getElementById('payup-table-body');
 
 calendar.on('clickEvent', (e) => {
-  let id = e.event.id;
+  let id = parseId(e.event.id);
+
   modalTitleElement.innerHTML = parseDate(id);
   let schedule = scheduleMap.get(parseYearMonth(id));
-  for (const element of schedule[id]) {
-
+  schedule[id].forEach((element) => {
     let fromDate = parseTime(element.dateTimeRange.from);
     let toDate = parseTime(element.dateTimeRange.to);
 
     tableBody.innerHTML += `<tr>
                       <td>${fromDate} ~ ${toDate}</td>
                       <td>${element.menteeNickname}</td>
+                      <td>${element.payupStatus === 'COMPLETE' ? '정산완료' : '정산대기'}</td>
                       <td>${element.payupAmount}원</td>
                         </tr>`;
-  }
+
+  });
+  document.querySelectorAll('th').forEach(th => th.style.textAlign = 'center');
+  document.querySelectorAll('td').forEach(td => td.style.textAlign = 'center');
 
   let modal = new bootstrap.Modal(modalElement);
   modal.show();
@@ -124,16 +131,26 @@ modalElement.addEventListener('hidden.bs.modal', () => {
 // 현재 캘린더가 보여주는 달(Month) 출력
 function currentMonthRange(calendar) {
   let date = calendar.getDate();
-  let currentMonth = `${date.getFullYear()}-${(date.getMonth()
-      + 1).toString().padStart(2, '0')}`;
+  let currentMonth = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
   let navbar = document.querySelector('.navbar--range');
   navbar.innerHTML = currentMonth;
 }
 
+// event ID parser
+function parseId(id) {
+  let COMPLETE = '_COMPLETE';
+  let WAITING = '_WAITING';
+  if (id.includes(COMPLETE)) {
+    return id.replace(COMPLETE, '');
+  }
+  if (id.includes(WAITING)) {
+    return id.replace(WAITING, '');
+  }
+}
+
 //=================================Date 객체 파싱함수=========================================//
 function getFormattedMonth(date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2,
-      '0')}`;
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 }
 
 function parseDateTime(date) {
