@@ -6,16 +6,22 @@ import com.anchor.domain.mentor.api.controller.request.RandomCodeMaker;
 import com.anchor.domain.mentor.api.service.MailService;
 import com.anchor.domain.mentor.api.service.MentorService;
 import com.anchor.domain.mentor.api.service.response.MentorOpenCloseTimes;
+import com.anchor.domain.mentor.api.service.response.MentorPayupResult;
 import com.anchor.global.auth.SessionUser;
 import jakarta.servlet.http.HttpSession;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -70,4 +76,20 @@ public class MentorController {
     }
   }
 
+  @GetMapping("/me/payup-info")
+  public ResponseEntity<MentorPayupResult> getTest(
+      @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") LocalDateTime currentMonth
+      /*,HttpSession session*/) {
+    SessionUser sessionUser = new SessionUser();
+    if (isFutureDate(currentMonth)) {
+      return ResponseEntity.ok(new MentorPayupResult());
+    }
+    MentorPayupResult payupInfos = mentorService.getMentorPayupResult(currentMonth, sessionUser);
+    return ResponseEntity.ok(payupInfos);
+  }
+
+  private boolean isFutureDate(LocalDateTime currentMonth) {
+    return currentMonth.isAfter(LocalDateTime.now()
+        .with(TemporalAdjusters.lastDayOfMonth()));
+  }
 }

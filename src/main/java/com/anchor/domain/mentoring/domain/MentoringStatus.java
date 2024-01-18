@@ -18,19 +18,19 @@ public enum MentoringStatus {
   private final String description;
 
   @JsonCreator
-  public static MentoringStatus fromDescription(String description) {
+  public static MentoringStatus fromDescription(String name) {
     for (MentoringStatus status : MentoringStatus.values()) {
-      if (status.getDescription()
-          .equals(description)) {
+      if (status.name()
+          .equals(name)) {
         return status;
       }
     }
-    throw new IllegalArgumentException("Invalid description :: " + description);
+    throw new IllegalArgumentException("Invalid description :: " + name);
   }
 
   public boolean isEqualTo(String status) {
     return status.toUpperCase()
-                 .equals(this.name());
+        .equals(this.name());
   }
 
 }

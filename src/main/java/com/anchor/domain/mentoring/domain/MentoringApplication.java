@@ -2,7 +2,6 @@ package com.anchor.domain.mentoring.domain;
 
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationInfo;
 import com.anchor.domain.payment.domain.Payment;
-import com.anchor.domain.user.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
 import com.anchor.domain.user.domain.User;
 import com.anchor.global.util.BaseEntity;
 import jakarta.persistence.CascadeType;
@@ -53,7 +52,6 @@ public class MentoringApplication extends BaseEntity {
       Payment payment, User user) {
     this.startDateTime = startDateTime;
     this.endDateTime = endDateTime;
-    this.mentoringStatus = mentoringStatus;
     this.mentoring = mentoring;
     this.payment = payment;
     this.user = user;
@@ -62,14 +60,16 @@ public class MentoringApplication extends BaseEntity {
         .add(this);
   }
 
-  public MentoringApplication(MentoringApplicationInfo applicationInfo,
-      MentoringStatus mentoringStatus, Mentoring mentoring, Payment payment, User user) {
+  public MentoringApplication(MentoringApplicationInfo applicationInfo, Mentoring mentoring, Payment payment,
+      User user) {
     this.startDateTime = applicationInfo.getStartDateTime();
     this.endDateTime = applicationInfo.getEndDateTime();
-    this.mentoringStatus = mentoringStatus == null ? MentoringStatus.WAITING : mentoringStatus;
     this.mentoring = mentoring;
     this.payment = payment;
+    this.payment.addMentoringApplication(this);
     this.user = user;
+    this.user.getMentoringApplicationList()
+        .add(this);
   }
 
   public void connectPayment(Payment payment) {
@@ -78,12 +78,6 @@ public class MentoringApplication extends BaseEntity {
 
   public void changeStatus(MentoringStatus mentoringStatus) {
     this.mentoringStatus = mentoringStatus;
-  }
-
-  private boolean isMatchingDateTime(RequiredMentoringStatusInfo requiredMentoringStatusInfo) {
-    return this.startDateTime.isEqual(requiredMentoringStatusInfo.getStartDateTime())
-        &&
-        this.endDateTime.isEqual(requiredMentoringStatusInfo.getEndDateTime());
   }
 
   @Override

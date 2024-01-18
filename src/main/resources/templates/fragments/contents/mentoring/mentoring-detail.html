@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko"
+      layout:decorate="~{layout/default}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>멘토링 조회</title>
+  <meta charset="UTF-8">
+  <link href="/css/library/toast/toastui-editor.min.css" rel="stylesheet"/>
+  <link href="/css/library/toast/tui-date-picker.min.css" rel="stylesheet">
+  <link href="/css/library/toast/tui-time-picker.min.css" rel="stylesheet">
+  <style>
+    .datepicker-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #datepicker-wrapper {
+      border-radius: 50px;
+    }
+
+    .radio {
+      width: 4rem;
+    }
+
+    .radio-group {
+      justify-content: center;
+    }
+  </style>
+</head>
+<div layout:fragment="content">
+  <div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="myModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="modal-title">멘토링 가능 시간</h1>
+          <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+        </div>
+        <div class="modal-body" id="modal-body">
+          <form id="form" method="post"
+                th:action="@{/mentorings/{id}/payment(id=${mentoringDetail.mentoringDetailSearchResult.mentoringId})} ">
+            <input id="duration-time" name="durationTime"
+                   th:value="${mentoringDetail.mentoringDetailSearchResult.durationTime}" type="hidden">
+            <div class="row row-cols-1 d-flex justify-content-center">
+              <div class="col" style="height: 400px">
+                <div class="datepicker-container ">
+                  <div class="tui-datepicker-input tui-datetime-input tui-has-focus">
+                    <input aria-label="Date-Time" id="datepicker-input" name="date" type="hidden">
+                    <span class="tui-ico-date"></span>
+                    <div id="datepicker-wrapper" style="margin-top: -1px;"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col justify-content-center">
+                <div class="time-button-group"></div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal" id="modal-close" type="button">Close</button>
+          <button class="btn btn-primary " id="submitButton" type="button">신청하기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-3 mb-3">
+        <!-- 왼쪽 사이드바 -->
+        <form id="mentor-search" method="get" th:action="@{/mentorings}">
+          <div class="mb-3 me-1">
+            <div class="input-group">
+              <label for="keyword"></label>
+              <input class="form-control" id="keyword" name="keyword" placeholder="멘토링 제목을 입력하세요." type="text">
+              <button class="btn btn-success" th:text="'검색'" type="submit">search</button>
+            </div>
+          </div>
+
+          <div class="accordion" id="accordionExample">
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingOne">
+                <button aria-controls="collapseOne" aria-expanded="true" class="accordion-button"
+                        data-bs-target="#collapseOne" data-bs-toggle="collapse" type="button">
+                  태그를 선택해주세요. (1개이상)
+                </button>
+              </h2>
+              <div aria-labelledby="headingOne" class="accordion-collapse collapse" data-bs-parent="#accordionExample"
+                   id="collapseOne">
+                <div class="accordion-body">
+                  <th:block th:each="tag: ${mentoringDetail.searchTags}">
+                    <input autocomplete="off" class="btn-check" name="tag"
+                           th:id="'btn-check-outlined '+${tagStat.count}"
+                           th:value="${tag}" type="checkbox">
+                    <label class="btn btn-outline-primary mx-2 mb-1" th:for="'btn-check-outlined '+${tagStat.count}"
+                           th:text="${tag}">자바</label>
+                  </th:block>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- 오른쪽 컨텐츠 -->
+      <div class="col-lg-9">
+        <div class="container mt-5">
+          <!-- Mentoring Title -->
+          <h3 class="text-center mb-4" th:text="${mentoringDetail.mentoringDetailSearchResult.title}">멘토링 제목</h3>
+
+          <div class="row">
+            <div class="col-md-10"></div>
+            <div class="col-md-2">
+              <a class="text-decoration-none text-dark"
+                 th:href="@{/mentor/{id}(id=${mentoringDetail.mentoringDetailSearchResult.mentorId})}">
+                <img alt="멘토프로필" style="height: 3rem; width: 4rem; border-radius: 50%; float: right"
+                     th:src="${mentoringDetail.getMentoringDetailSearchResult.mentorImage}">
+                <p class="lead"
+                   th:text="${mentoringDetail.mentoringDetailSearchResult.getMentorNickname}">
+                  멘토 닉네임</p>
+              </a>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12">
+              <div id="viewer">
+                <!--          Contents 들어갈 자리-->
+              </div>
+            </div>
+          </div>
+
+          <!-- Duration and Cost -->
+          <div class="row mt-3">
+            <div class="col-md-6">
+              <p class="lead">시간:
+                <span class="lead"
+                      th:text="${#strings.replace(#strings.replace(mentoringDetail.mentoringDetailSearchResult.durationTime,'h','시간'),'m','분')}">
+                  2시간</span>
+              </p>
+            </div>
+            <div class="col-md-6">
+              <p class="lead">비용:
+                <span class="lead"
+                      th:text="${#numbers.formatInteger(mentoringDetail.mentoringDetailSearchResult.cost,3,'COMMA')}+'원'">30,000원</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Tags -->
+          <div class="row mt-3">
+            <div class="col-md-12">
+              <p class="lead">Tags:
+                <th:block th:each="tag : ${mentoringDetail.mentoringDetailSearchResult.tags}">
+                  <span class="badge bg-primary mx-1" th:text="${tag}">Tag1</span>
+                </th:block>
+                <!-- Add more tags as needed -->
+              </p>
+            </div>
+          </div>
+
+          <!-- Apply Button -->
+          <div class="row mt-4">
+            <div class="col-md-12 text-end">
+              <button class="btn btn-success modal-button">신청하기</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <script src="/js/library/toast/toastui-editor-all.min.js"></script>
+  <script src="/js/library/toast/tui-date-picker.min.js"></script>
+  <script src="/js/library/toast/tui-time-picker.min.js"></script>
+  <script src="/js/mentoring/mentoring-apply.js"></script>
+  <script th:inline="javascript">
+    const viewer = new toastui.Editor.factory({
+      el: document.getElementById('viewer'), // toast ui editor 적용할 div
+      viewer: true, // viewer 사용 여부
+      initialValue: [[${mentoringDetail.getMentoringDetailSearchResult().getContent()}]] //초기 입력값
+    });
+  </script>
+</div>
+</html>

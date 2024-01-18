@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko"
+      layout:decorate="~{layout/default}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+  <title>멘토 스케줄 페이지</title>
+  <style>
+    .modal {
+      z-index: 1500;
+    }
+
+    .modal-backdrop {
+      z-index: 30;
+    }
+
+    #calendar {
+      height: 800px;
+      width: 1200px;
+    }
+
+
+    .sidebar hr {
+      margin: 1rem 0;
+    }
+
+    .app-column nav {
+      flex: 0 1 4rem;
+      border-bottom: 1px solid #e5e5e5;
+    }
+
+    .navbar {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    .navbar .dropdown {
+      margin-right: 1rem;
+    }
+
+    .navbar .dropdown .toastui-calendar-icon {
+      margin-left: 0.5rem;
+    }
+
+    .button.prev, .button.next {
+      padding: 0.8rem;
+    }
+
+    .navbar .button + .button {
+      margin-left: 0.25rem;
+    }
+
+    input:disabled + label {
+      color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .toastui-calendar-template-time strong {
+      color: inherit;
+    }
+
+  </style>
+  <link href="/css/library/toast/toastui-calendar.min.css" rel="stylesheet"/>
+  <link href="/css/library/bulma.min.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="d-flex justify-content-center" layout:fragment="content">
+  <!--  Modal -->
+  <div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="myModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="modal-title"></h1>
+          <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+        </div>
+        <div class="modal-body" id="modal-body">
+          <table class="table table-striped">
+            <thead>
+            <tr>
+              <th>시간</th>
+              <th>닉네임</th>
+              <th>정산금액</th>
+            </tr>
+            </thead>
+            <tbody id="payup-table-body">
+
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal" id="modal-close" type="button">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex flex-column">
+    <nav class="navbar">
+      <button class="button is-rounded prev">
+        <img alt="prev" src="./images/cal/ic-arrow-line-left.png" srcset="
+                  /images/cal/ic-arrow-line-left@2x.png 2x,
+                  /images/cal/ic-arrow-line-left@3x.png 3x">
+      </button>
+      <span class="navbar--range"></span>
+      <button class="button is-rounded today">Today</button>
+      <button class="button is-rounded next">
+        <img alt="prev" src="./images/cal/ic-arrow-line-right.png" srcset="
+                  /images/cal/ic-arrow-line-right@2x.png 2x,
+                  /images/cal/ic-arrow-line-right@3x.png 3">
+      </button>
+    </nav>
+    <div id="calendar"></div>
+  </div>
+  <script src="/js/library/toast/toastui-calendar.min.js"></script>
+  <script src="/js/mentor/payup.js"></script>
+</div>
+</body>
+</html>

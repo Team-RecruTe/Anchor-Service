@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ko"
+      layout:decorate="~{layout/default}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>멘토링 신청내역</title>
+  <meta charset="UTF-8">
+  <script src="/js/library/axios/axios.min.js"></script>
+</head>
+<body>
+<div class="d-flex flex-column justify-content-center" layout:fragment="content">
+  <div class="d-flex justify-content-center" id="table-container">
+    <table class="table w-75" id="application-list">
+      <tr th:each="app: ${mentoringApplications}">
+        <td class="ma"
+            th:id="${app.mentoringApplicationInfo.dateTimeRange.from} + ' ' + ${app.mentoringApplicationInfo.dateTimeRange.to}"></td>
+        <td class="align-middle"><input type="checkbox"></td>
+        <td class="align-middle">
+          <a th:href="'/mentorings/' + ${app.mentoringInfo.id}" th:text="${app.mentoringInfo.title}"></a>
+        </td>
+        <td class="align-middle">
+          <img class="rounded-circle" height="32" th:src="${app.mentorInfo.image}" width="32">
+        </td>
+        <td class="align-middle" th:text="${app.mentorInfo.nickname}"></td>
+        <td class="align-middle" th:text="${app.mentorInfo.email}"></td>
+        <td class="align-middle" th:text="${app.paymentInfo.amount}"></td>
+        <td class="align-middle">
+          <span>
+            [[${app.mentoringApplicationInfo.dateTimeRange.from.toString().replace("T", " ")}]] ~
+            [[${app.mentoringApplicationInfo.dateTimeRange.to.toString().replace("T", " ")}]]
+          </span>
+        </td>
+        <td class="align-middle" th:id="status">
+          <div class="btn-group d-flex justify-content-center">
+            <th:block
+                th:if="${app.mentoringApplicationInfo.status == '완료' || app.mentoringApplicationInfo.status == '취소'}">
+              <span>
+                [[${app.mentoringApplicationInfo.status}]]
+              </span>
+            </th:block>
+            <th:block
+                th:unless="${app.mentoringApplicationInfo.status == '완료' || app.mentoringApplicationInfo.status == '취소'}">
+              <button aria-expanded="false" class="btn dropdown-toggle" data-bs-toggle="dropdown"
+                      th:id="dropdown-button" type="button">
+                [[${app.mentoringApplicationInfo.status}]]
+              </button>
+              <ul class="dropdown-menu">
+                <th:block th:if="${app.mentoringApplicationInfo.status} == '대기'">
+                  <li class="dropdown-item" id="waiting">
+                    <span class="current-status" th:if="${app.mentoringApplicationInfo.status} == '대기'">대기</span>
+                    <span th:unless="${app.mentoringApplicationInfo.status} == '대기'">대기</span>
+                  </li>
+                  <li class="dropdown-item" id="cancel">
+                    <span class="current-status" th:if="${app.mentoringApplicationInfo.status} == '취소'">취소</span>
+                    <span th:unless="${app.mentoringApplicationInfo.status} == '취소'">취소</span>
+                  </li>
+                </th:block>
+                <th:block th:if="${app.mentoringApplicationInfo.status} == '승인'">
+                  <li class="dropdown-item" id="approval">
+                    <span class="current-status" th:if="${app.mentoringApplicationInfo.status} == '승인'">승인</span>
+                    <span th:unless="${app.mentoringApplicationInfo.status} == '승인'">승인</span>
+                  </li>
+                  <li class="dropdown-item" id="complete">
+                    <span class="current-status" th:if="${app.mentoringApplicationInfo.status} == '완료'">완료</span>
+                    <span th:unless="${app.mentoringApplicationInfo.status} == '완료'">완료</span>
+                  </li>
+                  <li class="dropdown-item" id="cancel">
+                    <span class="current-status" th:if="${app.mentoringApplicationInfo.status} == '취소'">취소</span>
+                    <span th:unless="${app.mentoringApplicationInfo.status} == '취소'">취소</span>
+                  </li>
+                </th:block>
+              </ul>
+            </th:block>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <button class="btn btn-primary" id="save-button" type="button">저장하기</button>
+  </div>
+
+  <div>
+    <nav aria-label="Page navigation example">
+      <ul class="pagination justify-content-center">
+      </ul>
+    </nav>
+  </div>
+  <script th:inline="javascript">
+    console.log([[${mentoringApplications}]])
+
+    let currentPage = parseInt(new URLSearchParams(location.search).get("page"))
+    currentPage = currentPage < 1 ? 1 : currentPage
+    const pagenation = document.querySelector('.pagination')
+
+    const createPage = (totalPage, currentPage, content, page) => {
+      const isPrevDisable = currentPage === 1 && content === "Prev"
+      const isCurrentDisable = currentPage === page
+      const isPageDisable = totalPage < page
+      const li = document.createElement("li")
+      const a = document.createElement("a")
+      li.classList.add("page-item")
+      a.classList.add("page-link")
+      a.href = `?page=${page}`
+      a.textContent = content
+      if (isPrevDisable || isCurrentDisable || isPageDisable) {
+        li.classList.add("disabled")
+      }
+      li.appendChild(a)
+      return li
+    }
+
+    const totalPage = [[${mentoringApplications.getSize()}]]
+    pagenation.appendChild(createPage(totalPage, currentPage, "Prev", currentPage - 1))
+    if (totalPage === 2) {
+      if (currentPage === 1) {
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage + 1, currentPage + 1))
+      } else {
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage - 1, currentPage - 1))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
+      }
+    } else if (totalPage > 2) {
+      if (currentPage === 1) {
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage + 1, currentPage + 1))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage + 2, currentPage + 2))
+      } else if (currentPage === totalPage) {
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage - 2, currentPage - 2))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage - 1, currentPage - 1))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
+      } else {
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage - 1, currentPage - 1))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage + 1, currentPage + 1))
+      }
+    }
+    pagenation.appendChild(createPage(totalPage, currentPage, "Next", currentPage + 1))
+
+    const appList = document.querySelector('#application-list')
+    const apps = appList.querySelectorAll('tr')
+    const addEvent = (ma, approval, cancel, waiting, complete, dropdownButton) => {
+      if (cancel !== null) {
+        cancel.addEventListener('click', () => {
+          dropdownButton.textContent = ' 취소 '
+          if (!cancel.querySelector('span').classList.contains('current-status')) {
+            dropdownButton.classList.add('border')
+            dropdownButton.classList.add('border-primary')
+            ma.classList.add('changed')
+          } else {
+            dropdownButton.classList.remove('border')
+            dropdownButton.classList.remove('border-primary')
+            ma.classList.remove('changed')
+          }
+        })
+      }
+
+      if (complete !== null) {
+        complete.addEventListener('click', () => {
+          dropdownButton.textContent = ' 완료 '
+          if (!complete.querySelector('span').classList.contains('current-status')) {
+            dropdownButton.classList.add('border')
+            dropdownButton.classList.add('border-primary')
+            ma.classList.add('changed')
+          } else {
+            dropdownButton.classList.remove('border')
+            dropdownButton.classList.remove('border-primary')
+            ma.classList.remove('changed')
+          }
+        })
+      }
+
+      if (approval !== null) {
+        approval.addEventListener('click', () => {
+          dropdownButton.textContent = ' 승인 '
+          if (!approval.querySelector('span').classList.contains('current-status')) {
+            dropdownButton.classList.add('border')
+            dropdownButton.classList.add('border-primary')
+            ma.classList.add('changed')
+          } else {
+            dropdownButton.classList.remove('border')
+            dropdownButton.classList.remove('border-primary')
+            ma.classList.remove('changed')
+          }
+        })
+      }
+      if (waiting !== null) {
+        waiting.addEventListener('click', () => {
+          dropdownButton.textContent = ' 대기 '
+          if (!waiting.querySelector('span').classList.contains('current-status')) {
+            dropdownButton.classList.add('border')
+            dropdownButton.classList.add('border-primary')
+            ma.classList.add('changed')
+          } else {
+            dropdownButton.classList.remove('border')
+            dropdownButton.classList.remove('border-primary')
+            ma.classList.remove('changed')
+          }
+        })
+      }
+    }
+
+    const saveButton = document.querySelector('#save-button')
+    saveButton.addEventListener('click', () => {
+      const json = {requiredMentoringStatusInfos: []}
+      for (const app of apps) {
+        const ma = app.querySelector('.ma')
+        if (ma.classList.contains('changed')) {
+          const maInfo = ma.id.split(' ')
+          const from = maInfo[0] + ':00';
+          const to = maInfo[1] + ':00';
+          let status = app.querySelector('#dropdown-button').textContent.trim()
+          status = status === '완료' ? 'COMPLETE' : 'CANCELLED'
+          json.requiredMentoringStatusInfos.push({
+            mentoringReservedTime: {
+              from: from,
+              to: to
+            },
+            mentoringStatus: status
+          })
+        }
+      }
+      console.log(json)
+      axios.put("/users/me/applied-mentorings", json)
+      .then(res => {
+        if (res.status === 200) {
+          alert('성공했습니다.')
+          window.href.reload();
+        }
+      })
+      .catch(error => {
+        console.log(error)
+      })
+    })
+
+    for (const app of apps) {
+      const ma = app.querySelector('.ma')
+      const approval = app.querySelector('#approval')
+      const cancel = app.querySelector('#cancel')
+      const waiting = app.querySelector('#waiting')
+      const complete = app.querySelector('#complete')
+      const dropdownButton = app.querySelector('#dropdown-button')
+      addEvent(ma, approval, cancel, waiting, complete, dropdownButton)
+    }
+  </script>
+</div>
+</body>
+</html>

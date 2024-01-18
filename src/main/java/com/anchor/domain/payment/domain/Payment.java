@@ -43,26 +43,22 @@ public class Payment extends BaseEntity {
   private MentoringApplication mentoringApplication;
 
   @Builder
-  private Payment(String impUid, String merchantUid, Integer amount, Integer cancelAmount,
-      PaymentStatus paymentStatus, MentoringApplication mentoringApplication) {
+  private Payment(String impUid, String merchantUid, Integer amount, MentoringApplication mentoringApplication) {
     this.impUid = impUid;
     this.merchantUid = merchantUid;
     this.orderUid = "anchor_" + merchantUid.substring(merchantUid.indexOf('_'));
     this.amount = amount;
-    this.cancelAmount = cancelAmount == null ? 0 : cancelAmount;
-    this.paymentStatus = paymentStatus == null ? PaymentStatus.SUCCESS : paymentStatus;
     this.mentoringApplication = mentoringApplication;
   }
 
-  public Payment(MentoringApplicationInfo applicationInfo, MentoringApplication mentoringApplication) {
+  public Payment(MentoringApplicationInfo applicationInfo) {
     this.impUid = applicationInfo.getImpUid();
     this.merchantUid = applicationInfo.getMerchantUid();
-    this.orderUid = "anchor_" + applicationInfo.getMerchantUid()
+    this.orderUid = "anchor" + applicationInfo.getMerchantUid()
         .substring(merchantUid.indexOf('_'));
     this.amount = applicationInfo.getAmount();
     this.cancelAmount = 0;
     this.paymentStatus = PaymentStatus.SUCCESS;
-    this.mentoringApplication = mentoringApplication;
   }
 
   public boolean isCancelled() {
@@ -74,4 +70,7 @@ public class Payment extends BaseEntity {
     this.cancelAmount = PaymentCancelDetail.getCancelAmount();
   }
 
+  public void addMentoringApplication(MentoringApplication mentoringApplication) {
+    this.mentoringApplication = mentoringApplication;
+  }
 }

@@ -49,7 +49,7 @@ public class MentorSchedule extends BaseEntity {
   public static List<MentorSchedule> of(MentorOpenCloseTimes mentorOpenCloseTimes) {
     List<MentorSchedule> mentorSchedules = new ArrayList<>();
     Map<String, List<OpenCloseTime>> scheduleOfDays = mentorOpenCloseTimes.getDays();
-    
+
     Arrays.stream(DayOfWeek.values())
         .forEach(day -> {
           List<OpenCloseTime> openCloseTimes = scheduleOfDays.get(day.name());

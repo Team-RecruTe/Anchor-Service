@@ -37,7 +37,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.ActiveProfiles;
 
 @DisplayName("멘토링 서비스 테스트 - DB 의존성 포함")
-@Import({QueryDslConfig.class, MentoringService.class, ObjectMapper.class, PayNumberFactory.class})
+@Import({QueryDslConfig.class, MentoringService.class, ObjectMapper.class, PayNumberCreator.class})
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @ActiveProfiles("test")
 @DataJpaTest

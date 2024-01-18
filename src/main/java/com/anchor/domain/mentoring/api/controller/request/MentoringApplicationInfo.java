@@ -1,7 +1,7 @@
 package com.anchor.domain.mentoring.api.controller.request;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
+import com.anchor.global.util.type.DateTimeRange;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -21,19 +21,21 @@ public class MentoringApplicationInfo implements Serializable {
 
   private Integer amount;
 
-  @JsonFormat(shape = Shape.STRING, pattern = "yyyy/MM/dd HH:mm:ss", timezone = "Asia/Seoul")
+  @JsonIgnore
   private LocalDateTime startDateTime;
 
-  @JsonFormat(shape = Shape.STRING, pattern = "yyyy/MM/dd HH:mm:ss", timezone = "Asia/Seoul")
+  @JsonIgnore
   private LocalDateTime endDateTime;
 
   @Builder
-  private MentoringApplicationInfo(String impUid, String merchantUid, Integer amount, LocalDateTime startDateTime,
-      LocalDateTime endDateTime) {
+  private MentoringApplicationInfo(String impUid, String merchantUid, Integer amount) {
     this.impUid = impUid;
     this.merchantUid = merchantUid;
     this.amount = amount;
-    this.startDateTime = startDateTime;
-    this.endDateTime = endDateTime;
+  }
+
+  public void addApplicationTime(DateTimeRange dateTimeRange) {
+    this.startDateTime = dateTimeRange.getFrom();
+    this.endDateTime = dateTimeRange.getTo();
   }
 }

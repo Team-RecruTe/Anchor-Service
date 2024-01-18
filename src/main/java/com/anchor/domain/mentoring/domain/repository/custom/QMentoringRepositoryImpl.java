@@ -1,6 +1,10 @@
 package com.anchor.domain.mentoring.domain.repository.custom;
 
+import static com.anchor.domain.mentor.domain.QMentor.mentor;
 import static com.anchor.domain.mentoring.domain.QMentoring.mentoring;
+import static com.anchor.domain.mentoring.domain.QMentoringDetail.mentoringDetail;
+import static com.anchor.domain.mentoring.domain.QMentoringTag.mentoringTag;
+import static com.anchor.domain.user.domain.QUser.user;
 import static com.querydsl.core.types.dsl.Expressions.numberTemplate;
 
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
@@ -18,6 +22,7 @@ import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -84,6 +89,23 @@ public class QMentoringRepositoryImpl implements QMentoringRepository {
     return new PageImpl<>(mentoringSearchResults, pageable, mentoringSearchResults.size());
   }
 
+  @Override
+  public List<Mentoring> findPopularMentoringTags() {
+
+    List<Long> mentoringIds = jpaQueryFactory.select(mentoring.id)
+        .from(mentoring)
+        .orderBy(mentoring.totalApplicationNumber.desc())
+        .offset(0)
+        .limit(10)
+        .fetch();
+
+    return jpaQueryFactory.selectFrom(mentoring)
+        .join(mentoring.mentoringTags, mentoringTag)
+        .fetchJoin()
+        .where(mentoring.id.in(mentoringIds))
+        .fetch();
+  }
+
   public List<MentoringSearchResult> findTopMentorings() {
     List<Mentoring> result = jpaQueryFactory.selectFrom(mentoring)
         .orderBy(mentoring.totalApplicationNumber.desc())
@@ -103,24 +125,26 @@ public class QMentoringRepositoryImpl implements QMentoringRepository {
     return topMentorings;
   }
 
+  public Optional<Mentoring> findMentoringDetailInfo(Long id) {
+    return Optional.ofNullable(jpaQueryFactory.selectFrom(mentoring)
+        .join(mentoring.mentor, mentor)
+        .fetchJoin()
+        .join(mentoring.mentoringDetail, mentoringDetail)
+        .fetchJoin()
+        .leftJoin(mentoring.mentoringTags, mentoringTag)
+        .fetchJoin()
+        .join(mentor.user, user)
+        .fetchJoin()
+        .where(mentoring.id.eq(id))
+        .fetchOne());
+  }
+
   private long from(Pageable pageable) {
     return pageable.getOffset();
   }
 
   private long to(Pageable pageable) {
     return from(pageable) + pageable.getPageSize();
-  }
-
-  private OrderSpecifier[] getOrderSpecifier(Sort sort) {
-    List<OrderSpecifier> orders = new ArrayList<>();
-    sort.stream()
-        .forEach(order -> {
-          PathBuilder<Mentoring> orderByExpression = new PathBuilder<>(Mentoring.class, "mentoring");
-          Order direction = order.isAscending() ? Order.ASC : Order.DESC;
-          String prop = order.getProperty();
-          orders.add(new OrderSpecifier(direction, orderByExpression.get(prop)));
-        });
-    return orders.toArray(OrderSpecifier[]::new);
   }
 
   private BooleanBuilder equalsWith(List<String> tags) {
@@ -134,10 +158,22 @@ public class QMentoringRepositoryImpl implements QMentoringRepository {
   }
 
   private BooleanExpression equalTag(String tag) {
-    if (tag != null && !tag.isBlank()) {
+    if (StringUtils.hasText(tag)) {
       return mentoring.mentoringTags.any().tag.eq(tag);
     }
-    return null;
+    return Expressions.TRUE;
+  }
+
+  private OrderSpecifier[] getOrderSpecifier(Sort sort) {
+    List<OrderSpecifier> orders = new ArrayList<>();
+    sort.stream()
+        .forEach(order -> {
+          PathBuilder<Mentoring> orderByExpression = new PathBuilder<>(Mentoring.class, "mentoring");
+          Order direction = order.isAscending() ? Order.ASC : Order.DESC;
+          String prop = order.getProperty();
+          orders.add(new OrderSpecifier(direction, orderByExpression.get(prop)));
+        });
+    return orders.toArray(OrderSpecifier[]::new);
   }
 
   private static class Searchable {
