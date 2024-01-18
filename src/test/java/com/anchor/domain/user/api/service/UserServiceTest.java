@@ -464,6 +464,7 @@ class UserServiceTest {
               .impUid("imp_1234")
               .merchantUid("toss_1234")
               .amount(10_000)
+              .paymentStatus(PaymentStatus.SUCCESS)
               .mentoringApplication(mentoringApplication)
               .build());
     }
