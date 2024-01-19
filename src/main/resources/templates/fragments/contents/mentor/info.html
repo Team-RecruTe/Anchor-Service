@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ko"
+      layout:decorate="~{layout/default}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+>
+<head>
+  <title>Anchor-service</title>
+  <script src="/js/jquery-3.7.1.min.js"></script>
+</head>
+
+<div layout:fragment="content" class="main">
+  <h2 style="text-align: center;">멘토 정보 페이지</h2>
+
+  <div class="container mt-3" style="max-width: 1480px;">
+  <hr>
+    <div class="row">
+      <!-- [좌측] 멘토 정보 시작 -->
+      <div class="col-md-3 text-center">
+        <!--방문자, 멘티, 다른 멘토 페이지-->
+        <div class="card">
+          <div class="card-header">멘토 정보</div>
+          <div id="current-profile-image" class="mt-3">
+            <div class="profile">
+              <th:block th:if="${mentorInfo.user.image==null}">
+                <img src="/images/x.png"
+                     id="userProfileImage" width="200px">
+              </th:block>
+              <th:block th:unless="${mentorInfo.user.image==null}">
+                <img th:src="${mentorInfo.user.image}" id="userProfileImage" width="200px">
+              </th:block>
+            </div>
+          </div>
+          <div class="card-body">
+            <hr>
+            <!--닉네임-->
+            <div class="form-group row justify-content-center">
+              <label for="nickname" class="col-sm-4 col-form-label text-end" style="color: #808080;">닉네임</label>
+              <div class="col-sm-8">
+                <span class="form-control-plaintext text-start" id="nickname" name="nickname" th:text="${mentorInfo.user.nickname}"></span>
+              </div>
+            </div>
+            <!--회사 계정-->
+            <div class="form-group row justify-content-center">
+              <label for="companyEmail" class="col-sm-4 col-form-label text-end" style="color: #808080;">회사 계정</label>
+              <div class="col-sm-8">
+                <span class="form-control-plaintext text-start" id="companyEmail" name="companyEmail"  th:text="${mentorInfo.companyEmail}"></span>
+              </div>
+            </div>
+            <!--커리어-->
+            <div class="form-group row justify-content-center">
+              <label for="current-career" class="col-sm-4 col-form-label text-end" style="color: #808080;">연차</label>
+              <div class="col-sm-8">
+                <span class="form-control-plaintext text-start" id="current-career" name="current-career" th:text="${mentorInfo.career} +' (' + ${mentorInfo.career.rangeOfYear} +')'"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!--멘토 + 자신의 페이지-->
+        <th:block th:if="${mentorInfo.user.id == #authentication.principal.user.id}"> <!--#authentication.principal.user.id-->
+          <div class="card mt-3">
+            <div class="card-header">멘토 필수정보</div>
+            <div class="card-body">
+              <!--커리어-->
+              <div class="form-group row justify-content-center">
+                <label for="career" class="col-sm-4 col-form-label text-end" style="color: #808080;">연차</label>
+                <div class="col-sm-8">
+                  <select class="form-control" id="career" name="career" >
+                    <option value=''>-선택-</option>
+                    <option th:each="career : ${T(com.anchor.domain.mentor.domain.Career).values()}"
+                            th:value="${career.name()}"
+                            th:text="${career.name()} +' (' + ${career.rangeOfYear} + ')'">
+                      Select Career
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <!--은행명-->
+              <div class="form-group row justify-content-center">
+                <label for="bankName" class="col-sm-4 col-form-label text-end" style="color: #808080;">은행명</label>
+                <div class="col-sm-8">
+                  <select class="form-control" id="bankName" name="bankName" >
+                    <option value=''>-선택-</option>
+                    <option value='SC제일은행'>SC제일은행</option>
+                    <option value='경남은행'>경남은행</option>
+                    <option value='광주은행'>광주은행</option>
+                    <option value='국민은행'>국민은행</option>
+                    <option value='기업은행'>기업은행</option>
+                    <option value='농협중앙회'>농협중앙회</option>
+                    <option value='대구은행'>대구은행</option>
+                    <option value='부산은행'>부산은행</option>
+                    <option value='산업은행'>산업은행</option>
+                    <option value='상호신용금고'>상호신용금고</option>
+                    <option value='새마을금고'>새마을금고</option>
+                    <option value='수협중앙회'>수협중앙회</option>
+                    <option value='신한은행'>신한은행</option>
+                    <option value='신협중앙회'>신협중앙회</option>
+                    <option value='외환은행'>외환은행</option>
+                    <option value='우리은행'>우리은행</option>
+                    <option value='우체국'>우체국</option>
+                    <option value='전북은행'>전북은행</option>
+                    <option value='제주은행'>제주은행</option>
+                    <option value='하나은행'>하나은행</option>
+                    <option value='한국씨티은행'>한국씨티은행</option>
+                    <option value='홍콩상하이은행'>홍콩상하이은행</option>
+                  </select>
+                </div>
+              </div>
+
+              <!--계좌 번호-->
+              <div class="form-group row justify-content-center">
+                <label for="accountNumber" class="col-sm-4 col-form-label text-end" style="color: #808080;">계좌 번호</label>
+                <div class="col-sm-8">
+                  <input type="text" class="form-control" id="accountNumber" name="accountNumber" th:value="${mentorInfo.accountNumber}">
+                </div>
+              </div>
+
+              <!--계좌 소유주 이름-->
+              <div class="form-group row justify-content-center">
+                <label for="accountName" class="col-sm-4 col-form-label text-end" style="color: #808080;">계좌 소유주</label>
+                <div class="col-sm-8">
+                  <input type="text" class="form-control" id="accountName" name="accountName" th:value="${mentorInfo.accountName}">
+                </div>
+              </div>
+              <div>
+                <button type="button" class="btn btn-outline-success mt-3" id="btn-mentor-update">수정하기</button>
+                <button type="button" class="btn btn-outline-danger mt-3" id="btn-mentor-delete">멘토 권한 해제하기</button>
+              </div>
+            </div>
+          </div>
+        </th:block>
+      </div>
+      <!-- [좌측] 멘토 정보 끝 -->
+
+
+
+      <!-- [우측] 멘토 소개글 및 멘토링 목록  시작-->
+      <div class="col-md-9">
+        <form>
+          <!--멘토 소개글-->
+          <div class="form-group">
+            <label for="mentorContents" style="font-size: 20px; text-align: center; font-weight: bold;">멘토 소개글</label>
+            <textarea class="form-control mt-2" id="mentorContents" rows="5" placeholder="상세 내용 입력" readonly
+                      th:text="${mentorInfo.mentorIntroduction != null ? mentorInfo.mentorIntroduction.contents : '안녕하세요🖐🏻 멘토링을 신청해보세요^^'}">
+            </textarea>
+
+            <th:block th:if="${mentorInfo.user.id == #authentication.principal.user.id}"> <!--#authentication.principal.user.id-->
+              <a th:href="@{/mentors/me/introduction}" class="btn btn-success mt-3">멘토 소개글 수정</a>
+            </th:block>
+          </div>
+
+          <!--멘토링 목록-->
+          <div class="form-group mt-4">
+            <label for="mentoringList" style="font-size: 20px; text-align: center; font-weight: bold;">멘토링 목록</label>
+            <div class="row" id="mentoringList">
+              <div th:each="mentorings, iterStat : ${mentorInfo.mentorings}" class="col-md-4 mb-4">
+                <div class="card mt-2">
+                  <div class="card-body">
+                    <h5 class="card-title" th:text="${mentorings.title}">멘토링 주제</h5>
+
+                    <div class="form-group row" >
+                      <label for="durationTime" class="col-sm-3 col-form-label" style="color: #808080;">시간</label>
+                      <div class="col-sm-9">
+                        <span class="form-control-plaintext text-start" id="durationTime" name="durationTime" th:text="${mentorings.durationTime}">1시간</span>
+                      </div>
+                    </div>
+                    <div class="form-group row" >
+                      <label for="cost" class="col-sm-3 col-form-label" style="color: #808080;">비용</label>
+                      <div class="col-sm-9">
+                        <span class="form-control-plaintext text-start" id="cost" name="cost" th:text="${mentorings.cost} + '원'">1만원</span>
+                      </div>
+                    </div>
+                    <a th:href="@{/mentorings/{id}(id=${mentorings.id})}" class="btn btn-primary mt-3">상세 보기</a>
+                    <th:block th:if="${mentorInfo.user.id == #authentication.principal.user.id}"> <!--#authentication.principal.user.id-->
+                      <button type="button" class="btn btn-danger mt-3" id="btn-mentoring-delete">멘토링 삭제</button>
+                    </th:block>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <!-- [우측] 멘토 소개글 및 멘토링 목록  끝-->
+    </div>
+  </div>
+
+  <script th:inline="javascript">
+    let mentor_id = [[${mentorInfo.id}]];
+
+    let index = {
+      init: function () {
+        $("#btn-mentor-update").on("click", () => {
+          this.updateMentor();
+        });
+        $("#btn-mentor-delete").on("click", () => {
+          this.deleteMentor();
+        });
+        $("#btn-mentoring-delete").on("click", () => {
+          this.deleteMentoring();
+        });
+      },
+
+      /*정보 수정*/
+      updateMentor: function(){
+        let data = {
+          career:$("#career").val(),
+          bankName:$("#bankName").val(),
+          accountNumber:$("#accountNumber").val(),
+          accountName:$("#accountName").val()
+        };
+        $.ajax({
+          type: "put",
+          url: "/mentors/me/info",
+          data: JSON.stringify(data),
+          contentType: "application/json; charset=utf-8",
+        }).done(function (resp) {
+          if(resp.status===500){
+            alert("멘토 필수 정보 수정을 실패했습니다.");
+          } else {
+            alert("멘토 필수 정보 수정을 성공했습니다.");
+            location.href="/mentors/" + mentor_id;
+          }
+        }).fail(function (error) {
+          alert(JSON.stringify(error));
+        });
+      },
+      /*멘토 권한 해제*/
+      deleteMentor: function(){
+        let data = {
+          mentorId : [[${mentorInfo.id}]]
+        };
+        $.ajax({
+          type: "delete",
+          url: "/mentors/me",
+          data: JSON.stringify(data),
+          contentType: "application/json; charset=utf-8",
+        }).done(function (resp) {
+          if(resp.status===500){
+            alert("멘토 권한 해제 실패");
+            location.href="/mentors/" + mentor_id;
+          } else {
+            alert("멘토 권한 해제 성공");
+            location.href="/";
+          }
+        }).fail(function (error) {
+          alert("멘토링 목록을 모두 삭제 후 멘토 권한 해제가 가능합니다.");
+          location.href="/mentors/" + mentor_id;
+        });
+      },
+      /*멘토링 삭제*/
+      deleteMentoring: function(){
+        console.log("click");
+      },
+    }
+
+    index.init();
+  </script>
+</div>
+
+</html>

@@ -2,8 +2,9 @@ package com.anchor.domain.mentor.api.controller;
 
 
 import com.anchor.domain.mentor.api.controller.request.MentorInfoRequest;
-import com.anchor.domain.mentor.api.controller.request.MentorIntroductionRequest;
+import com.anchor.domain.mentor.api.controller.request.MentorContentsRequest;
 import com.anchor.domain.mentor.api.service.MentorInfoService;
+import com.anchor.domain.mentor.api.service.response.MentorContentsEditResult;
 import com.anchor.global.auth.SessionUser;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -36,9 +37,9 @@ public class MentorInfoController {
   }
 
   @PutMapping("/introduction")
-  public ResponseEntity<String> modifyIntroduction(@RequestBody MentorIntroductionRequest mentorIntroductionRequest, HttpSession httpSession){
+  public ResponseEntity<MentorContentsEditResult> modifyIntroduction(@RequestBody MentorContentsRequest mentorContentsRequest, HttpSession httpSession){
     SessionUser user = (SessionUser) httpSession.getAttribute("user");
-    mentorInfoService.editContents(user.getMentorId(), mentorIntroductionRequest);
+    MentorContentsEditResult result  = mentorInfoService.editContents(user.getMentorId(), mentorContentsRequest);
     return ResponseEntity.ok().build();
   }
 

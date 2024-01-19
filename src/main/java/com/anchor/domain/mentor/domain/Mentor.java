@@ -1,7 +1,7 @@
 package com.anchor.domain.mentor.domain;
 
 import com.anchor.domain.mentor.api.controller.request.MentorInfoRequest;
-import com.anchor.domain.mentor.api.controller.request.MentorIntroductionRequest;
+import com.anchor.domain.mentor.api.controller.request.MentorContentsRequest;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.payment.domain.Payup;
 import com.anchor.domain.user.domain.User;
@@ -89,11 +89,11 @@ public class Mentor extends BaseEntity {
     this.accountName = mentorInfoRequest.getAccountName();
   }
 
-  public void editContents(MentorIntroductionRequest mentorIntroductionRequest) {
+  public void editContents(MentorContentsRequest mentorContentsRequest) {
     if (this.mentorIntroduction == null) {
-      this.mentorIntroduction = MentorIntroduction.addContents(mentorIntroductionRequest.getContents());
+      this.mentorIntroduction = MentorIntroduction.addContents(mentorContentsRequest.getContents());
     } else {
-      this.mentorIntroduction.editContents(mentorIntroductionRequest.getContents());
+      this.mentorIntroduction.editContents(mentorContentsRequest.getContents());
     }
   }
 
