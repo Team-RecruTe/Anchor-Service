@@ -23,7 +23,6 @@ import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentor.domain.repository.MentorRepository;
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
-import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo.MentoringDetailSearchResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringSaveRequestInfo;
 import com.anchor.domain.mentoring.domain.Mentoring;
@@ -42,7 +41,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
@@ -105,7 +103,7 @@ class MentoringServiceTest {
         .mentor(mentor)
         .build();
 
-    mentoring.editContents(new MentoringContentsInfo("테스트내용", List.of("백엔드", "자바")));
+//    mentoring.editContents(new MentoringContentsInfo("테스트내용", List.of("백엔드", "자바")));
 
     given(mentoringRepository.findMentoringDetailInfo(anyLong())).willReturn(Optional.of(mentoring));
 
