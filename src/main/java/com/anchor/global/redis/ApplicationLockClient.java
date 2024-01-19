@@ -35,7 +35,7 @@ public class ApplicationLockClient implements RedisClient<DateTimeRange> {
   }
 
   @Override
-  public List<DateTimeRange> findByKeyword(String pattern) {
+  public List<DateTimeRange> findAllByKeyword(String pattern) {
     List<DateTimeRange> applicationLockTimes = new ArrayList<>();
     ScanOptions options = ScanOptions.scanOptions()
         .match(pattern)
