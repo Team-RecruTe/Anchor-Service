@@ -15,10 +15,13 @@ public class MentoringContentsInfo {
 
   private List<String> tags;
 
+  private List<Long> imageIds;
+
   @Builder
-  public MentoringContentsInfo(String contents, List<String> tags) {
+  public MentoringContentsInfo(String contents, List<String> tags, List<Long> imageIds) {
     this.tags = tags;
     this.contents = contents;
+    this.imageIds = imageIds;
   }
 
 }

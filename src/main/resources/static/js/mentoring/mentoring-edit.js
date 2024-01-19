@@ -13,7 +13,11 @@ const editor = new toastui.Editor({
       axios.post("/image/upload", formData)
       .then((res) => {
         if (res.status === 200) {
-          callback(res.data.imageUrl, 'image');
+          callback(res.data.imageUrl, blob.name);
+          const addedImage = document.querySelector(
+              'img[alt="' + blob.name + '"]')
+          console.log(addedImage)
+          addedImage.id = 'add ' + res.data.imageId;
         }
       })
       .catch((error) => {
@@ -66,10 +70,15 @@ const tagEvent = (tags, tagInput, addButton, addTag) => {
 
 const submit = (axios, editor, tags) => {
   console.log(editor.getHTML())
+  const addedImages = document.querySelectorAll('img[id*="add"]')
+  console.log(addedImages)
+  alert("alert")
+  const imageIds = Array.from(addedImages).map(image => image.id.split(" ")[1])
   const tagList = Array.from(tags.children).map(tag => tag.textContent)
   const json = {
     contents: editor.getHTML(),
-    tags: tagList
+    tags: tagList,
+    imageIds: imageIds,
   }
   const currentPath = window.location.pathname
   const suffix = '/edit'

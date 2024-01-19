@@ -1,0 +1,28 @@
+services:
+  redis_session:
+    image: redis:latest
+    hostname: 127.0.0.1
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis/session/data:/data
+      - ./redis/session/conf/redis.conf:/usr/local/conf/redis.conf
+    labels:
+      - "name=redis_session"
+      - "mode=standalone"
+    restart: always
+    command: redis-server /usr/local/conf/redis.conf
+  redis_default:
+    image: redis:latest
+    hostname: 127.0.0.1
+    ports:
+      - 6380:6380
+    volumes:
+      - ./redis/default/data:/data
+      - ./redis/default/conf/redis.conf:/usr/local/conf/redis.conf
+    labels:
+      - "name=redis_default"
+      - "mode=standalone"
+    restart: always
+    command: redis-server /usr/local/conf/redis.conf
+

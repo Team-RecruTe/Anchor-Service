@@ -1,5 +1,7 @@
 package com.anchor.domain.mentoring.api.service;
 
+import com.anchor.domain.image.domain.Image;
+import com.anchor.domain.image.domain.repository.ImageRepository;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentor.domain.MentorSchedule;
 import com.anchor.domain.mentor.domain.repository.MentorRepository;
@@ -24,12 +26,12 @@ import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
 import com.anchor.domain.mentoring.api.service.response.TopMentoring;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
+import com.anchor.domain.mentoring.domain.MentoringDetail;
 import com.anchor.domain.mentoring.domain.MentoringTag;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.domain.payment.domain.repository.PaymentRepository;
-import com.anchor.domain.payment.domain.repository.PayupRepository;
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
@@ -52,6 +54,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class MentoringService {
 
+  private final ImageRepository imageRepository;
   private final MentoringRepository mentoringRepository;
   private final UserRepository userRepository;
   private final MentorRepository mentorRepository;
@@ -60,7 +63,6 @@ public class MentoringService {
   private final MentoringApplicationRepository mentoringApplicationRepository;
   private final ApplicationLockClient applicationLockClient;
   private final PayNumberCreator payNumberCreator;
-  private final PayupRepository payupRepository;
 
   @Transactional
   public MentoringCreateResult create(Long mentorId, MentoringBasicInfo mentoringBasicInfo) {
@@ -89,9 +91,18 @@ public class MentoringService {
   public MentoringContentsEditResult editContents(Long id, MentoringContentsInfo mentoringContentsInfo) {
     Mentoring mentoring = getMentoringById(id);
     mentoring.editContents(mentoringContentsInfo);
+    mapImagesWithMentoringDetail(mentoringContentsInfo, mentoring);
     Mentoring savedMentoring = mentoringRepository.save(mentoring);
     return new MentoringContentsEditResult(savedMentoring.getId());
   }
+
+  private void mapImagesWithMentoringDetail(MentoringContentsInfo mentoringContentsInfo, Mentoring mentoring) {
+    MentoringDetail mentoringDetail = mentoring.getMentoringDetail();
+    List<Image> savedImages = imageRepository.findAllById(mentoringContentsInfo.getImageIds());
+    Image.mapMentoringDetails(mentoringDetail, savedImages);
+    imageRepository.saveAll(savedImages);
+  }
+
 
   @Transactional(readOnly = true)
   public MentoringContents getContents(Long id, Long mentorId) {
@@ -136,7 +147,7 @@ public class MentoringService {
   public ApplicationTimeInfo getMentoringActiveTimes(Long id) {
     Mentor mentor = getMentoringById(id).getMentor();
     String pattern = ApplicationLockClient.createMatchPattern(mentor);
-    List<DateTimeRange> paymentTimes = applicationLockClient.findByKeyword(pattern);
+    List<DateTimeRange> paymentTimes = applicationLockClient.findAllByKeyword(pattern);
     List<MentoringApplication> mentoringApplications = mentoringApplicationRepository.findByMentoringId(id);
     List<MentorSchedule> mentorSchedules = mentorScheduleRepository.findMentorScheduleByMentorId(id);
     return ApplicationTimeInfo.create(mentoringApplications, mentorSchedules, paymentTimes);

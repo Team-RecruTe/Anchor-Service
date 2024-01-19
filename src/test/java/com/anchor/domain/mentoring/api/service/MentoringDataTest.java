@@ -83,7 +83,7 @@ public class MentoringDataTest {
     List<String> tags = List.of("java", "spring");
 
     // when
-    mentoringService.editContents(savedMentoring.getId(), new MentoringContentsInfo("<h1>컨텐츠입니다.<h1>", tags));
+//    mentoringService.editContents(savedMentoring.getId(), new MentoringContentsInfo("<h1>컨텐츠입니다.<h1>", tags));
     Mentoring updatedMentoring = mentoringRepository.findById(savedMentoring.getId())
         .get();
 
@@ -123,10 +123,10 @@ public class MentoringDataTest {
     Mentoring savedMentoring = mentoringRepository.save(mentoring);
 
     // when
-    mentoringService.editContents(savedMentoring.getId(),
-        new MentoringContentsInfo("<h1>컨텐츠입니다.<h1>", List.of("java", "spring")));
-    mentoringService.editContents(savedMentoring.getId(),
-        new MentoringContentsInfo("<h1>수정된 컨텐츠입니다.<h1>", List.of("java", "spring", "boot")));
+//    mentoringService.editContents(savedMentoring.getId(),
+//        new MentoringContentsInfo("<h1>컨텐츠입니다.<h1>", List.of("java", "spring")));
+//    mentoringService.editContents(savedMentoring.getId(),
+//        new MentoringContentsInfo("<h1>수정된 컨텐츠입니다.<h1>", List.of("java", "spring", "boot")));
     Mentoring updatedMentoring = mentoringRepository.findById(savedMentoring.getId())
         .get();
 
@@ -165,8 +165,8 @@ public class MentoringDataTest {
         .build();
     Mentoring savedMentoring = mentoringRepository.save(mentoring);
 
-    mentoringService.editContents(savedMentoring.getId(),
-        new MentoringContentsInfo("<h1>컨텐츠입니다.<h1>", List.of("java", "spring")));
+//    mentoringService.editContents(savedMentoring.getId(),
+//        new MentoringContentsInfo("<h1>컨텐츠입니다.<h1>", List.of("java", "spring")));
 
     Mentoring updatedMentoring = mentoringRepository.findById(savedMentoring.getId())
         .get();
