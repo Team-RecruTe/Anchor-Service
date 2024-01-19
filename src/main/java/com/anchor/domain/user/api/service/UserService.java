@@ -45,9 +45,7 @@ public class UserService {
   @Transactional
   public UserInfoResponse getProfile(String email) {
     User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> {
-          return new RuntimeException("해당 유저를 찾을 수 없습니다.");
-        });
+        .orElseThrow(() -> new RuntimeException("해당 유저를 찾을 수 없습니다."));
     return new UserInfoResponse(user);
   }
 
@@ -80,19 +78,24 @@ public class UserService {
   @Transactional
   public boolean changeAppliedMentoringStatus(SessionUser sessionUser, MentoringStatusInfo changeRequest) {
     User user = getUser(sessionUser);
-
     List<RequiredMentoringStatusInfo> mentoringStatusList = changeRequest.getRequiredMentoringStatusInfos();
     mentoringStatusList.forEach(status -> {
       try {
-        if (status.mentoringStatusIsCanceledOrComplete()) {
-          changeStatus(user, status);
-        }
+        validateMentoringStatus(status);
+        changeStatus(user, status);
       } catch (NoSuchElementException | IllegalArgumentException e) {
         log.warn(e.getMessage());
       }
     });
 
     return true;
+  }
+
+  private void validateMentoringStatus(RequiredMentoringStatusInfo statusInfo) {
+    MentoringStatus status = statusInfo.getMentoringStatus();
+    if (status.equals(MentoringStatus.WAITING) || status.equals(MentoringStatus.APPROVAL)) {
+      throw new IllegalArgumentException("변경하려는 상태가 'CANCELED' 또는 'COMPLETE'가 아닙니다.");
+    }
   }
 
   private User getUser(SessionUser sessionUser) {

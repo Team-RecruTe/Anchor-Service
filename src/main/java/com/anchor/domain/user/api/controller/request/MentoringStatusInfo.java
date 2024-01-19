@@ -27,7 +27,6 @@ public class MentoringStatusInfo {
 
     private MentoringStatus mentoringStatus;
 
-
     @Builder
     private RequiredMentoringStatusInfo(LocalDateTime startDateTime, LocalDateTime endDateTime,
         MentoringStatus mentoringStatus) {
@@ -35,14 +34,6 @@ public class MentoringStatusInfo {
       this.mentoringStatus = mentoringStatus;
     }
 
-    public boolean mentoringStatusIsCanceledOrComplete() {
-
-      if (mentoringStatus.equals(MentoringStatus.CANCELLED) || mentoringStatus.equals(MentoringStatus.COMPLETE)) {
-        return true;
-      } else {
-        throw new IllegalArgumentException("변경하려는 상태가 CANCELED 또는 COMPLETE 가 아닙니다.");
-      }
-
-    }
   }
+
 }

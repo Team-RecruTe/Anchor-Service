@@ -3,8 +3,6 @@ spring:
   profiles:
     active: local
     include:
-      - oauth
-      - session
       - aws
       - pay
   datasource:
@@ -44,10 +42,11 @@ spring:
 
   data:
     redis:
-      storage:
-        port: ${REDIS_STORAGE_PORT}
+      default:
+        host: ${REDIS_DEFAULT_HOST}
+        port: ${REDIS_DEFAULT_PORT}
       session:
-        host: ${REDIS_HOST}
+        host: ${REDIS_SESSION_HOST}
         port: ${REDIS_SESSION_PORT}
     web:
       pageable:
@@ -89,7 +88,9 @@ rest-template:
   max-connection: 50
   max-per-route: 20
 
-
+cloud:
+  aws:
+    cron: "0 0 3 * * *"
 
 #  datasource:
 #    url: jdbc:h2:mem:practical-test
