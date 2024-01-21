@@ -27,9 +27,18 @@ public class RestClientConfig {
   @Value("${rest-template.max-per-route}")
   private int maxPerRoute;
 
-  @Bean
-  public RestClient restClient() {
+  @Bean(name = "paymentRestClient")
+  public RestClient paymentRestClient() {
     return RestClient.builder()
+        .baseUrl("https://api.iamport.kr")
+        .requestFactory(httpRequestFactory())
+        .build();
+  }
+
+  @Bean(name = "payUpRestClient")
+  public RestClient payUpRestClient() {
+    return RestClient.builder()
+        .baseUrl("https://developers.nonghyup.com")
         .requestFactory(httpRequestFactory())
         .build();
   }

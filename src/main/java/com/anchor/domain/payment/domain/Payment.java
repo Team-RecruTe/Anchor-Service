@@ -39,7 +39,7 @@ public class Payment extends BaseEntity {
   @Column(nullable = false)
   private PaymentStatus paymentStatus = PaymentStatus.SUCCESS;
 
-  @OneToOne(mappedBy = "payment", fetch = FetchType.LAZY)
+  @OneToOne(mappedBy = "payment", fetch = FetchType.LAZY, optional = false)
   private MentoringApplication mentoringApplication;
 
   @Builder

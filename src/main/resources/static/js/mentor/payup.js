@@ -112,6 +112,7 @@ calendar.on('clickEvent', (e) => {
                       <td>${fromDate} ~ ${toDate}</td>
                       <td>${element.menteeNickname}</td>
                       <td>${element.payupStatus === 'COMPLETE' ? '정산완료' : '정산대기'}</td>
+                      <td>${element.paymentAmount}원</td>
                       <td>${element.payupAmount}원</td>
                         </tr>`;
 

@@ -21,9 +21,6 @@ public interface QMentoringApplicationRepository {
 
   Page<AppliedMentoringSearchResult> findAllByMentorId(Long mentorId, Pageable pageable);
 
-  List<MentoringApplication> findPayupListByCompleteAndLastMonth(MentoringStatus status, LocalDateTime lastMonth,
-      LocalDateTime thisMonth);
-
   List<MentoringApplication> findByMentoringId(Long mentoringId);
 
   Page<AppliedMentoringInfo> findByUserId(Long userId, Pageable pageable);

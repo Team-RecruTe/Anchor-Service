@@ -5,13 +5,11 @@ function paymentProcess() {
 
   let currentUri = String(window.location.pathname);
 
-  let requestUri = currentUri + '-process';
-
   let nickname = document.getElementById('user-nickname').textContent;
   let email = document.getElementById('user-email').textContent;
   let tel = document.getElementById('user-tel').value;
 
-  axios.post(requestUri, {
+  axios.post(currentUri, {
     nickname: nickname,
     email: email,
     tel: tel

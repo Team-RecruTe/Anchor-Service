@@ -46,14 +46,17 @@ public class MentorPayupResult {
 
     private DateTimeRange dateTimeRange;
     private String menteeNickname;
+    private Integer paymentAmount;
     private Integer payupAmount;
     private PayupStatus payupStatus;
 
-    public PayupInfo(LocalDateTime startDateTime, LocalDateTime endDateTime, String nickname, Integer amount,
+    public PayupInfo(LocalDateTime startDateTime, LocalDateTime endDateTime, String nickname, Integer paymentAmount,
+        Integer payupAmount,
         PayupStatus payupStatus) {
       this.dateTimeRange = DateTimeRange.of(startDateTime, endDateTime);
       this.menteeNickname = nickname;
-      this.payupAmount = amount;
+      this.paymentAmount = paymentAmount;
+      this.payupAmount = payupAmount;
       this.payupStatus = payupStatus;
     }
   }

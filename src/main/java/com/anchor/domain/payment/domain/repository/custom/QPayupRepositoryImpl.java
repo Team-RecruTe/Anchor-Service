@@ -6,10 +6,15 @@ import static com.anchor.domain.payment.domain.QPayup.payup;
 import static com.anchor.domain.user.domain.QUser.user;
 
 import com.anchor.domain.mentor.api.service.response.MentorPayupResult.PayupInfo;
+import com.anchor.domain.mentor.domain.Mentor;
+import com.anchor.domain.mentoring.domain.MentoringStatus;
+import com.anchor.domain.payment.domain.Payup;
+import com.anchor.domain.payment.domain.PayupStatus;
 import com.anchor.global.util.type.DateTimeRange;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -27,6 +32,7 @@ public class QPayupRepositoryImpl implements QPayupRepository {
                 mentoringApplication.startDateTime,
                 mentoringApplication.endDateTime,
                 user.nickname,
+                payment.amount,
                 payup.amount,
                 payup.payupStatus
             )
@@ -44,4 +50,30 @@ public class QPayupRepositoryImpl implements QPayupRepository {
         .fetch();
   }
 
+  @Override
+  public List<Payup> findAllByMonthRange(DateTimeRange dateTimeRange) {
+    return jpaQueryFactory.selectFrom(payup)
+        .join(payup.mentor)
+        .fetchJoin()
+        .join(mentoringApplication)
+        .on(mentoringApplication.payment.id.eq(payup.payment.id))
+        .where(
+            mentoringApplication.mentoringStatus.eq(MentoringStatus.COMPLETE)
+                .and(payup.payupStatus.eq(PayupStatus.WAITING))
+                .and(payup.createDate.between(dateTimeRange.getFrom(), dateTimeRange.getTo()))
+        )
+        .fetch();
+  }
+
+  @Override
+  public void updateStatus(DateTimeRange dateTimeRange, Set<Mentor> failMentors) {
+    List<Long> failMentorIds = failMentors.stream()
+        .map(Mentor::getId)
+        .toList();
+    jpaQueryFactory.update(payup)
+        .set(payup.payupStatus, PayupStatus.COMPLETE)
+        .where(payup.createDate.between(dateTimeRange.getFrom(), dateTimeRange.getTo())
+            .and(payup.mentor.id.notIn(failMentorIds)))
+        .execute();
+  }
 }

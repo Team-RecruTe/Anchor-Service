@@ -3,6 +3,7 @@ package com.anchor.global.util;
 
 import com.anchor.domain.mentoring.domain.MentoringStatus;
 import com.anchor.global.portone.request.AccessTokenRequest;
+import com.anchor.global.portone.request.PortOneRequestUrl;
 import com.anchor.global.portone.request.RequiredPaymentData;
 import com.anchor.global.portone.response.AccessTokenResult;
 import com.anchor.global.portone.response.PaymentCancelResult;
@@ -12,7 +13,7 @@ import com.anchor.global.portone.response.SinglePaymentResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -21,12 +22,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 @Component
-@RequiredArgsConstructor
 public class PaymentUtils {
 
-  private static final String ACCESS_TOKEN_URL = "https://api.iamport.kr/users/getToken";
-  private static final String CANCEL_PAYMENT_URL = "https://api.iamport.kr/payments/cancel";
-  private static final String CREATE_PAYMENT_URL = "https://api.iamport.kr/payments/";
 
   private final RestClient restClient;
 
@@ -37,6 +34,11 @@ public class PaymentUtils {
 
   @Value("${payment.imp-secret}")
   private String impSecret;
+
+  public PaymentUtils(@Qualifier("paymentRestClient") RestClient restClient, ObjectMapper objectMapper) {
+    this.restClient = restClient;
+    this.objectMapper = objectMapper;
+  }
 
   public Optional<PaymentResult> request(MentoringStatus status, RequiredPaymentData requiredPaymentData) {
     String accessToken = getAccessToken();
@@ -53,24 +55,24 @@ public class PaymentUtils {
   }
 
   private Optional<PaymentResult> cancelPayment(String accessToken, RequiredPaymentData requiredPaymentCancelData) {
-    return cancelPayment(CANCEL_PAYMENT_URL, accessToken, requiredPaymentCancelData);
+    return cancelPayment(PortOneRequestUrl.CANCEL_PAYMENT_URL.getUrl(), accessToken, requiredPaymentCancelData);
   }
 
   private String getAccessToken() {
     AccessTokenRequest accessTokenRequest = new AccessTokenRequest(impKey, impSecret);
-    return getToken(accessTokenRequest, ACCESS_TOKEN_URL)
+    return getToken(accessTokenRequest)
         .getAccessToken();
   }
 
   private String createPaymentDataRequestUrl(String impUid) {
-    return CREATE_PAYMENT_URL + impUid;
+    return PortOneRequestUrl.CREATE_PAYMENT_URL.getUrl() + impUid;
   }
 
-  private AccessTokenResult getToken(AccessTokenRequest accessTokenRequest, String requestUrl) {
+  private AccessTokenResult getToken(AccessTokenRequest accessTokenRequest) {
     try {
       String tokenRequestToJson = objectMapper.writeValueAsString(accessTokenRequest);
       ResponseEntity<PaymentRequestResult> entity = restClient.post()
-          .uri(requestUrl)
+          .uri(PortOneRequestUrl.ACCESS_TOKEN_URL.getUrl())
           .contentType(MediaType.APPLICATION_JSON)
           .body(tokenRequestToJson)
           .retrieve()

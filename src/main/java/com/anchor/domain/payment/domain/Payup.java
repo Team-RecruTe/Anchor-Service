@@ -1,6 +1,7 @@
 package com.anchor.domain.payment.domain;
 
 import com.anchor.domain.mentor.domain.Mentor;
+import com.anchor.global.nhpay.PayupCalculator;
 import com.anchor.global.util.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,6 +16,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.LastModifiedDate;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -23,8 +25,9 @@ public class Payup extends BaseEntity {
 
   private Integer amount;
 
+  @LastModifiedDate
   @Column(columnDefinition = "datetime")
-  private LocalDateTime payupDateTime;
+  private LocalDateTime payupDateTime = LocalDateTime.MIN;
 
   @Enumerated(EnumType.STRING)
   private PayupStatus payupStatus = PayupStatus.WAITING;
@@ -38,17 +41,12 @@ public class Payup extends BaseEntity {
   private Payment payment;
 
   @Builder
-  private Payup(LocalDateTime payupDateTime, Mentor mentor, Payment payment) {
-    this.amount = payment.getAmount();
-    this.payupDateTime = payupDateTime;
+  private Payup(Mentor mentor, Payment payment) {
+    this.amount = PayupCalculator.totalCalculate(payment.getAmount());
     this.mentor = mentor;
     this.mentor.getPayups()
         .add(this);
     this.payment = payment;
-  }
-
-  public void changeStatusToComplete() {
-    this.payupStatus = PayupStatus.COMPLETE;
   }
 
 }
