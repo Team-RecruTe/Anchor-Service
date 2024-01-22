@@ -74,7 +74,6 @@ class UserServiceTest {
   @InjectMocks
   UserService userService;
 
-
   private User user;
   private SessionUser sessionUser;
 

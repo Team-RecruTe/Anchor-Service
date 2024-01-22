@@ -62,6 +62,7 @@ public class UserController {
     return ResponseEntity.ok().build();
   }
 
+
   /**
    * 신청한 멘토링의 상태를 변경합니다. 취소, 또는 완료로 변경가능합니다.
    */
