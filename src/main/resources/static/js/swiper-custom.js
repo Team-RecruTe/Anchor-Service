@@ -17,6 +17,7 @@ new Swiper('.swiper', {
     nextEl: '.swiper-button-next'
   },
 
+
   // 반응형 웹 디자인을 위한 breakpoints 설정
   breakpoints: {
     // 화면 너비가 768px 미만일 때
