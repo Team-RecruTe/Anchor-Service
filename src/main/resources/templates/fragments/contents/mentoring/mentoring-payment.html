@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko"
+      layout:decorate="~{layout/default}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>멘토링 결제</title>
+  <meta charset="UTF-8">
+  <script src="/js/library/axios/axios.min.js"></script>
+  <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
+</head>
+<div layout:fragment="content">
+
+  <div class="container mt-4">
+    <div class="row">
+
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h2 class="card-title">결제할 멘토링 정보</h2>
+            <hr>
+            <p class="card-text" th:text="'제목 : '+${confirmInfo.mentoringInfo.mentoringTitle}">멘토링 제목: [멘토링제목]</p>
+            <p class="card-text"
+               th:text="'시간 : '+${confirmInfo.mentoringInfo.startDateTime +' ~ '+ confirmInfo.mentoringInfo.endDateTime}">
+              멘토링 시간대: [멘토링시간대]</p>
+            <p class="card-text" th:text="'금액 : '+${confirmInfo.mentoringInfo.amount}">멘토링 금액: [멘토링금액]</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h2 class="card-title">구매자 정보</h2>
+            <hr>
+            <div class="row">
+              <span class="col-2 ml-2">닉네임 : </span>
+              <span class="col-10 card-text" id="user-nickname" th:text="${confirmInfo.buyerInfo.userNickname}"></span>
+            </div>
+            <br/>
+            <div class="row">
+              <span class="col-2">이메일 : </span>
+              <span class="col-10 card-text" id="user-email" th:text="${confirmInfo.buyerInfo.userEmail}"></span>
+            </div>
+            <br/>
+            <label for="user-tel" th:text="'전화번호 : '">전화번호</label>
+            <input class="card-text" id="user-tel" name="tel" placeholder="전화번호를 입력하세요." type="number">
+          </div>
+          <div class="card-footer d-flex justify-content-between align-items-center">
+            <p class="total-amount font-weight-bold" th:text="'최종 결제금액 : '+${confirmInfo.mentoringInfo.finalAmount}">
+              최종 결제금액</p>
+            <button class="btn btn-success pay-button justify-content-end" id="payment-button">결제하기</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <script src="/js/mentoring/mentoring-payment.js"></script>
+</div>
+</html>

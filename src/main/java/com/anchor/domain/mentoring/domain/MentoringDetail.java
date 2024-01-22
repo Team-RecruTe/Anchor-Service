@@ -3,7 +3,6 @@ package com.anchor.domain.mentoring.domain;
 import com.anchor.global.util.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Lob;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,8 +12,7 @@ import lombok.NoArgsConstructor;
 @Entity
 public class MentoringDetail extends BaseEntity {
 
-  @Lob
-  @Column(nullable = false)
+  @Column(nullable = false, columnDefinition = "mediumtext")
   private String contents;
 
   private MentoringDetail(String contents) {
@@ -28,5 +26,5 @@ public class MentoringDetail extends BaseEntity {
   public void editDetail(String contents) {
     this.contents = contents;
   }
-  
+
 }

@@ -29,7 +29,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.web.client.RestClient;
 
 @MockBean(JpaMetamodelMappingContext.class)
 @WithMockUser(username = "hossi", roles = {"MENTOR"})
@@ -125,7 +124,6 @@ class MentoringControllerTest {
     // given
     MockHttpSession session = new MockHttpSession();
     session.setAttribute("user", new SessionUser());
-    RestClient restClient = RestClient.create();
     byte[] image = new byte[0];
 
     MockMultipartFile file = new MockMultipartFile("image", "image.png", MediaType.IMAGE_PNG_VALUE,

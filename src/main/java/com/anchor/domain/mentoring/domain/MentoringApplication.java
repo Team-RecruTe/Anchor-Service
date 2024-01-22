@@ -2,9 +2,9 @@ package com.anchor.domain.mentoring.domain;
 
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationInfo;
 import com.anchor.domain.payment.domain.Payment;
-import com.anchor.domain.user.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
 import com.anchor.domain.user.domain.User;
 import com.anchor.global.util.BaseEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -19,7 +19,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -40,8 +39,8 @@ public class MentoringApplication extends BaseEntity {
   @JoinColumn(name = "mentoring_id")
   private Mentoring mentoring;
 
-  @OneToOne(mappedBy = "mentoringApplication")
-  @Setter(AccessLevel.PRIVATE)
+  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+  @JoinColumn(name = "payment_id")
   private Payment payment;
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -56,7 +55,6 @@ public class MentoringApplication extends BaseEntity {
       Payment payment, User user) {
     this.startDateTime = startDateTime;
     this.endDateTime = endDateTime;
-    this.mentoringStatus = mentoringStatus;
     this.mentoring = mentoring;
     this.payment = payment;
     this.user = user;
@@ -65,14 +63,16 @@ public class MentoringApplication extends BaseEntity {
         .add(this);
   }
 
-  public MentoringApplication(MentoringApplicationInfo applicationInfo,
-      MentoringStatus mentoringStatus, Mentoring mentoring, Payment payment, User user) {
+  public MentoringApplication(MentoringApplicationInfo applicationInfo, Mentoring mentoring, Payment payment,
+      User user) {
     this.startDateTime = applicationInfo.getStartDateTime();
     this.endDateTime = applicationInfo.getEndDateTime();
-    this.mentoringStatus = mentoringStatus == null ? MentoringStatus.WAITING : mentoringStatus;
     this.mentoring = mentoring;
     this.payment = payment;
+    this.payment.addMentoringApplication(this);
     this.user = user;
+    this.user.getMentoringApplicationList()
+        .add(this);
   }
 
   public void connectPayment(Payment payment) {
@@ -81,20 +81,6 @@ public class MentoringApplication extends BaseEntity {
 
   public void changeStatus(MentoringStatus mentoringStatus) {
     this.mentoringStatus = mentoringStatus;
-  }
-
-  private boolean isMatchingDateTime(RequiredMentoringStatusInfo requiredMentoringStatusInfo) {
-    return this.startDateTime.isEqual(requiredMentoringStatusInfo.getStartDateTime())
-        &&
-        this.endDateTime.isEqual(requiredMentoringStatusInfo.getEndDateTime());
-  }
-
-  public boolean isExistPayment() {
-    return this.payment != null;
-  }
-
-  public void changePayment(Payment payment) {
-    setPayment(payment);
   }
 
   @Override

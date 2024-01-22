@@ -9,10 +9,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MentoringContents extends ResponseDto {
 
+  private String title;
   private String contents;
   private List<String> tags;
 
-  public MentoringContents(String contents, List<String> tags) {
+  public MentoringContents(String title, String contents, List<String> tags) {
+    this.title = title;
     this.contents = contents;
     this.tags = tags;
   }

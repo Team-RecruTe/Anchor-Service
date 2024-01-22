@@ -3,25 +3,39 @@ package com.anchor.domain.mentor.api.service;
 import com.anchor.domain.mentor.api.controller.request.MentorRegisterInfo;
 import com.anchor.domain.mentor.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
 import com.anchor.domain.mentor.api.service.response.AppliedMentoringSearchResult;
-import com.anchor.domain.mentor.api.service.response.MentoringUnavailableTimes;
+import com.anchor.domain.mentor.api.service.response.MentorOpenCloseTimes;
+import com.anchor.domain.mentor.api.service.response.MentorPayupResult;
+import com.anchor.domain.mentor.api.service.response.MentorPayupResult.PayupInfo;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentor.domain.repository.MentorRepository;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
-import com.anchor.domain.mentoring.domain.MentoringUnavailableTime;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
+import com.anchor.domain.payment.domain.Payment;
+import com.anchor.domain.payment.domain.repository.PayupRepository;
+import com.anchor.global.auth.SessionUser;
+import com.anchor.global.portone.request.RequiredPaymentCancelData;
+import com.anchor.global.portone.response.PaymentCancelResult;
+import com.anchor.global.portone.response.PaymentResult;
+import com.anchor.global.util.PaymentUtils;
 import com.anchor.global.util.type.DateTimeRange;
 import jakarta.persistence.PersistenceException;
-import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.NonUniqueResultException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,12 +44,8 @@ public class MentorService {
 
   private final MentorRepository mentorRepository;
   private final MentoringApplicationRepository mentoringApplicationRepository;
-
-  @Transactional
-  public void setUnavailableTimes(Long id, List<DateTimeRange> unavailableTimes) {
-    mentorRepository.deleteUnavailableTimes(id);
-    mentorRepository.saveUnavailableTimesWithBatch(id, unavailableTimes);
-  }
+  private final PayupRepository payupRepository;
+  private final PaymentUtils paymentUtils;
 
   @Transactional
   public void changeMentoringStatus(Long id, List<RequiredMentoringStatusInfo> requiredMentoringStatusInfos) {
@@ -61,11 +71,21 @@ public class MentorService {
     MentoringStatus mentoringStatus = requiredMentoringStatusInfo.getMentoringStatus();
     try {
       MentoringApplication mentoringApplication = getMentoringApplication(mentoringId, mentoringReservedTime);
+      Payment payment = mentoringApplication.getPayment();
       mentoringApplication.changeStatus(mentoringStatus);
+      cancelPayemntIfCancelled(mentoringStatus, payment);
       mentoringApplicationRepository.save(mentoringApplication);
     } catch (NullPointerException | PersistenceException e) {
       log.warn("Exception: {}", e);
     }
+  }
+
+  private void cancelPayemntIfCancelled(MentoringStatus status, Payment payment) {
+    RequiredPaymentCancelData requiredPaymentCancelData = new RequiredPaymentCancelData(payment);
+    Optional<PaymentResult> paymentCancelResult = paymentUtils.request(status, requiredPaymentCancelData);
+    paymentCancelResult.ifPresent(result -> {
+      payment.editPaymentCancelStatus((PaymentCancelResult) result);
+    });
   }
 
   private MentoringApplication getMentoringApplication(Long id, DateTimeRange mentoringReservedTime) {
@@ -77,15 +97,6 @@ public class MentorService {
       log.warn("Exception: {}", e);
       throw new RuntimeException(e);
     }
-  }
-
-  public MentoringUnavailableTimes getUnavailableTimes(Long mentorId) {
-    List<MentoringUnavailableTime> unavailableTimes = mentorRepository.findUnavailableTimes(mentorId);
-    List<MentoringApplication> reservedMentorings = mentoringApplicationRepository.findUnavailableTimesByMentoringIdAndStatus(
-        mentorId, MentoringStatus.APPROVAL,
-        MentoringStatus.WAITING);
-
-    return MentoringUnavailableTimes.of(unavailableTimes, reservedMentorings);
   }
 
   public Page<AppliedMentoringSearchResult> getMentoringApplications(Long mentorId, Pageable pageable) {
@@ -106,6 +117,53 @@ public class MentorService {
         .build();
     mentorRepository.save(dbInsertMentor);
     return dbInsertMentor;
+  }
+
+  @Transactional(readOnly = true)
+  public MentorOpenCloseTimes getMentorSchedule(Long mentorId) {
+    return mentorRepository.findScheduleById(mentorId);
+  }
+
+  @Transactional
+  public void setMentorSchedule(Long mentorId, MentorOpenCloseTimes mentorOpenCloseTimes) {
+    mentorRepository.deleteAllSchedules(mentorId);
+    mentorRepository.saveMentoSchedules(mentorId, mentorOpenCloseTimes);
+  }
+
+  @Transactional(readOnly = true)
+  public MentorPayupResult getMentorPayupResult(LocalDateTime currentMonth, SessionUser sessionUser) {
+//    Long mentorId = sessionUser.getMentorId();
+    Long mentorId = 1L;
+    DateTimeRange actualCalendarRange = DateTimeRange.of(
+        getFirstDayOfMonth(currentMonth),
+        getFirstDayOfNextMonth(currentMonth)
+    );
+    Map<LocalDateTime, Integer> dailyTotalAmountMap = new HashMap<>();
+    Map<LocalDateTime, List<PayupInfo>> dailyPayupInfoMap = new HashMap<>();
+    List<PayupInfo> payupInfos = payupRepository.findAllByMonthRange(actualCalendarRange, mentorId);
+    payupInfos.forEach(info -> handlePayupInfo(info, dailyTotalAmountMap, dailyPayupInfoMap));
+    return new MentorPayupResult(dailyTotalAmountMap, dailyPayupInfoMap);
+  }
+
+  private LocalDateTime getFirstDayOfMonth(LocalDateTime dateTime) {
+    return dateTime.with(TemporalAdjusters.firstDayOfMonth())
+        .truncatedTo(ChronoUnit.DAYS);
+  }
+
+  private LocalDateTime getFirstDayOfNextMonth(LocalDateTime dateTime) {
+    return dateTime.with(TemporalAdjusters.firstDayOfNextMonth())
+        .truncatedTo(ChronoUnit.DAYS);
+  }
+
+  private void handlePayupInfo(PayupInfo payupInfo,
+      Map<LocalDateTime, Integer> dailyTotalAmountMap, Map<LocalDateTime, List<PayupInfo>> dailyPayupInfoMap) {
+    DateTimeRange mentoringTimeRange = payupInfo.getDateTimeRange();
+    LocalDateTime startDateTime = mentoringTimeRange.getFrom()
+        .truncatedTo(ChronoUnit.DAYS);
+    dailyTotalAmountMap.put(startDateTime,
+        dailyTotalAmountMap.getOrDefault(startDateTime, 0) + payupInfo.getPayupAmount());
+    List<PayupInfo> payupInfos = dailyPayupInfoMap.computeIfAbsent(startDateTime, key -> new ArrayList<>());
+    payupInfos.add(payupInfo);
   }
 
 }

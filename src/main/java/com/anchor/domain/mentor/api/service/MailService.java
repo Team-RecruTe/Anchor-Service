@@ -22,8 +22,9 @@ public class MailService {
 
   private final JavaMailSender javaMailSender;
   private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
   @Value("${spring.mail.username}")
-  String sender;
+  private String sender;
 
   @Async("emailAsync")
   public CompletableFuture<String> sendMail(MailDto mailDto) {

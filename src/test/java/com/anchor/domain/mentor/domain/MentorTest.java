@@ -23,4 +23,5 @@ class MentorTest {
     Assertions.assertThat(mentor.getCareer()).isEqualTo(Career.JUNIOR);
     Assertions.assertThat(mentor.getCompanyEmail()).isEqualTo("09090@naver.com");
   }
+
 }

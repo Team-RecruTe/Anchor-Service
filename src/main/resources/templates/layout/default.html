@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+>
+<head>
+  <title>Layout page</title>
+  <link href="/css/library/bootstrap/bootstrap.css" rel="stylesheet">
+  <script src="/js/library/axios/axios.min.js"></script>
+</head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<div class="main-container" layout:fragment="content"></div>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<script src="/js/library/bootstrap/bootstrap.bundle.js"></script>
+<script src="/js/payment-timeout.js"></script>
+</body>
+</html>

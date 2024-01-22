@@ -1,9 +1,10 @@
 package com.anchor.domain.mentor.domain.repository.custom;
 
-import static com.anchor.domain.mentoring.domain.QMentoringUnavailableTime.mentoringUnavailableTime;
+import static com.anchor.domain.mentor.domain.QMentor.mentor;
+import static com.anchor.domain.mentor.domain.QMentorSchedule.mentorSchedule;
 
-import com.anchor.domain.mentoring.domain.MentoringUnavailableTime;
-import com.anchor.global.util.type.DateTimeRange;
+import com.anchor.domain.mentor.api.service.response.MentorOpenCloseTimes;
+import com.anchor.domain.mentor.domain.MentorSchedule;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -21,48 +22,44 @@ public class QMentorRepositoryImpl implements QMentorRepository {
   private final JdbcTemplate jdbcTemplate;
 
   @Override
-  public List<MentoringUnavailableTime> findUnavailableTimes(Long mentorId) {
-    return jpaQueryFactory.selectFrom(mentoringUnavailableTime)
-        .where(mentoringUnavailableTime.mentorId.eq(mentorId))
-        .stream()
-        .toList();
+  public MentorOpenCloseTimes findScheduleById(Long mentorId) {
+    List<MentorSchedule> mentorSchedules = jpaQueryFactory.selectFrom(mentorSchedule).
+        where(mentor.id.eq(mentorId))
+        .fetch();
+
+    return MentorOpenCloseTimes.of(mentorSchedules);
   }
 
   @Override
-  public void deleteUnavailableTimes(Long mentorId) {
-    jpaQueryFactory.delete(mentoringUnavailableTime)
-        .where(mentoringUnavailableTime.mentorId.eq(mentorId))
-        .execute();
-  }
+  public void saveMentoSchedules(Long mentorId, MentorOpenCloseTimes mentorOpenCloseTimes) {
+    String sql = "insert into mentor_schedule (mentor_id, open_time, close_time, active_status, day_of_week) VALUES (?, ?, ?, ?, ?)";
+    List<MentorSchedule> mentorSchedules = MentorSchedule.of(mentorOpenCloseTimes);
 
-  @Override
-  public void saveUnavailableTimes(Long mentorId, List<DateTimeRange> unavailableTimes) {
-    for (DateTimeRange unavailableTime : unavailableTimes) {
-      jpaQueryFactory.insert(mentoringUnavailableTime)
-          .columns(mentoringUnavailableTime.fromDateTime, mentoringUnavailableTime.toDateTime,
-              mentoringUnavailableTime.mentorId)
-          .values(unavailableTime.getFrom(), unavailableTime.getTo(), mentorId)
-          .execute();
-    }
-  }
-
-  @Override
-  public void saveUnavailableTimesWithBatch(Long mentorId, List<DateTimeRange> unavailableTimes) {
-    String sql = "insert into mentoring_unavailable_time (mentor_id, from_date_time, to_date_time) VALUES (?, ?, ?)";
     jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
       @Override
       public void setValues(PreparedStatement ps, int i) throws SQLException {
-        DateTimeRange range = unavailableTimes.get(i);
+        MentorSchedule schedule = mentorSchedules.get(i);
         ps.setLong(1, mentorId);
-        ps.setObject(2, range.getFrom());
-        ps.setObject(3, range.getTo());
+        ps.setObject(2, schedule.getOpenTime());
+        ps.setObject(3, schedule.getCloseTime());
+        ps.setObject(4, schedule.getActiveStatus()
+            .name());
+        ps.setObject(5, schedule.getDayOfWeek()
+            .name());
       }
 
       @Override
       public int getBatchSize() {
-        return unavailableTimes.size();
+        return mentorSchedules.size();
       }
     });
+  }
+
+  @Override
+  public void deleteAllSchedules(Long mentorId) {
+    jpaQueryFactory.delete(mentorSchedule)
+        .where(mentor.id.eq(mentorId))
+        .execute();
   }
 
 }

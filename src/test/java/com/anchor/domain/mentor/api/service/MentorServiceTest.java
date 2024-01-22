@@ -21,6 +21,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 class MentorServiceTest {
 
   private MentorService mentorService;
+
   @MockBean
   private MentorRepository mentorRepository;
 
@@ -51,6 +52,7 @@ class MentorServiceTest {
         .build();
     Mentor registerResult = mentorService.register(mentorRegisterInfo);
 
+
     Assertions.assertThat(registerResult.getCompanyEmail()).isEqualTo(mentor.getCompanyEmail());
   }
 
@@ -64,6 +66,7 @@ class MentorServiceTest {
         .accountName("leejuyoon")
         .career(Career.JUNIOR)
         .build();
+
     Mockito.when(mentorRepository.findByCompanyEmail("0000@naver.com")).thenReturn(Optional.of(mentor));
 
     MentorRegisterInfo mentorRegisterInfo = MentorRegisterInfo.builder()

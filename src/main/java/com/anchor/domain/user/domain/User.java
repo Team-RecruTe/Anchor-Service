@@ -2,6 +2,7 @@ package com.anchor.domain.user.domain;
 
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
+import com.anchor.domain.user.api.controller.request.UserNicknameRequest;
 import com.anchor.global.util.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,7 +34,7 @@ public class User extends BaseEntity {
   @Enumerated(EnumType.STRING)
   private UserRole role;
 
-  @OneToOne(fetch = FetchType.LAZY)
+  @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
   private Mentor mentor;
 
   @OneToMany(mappedBy = "user")
@@ -49,6 +50,10 @@ public class User extends BaseEntity {
 
   public String getRoleKey() {
     return role.getKey();
+  }
+
+  public void editNickname(UserNicknameRequest userNicknameRequest) {
+    this.nickname = userNicknameRequest.getNickname();
   }
 
 }

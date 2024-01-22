@@ -2,23 +2,22 @@ package com.anchor.domain.mentoring.api.controller;
 
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
+import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationUserInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
 import com.anchor.domain.mentoring.api.service.MentoringService;
-import com.anchor.domain.mentoring.api.service.response.ApplicationUnavailableTime;
-import com.anchor.domain.mentoring.api.service.response.AppliedMentoringInfo;
+import com.anchor.domain.mentoring.api.service.response.ApplicationTimeInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringDeleteResult;
-import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringPaymentInfo;
+import com.anchor.domain.mentoring.api.service.response.MentoringSaveRequestInfo;
+import com.anchor.domain.mentoring.api.service.response.TopMentoring;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.util.type.Link;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +37,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class MentoringController {
 
   private static final String SUCCESS = "success";
-  private static final String FAILURE = "failure";
   private final MentoringService mentoringService;
 
   @PostMapping
@@ -82,90 +80,92 @@ public class MentoringController {
     return ResponseEntity.ok(result);
   }
 
-  @GetMapping("/{id}")
-  public ResponseEntity<MentoringDetailInfo> mentoringDetail(
-      @PathVariable("id") Long id) {
-    MentoringDetailInfo mentoringDetailInfo = mentoringService.loadMentoringDetail(id);
-    return ResponseEntity.ok()
-        .body(mentoringDetailInfo);
+  @GetMapping("/rank")
+  public ResponseEntity<TopMentoring> getTopMentoring() {
+    TopMentoring result = mentoringService.getTopMentorings();
+    result.addLinks(Link.builder()
+        .setLink("self", "/mentorings/rank")
+        .build());
+    return ResponseEntity.ok(result);
   }
 
-  @GetMapping("/{id}/apply")
-  public ResponseEntity<List<ApplicationUnavailableTime>> mentoringApplicationPage(
-      @PathVariable("id") Long id, HttpSession session) {
-    List<ApplicationUnavailableTime> applicationUnavailableTimeList = mentoringService.loadMentoringUnavailableTime(id);
-    List<ApplicationUnavailableTime> sessionApplicationUnavailableTimeList = getSessionUnavailableTimeList(session, id);
-    sessionApplicationUnavailableTimeList.addAll(applicationUnavailableTimeList);
-    updateSessionUnavailableTimeList(session, id, sessionApplicationUnavailableTimeList);
+  /**
+   * 멘토의 활동시간과 해당 멘토링의 신청내역, Redis에 저장된 결제중인 멘토링시간대를 조회합니다. 해당 멘토링의 신청대기 또는 완료된 시간대를 조회한 후 활동시간과 신청내역 시간을 분리해서 클라이언트로
+   * 전달합니다.
+   */
+  @GetMapping("/{id}/reservation-time")
+  public ResponseEntity<ApplicationTimeInfo> mentoringActiveTime(@PathVariable("id") Long id) {
+    ApplicationTimeInfo mentoringActiveTimes = mentoringService.getMentoringActiveTimes(id);
     return ResponseEntity.ok()
-        .body(sessionApplicationUnavailableTimeList);
+        .body(mentoringActiveTimes);
+  }
+
+  /**
+   * 신청중인 멘토링 시간을 잠금처리하고, 세션에 멘토링 신청중인 데이터를 저장합니다.
+   */
+  @PostMapping("/{id}/lock")
+  public ResponseEntity<String> applicationTimeLock(@PathVariable("id") Long id,
+      @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
+    mentoringService.lock(id, sessionUser, applicationTime);
+    return ResponseEntity.ok()
+        .body(SUCCESS);
+  }
+
+  /**
+   * 결제중인 멘토링 시간대의 잠금 유효시간을 갱신합니다.
+   */
+  @PutMapping("/{id}/refresh")
+  public ResponseEntity<String> refreshPaymentTime(@PathVariable("id") Long id, HttpSession session) {
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
+    boolean refreshResult = mentoringService.refresh(id, sessionUser);
+    if (refreshResult) {
+      return ResponseEntity.ok()
+          .build();
+    } else {
+      return ResponseEntity.badRequest()
+          .body("이미 예약시간이 만료되었습니다. 홈페이지로 이동합니다.");
+    }
+  }
+
+  /**
+   * 멘토링 신청 도중 페이지를 벗어나거나, 시간이 만료되면 잠금을 해제합니다.
+   */
+  @DeleteMapping("/{id}/unlock")
+  public ResponseEntity<String> mentoringTimeSessionRemove(@PathVariable("id") Long id, HttpSession session) {
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
+    mentoringService.unlock(id, sessionUser);
+    return ResponseEntity.ok()
+        .body(SUCCESS);
+  }
+
+  /**
+   * 포트원 결제 API를 실행하기 위한 데이터를 응답데이터로 반환합니다.
+   */
+  @PostMapping("/{id}/payment-process")
+  public ResponseEntity<MentoringPaymentInfo> mentoringTimeSessionSave(
+      @PathVariable("id") Long id, @RequestBody MentoringApplicationUserInfo userInfo, HttpSession session) {
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
+    MentoringPaymentInfo mentoringPaymentInfo = mentoringService.createPaymentInfo(id, userInfo, sessionUser);
+    return ResponseEntity.ok()
+        .body(mentoringPaymentInfo);
   }
 
   /**
    * 멘토링 결제 완료가 되면 멘토링 신청이력을 저장합니다.
    */
   @PostMapping("/{id}/apply")
-  public ResponseEntity<AppliedMentoringInfo> mentoringApplicationSave
+  public ResponseEntity<MentoringSaveRequestInfo> mentoringApplicationSave
   (@PathVariable("id") Long id, @RequestBody MentoringApplicationInfo applicationInfo, HttpSession session) {
-    SessionUser sessionUser = (SessionUser) session.getAttribute("user");
-    if (sessionUser == null) {
-      throw new RuntimeException("로그인 정보가 없습니다. 잘못된 접근입니다.");
-    }
-    AppliedMentoringInfo appliedMentoringInfo =
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
+    MentoringSaveRequestInfo mentoringSaveRequestInfo =
         mentoringService.saveMentoringApplication(sessionUser, id, applicationInfo);
-
-    if (appliedMentoringInfo != null) {
-      List<ApplicationUnavailableTime> sessionApplicationUnavailableTimeList =
-          getSessionUnavailableTimeList(session, id);
-      mentoringService.removeApplicationTimeFromSession(sessionApplicationUnavailableTimeList, applicationInfo);
-      updateSessionUnavailableTimeList(session, id, sessionApplicationUnavailableTimeList);
+    if (mentoringSaveRequestInfo != null) {
       return ResponseEntity.ok()
-          .body(appliedMentoringInfo);
+          .body(mentoringSaveRequestInfo);
     }
-
     return ResponseEntity.badRequest()
         .build();
-  }
-
-  /**
-   * 멘토링 신청과정입니다. 결제진행중인 시간대를 다른 회원이 신청하지 못하도록 잠금처리 합니다.
-   */
-  @PostMapping("/{id}/apply-process")
-  public ResponseEntity<MentoringPaymentInfo> mentoringTimeSessionSave(
-      @PathVariable("id") Long id, @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
-    List<ApplicationUnavailableTime> sessionApplicationUnavailableTimeList = getSessionUnavailableTimeList(session, id);
-    mentoringService.addApplicationTimeFromSession(sessionApplicationUnavailableTimeList, applicationTime);
-    MentoringPaymentInfo mentoringPaymentInfo = mentoringService.createPaymentInfo(id, applicationTime);
-    updateSessionUnavailableTimeList(session, id, sessionApplicationUnavailableTimeList);
-    return ResponseEntity.ok()
-        .body(mentoringPaymentInfo);
-  }
-
-  /**
-   * 멘토링 신청 도중 결제실패 또는 취소시 잠금상태였던 시간대를 해제합니다.
-   */
-  @PostMapping("/{id}/apply-cancel")
-  public String mentoringTimeSessionRemove(@PathVariable("id") Long id,
-      @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
-    List<ApplicationUnavailableTime> sessionApplicationUnavailableTimeList = getSessionUnavailableTimeList(session, id);
-    boolean removeResult = mentoringService.removeApplicationTimeFromSession(sessionApplicationUnavailableTimeList,
-        applicationTime);
-    updateSessionUnavailableTimeList(session, id, sessionApplicationUnavailableTimeList);
-    return removeResult ? SUCCESS : FAILURE;
-  }
-
-
-  private List<ApplicationUnavailableTime> getSessionUnavailableTimeList(
-      HttpSession session, Long id) {
-    List<ApplicationUnavailableTime> sessionApplicationunavailableTimeList =
-        (List<ApplicationUnavailableTime>) session.getAttribute(String.valueOf(id));
-    return sessionApplicationunavailableTimeList == null ?
-        new ArrayList<>() : sessionApplicationunavailableTimeList;
-  }
-
-  private void updateSessionUnavailableTimeList(HttpSession session, Long id,
-      List<ApplicationUnavailableTime> sessionSavedTimeList) {
-    session.setAttribute(String.valueOf(id), sessionSavedTimeList);
   }
 
 }

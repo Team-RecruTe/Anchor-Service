@@ -2,23 +2,26 @@ package com.anchor.domain.mentor.api.controller;
 
 import com.anchor.domain.mentor.api.controller.request.MailDto;
 import com.anchor.domain.mentor.api.controller.request.MentoringStatusInfo;
-import com.anchor.domain.mentor.api.controller.request.MentoringUnavailableTimeInfo;
 import com.anchor.domain.mentor.api.controller.request.RandomCodeMaker;
 import com.anchor.domain.mentor.api.service.MailService;
 import com.anchor.domain.mentor.api.service.MentorService;
-import com.anchor.domain.mentor.api.service.response.MentoringUnavailableTimes;
+import com.anchor.domain.mentor.api.service.response.MentorOpenCloseTimes;
+import com.anchor.domain.mentor.api.service.response.MentorPayupResult;
 import com.anchor.global.auth.SessionUser;
-import com.anchor.global.util.type.Link;
 import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -31,33 +34,20 @@ public class MentorController {
   private final MailService mailService;
   private final HttpSession session;
 
-  @GetMapping("/me/schedule")
-  public ResponseEntity<MentoringUnavailableTimes> getUnavailableTimes(HttpSession httpSession) {
-    SessionUser user = (SessionUser) httpSession.getAttribute("user");
-    MentoringUnavailableTimes result = mentorService.getUnavailableTimes(user.getMentorId());
-    result.addLinks(Link.builder()
-        .setLink("self", "/me/schedule")
-        .build());
-    return ResponseEntity.ok(result);
-  }
-
-  @PostMapping("/me/schedule")
-  public ResponseEntity<String> registerUnavailableTimes(
-      @Valid @RequestBody MentoringUnavailableTimeInfo mentoringUnavailableTimeInfo, HttpSession httpSession) {
-    SessionUser user = (SessionUser) httpSession.getAttribute("user");
-    mentorService.setUnavailableTimes(user.getMentorId(), mentoringUnavailableTimeInfo.getDateTimeRanges());
-    log.info("IsEmpty: {}", mentoringUnavailableTimeInfo.getDateTimeRanges()
-        .isEmpty());
+  @PutMapping("/me/schedule")
+  public ResponseEntity<String> editMentorSchedule(@RequestBody MentorOpenCloseTimes mentorOpenCloseTimes,
+      HttpSession httpSession) {
+//    SessionUser user = (SessionUser) httpSession.getAttribute("user");
+    mentorService.setMentorSchedule(1L, mentorOpenCloseTimes);
     return ResponseEntity.ok()
         .build();
   }
 
   @PostMapping("/me/applied-mentorings")
-  public ResponseEntity<String> changeMentoringStatus(
-      @RequestBody MentoringStatusInfo mentoringStatusInfo,
+  public ResponseEntity<String> changeMentoringStatus(@RequestBody MentoringStatusInfo mentoringStatusInfo,
       HttpSession httpSession) {
     SessionUser user = (SessionUser) httpSession.getAttribute("user");
-    mentorService.changeMentoringStatus(user.getMentorId(), mentoringStatusInfo.getRequiredMentoringStatusInfos());
+    mentorService.changeMentoringStatus(1L, mentoringStatusInfo.getRequiredMentoringStatusInfos());
     return ResponseEntity.ok()
         .build();
   }
@@ -78,13 +68,28 @@ public class MentorController {
   @PostMapping("/register/email/auth")
   public ResponseEntity emailVerify(String userEmailCode) {
     String emailCode = (String) session.getAttribute("ecode");
-    log.info("auth session email code==="+emailCode);
+    log.info("auth session email code===" + emailCode);
     if (userEmailCode.equals(emailCode)) {
       return new ResponseEntity("success", HttpStatus.OK);
-    }
-    else {
+    } else {
       return new ResponseEntity("fail", HttpStatus.OK);
     }
   }
 
+  @GetMapping("/me/payup-info")
+  public ResponseEntity<MentorPayupResult> getTest(
+      @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") LocalDateTime currentMonth
+      /*,HttpSession session*/) {
+    SessionUser sessionUser = new SessionUser();
+    if (isFutureDate(currentMonth)) {
+      return ResponseEntity.ok(new MentorPayupResult());
+    }
+    MentorPayupResult payupInfos = mentorService.getMentorPayupResult(currentMonth, sessionUser);
+    return ResponseEntity.ok(payupInfos);
+  }
+
+  private boolean isFutureDate(LocalDateTime currentMonth) {
+    return currentMonth.isAfter(LocalDateTime.now()
+        .with(TemporalAdjusters.lastDayOfMonth()));
+  }
 }

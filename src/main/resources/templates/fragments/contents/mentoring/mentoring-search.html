@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko"
+      layout:decorate="~{layout/default}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>멘토링 조회</title>
+  <meta charset="UTF-8">
+</head>
+<div layout:fragment="content">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-3">
+        <!-- 왼쪽 사이드바 -->
+        <form action="/mentorings" id="mentor-search" method="get">
+          <div class="mb-3 me-1">
+            <div class="input-group">
+              <label for="keyword"></label>
+              <input class="form-control" id="keyword" name="keyword" placeholder="멘토링 제목을 입력하세요." type="text">
+              <button class="btn btn-success" th:text="'검색'" type="submit">search</button>
+            </div>
+          </div>
+
+          <div class="accordion" id="accordionExample">
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingOne">
+                <button aria-controls="collapseOne" aria-expanded="true" class="accordion-button"
+                        data-bs-target="#collapseOne" data-bs-toggle="collapse" type="button">
+                  태그를 선택해주세요. (1개이상)
+                </button>
+              </h2>
+              <div aria-labelledby="headingOne" class="accordion-collapse collapse" data-bs-parent="#accordionExample"
+                   id="collapseOne">
+                <div class="accordion-body">
+                  <th:block th:each="tag: ${mentoringSearchInfo.tags}">
+                    <input autocomplete="off" class="btn-check" name="tag"
+                           th:id="'btn-check-outlined '+${tagStat.count}"
+                           th:value="${tag}" type="checkbox">
+                    <label class="btn btn-outline-primary mx-2 mb-1" th:for="'btn-check-outlined '+${tagStat.count}"
+                           th:text="${tag}">자바</label>
+                  </th:block>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="col-lg-9">
+        <div class="row row-cols-2 row-cols2-md-3 row-cols-lg-4">
+          <th:block th:each="mentoring: ${mentoringSearchInfo.mentoringInfos}">
+            <div class="col-mb-4 mb-2">
+              <div class="card" style="width: 14rem; height: 16rem">
+                <div class="card-body d-flex flex-column ">
+                  <!-- Title -->
+                  <h6 class="card-title mb-3">
+                    <a class="text-decoration-none text-dark"
+                       th:href="@{/mentorings/{id}(id=${mentoring.mentoringInfo.id})}"
+                       th:text="${mentoring.mentoringInfo.title}">타이틀</a></h6>
+
+                  <!-- Career and Nickname -->
+                  <p class="card-text mb-1 mr-2" th:text="${mentoring.mentorInfo.career}"></p>
+                  <a class="card-text mb-1" th:href="@{/mentors/{id}(id=${mentoring.mentorInfo.id})}"
+                     th:text="${mentoring.mentorInfo.mentorNickname}">닉네임</a>
+
+                  <!-- Image -->
+                  <img alt="멘토이미지" class="card-img-bottom mb-2 mt-auto" style="width: 50px; height: 50px;"
+                       th:src="${mentoring.mentorInfo.mentorImage}">
+
+                  <!-- Tags -->
+                  <div class="d-flex flex-wrap">
+                    <th:block th:if="${mentoring.mentoringInfo.mentoringTags.isEmpty()}">
+                      <span>태그 x</span>
+                    </th:block>
+                    <th:block th:each="tag, tagStat : ${mentoring.mentoringInfo.mentoringTags}">
+                      <span class="card-text me-2 mr-2" th:text="${tag}"></span>
+                    </th:block>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </th:block>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="/js/mentoring/mentoring-search.js"></script>
+</html>

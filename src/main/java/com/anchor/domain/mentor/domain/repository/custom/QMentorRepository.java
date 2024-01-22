@@ -1,17 +1,12 @@
 package com.anchor.domain.mentor.domain.repository.custom;
 
-import com.anchor.domain.mentoring.domain.MentoringUnavailableTime;
-import com.anchor.global.util.type.DateTimeRange;
-import java.util.List;
+import com.anchor.domain.mentor.api.service.response.MentorOpenCloseTimes;
 
 public interface QMentorRepository {
 
-  List<MentoringUnavailableTime> findUnavailableTimes(Long mentorId);
+  MentorOpenCloseTimes findScheduleById(Long mentorId);
 
-  void deleteUnavailableTimes(Long mentorId);
+  void saveMentoSchedules(Long mentorId, MentorOpenCloseTimes mentorOpenCloseTimes);
 
-  void saveUnavailableTimes(Long mentorId, List<DateTimeRange> unavailableTimes);
-
-  void saveUnavailableTimesWithBatch(Long mentorId, List<DateTimeRange> unavailableTimes);
-
+  void deleteAllSchedules(Long mentorId);
 }

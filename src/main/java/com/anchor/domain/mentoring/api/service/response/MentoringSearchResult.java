@@ -71,14 +71,16 @@ public class MentoringSearchResult {
   static class MentoringInfo {
 
     private String title;
+    private Long id;
     private String durationTime;
     private Integer cost;
     private Integer totalApplicationNumber;
     private List<String> mentoringTags;
 
     @Builder
-    private MentoringInfo(String title, String durationTime, Integer cost, Integer totalApplicationNumber,
+    private MentoringInfo(Long id, String title, String durationTime, Integer cost, Integer totalApplicationNumber,
         List<String> mentoringTags) {
+      this.id = id;
       this.title = title;
       this.durationTime = durationTime;
       this.cost = cost;
@@ -88,6 +90,7 @@ public class MentoringSearchResult {
 
     public static MentoringInfo of(Mentoring mentoring) {
       return MentoringInfo.builder()
+          .id(mentoring.getId())
           .title(mentoring.getTitle())
           .durationTime(mentoring.getDurationTime())
           .totalApplicationNumber(mentoring.getTotalApplicationNumber())

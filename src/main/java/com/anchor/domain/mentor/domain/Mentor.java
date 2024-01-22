@@ -3,6 +3,7 @@ package com.anchor.domain.mentor.domain;
 import com.anchor.domain.mentor.api.controller.request.MentorInfoRequest;
 import com.anchor.domain.mentor.api.controller.request.MentorIntroductionRequest;
 import com.anchor.domain.mentoring.domain.Mentoring;
+import com.anchor.domain.payment.domain.Payup;
 import com.anchor.domain.user.domain.User;
 import com.anchor.global.util.BaseEntity;
 import jakarta.persistence.CascadeType;
@@ -15,7 +16,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,6 +40,9 @@ public class Mentor extends BaseEntity {
   private String accountNumber;
 
   @Column(length = 20, nullable = false)
+  private String accountName;
+
+  @Column(length = 20, nullable = false)
   private String bankName;
 
   @Column(length = 20, nullable = false)
@@ -55,6 +61,15 @@ public class Mentor extends BaseEntity {
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
   private User user;
+
+  @OneToMany(
+      mappedBy = "mentor",
+      cascade = CascadeType.ALL
+  )
+  private Set<MentorSchedule> mentorSchedule = new HashSet<>();
+
+  @OneToMany(mappedBy = "mentor", cascade = CascadeType.ALL)
+  private List<Payup> payups = new ArrayList<>();
 
   @Builder
   private Mentor(String companyEmail, Career career, String accountNumber, String accountName, String bankName,

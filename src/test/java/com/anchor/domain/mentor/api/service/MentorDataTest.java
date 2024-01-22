@@ -1,7 +1,6 @@
 package com.anchor.domain.mentor.api.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 
 import com.anchor.domain.mentor.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
 import com.anchor.domain.mentor.api.service.response.AppliedMentoringSearchResult;
@@ -13,7 +12,6 @@ import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
-import com.anchor.domain.mentoring.domain.MentoringUnavailableTime;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
 import com.anchor.domain.payment.domain.Payment;
@@ -71,59 +69,6 @@ class MentorDataTest {
 
   @Autowired
   ObjectMapper objectMapper;
-
-  @Transactional
-  @DisplayName("멘토 아이디와 불가능한 시간대를 입력받아 멘토링 불가능한 시간대를 저장합니다.")
-  @Test
-  void setUnavailableTimes() {
-    // given
-    Mentor mentor = Mentor.builder()
-        .accountName("홍길동")
-        .career(Career.JUNIOR)
-        .accountNumber("123456")
-        .companyEmail("random@naver.com")
-        .bankName("한국은행")
-        .build();
-    Mentor savedMentor = mentorRepository.save(mentor);
-
-    List<DateTimeRange> dateTimeRanges = List.of(
-        DateTimeRange.of(
-            LocalDateTime.of(2023, 12, 12, 20, 30, 0),
-            LocalDateTime.of(2023, 12, 12, 21, 30, 0)
-        ),
-        DateTimeRange.of(
-            LocalDateTime.of(2023, 12, 12, 21, 30, 0),
-            LocalDateTime.of(2023, 12, 12, 22, 30, 0)
-        ),
-        DateTimeRange.of(
-            LocalDateTime.of(2023, 12, 12, 22, 30, 0),
-            LocalDateTime.of(2023, 12, 12, 23, 30, 0)
-        )
-    );
-
-    // when
-    mentorService.setUnavailableTimes(savedMentor.getId(), dateTimeRanges);
-    List<MentoringUnavailableTime> mentoringUnavailableTimes = mentorRepository.findUnavailableTimes(
-        savedMentor.getId());
-
-    // then
-    assertThat(mentoringUnavailableTimes)
-        .extracting("fromDateTime", "toDateTime")
-        .contains(
-            tuple(
-                LocalDateTime.of(2023, 12, 12, 20, 30, 0),
-                LocalDateTime.of(2023, 12, 12, 21, 30, 0)
-            ),
-            tuple(
-                LocalDateTime.of(2023, 12, 12, 21, 30, 0),
-                LocalDateTime.of(2023, 12, 12, 22, 30, 0)
-            ),
-            tuple(
-                LocalDateTime.of(2023, 12, 12, 22, 30, 0),
-                LocalDateTime.of(2023, 12, 12, 23, 30, 0)
-            )
-        );
-  }
 
   @Transactional
   @DisplayName("멘토 아이디와 신청된 멘토링 진행날짜 및 상태 정보들을 이용해 멘토링 상태를 취소합니다.")
