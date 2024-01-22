@@ -1,7 +1,6 @@
 package com.anchor.domain.mentor.api.service;
 
 import com.anchor.domain.mentor.api.controller.request.MentorInfoRequest;
-import com.anchor.domain.mentor.api.controller.request.MentorContentsRequest;
 import com.anchor.domain.mentor.api.service.response.MentorInfoResponse;
 import com.anchor.domain.mentor.api.service.response.MentorContentsEditResult;
 import com.anchor.domain.mentor.api.service.response.MentorContents;

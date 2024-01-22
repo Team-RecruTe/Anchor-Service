@@ -70,8 +70,8 @@ public class MentoringSearchResult {
   @NoArgsConstructor
   static class MentoringInfo {
 
-    private String title;
     private Long id;
+    private String title;
     private String durationTime;
     private Integer cost;
     private Integer totalApplicationNumber;

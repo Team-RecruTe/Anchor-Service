@@ -1,0 +1,64 @@
+.swiper {
+  height: 300px;
+  position: relative;
+}
+.mask {
+  overflow: hidden;
+}
+
+.swiper .swiper-slide {
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.material-icons {
+  font-size: 30px;
+  color: white;
+}
+
+.swiper-pagination {
+  color: white;
+}
+
+.swiper-button-prev::after,
+.swiper-button-next::after{
+  content: "";
+  display: none;
+}
+
+.swiper-button-prev,
+.swiper-button-next {
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  z-index: 1;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0.9;
+}
+
+.swiper-button-prev {
+  left: 10px;
+}
+.swiper-button-next {
+  right: 10px;
+}
+
+.swiper-slide-duplicate-active{
+  opacity: 1;
+  background-color: rgba(255, 165, 0, 1); /* 주황색 배경에 100% 투명도 */
+}
+.swiper-slide-prev,
+.swiper-slide-next {
+  opacity: 0.5;
+}
+
+.card {
+  width: 300px;
+}

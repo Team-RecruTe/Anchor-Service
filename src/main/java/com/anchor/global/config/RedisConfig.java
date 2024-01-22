@@ -17,31 +17,25 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
 @EnableRedisRepositories
 public class RedisConfig {
 
-  @Value("${spring.data.redis.default.host}")
-  private String defaultHost;
-
-  @Value("${spring.data.redis.default.port}")
-  private int defaultPort;
-
   @Value("${spring.data.redis.session.host}")
-  private String sessionHost;
+  private String hostname;
 
   @Value("${spring.data.redis.session.port}")
-  private int sessionPort;
+  private int port;
 
   @Bean
   public RedisConnectionFactory redisConnectionFactory() {
     RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
-    redisStandaloneConfiguration.setHostName(sessionHost);
-    redisStandaloneConfiguration.setPort(sessionPort);
+    redisStandaloneConfiguration.setHostName(hostname);
+    redisStandaloneConfiguration.setPort(port);
     return new LettuceConnectionFactory(redisStandaloneConfiguration);
   }
 
   @Bean(name = "redisStorageConnectionFactory")
   public RedisConnectionFactory redisStorageConnectionFactory() {
     RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
-    redisStandaloneConfiguration.setHostName(defaultHost);
-    redisStandaloneConfiguration.setPort(defaultPort);
+    redisStandaloneConfiguration.setHostName(hostname);
+    redisStandaloneConfiguration.setPort(port);
     return new LettuceConnectionFactory(redisStandaloneConfiguration);
   }
 

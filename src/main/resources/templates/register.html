@@ -104,79 +104,77 @@
 <script>
   let emailVerified = false;
   const bankName = $("#bankName");
-  $("#btnEmailSend").on("click", function(e) {
-	  $.ajax({
-		  url : "/mentors/register/email/send",
-		  data : {
-			  receiver : $("#companyEmail").val(),
-		  },
-		  method: "post",
-		  success : function(data) {
-		    console.log(data);
-		    if (data === "success") {
-		      alert("이메일을 전송하였습니다.");
-		    }
-		    else {
-		      alert("이메일 전송에 실패하였습니다");
-		    }
-		  },
-		  complete : function(data) {
-			  console.log("complete");
-			  console.log(data);
-		  },
-	  });
-	return false;
+  $("#btnEmailSend").on("click", function (e) {
+    $.ajax({
+      url: "/mentors/register/email/send",
+      data: {
+        receiver: $("#companyEmail").val(),
+      },
+      method: "post",
+      success: function (data) {
+        console.log(data);
+        if (data === "success") {
+          alert("이메일을 전송하였습니다.");
+        } else {
+          alert("이메일 전송에 실패하였습니다");
+        }
+      },
+      complete: function (data) {
+        console.log("complete");
+        console.log(data);
+      },
+    });
+    return false;
   });
 
-  $("#btnEmailCheck").on("click", function(e) {
-	  $.ajax({
-		  url : "/mentors/register/email/auth",
-		  data : {
-			  userEmailCode : $("#emailCheck").val(),
-		  },
-		  method: "post",
-		  success : function(data) {
-		    console.log(data);
-		    if (data === "success") {
-		      alert("이메일 인증에 성공하였습니다.");
-		      emailVerified = true;
-		      // 나중에 이메일 쓴 칸도 readonly로 바꾸기
-		      $("#btnEmailSend").attr("disabled", true);
-		      $("#btnEmailCheck").attr("disabled", true);
-		    }
-        else {
+  $("#btnEmailCheck").on("click", function (e) {
+    $.ajax({
+      url: "/mentors/register/email/auth",
+      data: {
+        userEmailCode: $("#emailCheck").val(),
+      },
+      method: "post",
+      success: function (data) {
+        console.log(data);
+        if (data === "success") {
+          alert("이메일 인증에 성공하였습니다.");
+          emailVerified = true;
+          // 나중에 이메일 쓴 칸도 readonly로 바꾸기
+          $("#btnEmailSend").attr("disabled", true);
+          $("#btnEmailCheck").attr("disabled", true);
+        } else {
           alert("이메일 인증에 실패하였습니다.");
         }
-		  },
-		  complete : function(data) {
-			  console.log("complete");
-			  console.log(data);
-		  },
-	  });
-	return false;
+      },
+      complete: function (data) {
+        console.log("complete");
+        console.log(data);
+      },
+    });
+    return false;
   });
-  $("#btnSubmit").on("click", function(e) {
-    if($("#companyEmail").val() === "") {
+  $("#btnSubmit").on("click", function (e) {
+    if ($("#companyEmail").val() === "") {
       alert("이메일 입력은 필수사항이에요.");
       return false;
     }
-    if(emailVerified === false) {
+    if (emailVerified === false) {
       alert("이메일 인증을 완료해주세요.");
       return false;
     }
-    if($(':radio[name="career"]:checked').length < 1) {
+    if ($(':radio[name="career"]:checked').length < 1) {
       alert("아직 경력을 입력하지 않으셨네요.");
       return false;
     }
-    if(bankName.val()==="") {
+    if (bankName.val() === "") {
       alert("본인 계좌의 은행명을 입력해주세요.");
       return false;
     }
-    if(accountNumber.val()==="") {
+    if (accountNumber.val() === "") {
       alert("본인 소유의 계좌번호를 입력해주세요.");
       return false;
     }
-    if(accountName.val()==="") {
+    if (accountName.val() === "") {
       alert("계좌 소유자의 이름을 입력해주세요.");
       return false;
     }

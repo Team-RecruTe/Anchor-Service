@@ -101,7 +101,7 @@ public class MentoringViewController {
     log.info("reviewList===" + reviewList);
     return "/mentoring-review";
   }
-  
+
   private SessionUser getSessionUser(HttpSession session) {
     SessionUser sessionUser = (SessionUser) session.getAttribute("user");
     if (sessionUser == null) {
@@ -109,5 +109,5 @@ public class MentoringViewController {
     }
     return sessionUser;
   }
-  
+
 }
