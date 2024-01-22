@@ -36,7 +36,7 @@ public class UserController {
    *  유저 닉네임 변경
    */
   @PutMapping("/me")
-  public ResponseEntity<String> putInfo(@RequestBody UserNicknameRequest userNicknameRequest, BindingResult result,HttpSession httpSession){
+  public ResponseEntity<String> putInfo(@RequestBody UserNicknameRequest userNicknameRequest, HttpSession httpSession){
     SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
     userService.editNickname(sessionUser.getEmail(), userNicknameRequest);
     return ResponseEntity.ok().build();
