@@ -61,6 +61,7 @@ public class AppliedMentoringInfo {
     private String email;
     private String nickname;
     private String image;
+
   }
 
   @Getter

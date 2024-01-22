@@ -60,4 +60,5 @@ public class MentorViewController {
   public String viewPayupPage() {
     return viewResolver.getViewPath("mentor", "payup");
   }
+
 }

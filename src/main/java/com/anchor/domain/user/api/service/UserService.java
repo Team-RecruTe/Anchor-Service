@@ -1,10 +1,13 @@
 package com.anchor.domain.user.api.service;
 
+import com.anchor.domain.mentoring.api.controller.request.MentoringReviewInfo;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
+import com.anchor.domain.mentoring.domain.MentoringReview;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
+import com.anchor.domain.mentoring.domain.repository.MentoringReviewRepository;
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.domain.payment.domain.Payup;
 import com.anchor.domain.payment.domain.repository.PayupRepository;
@@ -39,8 +42,18 @@ public class UserService {
 
   private final UserRepository userRepository;
   private final MentoringApplicationRepository mentoringApplicationRepository;
+  private final MentoringReviewRepository mentoringReviewRepository;
   private final PayupRepository payupRepository;
   private final PaymentUtils paymentUtils;
+
+  public void writeReview(Long id, MentoringReviewInfo mentoringReviewInfo) {
+    Optional<MentoringApplication> mentoringApplication = mentoringApplicationRepository.findById(id);
+    MentoringReview dbMentoringReviewInsert = MentoringReview.builder()
+        .contents(mentoringReviewInfo.getContents())
+        .mentoringApplication(mentoringApplication.get())
+        .build();
+    mentoringReviewRepository.save(dbMentoringReviewInsert);
+  }
 
   @Transactional
   public UserInfoResponse getProfile(String email) {
@@ -73,7 +86,6 @@ public class UserService {
     User user = getUser(sessionUser);
     return mentoringApplicationRepository.findByUserId(user.getId(), pageable);
   }
-
 
   @Transactional
   public boolean changeAppliedMentoringStatus(SessionUser sessionUser, MentoringStatusInfo changeRequest) {
