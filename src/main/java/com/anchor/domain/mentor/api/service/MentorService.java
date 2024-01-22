@@ -105,8 +105,7 @@ public class MentorService {
   }
 
   public Mentor register(MentorRegisterInfo mentorRegisterInfo) {
-    if (mentorRepository.findByCompanyEmail(mentorRegisterInfo.getCompanyEmail())
-        .isPresent()) {
+    if (mentorRepository.findByCompanyEmail(mentorRegisterInfo.getCompanyEmail()).isPresent()) {
       throw new IllegalStateException("이미 존재하는 이메일");
     }
     Mentor dbInsertMentor = Mentor.builder()
@@ -166,4 +165,5 @@ public class MentorService {
     List<PayupInfo> payupInfos = dailyPayupInfoMap.computeIfAbsent(startDateTime, key -> new ArrayList<>());
     payupInfos.add(payupInfo);
   }
+
 }
