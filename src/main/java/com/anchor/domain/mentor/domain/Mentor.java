@@ -45,10 +45,7 @@ public class Mentor extends BaseEntity {
   @Column(length = 20, nullable = false)
   private String accountName;
 
-  @OneToOne(
-      fetch = FetchType.LAZY,
-      cascade = CascadeType.ALL
-  )
+  @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "mentor_introduction_id")
   private MentorIntroduction mentorIntroduction;
 

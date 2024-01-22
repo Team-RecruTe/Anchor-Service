@@ -5,7 +5,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -17,8 +16,7 @@ import lombok.NoArgsConstructor;
 @Entity
 public class MentoringReview extends BaseEntity {
 
-  @Lob
-  @Column(nullable = false)
+  @Column(nullable = false, columnDefinition = "mediumtext")
   private String contents;
 
   @Column(nullable = false)

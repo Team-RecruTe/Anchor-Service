@@ -1,34 +1,28 @@
 package com.anchor.domain.mentor.api.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import com.anchor.domain.mentor.api.controller.request.MentorRegisterInfo;
 import com.anchor.domain.mentor.domain.Career;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentor.domain.repository.MentorRepository;
-import java.lang.reflect.Member;
 import java.util.Optional;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
 class MentorServiceTest {
 
+  @InjectMocks
   private MentorService mentorService;
 
-  @MockBean
+  @Mock
   private MentorRepository mentorRepository;
 
-  @BeforeEach
-  void setUp() {
-    mentorService = new MentorService(mentorRepository);
-  }
 
   @Test
   @DisplayName("멘토 등록 성공")
@@ -41,7 +35,8 @@ class MentorServiceTest {
         .career(Career.JUNIOR)
         .build();
 
-    Mockito.when(mentorRepository.save(mentor)).thenReturn(mentor);
+    Mockito.when(mentorRepository.save(mentor))
+        .thenReturn(mentor);
 
     MentorRegisterInfo mentorRegisterInfo = MentorRegisterInfo.builder()
         .bankName("NH농협")
@@ -52,8 +47,8 @@ class MentorServiceTest {
         .build();
     Mentor registerResult = mentorService.register(mentorRegisterInfo);
 
-
-    Assertions.assertThat(registerResult.getCompanyEmail()).isEqualTo(mentor.getCompanyEmail());
+    Assertions.assertThat(registerResult.getCompanyEmail())
+        .isEqualTo(mentor.getCompanyEmail());
   }
 
   @Test
@@ -67,7 +62,8 @@ class MentorServiceTest {
         .career(Career.JUNIOR)
         .build();
 
-    Mockito.when(mentorRepository.findByCompanyEmail("0000@naver.com")).thenReturn(Optional.of(mentor));
+    Mockito.when(mentorRepository.findByCompanyEmail("0000@naver.com"))
+        .thenReturn(Optional.of(mentor));
 
     MentorRegisterInfo mentorRegisterInfo = MentorRegisterInfo.builder()
         .bankName("NH농협")
