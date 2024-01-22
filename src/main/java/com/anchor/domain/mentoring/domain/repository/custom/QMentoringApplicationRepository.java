@@ -24,4 +24,7 @@ public interface QMentoringApplicationRepository {
   List<MentoringApplication> findAllByMentorId(Long mentorID);
 
   Page<AppliedMentoringInfo> findByUserId(Long userId, Pageable pageable);
+
+  public Long getMentoringId(MentoringApplication application);
+
 }

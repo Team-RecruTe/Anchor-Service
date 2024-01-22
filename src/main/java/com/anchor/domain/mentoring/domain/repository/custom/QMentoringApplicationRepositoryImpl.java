@@ -137,6 +137,13 @@ public class QMentoringApplicationRepositoryImpl implements QMentoringApplicatio
     return new PageImpl<>(appliedMentoringInfos, pageable, totalElements);
   }
 
+  public Long getMentoringId(MentoringApplication application) {
+    return jpaQueryFactory.select(mentoringApplication.mentoring.id)
+        .from(mentoringApplication)
+        .where(mentoringApplication.eq(application))
+        .fetchOne();
+  }
+
   private BooleanBuilder equalsStatuses(MentoringStatus... statuses) {
     BooleanBuilder builder = new BooleanBuilder();
     Arrays.stream(statuses)

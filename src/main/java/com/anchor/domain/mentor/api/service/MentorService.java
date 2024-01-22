@@ -17,7 +17,7 @@ import com.anchor.global.auth.SessionUser;
 import com.anchor.global.portone.request.RequiredPaymentCancelData;
 import com.anchor.global.portone.response.PaymentCancelResult;
 import com.anchor.global.portone.response.PaymentResult;
-import com.anchor.global.util.PaymentUtils;
+import com.anchor.global.util.PaymentClient;
 import com.anchor.global.util.type.DateTimeRange;
 import jakarta.persistence.PersistenceException;
 import java.time.LocalDateTime;
@@ -42,7 +42,7 @@ public class MentorService {
   private final MentorRepository mentorRepository;
   private final MentoringApplicationRepository mentoringApplicationRepository;
   private final PayupRepository payupRepository;
-  private final PaymentUtils paymentUtils;
+  private final PaymentClient paymentClient;
 
   @Transactional
   public void changeMentoringStatus(Long id, List<RequiredMentoringStatusInfo> requiredMentoringStatusInfos) {
@@ -79,7 +79,7 @@ public class MentorService {
 
   private void cancelPayemntIfCancelled(MentoringStatus status, Payment payment) {
     RequiredPaymentCancelData requiredPaymentCancelData = new RequiredPaymentCancelData(payment);
-    Optional<PaymentResult> paymentCancelResult = paymentUtils.request(status, requiredPaymentCancelData);
+    Optional<PaymentResult> paymentCancelResult = paymentClient.request(status, requiredPaymentCancelData);
     paymentCancelResult.ifPresent(result -> {
       payment.editPaymentCancelStatus((PaymentCancelResult) result);
     });

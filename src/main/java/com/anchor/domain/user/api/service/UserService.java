@@ -25,7 +25,8 @@ import com.anchor.global.auth.SessionUser;
 import com.anchor.global.portone.request.RequiredPaymentCancelData;
 import com.anchor.global.portone.response.PaymentCancelResult;
 import com.anchor.global.portone.response.PaymentResult;
-import com.anchor.global.util.PaymentUtils;
+import com.anchor.global.redis.lock.RedisLockFacade;
+import com.anchor.global.util.PaymentClient;
 import com.anchor.global.util.type.DateTimeRange;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,7 +49,8 @@ public class UserService {
   private final MentoringApplicationRepository mentoringApplicationRepository;
   private final MentoringReviewRepository mentoringReviewRepository;
   private final PayupRepository payupRepository;
-  private final PaymentUtils paymentUtils;
+  private final PaymentClient paymentClient;
+  private final RedisLockFacade redisLockFacade;
 
   @Transactional
   public void writeReview(SessionUser sessionUser, MentoringReviewInfo mentoringReviewInfo) {
@@ -158,25 +160,23 @@ public class UserService {
   }
 
   private void processMentoringStatus(MentoringApplication mentoringApplication) {
-    MentoringStatus mentoringStatus = mentoringApplication.getMentoringStatus();
-    if (mentoringStatus.equals(MentoringStatus.CANCELLED)) {
-      cancelPaymentIfCancelled(mentoringApplication);
-    }
-    if (mentoringStatus.equals(MentoringStatus.COMPLETE)) {
-      savePayup(mentoringApplication);
+    switch (mentoringApplication.getMentoringStatus()) {
+      case CANCELLED -> cancelPayment(mentoringApplication);
+      case COMPLETE -> savePayup(mentoringApplication);
     }
   }
 
-  private void cancelPaymentIfCancelled(MentoringApplication application) {
+  private void cancelPayment(MentoringApplication application) {
     MentoringStatus status = application.getMentoringStatus();
     Payment payment = application.getPayment();
     RequiredPaymentCancelData requiredPaymentCancelData = new RequiredPaymentCancelData(payment);
-    Optional<PaymentResult> paymentCancelResult = paymentUtils.request(status, requiredPaymentCancelData);
+    Optional<PaymentResult> paymentCancelResult = paymentClient.request(status, requiredPaymentCancelData);
     paymentCancelResult.ifPresent(result -> payment.editPaymentCancelStatus((PaymentCancelResult) result));
   }
 
   private void savePayup(MentoringApplication application) {
-    Mentoring mentoring = application.getMentoring();
+    Long mentoringId = mentoringApplicationRepository.getMentoringId(application);
+    Mentoring mentoring = redisLockFacade.increaseTotalApplication(mentoringId);
     Mentor mentor = mentoring.getMentor();
     Payment payment = application.getPayment();
     Payup payup = Payup.builder()
@@ -185,4 +185,5 @@ public class UserService {
         .build();
     payupRepository.save(payup);
   }
+
 }

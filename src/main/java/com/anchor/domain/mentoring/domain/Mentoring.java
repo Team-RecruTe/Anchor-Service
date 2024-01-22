@@ -123,4 +123,7 @@ public class Mentoring extends BaseEntity {
     }
   }
 
+  public void increaseTotalApplication() {
+    totalApplicationNumber += 1;
+  }
 }

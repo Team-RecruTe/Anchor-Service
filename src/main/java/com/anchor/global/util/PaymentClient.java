@@ -22,8 +22,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 @Component
-public class PaymentUtils {
-
+public class PaymentClient {
 
   private final RestClient restClient;
 
@@ -35,7 +34,7 @@ public class PaymentUtils {
   @Value("${payment.imp-secret}")
   private String impSecret;
 
-  public PaymentUtils(@Qualifier("paymentRestClient") RestClient restClient, ObjectMapper objectMapper) {
+  public PaymentClient(@Qualifier("paymentRestClient") RestClient restClient, ObjectMapper objectMapper) {
     this.restClient = restClient;
     this.objectMapper = objectMapper;
   }
