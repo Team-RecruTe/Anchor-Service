@@ -17,11 +17,16 @@ class MentorTest {
         .bankName("NH농협")
         .build();
 
-    Assertions.assertThat(mentor.getAccountName()).isEqualTo("이주윤");
-    Assertions.assertThat(mentor.getBankName()).isEqualTo("NH농협");
-    Assertions.assertThat(mentor.getAccountNumber()).isEqualTo("01092-778-3406");
-    Assertions.assertThat(mentor.getCareer()).isEqualTo(Career.JUNIOR);
-    Assertions.assertThat(mentor.getCompanyEmail()).isEqualTo("09090@naver.com");
+    Assertions.assertThat(mentor.getAccountName())
+        .isEqualTo("이주윤");
+    Assertions.assertThat(mentor.getBankName())
+        .isEqualTo("NH농협");
+    Assertions.assertThat(mentor.getAccountNumber())
+        .isEqualTo("01092-778-3406");
+    Assertions.assertThat(mentor.getCareer())
+        .isEqualTo(Career.JUNIOR);
+    Assertions.assertThat(mentor.getCompanyEmail())
+        .isEqualTo("09090@naver.com");
   }
 
 }
