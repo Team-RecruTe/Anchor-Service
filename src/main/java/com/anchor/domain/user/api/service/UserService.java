@@ -10,6 +10,7 @@ import com.anchor.domain.payment.domain.Payup;
 import com.anchor.domain.payment.domain.repository.PayupRepository;
 import com.anchor.domain.user.api.controller.request.MentoringStatusInfo;
 import com.anchor.domain.user.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
+import com.anchor.domain.user.api.controller.request.UserImageRequest;
 import com.anchor.domain.user.api.controller.request.UserNicknameRequest;
 import com.anchor.domain.user.api.service.response.AppliedMentoringInfo;
 import com.anchor.domain.user.api.service.response.UserInfoResponse;

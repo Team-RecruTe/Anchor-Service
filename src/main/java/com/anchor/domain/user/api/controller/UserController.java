@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,7 +36,7 @@ public class UserController {
    *  유저 닉네임 변경
    */
   @PutMapping("/me")
-  public ResponseEntity<String> putInfo(@RequestBody UserNicknameRequest userNicknameRequest, BindingResult result,HttpSession httpSession){
+  public ResponseEntity<String> putInfo(@RequestBody UserNicknameRequest userNicknameRequest, HttpSession httpSession){
     SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
     userService.editNickname(sessionUser.getEmail(), userNicknameRequest);
     return ResponseEntity.ok().build();
