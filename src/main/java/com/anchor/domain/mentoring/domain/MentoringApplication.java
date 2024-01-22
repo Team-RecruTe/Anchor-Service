@@ -52,6 +52,9 @@ public class MentoringApplication extends BaseEntity {
   @JoinColumn(name = "user_id")
   private User user;
 
+  @OneToOne(mappedBy = "mentoringApplication")
+  private MentoringReview mentoringReview;
+
   @Builder
   private MentoringApplication(LocalDateTime startDateTime, LocalDateTime endDateTime, Mentoring mentoring,
       Payment payment, User user) {
