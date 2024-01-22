@@ -53,7 +53,7 @@ public class User extends BaseEntity {
     return role.getKey();
   }
 
-  public void editNickname(UserNicknameRequest userNicknameRequest) {
+  public void editNickname(UserNicknameRequest userNicknameRequest){
     this.nickname = userNicknameRequest.getNickname();
   }
 
