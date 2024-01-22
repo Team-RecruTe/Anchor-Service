@@ -1,7 +1,7 @@
 package com.anchor.domain.mentor.domain;
 
 import com.anchor.domain.mentor.api.controller.request.MentorInfoRequest;
-import com.anchor.domain.mentor.api.controller.request.MentorContents;
+import com.anchor.domain.mentor.api.service.response.MentorContents;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.payment.domain.Payup;
 import com.anchor.domain.user.domain.User;
