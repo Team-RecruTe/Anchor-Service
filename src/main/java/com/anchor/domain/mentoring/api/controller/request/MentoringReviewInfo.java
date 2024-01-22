@@ -13,12 +13,13 @@ public class MentoringReviewInfo {
   @Size(min = 1, max = 200, message = "1자 이상 200자 이하로 작성해주세요.")
   private String contents;
 
-  private String rating;
+  private Integer ratings;
 
   @Builder
   @ConstructorProperties({"contents"})
-  public MentoringReviewInfo(String contents) {
+  public MentoringReviewInfo(String contents, Integer ratings) {
     this.contents = contents;
+    this.ratings = ratings;
   }
 
 }

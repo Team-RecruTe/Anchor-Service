@@ -21,6 +21,9 @@ public class MentoringReview extends BaseEntity {
   @Column(nullable = false)
   private String contents;
 
+  @Column(nullable = false)
+  private Integer ratings;
+
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "mentor_application_id")
   private MentoringApplication mentoringApplication;
