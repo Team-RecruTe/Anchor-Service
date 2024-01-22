@@ -1,6 +1,7 @@
 package com.anchor.domain.mentoring.api.controller;
 
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
+import com.anchor.domain.mentoring.api.controller.request.MentoringRatingInterface;
 import com.anchor.domain.mentoring.api.controller.request.MentoringReviewInfoInterface;
 import com.anchor.domain.mentoring.api.service.MentoringService;
 import com.anchor.domain.mentoring.api.service.response.MentoringContents;
@@ -63,8 +64,10 @@ public class MentoringViewController {
     Set<String> popularMentoringTags = mentoringService.getPopularMentoringTags();
     MentoringDetailInfo mentoringDetailInfo = MentoringDetailInfo.of(mentoringDetailSearchResult, popularMentoringTags);
     List<MentoringReviewInfoInterface> reviewList = mentoringService.getMentoringReviews(id);
+    MentoringRatingInterface averageRatings = mentoringService.getMentoringRatings(id);
     model.addAttribute("reviewList", reviewList);
     model.addAttribute("mentoringDetail", mentoringDetailInfo);
+    model.addAttribute("averageRatings", averageRatings);
     return viewResolver.getViewPath("mentoring", "mentoring-detail");
   }
 

@@ -16,7 +16,7 @@ public class MentoringReviewInfo {
   private Integer ratings;
 
   @Builder
-  @ConstructorProperties({"contents"})
+  @ConstructorProperties({"contents", "ratings"})
   public MentoringReviewInfo(String contents, Integer ratings) {
     this.contents = contents;
     this.ratings = ratings;

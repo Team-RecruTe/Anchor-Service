@@ -29,8 +29,9 @@ public class MentoringReview extends BaseEntity {
   private MentoringApplication mentoringApplication;
 
   @Builder
-  MentoringReview(String contents, MentoringApplication mentoringApplication) {
+  MentoringReview(String contents, Integer ratings, MentoringApplication mentoringApplication) {
     this.contents = contents;
+    this.ratings = ratings;
     this.mentoringApplication = mentoringApplication;
   }
 }

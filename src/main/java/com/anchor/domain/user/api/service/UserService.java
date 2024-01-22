@@ -52,6 +52,7 @@ public class UserService {
     Optional<MentoringApplication> mentoringApplication = mentoringApplicationRepository.findById(id);
     MentoringReview dbMentoringReviewInsert = MentoringReview.builder()
         .contents(mentoringReviewInfo.getContents())
+        .ratings(mentoringReviewInfo.getRatings())
         .mentoringApplication(mentoringApplication.get())
         .build();
     mentoringReviewRepository.save(dbMentoringReviewInsert);
