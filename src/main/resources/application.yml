@@ -3,8 +3,10 @@ spring:
   profiles:
     active: local
     include:
+      - oauth
+      - session
       - aws
-      - pay
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${MYSQL_URL}
@@ -42,15 +44,8 @@ spring:
 
   data:
     redis:
-      default:
-        host: ${REDIS_DEFAULT_HOST}
-        port: ${REDIS_DEFAULT_PORT}
-      session:
-        host: ${REDIS_SESSION_HOST}
-        port: ${REDIS_SESSION_PORT}
-    web:
-      pageable:
-        one-indexed-parameters: true
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
 
   security:
     oauth2:
@@ -99,3 +94,4 @@ cloud:
 #  h2:
 #    console:
 #      enabled: true
+

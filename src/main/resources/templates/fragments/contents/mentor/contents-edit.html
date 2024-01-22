@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko"
+      layout:decorate="~{layout/default}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+>
+<head>
+  <title>Anchor-service</title>
+  <link href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" rel="stylesheet"/>
+  <script src="/js/axios.min.js"></script>
+</head>
+<body>
+<div class="d-flex justify-content-center" layout:fragment="content">
+  <!-- 에디터를 적용할 요소 (컨테이너) -->
+  <div class="w-75" id="editor-container">
+    <h2 class="border rounded border-dark-subtle p-2 fs-3 fw-semibold" id="title" style="text-align: center;">멘토 소개글</h2>
+
+    <div id="content">
+    </div>
+    <button class="w-100 btn btn-primary" id="submit-btn" type="button">제출하기</button>
+  </div>
+
+  <!-- TUI 에디터 JS CDN -->
+  <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+
+  <script>
+    const submitButton = document.querySelector('#submit-btn');
+    const editor = new toastui.Editor({
+      el: document.querySelector('#content'), // 에디터를 적용할 요소 (컨테이너)
+      height: '800px',                        // 에디터 영역의 높이 값 (OOOpx || auto)
+      initialEditType: 'markdown',            // 최초로 보여줄 에디터 타입 (markdown || wysiwyg)
+      initialValue: '',                       // 내용의 초기 값으로, 반드시 마크다운 문자열 형태여야 함
+      previewStyle: 'vertical',               // 마크다운 프리뷰 스타일 (tab || vertical)
+      placeholder: '내용을 입력해 주세요.',
+      hooks: {
+        async addImageBlobHook(blob, callback) { //  (업로드한 이미지를 Blob 형태로 변환, 이미지 업로드 이후 본문에 저장되는 데이터를 지정해주는 콜백함수)
+          const formData = new FormData();
+          formData.append('image', blob);
+
+          axios.post("/image/upload", formData)
+          .then((res) => {
+            if (res.status === 200) {
+              callback(res.data.imageUrl, 'image');
+            }
+          })
+          .catch((error) => {
+            console.error('업로드 중 오류가 발생했습니다.', error);
+          });
+        },
+      }
+    });
+
+    const submit = (axios, editor) => {
+      console.log(editor.getHTML())
+      const json = {
+        contents: editor.getHTML(),
+      }
+      const currentPath = window.location.pathname
+      const path = currentPath.substring(0)
+
+      axios.put(path, json)
+      .then((res) => {
+        if (res.status === 200) {
+          // 'links' 배열이 존재하고, 배열인지 확인
+          if (Array.isArray(res.data.links)) {
+            for (const link of res.data.links) {
+              if (link.rel === "self") {
+                window.location.href = link.href;
+                return;
+              }
+            }
+          }
+          window.location.href = "/"
+        } else {
+          alert('url이 반환되지 않았습니다.')
+        }
+      })
+      .catch((error) => {
+        console.error('PUT 요청 중 오류가 발생했습니다.', error);
+        alert('PUT 요청 중에 문제가 발생했습니다.')
+      });
+    }
+
+    const submitEvent = (axios, submitButton, editor, submit) => {
+      submitButton.addEventListener('click',
+          () => submit(axios, editor));
+    }
+  </script>
+
+
+  <script th:inline="javascript">
+    const initContents = (editor, submitEvent, submit) => {
+      const mentorContents = [[${mentorContents}]] || {}; // 기본값을 빈 객체로 설정
+      const submitButton = document.querySelector('#submit-btn');
+
+      // 1. 에디터 초기화
+      const initalContents = mentorContents.contents
+      editor.setHTML(initalContents)
+
+      // 4. 제출 이벤트
+      submitEvent(axios, submitButton, editor, submit)
+    }
+
+    initContents(editor, submitEvent, submit)
+  </script>
+</div>
+</body>
+
+</html>

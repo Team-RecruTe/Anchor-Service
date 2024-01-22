@@ -8,5 +8,9 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MentorRepository extends JpaRepository<Mentor, Long>, QMentorRepository {
+
   Optional<Mentor> findByCompanyEmail(String email);
+
+  Optional<Mentor> findByIdAndMentorIntroduction_Id(Long id, Long mentorIntroductionId);
+
 }

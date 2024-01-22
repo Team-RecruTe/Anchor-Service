@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko"
+      layout:decorate="~{layout/default}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+>
+<head>
+  <title>멘토링 에디터 페이지</title>
+  <link href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" rel="stylesheet"/>
+</head>
+<body>
+<div layout:fragment="content">
+  <h2 style="text-align: center;">TOAST UI Editor 글쓰기 페이지</h2>
+
+  <!-- 에디터를 적용할 요소 (컨테이너) -->
+  <div id="content">
+  </div>
+
+  <!-- TUI 에디터 JS CDN -->
+  <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+  <script>
+    const editor = new toastui.Editor({
+      el: document.querySelector('#content'), // 에디터를 적용할 요소 (컨테이너)
+      height: '500px',                        // 에디터 영역의 높이 값 (OOOpx || auto)
+      initialEditType: 'markdown',            // 최초로 보여줄 에디터 타입 (markdown || wysiwyg)
+      initialValue: '',                       // 내용의 초기 값으로, 반드시 마크다운 문자열 형태여야 함
+      previewStyle: 'vertical',               // 마크다운 프리뷰 스타일 (tab || vertical)
+      placeholder: '내용을 입력해 주세요.',
+    });
+  </script>
+</div>
+</body>
+</html>

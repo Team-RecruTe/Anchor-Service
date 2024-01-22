@@ -2,6 +2,7 @@ package com.anchor.domain.user.domain;
 
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
+import com.anchor.domain.user.api.controller.request.UserImageRequest;
 import com.anchor.domain.user.api.controller.request.UserNicknameRequest;
 import com.anchor.global.util.BaseEntity;
 import jakarta.persistence.Column;
@@ -52,8 +53,12 @@ public class User extends BaseEntity {
     return role.getKey();
   }
 
-  public void editNickname(UserNicknameRequest userNicknameRequest) {
+  public void editNickname(UserNicknameRequest userNicknameRequest){
     this.nickname = userNicknameRequest.getNickname();
+  }
+
+  public void uploadImage(UserImageRequest userImageRequest){
+    this.image = userImageRequest.getImage();
   }
 
 }

@@ -10,15 +10,20 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SessionUser implements Serializable {
 
+  private Long id;
   private String email;
   private String nickname;
   private String image;
   private Long mentorId;
 
   public SessionUser(User user) {
+    this.id = user.getId();
     this.email = user.getEmail();
     this.nickname = user.getNickname();
     this.image = user.getImage();
+    if (user.getMentor() != null) {
+      this.mentorId = user.getMentor().getId();
+    }
   }
 
   public static SessionUser getSessionUser(HttpSession session) {

@@ -1,7 +1,7 @@
 package com.anchor.domain.mentor.domain;
 
 import com.anchor.domain.mentor.api.controller.request.MentorInfoRequest;
-import com.anchor.domain.mentor.api.controller.request.MentorIntroductionRequest;
+import com.anchor.domain.mentor.api.controller.request.MentorContentsRequest;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.payment.domain.Payup;
 import com.anchor.domain.user.domain.User;
@@ -40,15 +40,15 @@ public class Mentor extends BaseEntity {
   private String accountNumber;
 
   @Column(length = 20, nullable = false)
-  private String accountName;
-
-  @Column(length = 20, nullable = false)
   private String bankName;
 
   @Column(length = 20, nullable = false)
   private String accountName;
 
-  @OneToOne(fetch = FetchType.LAZY)
+  @OneToOne(
+      fetch = FetchType.LAZY,
+      cascade = CascadeType.ALL
+  )
   @JoinColumn(name = "mentor_introduction_id")
   private MentorIntroduction mentorIntroduction;
 
@@ -89,18 +89,11 @@ public class Mentor extends BaseEntity {
     this.accountName = mentorInfoRequest.getAccountName();
   }
 
-  public void editInfo(MentorInfoRequest mentorInfoRequest) {
-    this.career = mentorInfoRequest.getCareer();
-    this.bankName = mentorInfoRequest.getBankName();
-    this.accountNumber = mentorInfoRequest.getAccountNumber();
-    this.accountName = mentorInfoRequest.getAccountName();
-  }
-
-  public void editContents(MentorIntroductionRequest mentorIntroductionRequest) {
-    if (this.mentorIntroduction == null) {
-      this.mentorIntroduction = MentorIntroduction.addContents(mentorIntroductionRequest.getContents());
-    } else {
-      this.mentorIntroduction.editContents(mentorIntroductionRequest.getContents());
+  public void editContents(MentorContents mentorContents) {
+        if (this.mentorIntroduction == null) {
+          this.mentorIntroduction = MentorIntroduction.addContents(mentorContents.getContents());
+        } else {
+          this.mentorIntroduction.editContents(mentorContents.getContents());
     }
   }
 
