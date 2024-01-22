@@ -5,11 +5,13 @@ function paymentProcess() {
 
   let currentUri = String(window.location.pathname);
 
+  let requestUri = currentUri + '-process';
+
   let nickname = document.getElementById('user-nickname').textContent;
   let email = document.getElementById('user-email').textContent;
   let tel = document.getElementById('user-tel').value;
 
-  axios.post(currentUri, {
+  axios.post(requestUri, {
     nickname: nickname,
     email: email,
     tel: tel
@@ -59,7 +61,7 @@ function paymentValidation(res, amount) {
       }
     });
   } else {
-    alert('결제에 실패하였습니다. 에러내용: ' + res.error_msg);
+    alert('에러내용: ' + res.error_msg);
   }
 }
 

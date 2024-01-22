@@ -38,7 +38,7 @@
           <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
         </div>
         <div class="modal-body" id="modal-body">
-          <form id="form" method="get"
+          <form id="form" method="post"
                 th:action="@{/mentorings/{id}/payment(id=${mentoringDetail.mentoringDetailSearchResult.mentoringId})} ">
             <input id="duration-time" name="durationTime"
                    th:value="${mentoringDetail.mentoringDetailSearchResult.durationTime}" type="hidden">

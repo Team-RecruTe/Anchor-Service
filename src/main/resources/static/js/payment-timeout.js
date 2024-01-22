@@ -13,7 +13,7 @@ function paymentPageValidation() {
       .then(res => {
         if (res.status !== 200) {
           alert(res.data);
-          location.href = '/';
+          history.back();
         }
       });
     }

@@ -142,7 +142,7 @@ public class MentoringController {
   /**
    * 포트원 결제 API를 실행하기 위한 데이터를 응답데이터로 반환합니다.
    */
-  @PostMapping("/{id}/payment")
+  @PostMapping("/{id}/payment-process")
   public ResponseEntity<MentoringPaymentInfo> mentoringTimeSessionSave(
       @PathVariable("id") Long id, @RequestBody MentoringApplicationUserInfo userInfo, HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);

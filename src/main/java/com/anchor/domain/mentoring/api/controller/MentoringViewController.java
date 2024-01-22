@@ -25,6 +25,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -86,7 +87,7 @@ public class MentoringViewController {
   /**
    * 멘토링 결제페이지로 이동합니다. 결제할 멘토링정보, 신청한 시간이 데이터로 반환됩니다.
    */
-  @GetMapping("/{id}/payment")
+  @PostMapping("/{id}/payment")
   public String viewMentoringPayment(@PathVariable("id") Long id,
       @ModelAttribute MentoringApplicationTime applicationTime, HttpSession session, Model model) {
     SessionUser sessionUser = getSessionUser(session);
