@@ -10,7 +10,6 @@ import com.anchor.domain.mentoring.domain.repository.MentoringApplicationReposit
 import com.anchor.domain.mentoring.domain.repository.MentoringReviewRepository;
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.domain.payment.domain.Payup;
-import com.anchor.domain.payment.domain.repository.PaymentRepository;
 import com.anchor.domain.payment.domain.repository.PayupRepository;
 import com.anchor.domain.user.api.controller.request.MentoringStatusInfo;
 import com.anchor.domain.user.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
@@ -45,6 +44,7 @@ public class UserService {
 
   private final UserRepository userRepository;
   private final MentoringApplicationRepository mentoringApplicationRepository;
+  private final MentoringReviewRepository mentoringReviewRepository;
   private final PayupRepository payupRepository;
   private final PaymentUtils paymentUtils;
   private final MentoringReviewRepository mentoringReviewRepository;
@@ -60,18 +60,28 @@ public class UserService {
   }
 
   @Transactional
-  public UserInfoResponse getProfile(String email){
+  public void writeReview(Long id, MentoringReviewInfo mentoringReviewInfo) {
+    Optional<MentoringApplication> mentoringApplication = mentoringApplicationRepository.findById(id);
+    MentoringReview dbMentoringReviewInsert = MentoringReview.builder()
+        .contents(mentoringReviewInfo.getContents())
+        .mentoringApplication(mentoringApplication.get())
+        .build();
+    mentoringReviewRepository.save(dbMentoringReviewInsert);
+  }
+
+  @Transactional
+  public UserInfoResponse getProfile(String email) {
     User user = userRepository.findByEmail(email)
-        .orElseThrow(()->{
+        .orElseThrow(() -> {
           return new RuntimeException("해당 유저를 찾을 수 없습니다.");
         });
     return new UserInfoResponse(user);
   }
 
   @Transactional
-  public void editNickname(String email, UserNicknameRequest userNicknameRequest){
+  public void editNickname(String email, UserNicknameRequest userNicknameRequest) {
     User user = userRepository.findByEmail(email)
-        .orElseThrow(()->{
+        .orElseThrow(() -> {
           return new RuntimeException("해당 유저를 찾을 수 없습니다.");
         });
     user.editNickname(userNicknameRequest);
@@ -79,9 +89,9 @@ public class UserService {
   }
 
   @Transactional
-  public void uploadImage(String email, UserImageRequest userImageRequest){
+  public void uploadImage(String email, UserImageRequest userImageRequest) {
     User user = userRepository.findByEmail(email)
-        .orElseThrow(()->{
+        .orElseThrow(() -> {
           return new RuntimeException("해당 유저를 찾을 수 없습니다.");
         });
     user.uploadImage(userImageRequest);
@@ -89,9 +99,9 @@ public class UserService {
   }
 
   @Transactional
-  public void deleteUser(String email){
+  public void deleteUser(String email) {
     User user = userRepository.findByEmail(email)
-        .orElseThrow(()->{
+        .orElseThrow(() -> {
           return new RuntimeException("해당 유저를 찾을 수 없습니다.");
         });
     userRepository.delete(user);
