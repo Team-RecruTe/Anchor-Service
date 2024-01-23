@@ -23,7 +23,7 @@ import org.springframework.web.client.RestClient.RequestHeadersSpec.ConvertibleC
 
 @Slf4j
 @Component
-public class PayupUtils {
+public class PayupClient {
 
 
   private final RestClient restClient;
@@ -33,7 +33,7 @@ public class PayupUtils {
   @Value("${payup.iscd}")
   private String institutionCode;
 
-  public PayupUtils(@Qualifier("payUpRestClient") RestClient restClient, ObjectMapper objectMapper) {
+  public PayupClient(@Qualifier("payUpRestClient") RestClient restClient, ObjectMapper objectMapper) {
     this.restClient = restClient;
     this.objectMapper = objectMapper;
   }

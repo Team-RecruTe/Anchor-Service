@@ -3,7 +3,7 @@ package com.anchor.domain.payment.api.service;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.payment.domain.Payup;
 import com.anchor.domain.payment.domain.repository.PayupRepository;
-import com.anchor.global.util.PayupUtils;
+import com.anchor.global.util.PayupClient;
 import com.anchor.global.util.type.DateTimeRange;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PayupService {
 
   private final PayupRepository payupRepository;
-  private final PayupUtils payupUtils;
+  private final PayupClient payupClient;
 
   @Transactional
   public void processMonthlyPayup() {
@@ -36,8 +36,8 @@ public class PayupService {
     try {
       mentorTotalAmount.keySet()
           .parallelStream()
-          .filter(key -> payupUtils.validateAccountHolder(key, payupFailMentors))
-          .forEach(key -> payupUtils.requestPayup(key, mentorTotalAmount.get(key), payupFailMentors));
+          .filter(key -> payupClient.validateAccountHolder(key, payupFailMentors))
+          .forEach(key -> payupClient.requestPayup(key, mentorTotalAmount.get(key), payupFailMentors));
       payupRepository.updateStatus(dateTimeRange, payupFailMentors);
     } catch (Exception e) {
       log.warn(e.getMessage());
