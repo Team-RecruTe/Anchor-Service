@@ -24,7 +24,7 @@
         <hr>
         <ul class="nav nav-pills flex-column mb-auto">
           <li class="nav-item">
-            <a aria-current="page" class="nav-link" th:href="@{/users/me}">
+            <a aria-current="page" class="nav-link link-body-emphasis" th:href="@{/users/me}">
               <svg class="bi pe-none me-2" height="16" width="16">
                 <use xlink:href="#home"></use>
               </svg>
@@ -37,6 +37,14 @@
                 <use xlink:href="#speedometer2"></use>
               </svg>
               멘토링 신청내역
+            </a>
+          </li>
+          <li th:if="${session.user.mentorId eq null}">
+            <a class="nav-link link-body-emphasis" th:href="@{/mentors/register}">
+              <svg class="bi pe-none me-2" height="16" width="16">
+                <use xlink:href="#speedometer2"></use>
+              </svg>
+              멘토 신청
             </a>
           </li>
         </ul>

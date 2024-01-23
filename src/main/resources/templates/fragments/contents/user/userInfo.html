@@ -5,7 +5,6 @@
 >
 <head>
   <title>Anchor-service</title>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <style>
     .info-table {
       border: 2px solid #cecece; /* 테두리 색 설정 */
@@ -69,7 +68,6 @@
           </table>
         </div>
 
-
         <div class="text-center mt-4">
           <button class="btn btn-primary" id="btn-update">정보 수정</button>
           <button class="btn btn-danger" id="btn-delete">회원 탈퇴</button>
@@ -80,90 +78,90 @@
   <script th:inline="javascript">
     let imgUrl = null;
 
-    let index = {
-      init: function () {
-        $("#btn-update").on("click", () => {
-          this.update();
-        });
-        $("#btn-delete").on("click", () => {
-          this.delete();
-        });
-        $("#imageUpload").on("change", () => {
-          this.uploadImage();
-        });
-        $("#btn-saveImage").on("click", () => {
-          this.saveImage(imgUrl);
-        });
-      },
+      let index = {
+        init: function () {
+          $("#btn-update").on("click", () => {
+            this.update();
+          });
+          $("#btn-delete").on("click", () => {
+            this.delete();
+          });
+          $("#imageUpload").on("change", () => {
+            this.uploadImage();
+          });
+          $("#btn-saveImage").on("click", () => {
+            this.saveImage(imgUrl);
+          });
+        },
 
-      /*이미지 업로드*/
-      uploadImage: function () {
-        let formData = new FormData();
-        let imageFile = $("#imageUpload")[0].files[0];
-        formData.append("image", imageFile);
-        $.ajax({
-          type: "POST",
-          url: "/image/upload",
-          data: formData,
-          contentType: false,
-          processData: false,
-          success: function (response) {
-            imgUrl = response;
-            console.log(response.imageUrl);
-            let tempHtml = "";
-            if(response) {
-              tempHtml = `<img src='${response.imageUrl}' id='updateProfileImage' width='200px'>`;
-              $("#current-profile-image").hide(); // 기존 이미지 숨기기
+        /*이미지 업로드*/
+        uploadImage: function () {
+          let formData = new FormData();
+          let imageFile = $("#imageUpload")[0].files[0];
+          formData.append("image", imageFile);
+          $.ajax({
+            type: "POST",
+            url: "/image/upload",
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+              imgUrl = response;
+              console.log(response.imageUrl);
+              let tempHtml = "";
+              if (response) {
+                tempHtml = `<img src='${response.imageUrl}' id='updateProfileImage' width='200px'>`;
+                $("#current-profile-image").hide(); // 기존 이미지 숨기기
+              }
+              $("#new-profile-image").html(tempHtml); // 임시로 html에 넣어주기
+            },
+            error: function (error) {
             }
-            $("#new-profile-image").html(tempHtml); // 임시로 html에 넣어주기
-          },
-          error: function (error) {
-          }
-        });
-      },
+          });
+        },
 
-      /*이미지url user테이블에 저장*/
-      saveImage: function (data) {
-        let image = $("#uploadedImageUrl").val();
-        console.log(image);
-        $.ajax({
-          type: "PUT",
-          url: "/users/me/image",
-          data: JSON.stringify({"image":data.imageUrl}),
-          contentType: "application/json; charset=utf-8",
-          success: function (response) {
-            alert("프로필 이미지가 성공적으로 업데이트되었습니다.");
-            location.href="/users/me";
-          },
-          error: function (error) {
-            alert("이미지 저장 실패");
-          }
-        });
-      },
+        /*이미지url user테이블에 저장*/
+        saveImage: function (data) {
+          let image = $("#uploadedImageUrl").val();
+          console.log(image);
+          $.ajax({
+            type: "PUT",
+            url: "/users/me/image",
+            data: JSON.stringify({"image": data.imageUrl}),
+            contentType: "application/json; charset=utf-8",
+            success: function (response) {
+              alert("프로필 이미지가 성공적으로 업데이트되었습니다.");
+              location.href = "/users/me";
+            },
+            error: function (error) {
+              alert("이미지 저장 실패");
+            }
+          });
+        },
 
-      /*정보 수정*/
-      update: function(){
-        console.log("click");
-        let data = {
-          email:$("#email").val(),
-          nickname:$("#nickname").val()
-        };
-        $.ajax({
-          type: "put",
-          url: "/users/me",
-          data: JSON.stringify(data),
-          contentType: "application/json; charset=utf-8",
-        }).done(function (resp) {
-          if(resp.status===500){
-            alert("회원정보수정을 실패했습니다.");
-          } else {
-            alert("회원정보수정을 성공했습니다.");
-            location.href="/users/me";
-          }
-        }).fail(function (error) {
-          alert(JSON.stringify(error));
-        });
-      },
+        /*정보 수정*/
+        update: function () {
+          console.log("click");
+          let data = {
+            email: $("#email").val(),
+            nickname: $("#nickname").val()
+          };
+          $.ajax({
+            type: "put",
+            url: "/users/me",
+            data: JSON.stringify(data),
+            contentType: "application/json; charset=utf-8",
+          }).done(function (resp) {
+            if (resp.status === 500) {
+              alert("회원정보수정을 실패했습니다.");
+            } else {
+              alert("회원정보수정을 성공했습니다.");
+              location.href = "/users/me";
+            }
+          }).fail(function (error) {
+            alert(JSON.stringify(error));
+          });
+        },
 
       /*회원 탈퇴*/
       delete: function(){
@@ -189,7 +187,7 @@
       },
     }
 
-    index.init();
-  </script>
-</div>
+      index.init();
+    </script>
+  </div>
 </html>
