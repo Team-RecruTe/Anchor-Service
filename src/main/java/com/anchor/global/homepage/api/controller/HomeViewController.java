@@ -1,6 +1,5 @@
 package com.anchor.global.homepage.api.controller;
 
-import com.anchor.domain.mentoring.api.service.MentoringService;
 import com.anchor.domain.mentoring.api.service.response.TopMentoring;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.homepage.api.service.HomeService;
@@ -21,8 +20,8 @@ public class HomeViewController {
   private final ViewResolver viewResolver;
   private final HomeService homeService;
 
-  @GetMapping({"","/"})
-  public String viewHome(Model model, HttpSession httpSession){
+  @GetMapping({"", "/"})
+  public String viewHome(Model model, HttpSession httpSession) {
     SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
     List<PopularTagResponse> popularTags = homeService.getPopularTags();
     model.addAttribute("popularTags", popularTags);
@@ -31,4 +30,8 @@ public class HomeViewController {
     return viewResolver.getViewPath("common", "home");
   }
 
+  @GetMapping("/login")
+  public String viewLogin() {
+    return viewResolver.getViewPath("common", "login");
+  }
 }

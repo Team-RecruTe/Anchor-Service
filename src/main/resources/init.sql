@@ -11,7 +11,7 @@ values (1, 'testMentor@test.com', '테스트멘토', now(), now(), 'MENTOR',
        (2, 'testUser@test.com', '테스트유저', now(), now(), 'USER',
         'https://anchor-image-stroage.s3.ap-northeast-2.amazonaws.com/%EA%B3%A0%EC%8A%B4%EB%8F%84%EC%B9%98_1704431943574.jpg'),
        (3, 'kks4517@naver.com', '김기홍', now(), now(), 'MENTOR',
-        'https://anchor-image-stroage.s3.ap-northeast-2.amazonaws.com/%EA%B3%A0%EC%8A%B4%EB%8F%84%EC%B9%98_1704431943574.jpg');;
+        'https://phinf.pstatic.net/contact/20200829_116/1598709994054RKSO7_JPEG/image.jpg');;
 commit;
 
 #### 멘토 소개글 등록
