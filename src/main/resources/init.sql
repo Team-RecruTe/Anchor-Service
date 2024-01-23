@@ -5,19 +5,30 @@ commit;
 
 #### 회원정보 등록
 start transaction;
-insert into user (id, email, nickname, create_date, update_date, image)
-values (1, 'testMentor@test.com', '테스트멘토', now(), now(),
+insert into user (id, email, nickname, create_date, update_date, role, image)
+values (1, 'testMentor@test.com', '테스트멘토', now(), now(), 'MENTOR',
         'https://anchor-image-stroage.s3.ap-northeast-2.amazonaws.com/%EA%B3%A0%EC%8A%B4%EB%8F%84%EC%B9%98_1704431943574.jpg'),
-       (2, 'testUser@test.com', '테스트유저', now(), now(),
-        'https://anchor-image-stroage.s3.ap-northeast-2.amazonaws.com/%EA%B3%A0%EC%8A%B4%EB%8F%84%EC%B9%98_1704431943574.jpg');
+       (2, 'testUser@test.com', '테스트유저', now(), now(), 'USER',
+        'https://anchor-image-stroage.s3.ap-northeast-2.amazonaws.com/%EA%B3%A0%EC%8A%B4%EB%8F%84%EC%B9%98_1704431943574.jpg'),
+       (3, 'kks4517@naver.com', '김기홍', now(), now(), 'MENTOR',
+        'https://anchor-image-stroage.s3.ap-northeast-2.amazonaws.com/%EA%B3%A0%EC%8A%B4%EB%8F%84%EC%B9%98_1704431943574.jpg');;
+commit;
+
+#### 멘토 소개글 등록
+start transaction;
+insert into mentor_introduction(id, contents, create_date, update_date)
+values (1, '테스트 소개글입니다. 안녕안녕', now(), now()),
+       (2, '테스트소개글 입니다. blanc is best beer', now(), now());
 commit;
 
 #### 멘토정보 등록
 start transaction;
 insert into mentor(id, company_email, account_name, account_number, bank_name, career, create_date,
-                   update_date, user_id)
-values (1, 'testCompany@test.com', '기홍', '1000002663004', '국민은행', 'MIDDLE', now(), now(), 1);
+                   update_date, user_id, mentor_introduction_id)
+values (1, 'testCompany@test.com', '기홍', '1000002663004', '국민은행', 'MIDDLE', now(), now(), 1, 1),
+       (2, 'recrute1602@gamil.com', '기홍', '1000002662088', '신한은행', 'JUNIOR', now(), now(), 3, 2);
 commit;
+
 
 ### 멘토 스케줄 등록
 start transaction;
