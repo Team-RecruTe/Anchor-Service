@@ -4,7 +4,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.global.nhpay.request.NHRequestUrl;
-import com.anchor.global.nhpay.request.PayupRequestHeader;
 import com.anchor.global.nhpay.request.RequiredAccountHolderData;
 import com.anchor.global.nhpay.request.RequiredDepositData;
 import com.anchor.global.nhpay.response.AccountHolderResult;
@@ -40,18 +39,12 @@ public class PayupUtils {
   }
 
   public boolean validateAccountHolder(Mentor mentor, Set<Mentor> failMentor) {
-    PayupRequestHeader header = PayupRequestHeader.createAccountHolderRequestHeader(institutionCode, accessToken);
-    RequiredAccountHolderData requiredAccountHolderData = RequiredAccountHolderData.of(header, mentor);
+    RequiredAccountHolderData requiredData = RequiredAccountHolderData.of(institutionCode, accessToken, mentor);
     try {
-      String requestBody = objectMapper.writeValueAsString(requiredAccountHolderData);
-      AccountHolderResult entity = restClient.post()
-          .uri(NHRequestUrl.ACCOUNT_HOLDER_URI.getUrl())
-          .accept(APPLICATION_JSON)
-          .contentType(APPLICATION_JSON)
-          .body(requestBody)
-          .exchange((request, response) -> checkStatusCode(response, AccountHolderResult.class));
+      String body = objectMapper.writeValueAsString(requiredData);
+      AccountHolderResult entity = request(NHRequestUrl.ACCOUNT_HOLDER_URI.getUrl(), body, AccountHolderResult.class);
 
-      if (entity.validateResponseCode() && entity.isEqualToAccountName(mentor.getAccountName())) {
+      if (entity.validateResponseCode() && entity.isSameAs(mentor.getAccountName())) {
         return true;
       }
 
@@ -63,25 +56,28 @@ public class PayupUtils {
     }
   }
 
-  public void requestPayup(Mentor mentor, Integer totalAmount) {
-    PayupRequestHeader payupRequestHeader = PayupRequestHeader.createDepositRequestHeader(institutionCode, accessToken);
-    RequiredDepositData requiredDepositData = RequiredDepositData.of(payupRequestHeader, mentor, totalAmount);
-
+  public void requestPayup(Mentor mentor, Integer totalAmount, Set<Mentor> failMentor) {
+    RequiredDepositData requiredData = RequiredDepositData.of(institutionCode, accessToken, mentor, totalAmount);
     try {
-      String requestBody = objectMapper.writeValueAsString(requiredDepositData);
-      DepositResult entity = restClient.post()
-          .uri(NHRequestUrl.DEPOSIT_URI.getUrl())
-          .accept(APPLICATION_JSON)
-          .contentType(APPLICATION_JSON)
-          .body(requestBody)
-          .exchange((request, response) -> checkStatusCode(response, DepositResult.class));
+      String body = objectMapper.writeValueAsString(requiredData);
+      DepositResult entity = request(NHRequestUrl.DEPOSIT_URI.getUrl(), body, DepositResult.class);
 
       if (!entity.validateResponseCode()) {
         log.warn(entity.getMessage());
+        failMentor.add(mentor);
       }
     } catch (JsonProcessingException e) {
       throw new RuntimeException("직렬화 불가능한 객체거나 null입니다.");
     }
+  }
+
+  private <T extends PayupResult> T request(String requestUrl, String requestBody, Class<T> clazz) {
+    return restClient.post()
+        .uri(requestUrl)
+        .accept(APPLICATION_JSON)
+        .contentType(APPLICATION_JSON)
+        .body(requestBody)
+        .exchange((request, response) -> checkStatusCode(response, clazz));
   }
 
   private <T extends PayupResult> T checkStatusCode(ConvertibleClientHttpResponse response, Class<T> clazz)

@@ -37,7 +37,7 @@ public class PayupService {
       mentorTotalAmount.keySet()
           .parallelStream()
           .filter(key -> payupUtils.validateAccountHolder(key, payupFailMentors))
-          .forEach(key -> payupUtils.requestPayup(key, mentorTotalAmount.get(key)));
+          .forEach(key -> payupUtils.requestPayup(key, mentorTotalAmount.get(key), payupFailMentors));
       payupRepository.updateStatus(dateTimeRange, payupFailMentors);
     } catch (Exception e) {
       log.warn(e.getMessage());

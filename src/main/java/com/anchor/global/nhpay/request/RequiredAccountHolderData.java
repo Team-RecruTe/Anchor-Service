@@ -25,7 +25,8 @@ public class RequiredAccountHolderData implements RequiredPayupData {
     this.accountNumber = accountNumber;
   }
 
-  public static RequiredAccountHolderData of(PayupRequestHeader header, Mentor mentor) {
+  public static RequiredAccountHolderData of(String institutionCode, String accessToken, Mentor mentor) {
+    PayupRequestHeader header = PayupRequestHeader.createAccountHolderRequestHeader(institutionCode, accessToken);
     String bankName = mentor.getBankName();
     BankCode bankCode = BankCode.find(bankName);
     return new RequiredAccountHolderData(header, bankCode.getCode(), mentor.getAccountNumber());

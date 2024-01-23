@@ -42,7 +42,7 @@ public class Payup extends BaseEntity {
 
   @Builder
   private Payup(Mentor mentor, Payment payment) {
-    this.amount = PayupCalculator.totalCalculate(payment.getAmount());
+    this.amount = PayupCalculator.calculateCharge(payment.getAmount(), PayupCalculator.DEFAULT_CHARGE);
     this.mentor = mentor;
     this.mentor.getPayups()
         .add(this);

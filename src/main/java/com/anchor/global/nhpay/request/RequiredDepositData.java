@@ -1,9 +1,6 @@
 package com.anchor.global.nhpay.request;
 
 import com.anchor.domain.mentor.domain.Mentor;
-import com.anchor.domain.mentoring.domain.MentoringApplication;
-import com.anchor.domain.payment.domain.Payment;
-import com.anchor.global.nhpay.PayupCalculator;
 import com.anchor.global.util.BankCode;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
@@ -41,22 +38,11 @@ public class RequiredDepositData implements RequiredPayupData {
     this.depositAccountInfo = accountMessage;
   }
 
-  public static RequiredDepositData of(PayupRequestHeader header, MentoringApplication application) {
-    Mentor mentor = application.getMentoring()
-        .getMentor();
-    Payment payment = application.getPayment();
+  public static RequiredDepositData of(String institutionCode, String accessToken, Mentor mentor, Integer totalAmount) {
+    PayupRequestHeader header = PayupRequestHeader.createDepositRequestHeader(institutionCode, accessToken);
     BankCode bankCode = BankCode.find(mentor.getBankName());
-    Integer amount = payment.getAmount();
-    Integer payUpAmount = PayupCalculator.totalCalculate(amount);
     String accountMessage = "Anchor 멘토링 정산";
-    return new RequiredDepositData(header, bankCode.getCode(), mentor.getAccountNumber(), String.valueOf(payUpAmount),
+    return new RequiredDepositData(header, bankCode.getCode(), mentor.getAccountNumber(), String.valueOf(totalAmount),
         accountMessage);
-  }
-
-  public static RequiredDepositData of(PayupRequestHeader header, Mentor mentor, Integer totalAmount) {
-    BankCode bankCode = BankCode.find(mentor.getBankName());
-    String accountMessage = "Anchor 멘토링 정산";
-    return new RequiredDepositData(header, bankCode.getCode(), mentor.getAccountNumber(),
-        String.valueOf(totalAmount), accountMessage);
   }
 }
