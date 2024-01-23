@@ -9,7 +9,7 @@
 <body>
 <div class="d-flex flex-column justify-content-center" layout:fragment="content">
   <div class="d-flex justify-content-center" id="table-container">
-    <table class="table w-75" id="application-list">
+    <table class="table w-75 table-striped" id="application-list">
       <tr th:each="app: ${mentoringApplications}">
         <td class="ma"
             th:id="${app.mentoringApplicationInfo.dateTimeRange.from} + ' ' + ${app.mentoringApplicationInfo.dateTimeRange.to}"></td>
@@ -86,7 +86,7 @@
   <script th:inline="javascript">
     console.log([[${mentoringApplications}]])
 
-    let currentPage = parseInt(new URLSearchParams(location.search).get("page"))
+    let currentPage = parseInt(new URLSearchParams(location.search).get("page")) || 1;
     currentPage = currentPage < 1 ? 1 : currentPage
     const pagenation = document.querySelector('.pagination')
 

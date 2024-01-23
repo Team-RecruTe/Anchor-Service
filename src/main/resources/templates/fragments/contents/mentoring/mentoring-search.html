@@ -95,7 +95,7 @@
   <script th:inline="javascript">
     console.log([[${mentoringSearchInfo.mentoringInfos}]])
 
-    let currentPage = parseInt(new URLSearchParams(location.search).get("page"))
+    let currentPage = parseInt(new URLSearchParams(location.search).get("page")) || 1;
     currentPage = currentPage < 1 ? 1 : currentPage
     const pagenation = document.querySelector('.pagination')
 

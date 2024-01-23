@@ -1,3 +1,10 @@
+let loginButton = document.getElementById('header-login');
+if (loginButton !== null) {
+  loginButton.addEventListener('click', () => {
+    location.href = '/login';
+  });
+}
+
 setInterval(paymentPageValidation, 270_000);
 
 function paymentPageValidation() {
