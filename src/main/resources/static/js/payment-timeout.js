@@ -31,6 +31,6 @@ function currentUriMatcher(currentUri) {
 }
 
 function unlock(currentUri) {
-  let requestUri = currentUri.replace(/\/payment$/, '/unlock');
+  let requestUri = currentUri.replace(/\/payment$/, '/lock');
   axios.delete(requestUri).then(res => location.href = '/');
 }

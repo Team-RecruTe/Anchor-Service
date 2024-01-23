@@ -131,7 +131,7 @@ public class MentoringController {
   /**
    * 멘토링 신청 도중 페이지를 벗어나거나, 시간이 만료되면 잠금을 해제합니다.
    */
-  @DeleteMapping("/{id}/unlock")
+  @DeleteMapping("/{id}/lock")
   public ResponseEntity<String> mentoringTimeSessionRemove(@PathVariable("id") Long id, HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
     mentoringService.unlock(id, sessionUser);
