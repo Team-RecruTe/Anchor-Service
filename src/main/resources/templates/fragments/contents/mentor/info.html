@@ -9,12 +9,71 @@
 </head>
 
 <div class="main" layout:fragment="content">
-  <h2 style="text-align: center;">멘토 정보 페이지</h2>
+  <h2 class="text-center">멘토 정보 페이지</h2>
 
-  <div class="container mt-3" style="max-width: 1480px;">
+  <div class="container mt-3" style="max-width: 100%">
     <hr>
     <div class="row">
-      <!-- [좌측] 멘토 정보 시작 -->
+      <div class="col-md-2">
+        <div th:if="${session.user != null && mentorInfo.id eq session.user.mentorId}">
+          <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        </div>
+      </div>
+
+      <!-- [좌측] 멘토 소개글 및 멘토링 목록  시작-->
+      <div class="col-md-7">
+        <form>
+          <!--멘토 소개글-->
+          <div class="form-group">
+            <p>멘토 소개</p>
+            <div class="border border-3 shadow-sm p-3 mb-5 bg-body rounded" id="viewer">
+              <!--          Contents 들어갈 자리-->
+            </div>
+            <a class="btn btn-success mt-3"
+               th:href="@{/mentors/me/introduction}"
+               th:if="${session.user != null && mentorInfo.id eq session.user.mentorId}">
+              멘토 소개글 수정</a>
+          </div>
+
+          <!--멘토링 목록-->
+          <div class="form-group mt-4">
+            <label for="mentoringList" style="font-size: 20px; text-align: center; font-weight: bold;">멘토링 목록</label>
+            <div class="row" id="mentoringList">
+              <div class="col-md-4 mb-4" th:each="mentorings, iterStat : ${mentorInfo.mentorings}">
+                <div class="card mt-2">
+                  <div class="card-body">
+                    <h5 class="card-title" th:text="${mentorings.title}">멘토링 주제</h5>
+
+                    <div class="form-group row">
+                      <label class="col-sm-3 col-form-label" for="durationTime" style="color: #808080;">시간</label>
+                      <div class="col-sm-9">
+                        <span class="form-control-plaintext text-start" id="durationTime" name="durationTime"
+                              th:text="${mentorings.durationTime}">1시간</span>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-sm-3 col-form-label" for="cost" style="color: #808080;">비용</label>
+                      <div class="col-sm-9">
+                        <span class="form-control-plaintext text-start" id="cost" name="cost"
+                              th:text="${mentorings.cost} + '원'">1만원</span>
+                      </div>
+                    </div>
+                    <a class="btn btn-primary mt-3" th:href="@{/mentorings/{id}(id=${mentorings.id})}">상세 보기</a>
+                    <button class="btn btn-danger mt-3"
+                            id="btn-mentoring-delete"
+                            th:if="${session.user != null && mentorInfo.id eq session.user.mentorId}" type="button">멘토링
+                      삭제
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <!-- [좌측] 멘토 소개글 및 멘토링 목록  끝-->
+
+      <!-- [우측] 멘토 정보 시작 -->
       <div class="col-md-3 text-center">
         <!--방문자, 멘티, 다른 멘토 페이지-->
         <div class="card">
@@ -112,60 +171,9 @@
           </div>
         </div>
       </div>
-      <!-- [좌측] 멘토 정보 끝 -->
+      <!-- [우측] 멘토 정보 끝 -->
 
-      <!-- [우측] 멘토 소개글 및 멘토링 목록  시작-->
-      <div class="col-md-9">
-        <form>
-          <!--멘토 소개글-->
-          <div class="form-group">
-            <p>멘토 소개</p>
-            <div class="border border-3 shadow-sm p-3 mb-5 bg-body rounded" id="viewer">
-              <!--          Contents 들어갈 자리-->
-            </div>
-            <a class="btn btn-success mt-3"
-               th:href="@{/mentors/me/introduction}"
-               th:if="${session.user != null && mentorInfo.id eq session.user.mentorId}">
-              멘토 소개글 수정</a>
-          </div>
 
-          <!--멘토링 목록-->
-          <div class="form-group mt-4">
-            <label for="mentoringList" style="font-size: 20px; text-align: center; font-weight: bold;">멘토링 목록</label>
-            <div class="row" id="mentoringList">
-              <div class="col-md-4 mb-4" th:each="mentorings, iterStat : ${mentorInfo.mentorings}">
-                <div class="card mt-2">
-                  <div class="card-body">
-                    <h5 class="card-title" th:text="${mentorings.title}">멘토링 주제</h5>
-
-                    <div class="form-group row">
-                      <label class="col-sm-3 col-form-label" for="durationTime" style="color: #808080;">시간</label>
-                      <div class="col-sm-9">
-                        <span class="form-control-plaintext text-start" id="durationTime" name="durationTime"
-                              th:text="${mentorings.durationTime}">1시간</span>
-                      </div>
-                    </div>
-                    <div class="form-group row">
-                      <label class="col-sm-3 col-form-label" for="cost" style="color: #808080;">비용</label>
-                      <div class="col-sm-9">
-                        <span class="form-control-plaintext text-start" id="cost" name="cost"
-                              th:text="${mentorings.cost} + '원'">1만원</span>
-                      </div>
-                    </div>
-                    <a class="btn btn-primary mt-3" th:href="@{/mentorings/{id}(id=${mentorings.id})}">상세 보기</a>
-                    <button class="btn btn-danger mt-3"
-                            id="btn-mentoring-delete"
-                            th:if="${session.user != null && mentorInfo.id eq session.user.mentorId}" type="button">멘토링
-                      삭제
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </form>
-      </div>
-      <!-- [우측] 멘토 소개글 및 멘토링 목록  끝-->
     </div>
   </div>
   <script src="/js/library/toast/toastui-editor-all.min.js"></script>

@@ -14,49 +14,60 @@
 </head>
 <body>
 <div class="d-flex flex-column justify-content-center" layout:fragment="content">
-  <form class=" d-flex row-column justify-content-center" id="week-container">
-    <div class="form-check me-4">
-      <input checked class="form-check-input" id="monday" name="flexRadioDefault" type="radio">
-      <label class="form-check-label" for="monday">월</label>
+  <div class="row">
+    <div class="col-3">
+      <div th:replace="~{fragments/sidebar :: sidebar}"></div>
     </div>
-    <div class="form-check me-4">
-      <input class="form-check-input" id="tuesday" name="flexRadioDefault" type="radio">
-      <label class="form-check-label" for="tuesday">화</label>
+    <div class="col-9">
+      <div class="row">
+        <form class=" d-flex row-column justify-content-center" id="week-container">
+          <div class="form-check me-4">
+            <input checked class="form-check-input" id="monday" name="flexRadioDefault" type="radio">
+            <label class="form-check-label" for="monday">월</label>
+          </div>
+          <div class="form-check me-4">
+            <input class="form-check-input" id="tuesday" name="flexRadioDefault" type="radio">
+            <label class="form-check-label" for="tuesday">화</label>
+          </div>
+          <div class="form-check me-4">
+            <input class="form-check-input" id="wednesday" name="flexRadioDefault" type="radio">
+            <label class="form-check-label" for="wednesday">수</label>
+          </div>
+          <div class="form-check me-4">
+            <input class="form-check-input" id="thursday" name="flexRadioDefault" type="radio">
+            <label class="form-check-label" for="thursday">목</label>
+          </div>
+          <div class="form-check me-4">
+            <input class="form-check-input" id="friday" name="flexRadioDefault" type="radio">
+            <label class="form-check-label" for="friday">금</label>
+          </div>
+          <div class="form-check me-4">
+            <input class="form-check-input" id="saturday" name="flexRadioDefault" type="radio">
+            <label class="form-check-label" for="saturday">토</label>
+          </div>
+          <div class="form-check me-4">
+            <input class="form-check-input" id="sunday" name="flexRadioDefault" type="radio">
+            <label class="form-check-label" for="sunday">일</label>
+          </div>
+        </form>
+      </div>
+      <div class="d-flex justify-content-center" id="times-container">
+        <div id="open-time-picker"></div>
+        <div id="close-time-picker"></div>
+        <button id="add-time-btn" type="button">시간 추가</button>
+      </div>
+      <div class="row">
+        <div class="d-flex flex-column justify-content-center" id="monday-times-container"></div>
+        <div class="d-flex flex-column justify-content-center hidden" id="tuesday-times-container"></div>
+        <div class="d-flex flex-column justify-content-center hidden" id="wednesday-times-container"></div>
+        <div class="d-flex flex-column justify-content-center hidden" id="thursday-times-container"></div>
+        <div class="d-flex flex-column justify-content-center hidden" id="friday-times-container"></div>
+        <div class="d-flex flex-column justify-content-center hidden" id="saturday-times-container"></div>
+        <div class="d-flex flex-column justify-content-center hidden" id="sunday-times-container"></div>
+        <button id="save-btn" type="button">저장하기</button>
+      </div>
     </div>
-    <div class="form-check me-4">
-      <input class="form-check-input" id="wednesday" name="flexRadioDefault" type="radio">
-      <label class="form-check-label" for="wednesday">수</label>
-    </div>
-    <div class="form-check me-4">
-      <input class="form-check-input" id="thursday" name="flexRadioDefault" type="radio">
-      <label class="form-check-label" for="thursday">목</label>
-    </div>
-    <div class="form-check me-4">
-      <input class="form-check-input" id="friday" name="flexRadioDefault" type="radio">
-      <label class="form-check-label" for="friday">금</label>
-    </div>
-    <div class="form-check me-4">
-      <input class="form-check-input" id="saturday" name="flexRadioDefault" type="radio">
-      <label class="form-check-label" for="saturday">토</label>
-    </div>
-    <div class="form-check me-4">
-      <input class="form-check-input" id="sunday" name="flexRadioDefault" type="radio">
-      <label class="form-check-label" for="sunday">일</label>
-    </div>
-  </form>
-  <div class="d-flex justify-content-center" id="times-container">
-    <div id="open-time-picker"></div>
-    <div id="close-time-picker"></div>
-    <button id="add-time-btn" type="button">시간 추가</button>
   </div>
-  <div class="d-flex flex-column justify-content-center" id="monday-times-container"></div>
-  <div class="d-flex flex-column justify-content-center hidden" id="tuesday-times-container"></div>
-  <div class="d-flex flex-column justify-content-center hidden" id="wednesday-times-container"></div>
-  <div class="d-flex flex-column justify-content-center hidden" id="thursday-times-container"></div>
-  <div class="d-flex flex-column justify-content-center hidden" id="friday-times-container"></div>
-  <div class="d-flex flex-column justify-content-center hidden" id="saturday-times-container"></div>
-  <div class="d-flex flex-column justify-content-center hidden" id="sunday-times-container"></div>
-  <button id="save-btn" type="button">저장하기</button>
   <script src="https://uicdn.toast.com/tui.time-picker/latest/tui-time-picker.js"></script>
   <script th:inline="javascript">
     const tuiTimePicker = tui.TimePicker;

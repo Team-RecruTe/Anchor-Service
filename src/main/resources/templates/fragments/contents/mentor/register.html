@@ -11,42 +11,7 @@
   <div class="row justify-content-center">
 
     <div class="col-3">
-      <div class="d-flex flex-column flex-shrink-0 p-3 bg-body-tertiary" style="width: 280px;">
-        <a class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none" href="/">
-          <svg class="bi pe-none me-2" height="32" width="40">
-            <use xlink:href="#bootstrap"></use>
-          </svg>
-          <span class="fs-4">Sidebar</span>
-        </a>
-        <hr>
-        <ul class="nav nav-pills flex-column mb-auto">
-          <li class="nav-item">
-            <a aria-current="page" class="nav-link link-body-emphasis" th:href="@{/users/me}">
-              <svg class="bi pe-none me-2" height="16" width="16">
-                <use xlink:href="#home"></use>
-              </svg>
-              내 프로필
-            </a>
-          </li>
-          <li>
-            <a class="nav-link link-body-emphasis" th:href="@{/users/me/applied-mentorings}">
-              <svg class="bi pe-none me-2" height="16" width="16">
-                <use xlink:href="#speedometer2"></use>
-              </svg>
-              멘토링 신청내역
-            </a>
-          </li>
-          <li th:if="${session.user.mentorId eq null}">
-            <a class="nav-link active" th:href="@{/mentors/register}">
-              <svg class="bi pe-none me-2" height="16" width="16">
-                <use xlink:href="#speedometer2"></use>
-              </svg>
-              멘토 신청
-            </a>
-          </li>
-        </ul>
-        <hr>
-      </div>
+      <div th:replace="~{fragments/sidebar::sidebar}"></div>
     </div>
 
     <div class="col-6 d-flex justify-content-center">
