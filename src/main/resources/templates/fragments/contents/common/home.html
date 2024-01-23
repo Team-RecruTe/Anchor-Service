@@ -7,6 +7,7 @@
   <title>Anchor-service</title>
   <link rel="stylesheet" href="/css/swiper.min.css" />
   <link href="/css/swiper-custom.css" rel="stylesheet">
+  <script src="/js/library/jquery/jquery-3.7.1.min.js"></script>
 </head>
 
 <div layout:fragment="content" class="main">
@@ -14,13 +15,12 @@
   <div class="container mt-4">
     <hr>
     <!--인기 멘토링(9번째까지)-->
-    <br>
     <div class="row">
-      <h3 style="text-align: center;">💚인기 멘토링</h3>
-      <div class="swiper mask">
+      <h3 style="text-align: center;" class="mt-4">💚인기 멘토링</h3>
+      <div class="swiper mask" style="height: 350px;">
         <div class="swiper-wrapper">
           <div class="swiper-slide" th:each="mentoring, iterStat : ${topMentorings.mentoringRank}" th:if="${iterStat.count <= 9}">
-            <div class="card">
+            <div class="card mt-4">
               <div class="card-body d-flex flex-column align-items-center text-center">
                 <!-- Title -->
                 <h4 class="card-title mb-3" th:text="${mentoring.mentoringInfo.title}"></h4>
@@ -79,14 +79,16 @@
             </h2>
             <div aria-labelledby="headingOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample"
                  id="collapseOne">
-              <div class="accordion-body">
-                <th:block th:each="tagResponse : ${popularTags}">
-                  <div th:each="tag : ${tagResponse.tags}">
-                    <input autocomplete="off" class="btn-check" th:name="'tag-' + ${tagStat.index}"
-                           th:id="'btn-check-outlined-' + ${tagStat.index}" th:value="${tag}" type="checkbox">
-                    <label class="btn btn-outline-primary mx-2 mb-1" th:for="'btn-check-outlined-' + ${tagStat.index}"
+              <div class="accordion-body d-flex justify-content-center flex-wrap">
+                <th:block th:each="tagResponse, outerStat : ${popularTags}">
+                  <th:block th:each="tag, tagStat : ${tagResponse.tags}">
+                    <input autocomplete="off" class="btn-check" name="tag"
+                           th:id="${'btn-check-outlined-' + outerStat.count + '-' + tagStat.count}"
+                           th:value="${tag}" type="checkbox">
+                    <label class="btn btn-outline-primary mx-2 mb-1"
+                           th:for="${'btn-check-outlined-' + outerStat.count + '-' + tagStat.count}"
                            th:text="${tag}">태그 이름</label>
-                  </div>
+                  </th:block>
                 </th:block>
               </div>
             </div>
@@ -98,6 +100,21 @@
 
   <script src="/js/swiper.min.js"></script>
   <script src="/js/swiper-custom.js"></script>
-
+  <script>
+    /*태그 중복 제외*/
+    $(document).ready(function() {
+      var seenTags = {}; // 중복을 확인하기 위한 객체
+      // 모든 체크박스를 순회
+      $('input[type="checkbox"][name="tag"]').each(function() {
+        var tag = $(this).val(); // 현재 태그의 값
+        if (seenTags[tag]) {
+          $(this).next().hide(); // 라벨 숨기기
+          $(this).hide(); // 체크박스 숨기기
+        } else {
+          seenTags[tag] = true;           // 새로운 태그면 seenTags 객체에 추가합니다.
+        }
+      });
+    });
+  </script>
 </div>
 </html>
