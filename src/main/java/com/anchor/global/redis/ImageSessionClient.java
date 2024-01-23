@@ -2,18 +2,18 @@ package com.anchor.global.redis;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 public class ImageSessionClient implements RedisClient<String> {
 
-  private final RedisTemplate<String, String> redisTemplate;
+  private final RedisOperations<String, String> redis;
 
   @Override
   public void save(String key, String value) {
-    redisTemplate.opsForValue()
+    redis.opsForValue()
         .set(key, value);
   }
 

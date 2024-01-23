@@ -8,6 +8,7 @@ import com.anchor.domain.mentor.api.service.response.MentorPayupResult;
 import com.anchor.domain.mentor.api.service.response.MentorPayupResult.PayupInfo;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentor.domain.repository.MentorRepository;
+import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
@@ -17,6 +18,8 @@ import com.anchor.global.auth.SessionUser;
 import com.anchor.global.portone.request.RequiredPaymentCancelData;
 import com.anchor.global.portone.response.PaymentCancelResult;
 import com.anchor.global.portone.response.PaymentResult;
+import com.anchor.global.redis.message.NotificationEvent;
+import com.anchor.global.redis.message.ReceiverType;
 import com.anchor.global.util.PaymentClient;
 import com.anchor.global.util.type.DateTimeRange;
 import jakarta.persistence.PersistenceException;
@@ -29,6 +32,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.NonUniqueResultException;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -39,16 +43,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class MentorService {
 
-  private final MentorRepository mentorRepository;
   private final MentoringApplicationRepository mentoringApplicationRepository;
+  private final MentorRepository mentorRepository;
   private final PayupRepository payupRepository;
+  private final ApplicationEventPublisher applicationEventPublisher;
   private final PaymentClient paymentClient;
 
   @Transactional
-  public void changeMentoringStatus(Long id, List<RequiredMentoringStatusInfo> requiredMentoringStatusInfos) {
-    Mentor mentor = getMentor(id);
-    mentor.getMentorings()
-        .forEach(mentoring -> changeStatusAll(mentoring.getId(), requiredMentoringStatusInfos));
+  public void changeMentoringStatus(Long mentorId, List<RequiredMentoringStatusInfo> requiredMentoringStatusInfos) {
+    Mentor mentor = getMentor(mentorId);
+    requiredMentoringStatusInfos.forEach(
+        requiredMentoringStatusInfo -> changeStatus(mentor.getId(), requiredMentoringStatusInfo));
   }
 
   private Mentor getMentor(Long id) {
@@ -57,22 +62,27 @@ public class MentorService {
     return mentor;
   }
 
-  private void changeStatusAll(Long mentoringId, List<RequiredMentoringStatusInfo> requiredMentoringStatusInfos) {
-    requiredMentoringStatusInfos.forEach(requiredMentoringStatusInfo -> {
-      changeStatus(mentoringId, requiredMentoringStatusInfo);
-    });
-  }
-
-  private void changeStatus(Long mentoringId, RequiredMentoringStatusInfo requiredMentoringStatusInfo) {
+  private void changeStatus(Long mentorId,
+      RequiredMentoringStatusInfo requiredMentoringStatusInfo) {
     DateTimeRange mentoringReservedTime = requiredMentoringStatusInfo.getMentoringReservedTime();
     MentoringStatus mentoringStatus = requiredMentoringStatusInfo.getMentoringStatus();
     try {
-      MentoringApplication mentoringApplication = getMentoringApplication(mentoringId, mentoringReservedTime);
+      MentoringApplication mentoringApplication = getMentoringApplication(mentorId, mentoringReservedTime);
+      Mentoring mentoring = mentoringApplication.getMentoring();
       Payment payment = mentoringApplication.getPayment();
       mentoringApplication.changeStatus(mentoringStatus);
       cancelPayemntIfCancelled(mentoringStatus, payment);
       mentoringApplicationRepository.save(mentoringApplication);
+      applicationEventPublisher.publishEvent(NotificationEvent.builder()
+          .email(mentoringApplication.getUser()
+              .getEmail())
+          .mentoringId(mentoring.getId())
+          .title(mentoring.getTitle())
+          .mentoringStatus(mentoringStatus)
+          .receiverType(ReceiverType.TO_MENTEE)
+          .build());
     } catch (NullPointerException | PersistenceException e) {
+      log.warn("Exception: {}", "로그");
       log.warn("Exception: {}", e);
     }
   }
@@ -89,7 +99,7 @@ public class MentorService {
     LocalDateTime startDateTime = mentoringReservedTime.getFrom();
     LocalDateTime endDateTime = mentoringReservedTime.getTo();
     try {
-      return mentoringApplicationRepository.findByMentoringIdAndProgressTime(id, startDateTime, endDateTime);
+      return mentoringApplicationRepository.findByMentorIdAndProgressTime(id, startDateTime, endDateTime);
     } catch (NonUniqueResultException e) {
       log.warn("Exception: {}", e);
       throw new RuntimeException(e);

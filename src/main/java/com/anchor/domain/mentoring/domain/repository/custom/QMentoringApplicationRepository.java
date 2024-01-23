@@ -11,8 +11,8 @@ import org.springframework.data.domain.Pageable;
 
 public interface QMentoringApplicationRepository {
 
-  MentoringApplication findByMentoringIdAndProgressTime(
-      Long mentoringId,
+  MentoringApplication findByMentorIdAndProgressTime(
+      Long userId,
       LocalDateTime startDateTime,
       LocalDateTime endDateTime
   );

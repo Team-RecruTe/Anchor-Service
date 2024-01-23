@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.Cursor;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ApplicationLockClient implements RedisClient<DateTimeRange> {
 
-  private final RedisTemplate<String, DateTimeRange> redisTemplate;
+  private final RedisOperations<String, DateTimeRange> redis;
   private final Duration expiredTime = Duration.ofMinutes(5L);
 
   public static String createKey(Mentor mentor, SessionUser sessionUser) {
@@ -30,7 +30,7 @@ public class ApplicationLockClient implements RedisClient<DateTimeRange> {
 
   @Override
   public void save(String key, DateTimeRange value) {
-    redisTemplate.opsForValue()
+    redis.opsForValue()
         .set(key, value, expiredTime);
   }
 
@@ -40,7 +40,7 @@ public class ApplicationLockClient implements RedisClient<DateTimeRange> {
     ScanOptions options = ScanOptions.scanOptions()
         .match(pattern)
         .build();
-    try (Cursor<String> scan = redisTemplate.scan(options)) {
+    try (Cursor<String> scan = redis.scan(options)) {
       while (scan.hasNext()) {
         String key = scan.next();
         DateTimeRange dateTimeRange = findByKey(key);
@@ -54,20 +54,20 @@ public class ApplicationLockClient implements RedisClient<DateTimeRange> {
 
   @Override
   public DateTimeRange findByKey(String key) {
-    return redisTemplate.opsForValue()
+    return redis.opsForValue()
         .get(key);
   }
 
   @Override
   public void remove(String key) {
-    redisTemplate.delete(key);
+    redis.delete(key);
   }
 
   @Override
   public void refresh(String key) {
     DateTimeRange dateTimeRange = findByKey(key);
     if (Objects.nonNull(dateTimeRange)) {
-      redisTemplate.opsForValue()
+      redis.opsForValue()
           .set(key, dateTimeRange, expiredTime);
     } else {
       throw new RuntimeException("이미 예약시간이 만료되었습니다. 홈페이지로 이동합니다.");

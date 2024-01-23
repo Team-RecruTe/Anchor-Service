@@ -26,6 +26,8 @@ import com.anchor.global.portone.request.RequiredPaymentCancelData;
 import com.anchor.global.portone.response.PaymentCancelResult;
 import com.anchor.global.portone.response.PaymentResult;
 import com.anchor.global.redis.lock.RedisLockFacade;
+import com.anchor.global.redis.message.NotificationEvent;
+import com.anchor.global.redis.message.ReceiverType;
 import com.anchor.global.util.PaymentClient;
 import com.anchor.global.util.type.DateTimeRange;
 import java.time.LocalDateTime;
@@ -34,6 +36,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -44,9 +47,9 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserService {
 
-
   private final UserRepository userRepository;
   private final MentoringApplicationRepository mentoringApplicationRepository;
+  private final ApplicationEventPublisher applicationEventPublisher;
   private final MentoringReviewRepository mentoringReviewRepository;
   private final PayupRepository payupRepository;
   private final PaymentClient paymentClient;
@@ -108,7 +111,6 @@ public class UserService {
     userRepository.delete(user);
   }
 
-
   @Transactional(readOnly = true)
   public Page<AppliedMentoringInfo> loadAppliedMentoringList(SessionUser sessionUser, Pageable pageable) {
     User user = getUser(sessionUser);
@@ -152,25 +154,38 @@ public class UserService {
 
   private void changeStatus(User user, RequiredMentoringStatusInfo mentoringStatusInfo) {
     DateTimeRange dateTimeRange = mentoringStatusInfo.getMentoringReservedTime();
-    MentoringApplication mentoringApplication = getMentoringApplicationByTimeRange(user.getId(),
-        dateTimeRange.getFrom(), dateTimeRange.getTo());
-    mentoringApplication.changeStatus(mentoringStatusInfo.getMentoringStatus());
-    processMentoringStatus(mentoringApplication);
+    MentoringStatus mentoringStatus = mentoringStatusInfo.getMentoringStatus();
+    LocalDateTime startDateTime = dateTimeRange.getFrom();
+    LocalDateTime endDateTime = dateTimeRange.getTo();
+    Long userId = user.getId();
+    MentoringApplication mentoringApplication =
+        mentoringApplicationRepository.findByStartDateTimeAndEndDateTimeAndUserId(startDateTime, endDateTime, userId)
+            .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링 신청이력이 존재하지 않습니다."));
+    mentoringApplication.changeStatus(mentoringStatus);
+    processPayment(mentoringApplication, mentoringStatus);
+    Mentoring mentoring = mentoringApplication.getMentoring();
+    applicationEventPublisher.publishEvent(NotificationEvent.builder()
+        .email(mentoring.getMentor()
+            .getCompanyEmail())
+        .mentoringId(mentoring.getId())
+        .title(mentoring.getTitle())
+        .mentoringStatus(mentoringStatus)
+        .receiverType(ReceiverType.TO_MENTEE)
+        .build());
     mentoringApplicationRepository.save(mentoringApplication);
   }
 
-  private void processMentoringStatus(MentoringApplication mentoringApplication) {
-    switch (mentoringApplication.getMentoringStatus()) {
-      case CANCELLED -> cancelPayment(mentoringApplication);
+  private void processPayment(MentoringApplication mentoringApplication, MentoringStatus mentoringStatus) {
+    switch (mentoringStatus) {
+      case CANCELLED -> cancelPayment(mentoringApplication, mentoringStatus);
       case COMPLETE -> savePayup(mentoringApplication);
     }
   }
 
-  private void cancelPayment(MentoringApplication application) {
-    MentoringStatus status = application.getMentoringStatus();
+  private void cancelPayment(MentoringApplication application, MentoringStatus mentoringStatus) {
     Payment payment = application.getPayment();
     RequiredPaymentCancelData requiredPaymentCancelData = new RequiredPaymentCancelData(payment);
-    Optional<PaymentResult> paymentCancelResult = paymentClient.request(status, requiredPaymentCancelData);
+    Optional<PaymentResult> paymentCancelResult = paymentClient.request(mentoringStatus, requiredPaymentCancelData);
     paymentCancelResult.ifPresent(result -> payment.editPaymentCancelStatus((PaymentCancelResult) result));
   }
 
