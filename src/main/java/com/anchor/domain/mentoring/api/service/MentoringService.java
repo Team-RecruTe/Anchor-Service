@@ -11,6 +11,8 @@ import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTi
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationUserInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
+import com.anchor.domain.mentoring.api.controller.request.MentoringRatingInterface;
+import com.anchor.domain.mentoring.api.controller.request.MentoringReviewInfoInterface;
 import com.anchor.domain.mentoring.api.service.response.ApplicationTimeInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringContents;
 import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
@@ -26,13 +28,11 @@ import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
 import com.anchor.domain.mentoring.api.service.response.TopMentoring;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
-import com.anchor.domain.mentoring.domain.MentoringReview;
-import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
-import com.anchor.domain.mentoring.domain.repository.MentoringReviewRepository;
 import com.anchor.domain.mentoring.domain.MentoringDetail;
 import com.anchor.domain.mentoring.domain.MentoringTag;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
+import com.anchor.domain.mentoring.domain.repository.MentoringReviewRepository;
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.domain.payment.domain.repository.PaymentRepository;
 import com.anchor.domain.user.domain.User;
@@ -62,15 +62,20 @@ public class MentoringService {
   private final UserRepository userRepository;
   private final MentorRepository mentorRepository;
   private final PaymentRepository paymentRepository;
-   private final MentorScheduleRepository mentorScheduleRepository;
+  private final MentorScheduleRepository mentorScheduleRepository;
   private final MentoringApplicationRepository mentoringApplicationRepository;
-    private final MentoringReviewRepository mentoringReviewRepository;
+  private final MentoringReviewRepository mentoringReviewRepository;
   private final ApplicationLockClient applicationLockClient;
   private final PayNumberCreator payNumberCreator;
 
-  public List<MentoringReview> getMentoringReviews(Long mentoringId) {
-    List<MentoringReview> reviewList = mentoringReviewRepository.getReviewList(mentoringId);
+  public List<MentoringReviewInfoInterface> getMentoringReviews(Long mentoringId) {
+    List<MentoringReviewInfoInterface> reviewList = mentoringReviewRepository.getReviewList(mentoringId);
     return reviewList;
+  }
+
+  public MentoringRatingInterface getMentoringRatings(Long mentoringId) {
+    MentoringRatingInterface averageRatings = mentoringReviewRepository.getAverageRatings(mentoringId);
+    return averageRatings;
   }
 
   @Transactional

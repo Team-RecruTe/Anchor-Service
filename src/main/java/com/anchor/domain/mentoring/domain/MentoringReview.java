@@ -21,13 +21,17 @@ public class MentoringReview extends BaseEntity {
   @Column(nullable = false)
   private String contents;
 
+  @Column(nullable = false)
+  private Integer ratings;
+
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "mentor_application_id")
   private MentoringApplication mentoringApplication;
 
   @Builder
-  MentoringReview(String contents, MentoringApplication mentoringApplication) {
+  MentoringReview(String contents, Integer ratings, MentoringApplication mentoringApplication) {
     this.contents = contents;
+    this.ratings = ratings;
     this.mentoringApplication = mentoringApplication;
   }
 }

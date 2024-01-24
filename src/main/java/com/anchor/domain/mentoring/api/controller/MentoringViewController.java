@@ -1,6 +1,8 @@
 package com.anchor.domain.mentoring.api.controller;
 
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
+import com.anchor.domain.mentoring.api.controller.request.MentoringRatingInterface;
+import com.anchor.domain.mentoring.api.controller.request.MentoringReviewInfoInterface;
 import com.anchor.domain.mentoring.api.service.MentoringService;
 import com.anchor.domain.mentoring.api.service.response.MentoringContents;
 import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
@@ -8,14 +10,12 @@ import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo.Ment
 import com.anchor.domain.mentoring.api.service.response.MentoringPayConfirmInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
-import com.anchor.domain.mentoring.domain.MentoringReview;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.util.view.ViewResolver;
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/mentorings")
 @Controller
@@ -64,7 +63,11 @@ public class MentoringViewController {
     MentoringDetailSearchResult mentoringDetailSearchResult = mentoringService.getMentoringDetailInfo(id);
     Set<String> popularMentoringTags = mentoringService.getPopularMentoringTags();
     MentoringDetailInfo mentoringDetailInfo = MentoringDetailInfo.of(mentoringDetailSearchResult, popularMentoringTags);
+    List<MentoringReviewInfoInterface> reviewList = mentoringService.getMentoringReviews(id);
+    MentoringRatingInterface averageRatings = mentoringService.getMentoringRatings(id);
+    model.addAttribute("reviewList", reviewList);
     model.addAttribute("mentoringDetail", mentoringDetailInfo);
+    model.addAttribute("averageRatings", averageRatings);
     return viewResolver.getViewPath("mentoring", "mentoring-detail");
   }
 
@@ -92,14 +95,6 @@ public class MentoringViewController {
         sessionUser);
     model.addAttribute("confirmInfo", mentoringConfirmInfo);
     return viewResolver.getViewPath("mentoring", "mentoring-payment");
-  }
-
-  @GetMapping("/{id}/reviews")
-  public String viewReviewPage(@PathVariable("id") Long mentoringId, Model model) {
-    List<MentoringReview> reviewList = mentoringService.getMentoringReviews(mentoringId);
-    model.addAttribute("reviewList", reviewList);
-    log.info("reviewList===" + reviewList);
-    return "/mentoring-review";
   }
 
   private SessionUser getSessionUser(HttpSession session) {

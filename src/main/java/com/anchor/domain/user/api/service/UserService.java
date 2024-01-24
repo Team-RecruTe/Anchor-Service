@@ -1,10 +1,13 @@
 package com.anchor.domain.user.api.service;
 
 import com.anchor.domain.mentor.domain.Mentor;
+import com.anchor.domain.mentoring.api.controller.request.MentoringReviewInfo;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
+import com.anchor.domain.mentoring.domain.MentoringReview;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
+import com.anchor.domain.mentoring.domain.repository.MentoringReviewRepository;
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.domain.payment.domain.Payup;
 import com.anchor.domain.payment.domain.repository.PaymentRepository;
@@ -39,11 +42,21 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserService {
 
-
   private final UserRepository userRepository;
   private final MentoringApplicationRepository mentoringApplicationRepository;
   private final PayupRepository payupRepository;
   private final PaymentUtils paymentUtils;
+  private final MentoringReviewRepository mentoringReviewRepository;
+
+  public void writeReview(Long id, MentoringReviewInfo mentoringReviewInfo) {
+    Optional<MentoringApplication> mentoringApplication = mentoringApplicationRepository.findById(id);
+    MentoringReview dbMentoringReviewInsert = MentoringReview.builder()
+        .contents(mentoringReviewInfo.getContents())
+        .ratings(mentoringReviewInfo.getRatings())
+        .mentoringApplication(mentoringApplication.get())
+        .build();
+    mentoringReviewRepository.save(dbMentoringReviewInsert);
+  }
 
   @Transactional
   public UserInfoResponse getProfile(String email){
@@ -82,7 +95,6 @@ public class UserService {
         });
     userRepository.delete(user);
   }
-
 
   @Transactional(readOnly = true)
   public Page<AppliedMentoringInfo> loadAppliedMentoringList(SessionUser sessionUser, Pageable pageable) {
@@ -156,10 +168,10 @@ public class UserService {
     Mentor mentor = mentoring.getMentor();
     Payment payment = application.getPayment();
     Payup payup = Payup.builder()
+        .payupDateTime(LocalDateTime.MIN)
         .mentor(mentor)
         .payment(payment)
         .build();
     payupRepository.save(payup);
   }
-
 }
