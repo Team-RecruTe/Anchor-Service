@@ -27,15 +27,15 @@ public interface MentoringReviewRepository extends JpaRepository<MentoringReview
   List<MentoringReviewInfoInterface> getReviewList(@Param("mentoringId") Long mentoringId);
 
   @Query(
-      value = "select round(avg(mr.ratings), 2) as average_ratings\n"
-          + "from mentoring_review as mr\n"
-          + "join mentoring_application as ma\n"
-          + "on mr.mentor_application_id = ma.id\n"
-          + "join mentoring as m\n"
-          + "on ma.mentoring_id = m.id \n"
-          + "join user as u\n"
-          + "on ma.user_id = u.id\n"
-          + "where ma.mentoring_id = :mentoringId\n"
+      value = "select round(avg(mr.ratings), 2) as average_ratings "
+          + "from mentoring_review as mr "
+          + "join mentoring_application as ma "
+          + "on mr.mentor_application_id = ma.id "
+          + "join mentoring as m "
+          + "on ma.mentoring_id = m.id "
+          + "join user as u "
+          + "on ma.user_id = u.id "
+          + "where ma.mentoring_id = :mentoringId "
           + "group by ma.mentoring_id", nativeQuery = true
   )
   MentoringRatingInterface getAverageRatings(@Param("mentoringId") Long mentoringId);

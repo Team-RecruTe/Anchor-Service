@@ -47,22 +47,12 @@ public class UserService {
   private final MentoringReviewRepository mentoringReviewRepository;
   private final PayupRepository payupRepository;
   private final PaymentUtils paymentUtils;
-  private final MentoringReviewRepository mentoringReviewRepository;
-
-  public void writeReview(Long id, MentoringReviewInfo mentoringReviewInfo) {
-    Optional<MentoringApplication> mentoringApplication = mentoringApplicationRepository.findById(id);
-    MentoringReview dbMentoringReviewInsert = MentoringReview.builder()
-        .contents(mentoringReviewInfo.getContents())
-        .ratings(mentoringReviewInfo.getRatings())
-        .mentoringApplication(mentoringApplication.get())
-        .build();
-    mentoringReviewRepository.save(dbMentoringReviewInsert);
-  }
 
   @Transactional
   public void writeReview(Long id, MentoringReviewInfo mentoringReviewInfo) {
     Optional<MentoringApplication> mentoringApplication = mentoringApplicationRepository.findById(id);
     MentoringReview dbMentoringReviewInsert = MentoringReview.builder()
+        .ratings(mentoringReviewInfo.getRatings())
         .contents(mentoringReviewInfo.getContents())
         .mentoringApplication(mentoringApplication.get())
         .build();
@@ -179,7 +169,6 @@ public class UserService {
     Mentor mentor = mentoring.getMentor();
     Payment payment = application.getPayment();
     Payup payup = Payup.builder()
-        .payupDateTime(LocalDateTime.MIN)
         .mentor(mentor)
         .payment(payment)
         .build();

@@ -182,25 +182,27 @@
           </div>
 
           <div class="row mt-4">
-            <p style="font-size: 36px">⭐평점 : <span th:text="${averageRatings.getAverage_ratings()}">별점 평균</span>⭐</p>
-            <table class="table">
-              <thead>
-              <tr>
-                <th scope="col">닉네임</th>
-                <th scope="col">평점</th>
-                <th scope="col">리뷰</th>
-              </tr>
-              </thead>
-              <tbody>
-              <th:block th:each="item:${reviewList}">
+            <th:block th:if="${averageRatings ne null and reviewList ne null and !reviewList.isEmpty()}">
+              <p style="font-size: 36px">⭐평점 : <span th:text="${averageRatings.getAverage_ratings()}">별점 평균</span>⭐</p>
+              <table class="table">
+                <thead>
                 <tr>
-                  <td th:text="${item.nickname}">Mark</td>
-                  <td th:text="${item.ratings}">4.5</td>
-                  <td th:text="${item.contents}">실력 쌓기 좋은 수업</td>
+                  <th scope="col">닉네임</th>
+                  <th scope="col">평점</th>
+                  <th scope="col">리뷰</th>
                 </tr>
-              </th:block>
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                <th:block th:each="item:${reviewList}">
+                  <tr>
+                    <td th:text="${item.nickname}">Mark</td>
+                    <td th:text="${item.ratings}">4.5</td>
+                    <td th:text="${item.contents}">실력 쌓기 좋은 수업</td>
+                  </tr>
+                </th:block>
+                </tbody>
+              </table>
+            </th:block>
           </div>
 
         </div>
