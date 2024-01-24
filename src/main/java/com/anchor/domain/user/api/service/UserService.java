@@ -58,6 +58,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserService {
 
+
   private final UserRepository userRepository;
   private final MentoringApplicationRepository mentoringApplicationRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
@@ -122,6 +123,7 @@ public class UserService {
     User user = getUser(sessionUser);
     userRepository.delete(user);
   }
+
 
   @Transactional(readOnly = true)
   public Page<AppliedMentoringInfo> loadAppliedMentoringList(SessionUser sessionUser, Pageable pageable) {
