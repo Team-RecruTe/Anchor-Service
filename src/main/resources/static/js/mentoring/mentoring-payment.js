@@ -1,5 +1,14 @@
 document.getElementById('payment-button').addEventListener("click",
     paymentProcess);
+document.getElementById('cancel-button').addEventListener('click', () => {
+  cancelPaymentProcess();
+});
+
+function cancelPaymentProcess() {
+  let currentUri = String(window.location.pathname);
+  let requestUri = currentUri.replace(/\/payment$/, '/lock');
+  axios.delete(requestUri).then(res => history.back());
+}
 
 function paymentProcess() {
 

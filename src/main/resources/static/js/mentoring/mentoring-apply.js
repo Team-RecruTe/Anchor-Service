@@ -43,7 +43,6 @@ let datepicker = new tui.DatePicker('#datepicker-wrapper', {
     element: '#datepicker-input',
     format: 'yyyy-MM-dd'
   },
-  showToday: false,
   showAlways: true
 });
 
@@ -52,10 +51,18 @@ let inputTime;
 datepicker.on('change', () => {
   buttonContainer.innerHTML = '';
   selectedDate = datepicker.getDate();
-  let selectedDayOfWeek = dayOfWeek[selectedDate.getDay()];
-  initializeReservationButtons(selectedDayOfWeek);
-  updateReservationButtons(activeTimes, unavailableTimes, selectedDate);
-  clickEventCreator();
+
+  let currentDate = new Date();
+
+  let newCurrentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+  let newSelectedDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+
+  if (newCurrentDate <= newSelectedDate) {
+    initializeReservationButtons(selectedDate, currentDate);
+    // 당일이라면, 현재시간 이전의 신청가능시간은 삭제해야함.
+    updateReservationButtons(activeTimes, unavailableTimes, selectedDate);
+    clickEventCreator();
+  }
 });
 
 function clickEventCreator() {
@@ -68,12 +75,16 @@ function clickEventCreator() {
 }
 
 // 예약시간 버튼을 생성하고 초기화하는 함수
-function initializeReservationButtons(selectedDayOfWeek) {
+function initializeReservationButtons(selectedDate, currentDate) {
 
   // active time 에 등록된 시간대만 버튼 생성
   // 선택한 날짜의 요일
   // 선택한 요일의 활동시간 리스트 조회
+  let selectedDayOfWeek = dayOfWeek[selectedDate.getDay()];
   let activeTimeInfos = activeTimes[selectedDayOfWeek];
+  let newCurrentDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+  let newSelectedDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+  let currentCombinedTime = currentDate.getHours() * 60 + currentDate.getMinutes();
   activeTimeInfos.forEach(activeTimeInfo => {
     let activeStatus = activeTimeInfo.active_status;
     let openTime = activeTimeInfo.open_time;
@@ -81,6 +92,10 @@ function initializeReservationButtons(selectedDayOfWeek) {
     let div = document.createElement('div');
     div.classList.add('input-group', 'radio-group');
     if (activeStatus === 'OPEN') {
+      if (newCurrentDate.getTime() === newSelectedDate.getTime()) {
+        openTime = convertMinutesToTimeString(
+            Math.max(convertTimeStringToMinutes(openTime), Math.floor((currentCombinedTime + 30) / 30) * 30));
+      }
       for (let time = openTime; time < closeTime; time = increment30Minutes(time)) {
         appendInput(time, div);
         appendLabel(time, div);
@@ -88,6 +103,19 @@ function initializeReservationButtons(selectedDayOfWeek) {
       buttonContainer.appendChild(div);
     }
   });
+
+  function convertTimeStringToMinutes(time) {
+    let [hours, minutes] = time.split(':').map(Number);
+    return hours * 60 + minutes;
+  }
+
+  function convertMinutesToTimeString(minutes) {
+    let hours = Math.floor(minutes / 60);
+    let minutesPart = minutes % 60;
+    let formattedHours = String(hours).padStart(2, '0');
+    let formattedMinutes = String(minutesPart).padStart(2, '0');
+    return `${formattedHours}:${formattedMinutes}`;
+  }
 
   function appendInput(time, div) {
     let input = document.createElement('input');

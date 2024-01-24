@@ -46,7 +46,7 @@
               <div class="col" style="height: 400px">
                 <div class="datepicker-container ">
                   <div class="tui-datepicker-input tui-datetime-input tui-has-focus">
-                    <input aria-label="Date-Time" id="datepicker-input" name="date" type="hidden">
+                    <input aria-label="Date-Time" id="datepicker-input" name="date" type="text">
                     <span class="tui-ico-date"></span>
                     <div id="datepicker-wrapper" style="margin-top: -1px;"></div>
                   </div>
@@ -165,7 +165,19 @@
           <!-- Apply Button -->
           <div class="row mt-4">
             <div class="col-md-12 text-end">
-              <button class="btn btn-success modal-button">신청하기</button>
+              <button class="btn btn-success" id="login-button" th:if="${session.user eq null}">
+                로그인이 필요한 기능입니다.
+              </button>
+              <button
+                  class="btn btn-success modal-button"
+                  th:if="${session.user != null && mentoringDetail.mentoringDetailSearchResult.mentorId ne session.user.mentorId}">
+                신청하기
+              </button>
+              <button
+                  class="btn btn-outline-success" id="edit-button"
+                  th:if="${session.user != null && mentoringDetail.mentoringDetailSearchResult.mentorId eq session.user.mentorId}">
+                수정하기
+              </button>
             </div>
           </div>
 
@@ -206,6 +218,18 @@
       viewer: true, // viewer 사용 여부
       initialValue: [[${mentoringDetail.getMentoringDetailSearchResult().getContent()}]] //초기 입력값
     });
+    let editButton = document.getElementById('edit-button');
+    if (editButton !== null) {
+      editButton.addEventListener('click', () => {
+        location.href = window.location.pathname + '/contents/edit';
+      });
+    }
+    let loginButton = document.getElementById('login-button');
+    if (loginButton !== null) {
+      loginButton.addEventListener('click', () => {
+        location.href = '/login';
+      })
+    }
   </script>
 </div>
 </html>

@@ -15,6 +15,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -68,6 +69,8 @@ public class ApplicationTimeInfo {
     schedules.stream()
         .map(MentorActiveTime::of)
         .forEach(mentorActiveTime -> addMentorActiveTimes(mentorActiveTime, activeTimeMap));
+    activeTimeMap.forEach((key, value) -> value
+        .sort(Comparator.comparing(MentorActiveTime::getOpenTime)));
     return activeTimeMap;
   }
 
