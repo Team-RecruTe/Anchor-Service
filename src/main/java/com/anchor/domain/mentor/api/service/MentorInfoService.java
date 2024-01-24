@@ -1,5 +1,6 @@
 package com.anchor.domain.mentor.api.service;
 
+import com.anchor.domain.mentor.api.controller.request.MentorContentsRequest;
 import com.anchor.domain.mentor.api.controller.request.MentorInfoRequest;
 import com.anchor.domain.mentor.api.service.response.MentorInfoResponse;
 import com.anchor.domain.mentor.api.service.response.MentorContentsEditResult;
@@ -37,10 +38,10 @@ public class MentorInfoService {
   }
 
   @Transactional
-  public MentorContentsEditResult editContents(Long mentorId, MentorContents mentorContents) {
+  public MentorContentsEditResult editContents(Long mentorId, MentorContentsRequest mentorContentsRequest) {
     Mentor mentor = mentorRepository.findById(mentorId)
         .orElseThrow(()-> new RuntimeException("멘토를 찾을 수 없습니다."));
-    mentor.editContents(mentorContents);
+    mentor.editContents(mentorContentsRequest);
     Mentor savedMentor = mentorRepository.save(mentor);
     return new MentorContentsEditResult(savedMentor.getId());
   }
