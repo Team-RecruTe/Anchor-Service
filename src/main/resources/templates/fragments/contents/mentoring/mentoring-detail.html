@@ -183,8 +183,9 @@
 
           <div class="row mt-4">
             <th:block th:if="${averageRatings ne null and reviewList ne null and !reviewList.isEmpty()}">
-              <p style="font-size: 36px">⭐평점 : <span th:text="${averageRatings.getAverage_ratings()}">별점 평균</span>⭐</p>
-              <table class="table">
+              <p style="font-size: 36px">⭐평균 별점 : <span th:text="${averageRatings.getAverage_ratings()}">별점 평균</span>⭐
+              </p>
+              <table class="table table-striped-columns text-center">
                 <thead>
                 <tr>
                   <th scope="col">닉네임</th>

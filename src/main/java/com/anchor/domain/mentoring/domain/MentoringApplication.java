@@ -31,6 +31,9 @@ public class MentoringApplication extends BaseEntity {
   @Column(nullable = false, columnDefinition = "datetime")
   private LocalDateTime endDateTime;
 
+  @Column(nullable = false, columnDefinition = "boolean default false")
+  private Boolean hasReview = Boolean.FALSE;
+
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private MentoringStatus mentoringStatus = MentoringStatus.WAITING;
@@ -46,9 +49,6 @@ public class MentoringApplication extends BaseEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
   private User user;
-
-  @OneToOne(mappedBy = "mentoringApplication")
-  private MentoringReview mentoringReview;
 
   @Builder
   private MentoringApplication(LocalDateTime startDateTime, LocalDateTime endDateTime, Mentoring mentoring,
@@ -81,6 +81,10 @@ public class MentoringApplication extends BaseEntity {
 
   public void changeStatus(MentoringStatus mentoringStatus) {
     this.mentoringStatus = mentoringStatus;
+  }
+
+  public void completedReview() {
+    hasReview = true;
   }
 
   @Override

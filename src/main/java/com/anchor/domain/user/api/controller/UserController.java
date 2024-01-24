@@ -28,9 +28,9 @@ public class UserController {
    * 유저 닉네임 변경
    */
   @PutMapping("/me")
-  public ResponseEntity<String> putInfo(@RequestBody UserNicknameRequest userNicknameRequest, HttpSession httpSession) {
-    SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
-    userService.editNickname(sessionUser.getEmail(), userNicknameRequest);
+  public ResponseEntity<String> putInfo(@RequestBody UserNicknameRequest userNicknameRequest, HttpSession session) {
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
+    userService.editNickname(sessionUser, userNicknameRequest);
     return ResponseEntity.ok()
         .build();
   }
@@ -39,9 +39,9 @@ public class UserController {
    * 유저 프로필 이미지 변경
    */
   @PutMapping("/me/image")
-  public ResponseEntity<String> putImage(@RequestBody UserImageRequest userImageRequest, HttpSession httpSession) {
-    SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
-    userService.uploadImage(sessionUser.getEmail(), userImageRequest);
+  public ResponseEntity<String> putImage(@RequestBody UserImageRequest userImageRequest, HttpSession session) {
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
+    userService.uploadImage(sessionUser, userImageRequest);
     return ResponseEntity.ok()
         .build();
   }
@@ -50,9 +50,9 @@ public class UserController {
    * 유저 탈퇴
    */
   @DeleteMapping("/me")
-  public ResponseEntity<String> deleteUser(HttpSession httpSession) {
-    SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
-    userService.deleteUser(sessionUser.getEmail());
+  public ResponseEntity<String> deleteUser(HttpSession session) {
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
+    userService.deleteUser(sessionUser);
     return ResponseEntity.ok()
         .build();
   }

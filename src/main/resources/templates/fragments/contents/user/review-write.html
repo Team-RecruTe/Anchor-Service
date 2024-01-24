@@ -4,7 +4,13 @@
       xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Title</title>
+  <title>리뷰 작성</title>
+  <style>
+    #field-error {
+      color: red;
+      margin-top: 5px;
+    }
+  </style>
 </head>
 <div class="main" layout:fragment="content">
   <div class="container">
@@ -13,7 +19,7 @@
         <h2 class="mt-5 mb-2"
             style="font-weight:700; color: #0a58ca">
           리뷰 작성 페이지</h2>
-        <form method="post" th:action="@{|/users/me/applied-mentorings/${id}/review|}"
+        <form method="post" th:action="@{/users/me/applied-mentorings/review}"
               th:object="${mentoringReviewInfo}">
           <div class="mb-3 d-flex justify-content-center star-box">
             <i class="bi bi-star mx-2 star" id="star1" style="font-size: 60px"></i>
@@ -29,26 +35,28 @@
                         th:name="contents"
                         th:value="${mentoringReviewInfo.contents}"></textarea>
               <label for="contents">리뷰를 남겨주세요</label>
-              <div th:errors="*{contents}" th:if="${#fields.hasErrors('contents')}">please check it
+              <div id="field-error" th:errors="*{contents}" th:if="${#fields.hasErrors('contents')}">please check it
                 again
               </div>
             </div>
             <input id="ratings" name="ratings" th:name="ratings" type="hidden">
+            <input th:name="startTime" th:value="${mentoringReservedTime.startTime}" type="hidden">
+            <input th:name="endTime" th:value="${mentoringReservedTime.endTime}" type="hidden">
           </div>
           <div class="d-flex justify-content-center mt-5">
-            <button class="btn" id="btnSubmit" style="background-color:#0a58ca; color:white;">WRITE</button>
+            <button class="btn btn-primary" id="btnSubmit">WRITE</button>
           </div>
         </form>
       </div>
     </div>
   </div>
   <script>
-    $(".star").on("click",function() {
-    const total = $(this).index();
-        $(this).parent().find(".star").removeClass("bi-star-fill").addClass("bi-star");
-        $(this).prevAll().removeClass("bi-star").addClass("bi-star-fill");
-        $(this).removeClass("bi-star").addClass("bi-star-fill");
-        $("#ratings").val($(this).index() + 1);
+    $(".star").on("click", function () {
+      const total = $(this).index();
+      $(this).parent().find(".star").removeClass("bi-star-fill").addClass("bi-star");
+      $(this).prevAll().removeClass("bi-star").addClass("bi-star-fill");
+      $(this).removeClass("bi-star").addClass("bi-star-fill");
+      $("#ratings").val($(this).index() + 1);
     });
 
   </script>

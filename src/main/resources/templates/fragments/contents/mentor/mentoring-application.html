@@ -12,8 +12,8 @@
     <div class="col-1">
       <div th:replace="~{fragments/sidebar::sidebar}"></div>
     </div>
-    <div class="d-flex justify-content-center col-11" id="table-container">
-      <table class="table w-75 table-striped" id="application-list">
+    <div class="col-11" id="table-container">
+      <table class="table w-75 table-striped table-hover" id="application-list" style="margin: 0 auto 0 auto">
         <tr th:each="app: ${mentoringApplications}">
           <td class="ma"
               th:id="${app.mentoringApplicationInfo.dateTimeRange.from} + ' ' + ${app.mentoringApplicationInfo.dateTimeRange.to}"></td>

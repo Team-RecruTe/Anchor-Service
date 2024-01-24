@@ -17,8 +17,10 @@
       <div th:replace="~{fragments/sidebar::sidebar}"></div>
     </div>
 
-    <div class="d-flex justify-content-center col-11" id="table-container">
-      <table class="table w-75 table-striped" id="application-list">
+    <div class="col-11" id="table-container">
+      <table class="table w-75 table-striped table-hover" id="application-list"
+             style="margin-left: auto;margin-right: auto">
+        <tbody>
         <tr th:each="app: ${mentoringApplications}">
           <td class="ma"
               th:id="${app.mentoringApplicationInfo.dateTimeRange.from} + ' ' + ${app.mentoringApplicationInfo.dateTimeRange.to}"></td>
@@ -27,7 +29,7 @@
             <a th:href="'/mentorings/' + ${app.mentoringInfo.id}" th:text="${app.mentoringInfo.title}"></a>
           </td>
           <td class="align-middle">
-            <img class="rounded-circle" height="32" th:src="${app.mentorInfo.image}" width="32">
+            <img alt="" class="rounded-circle" height="32" th:src="${app.mentorInfo.image}" width="32">
           </td>
           <td class="align-middle" th:text="${app.mentorInfo.nickname}"></td>
           <td class="align-middle" th:text="${app.mentorInfo.email}"></td>
@@ -42,7 +44,28 @@
             <div class="btn-group d-flex justify-content-center">
               <th:block
                   th:if="${app.mentoringApplicationInfo.status == '완료' || app.mentoringApplicationInfo.status == '취소'}">
-              <span>
+                <th:block th:if="${app.mentoringApplicationInfo.status == '완료'}">
+                  <form method="get" th:action="@{/users/me/review/edit}"
+                        th:if="${app.mentoringApplicationInfo.hasReview}">
+                    <input name="startTime" th:value="${app.mentoringApplicationInfo.dateTimeRange.from}"
+                           type="hidden">
+                    <input name="endTime" th:value="${app.mentoringApplicationInfo.dateTimeRange.to}" type="hidden">
+                    <button class="btn btn-outline-success">
+                      리뷰 수정
+                    </button>
+                  </form>
+                  <form method="get" th:action="@{/users/me/applied-mentorings/review}"
+                        th:unless="${app.mentoringApplicationInfo.hasReview}">
+                    <input name="startTime" th:value="${app.mentoringApplicationInfo.dateTimeRange.from}"
+                           type="hidden">
+                    <input name="endTime" th:value="${app.mentoringApplicationInfo.dateTimeRange.to}" type="hidden">
+                    <button class="btn btn-outline-success"
+                            type="submit">
+                      리뷰 작성
+                    </button>
+                  </form>
+                </th:block>
+                <span th:unless="${app.mentoringApplicationInfo.status == '완료'}">
                 [[${app.mentoringApplicationInfo.status}]]
               </span>
               </th:block>
@@ -82,6 +105,7 @@
             </div>
           </td>
         </tr>
+        </tbody>
       </table>
     </div>
     <div class="d-flex justify-content-end">

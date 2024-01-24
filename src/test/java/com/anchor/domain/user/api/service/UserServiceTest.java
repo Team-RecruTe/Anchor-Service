@@ -15,6 +15,7 @@ import com.anchor.domain.user.api.service.response.UserInfoResponse;
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.UserRole;
 import com.anchor.domain.user.domain.repository.UserRepository;
+import com.anchor.global.auth.SessionUser;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,10 +33,6 @@ class UserServiceTest {
   @InjectMocks
   UserService userService;
 
-  private UserInfoResponse userInfoResponse(User user) {
-    return new UserInfoResponse(user);
-  }
-
 
   @DisplayName("회원 정보 조회 - 성공")
   @Test
@@ -51,7 +48,7 @@ class UserServiceTest {
     when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
 
     // when
-    UserInfoResponse userInfoResponse = userService.getProfile(userEmail);
+    UserInfoResponse userInfoResponse = userService.getProfile(new SessionUser(user));
 
     // then
     assertNotNull(userInfoResponse);
@@ -66,10 +63,15 @@ class UserServiceTest {
   void getProfile_Fail_UserNotFound() {
     // given
     String userEmail = "nonexistent@smtown";
+    User user = User.builder()
+        .email(userEmail)
+        .nickname("mark")
+        .role(UserRole.USER)
+        .build();
     when(userRepository.findByEmail(userEmail)).thenReturn(Optional.empty());
 
     // when, then
-    assertThrows(RuntimeException.class, () -> userService.getProfile(userEmail));
+    assertThrows(RuntimeException.class, () -> userService.getProfile(new SessionUser(user)));
   }
 
 
@@ -87,7 +89,7 @@ class UserServiceTest {
     UserNicknameRequest userNicknameRequest = new UserNicknameRequest("newMark");
 
     // when
-    assertDoesNotThrow(() -> userService.editNickname(userEmail, userNicknameRequest));
+    assertDoesNotThrow(() -> userService.editNickname(new SessionUser(user), userNicknameRequest));
 
     // then
     assertEquals("newMark", user.getNickname());
@@ -98,11 +100,16 @@ class UserServiceTest {
   void editNickname_Fail_UserNotFound() {
     // given
     String userEmail = "nonexistent@smtown";
+    User user = User.builder()
+        .email(userEmail)
+        .nickname("mark")
+        .role(UserRole.USER)
+        .build();
     UserNicknameRequest userNicknameRequest = new UserNicknameRequest("newMark");
     when(userRepository.findByEmail(userEmail)).thenReturn(Optional.empty());
 
     // when, then
-    assertThrows(RuntimeException.class, () -> userService.editNickname(userEmail, userNicknameRequest));
+    assertThrows(RuntimeException.class, () -> userService.editNickname(new SessionUser(user), userNicknameRequest));
   }
 
 
@@ -119,7 +126,7 @@ class UserServiceTest {
     when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
 
     // when
-    assertDoesNotThrow(() -> userService.deleteUser(userEmail));
+    assertDoesNotThrow(() -> userService.deleteUser(new SessionUser(user)));
 
     // then
     verify(userRepository, times(1)).delete(user);
@@ -130,10 +137,15 @@ class UserServiceTest {
   void deleteUser_Fail_UserNotFound() {
     // given
     String userEmail = "nonexistent@smtown";
+    User user = User.builder()
+        .email(userEmail)
+        .nickname("mark")
+        .role(UserRole.USER)
+        .build();
     when(userRepository.findByEmail(userEmail)).thenReturn(Optional.empty());
 
     // when, then
-    assertThrows(RuntimeException.class, () -> userService.deleteUser(userEmail));
+    assertThrows(RuntimeException.class, () -> userService.deleteUser(new SessionUser(user)));
     verify(userRepository, never()).delete(any());
   }
 

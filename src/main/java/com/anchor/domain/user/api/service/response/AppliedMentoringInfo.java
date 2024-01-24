@@ -19,11 +19,11 @@ public class AppliedMentoringInfo {
 
   @Builder
   private AppliedMentoringInfo(Long id, String title, String email, String nickname, String image, Integer amount,
-      String orderUid, DateTimeRange dateTimeRange, String status) {
+      String orderUid, DateTimeRange dateTimeRange, String status, Boolean hasReview) {
     this.mentoringInfo = new MentoringInfo(id, title);
     this.mentorInfo = new MentorInfo(email, nickname, image);
     this.paymentInfo = new PaymentInfo(orderUid, amount);
-    this.mentoringApplicationInfo = new MentoringApplicationInfo(dateTimeRange, status);
+    this.mentoringApplicationInfo = new MentoringApplicationInfo(dateTimeRange, status, hasReview);
   }
 
   public static AppliedMentoringInfo of(MentoringApplication application) {
@@ -43,6 +43,7 @@ public class AppliedMentoringInfo {
         .dateTimeRange(DateTimeRange.of(application.getStartDateTime(), application.getEndDateTime()))
         .status(application.getMentoringStatus()
             .getDescription())
+        .hasReview(application.getHasReview())
         .build();
   }
 
@@ -78,6 +79,7 @@ public class AppliedMentoringInfo {
 
     private DateTimeRange dateTimeRange;
     private String status;
+    private Boolean hasReview;
   }
 
 }

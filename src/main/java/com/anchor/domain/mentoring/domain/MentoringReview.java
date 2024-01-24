@@ -1,5 +1,6 @@
 package com.anchor.domain.mentoring.domain;
 
+import com.anchor.domain.user.api.controller.request.RequiredEditReview;
 import com.anchor.global.util.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,5 +32,10 @@ public class MentoringReview extends BaseEntity {
     this.contents = contents;
     this.ratings = ratings;
     this.mentoringApplication = mentoringApplication;
+  }
+
+  public void editReview(RequiredEditReview editReview) {
+    this.contents = editReview.getContents();
+    this.ratings = editReview.getRatings();
   }
 }
