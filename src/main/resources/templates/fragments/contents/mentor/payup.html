@@ -100,23 +100,28 @@
       <div th:replace="~{fragments/sidebar :: sidebar}"></div>
     </div>
 
-    <div class="d-flex flex-column col-md-9">
-      <nav class="navbar">
-        <button class="button is-rounded prev">
-          <img alt="prev" src="/images/cal/ic-arrow-line-left.png" srcset="
+    <div class="d-flex flex-column col-md-6">
+      <div class="row">
+        <nav class="navbar">
+          <button class="button is-rounded prev">
+            <img alt="prev" src="/images/cal/ic-arrow-line-left.png" srcset="
                   /images/cal/ic-arrow-line-left@2x.png 2x,
                   /images/cal/ic-arrow-line-left@3x.png 3x">
-        </button>
-        <span class="navbar--range"></span>
-        <button class="button is-rounded today">Today</button>
-        <button class="button is-rounded next">
-          <img alt="prev" src="/images/cal/ic-arrow-line-right.png" srcset="
+          </button>
+          <span class="navbar--range"></span>
+          <button class="button is-rounded today">Today</button>
+          <button class="button is-rounded next">
+            <img alt="prev" src="/images/cal/ic-arrow-line-right.png" srcset="
                   /images/cal/ic-arrow-line-right@2x.png 2x,
                   /images/cal/ic-arrow-line-right@3x.png 3">
-        </button>
-      </nav>
-      <div id="calendar"></div>
+          </button>
+        </nav>
+      </div>
+      <div class="row">
+        <div id="calendar"></div>
+      </div>
     </div>
+    <div class="col-md-3"></div>
   </div>
   <script src="/js/library/toast/toastui-calendar.min.js"></script>
   <script src="/js/mentor/payup.js"></script>
