@@ -28,8 +28,6 @@ import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
 import com.anchor.domain.mentoring.api.service.response.TopMentoring;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
-import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
-import com.anchor.domain.mentoring.domain.repository.MentoringReviewRepository;
 import com.anchor.domain.mentoring.domain.MentoringDetail;
 import com.anchor.domain.mentoring.domain.MentoringTag;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
@@ -37,7 +35,6 @@ import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
 import com.anchor.domain.mentoring.domain.repository.MentoringReviewRepository;
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.domain.payment.domain.repository.PaymentRepository;
-import com.anchor.domain.payment.domain.repository.PayupRepository;
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
@@ -65,13 +62,11 @@ public class MentoringService {
   private final UserRepository userRepository;
   private final MentorRepository mentorRepository;
   private final PaymentRepository paymentRepository;
-   private final MentorScheduleRepository mentorScheduleRepository;
+  private final MentorScheduleRepository mentorScheduleRepository;
   private final MentoringApplicationRepository mentoringApplicationRepository;
-    private final MentoringReviewRepository mentoringReviewRepository;
+  private final MentoringReviewRepository mentoringReviewRepository;
   private final ApplicationLockClient applicationLockClient;
   private final PayNumberCreator payNumberCreator;
-  private final PayupRepository payupRepository;
-  private final MentoringReviewRepository mentoringReviewRepository;
 
   public List<MentoringReviewInfoInterface> getMentoringReviews(Long mentoringId) {
     List<MentoringReviewInfoInterface> reviewList = mentoringReviewRepository.getReviewList(mentoringId);
