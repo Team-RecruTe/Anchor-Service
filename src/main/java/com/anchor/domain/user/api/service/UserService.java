@@ -42,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UserService {
 
+
   private final UserRepository userRepository;
   private final MentoringApplicationRepository mentoringApplicationRepository;
   private final PayupRepository payupRepository;
@@ -96,12 +97,12 @@ public class UserService {
     userRepository.delete(user);
   }
 
+
   @Transactional(readOnly = true)
   public Page<AppliedMentoringInfo> loadAppliedMentoringList(SessionUser sessionUser, Pageable pageable) {
     User user = getUser(sessionUser);
     return mentoringApplicationRepository.findByUserId(user.getId(), pageable);
   }
-
 
   @Transactional
   public boolean changeAppliedMentoringStatus(SessionUser sessionUser, MentoringStatusInfo changeRequest) {

@@ -23,8 +23,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
-@RequestMapping
-@RestController("/users")
+@RequestMapping("/users")
+@RestController
 public class UserController {
 
   private static final String SUCCESS = "success";
