@@ -60,7 +60,8 @@ public class QPayupRepositoryImpl implements QPayupRepository {
         .where(
             mentoringApplication.mentoringStatus.eq(MentoringStatus.COMPLETE)
                 .and(payup.payupStatus.eq(PayupStatus.WAITING))
-                .and(payup.createDate.between(dateTimeRange.getFrom(), dateTimeRange.getTo()))
+                .and(payup.createDate.goe(dateTimeRange.getFrom()))
+                .and(payup.createDate.before(dateTimeRange.getTo()))
         )
         .fetch();
   }
@@ -72,8 +73,10 @@ public class QPayupRepositoryImpl implements QPayupRepository {
         .toList();
     jpaQueryFactory.update(payup)
         .set(payup.payupStatus, PayupStatus.COMPLETE)
-        .where(payup.createDate.between(dateTimeRange.getFrom(), dateTimeRange.getTo())
-            .and(payup.mentor.id.notIn(failMentorIds)))
+        .where(
+            payup.createDate.goe(dateTimeRange.getFrom())
+                .and(payup.createDate.before(dateTimeRange.getTo()))
+                .and(payup.mentor.id.notIn(failMentorIds)))
         .execute();
   }
 }

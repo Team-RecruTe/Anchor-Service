@@ -13,9 +13,9 @@ public class PayupScheduler {
   private final PayupService payupService;
 
   /**
-   * 매달 1일 00:00:00 에 실행
+   * 매달 1일 03:00:00 에 실행
    */
-  @Scheduled(cron = "0 0 0 1 * *")
+  @Scheduled(cron = "0 0 3 1 * *")
   public void payupProcess() {
     payupService.processMonthlyPayup();
   }

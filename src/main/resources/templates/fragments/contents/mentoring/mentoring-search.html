@@ -105,9 +105,12 @@
       const isPageDisable = totalPage < page
       const li = document.createElement("li")
       const a = document.createElement("a")
+      const newRequestParam = new URLSearchParams(location.search);
+      newRequestParam.delete('page');
+      newRequestParam.append('page', page);
       li.classList.add("page-item")
       a.classList.add("page-link")
-      a.href = `?page=${page}`
+      a.href = `?${newRequestParam.toString()}`
       a.textContent = content
       if (isPrevDisable || isCurrentDisable || isPageDisable) {
         li.classList.add("disabled")

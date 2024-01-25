@@ -272,6 +272,12 @@ public class MentoringService {
     }
   }
 
+  public void autoChangeStatus(DateTimeRange targetDateRange) {
+    List<MentoringApplication> result = mentoringApplicationRepository.findAllByNotCompleteForWeek(targetDateRange);
+    result.forEach(application -> application.changeStatus(MentoringStatus.COMPLETE));
+    mentoringApplicationRepository.saveAll(result);
+  }
+
   private Mentor getMentorById(Long id) {
     return mentorRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("일치하는 멘토 정보가 없습니다."));
