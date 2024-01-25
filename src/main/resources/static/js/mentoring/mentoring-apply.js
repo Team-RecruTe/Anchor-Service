@@ -59,7 +59,6 @@ datepicker.on('change', () => {
 
   if (newCurrentDate <= newSelectedDate) {
     initializeReservationButtons(selectedDate, currentDate);
-    // 당일이라면, 현재시간 이전의 신청가능시간은 삭제해야함.
     updateReservationButtons(activeTimes, unavailableTimes, selectedDate);
     clickEventCreator();
   }

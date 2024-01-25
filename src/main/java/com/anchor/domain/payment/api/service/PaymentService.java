@@ -2,6 +2,8 @@ package com.anchor.domain.payment.api.service;
 
 import com.anchor.domain.mentoring.domain.MentoringStatus;
 import com.anchor.domain.payment.api.controller.request.PaymentResultInfo;
+import com.anchor.domain.payment.api.service.response.PaymentCompleteResult;
+import com.anchor.domain.payment.domain.repository.PaymentRepository;
 import com.anchor.global.portone.request.RequiredPaymentCreateData;
 import com.anchor.global.portone.response.PaymentResult;
 import com.anchor.global.portone.response.SinglePaymentResult;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 public class PaymentService {
 
   private final PaymentUtils apiUtil;
+  private final PaymentRepository paymentRepository;
 
   public ResponseType validatePaymentResult(PaymentResultInfo paymentResultInfo) {
     RequiredPaymentCreateData requiredPaymentCreateData = new RequiredPaymentCreateData(paymentResultInfo.getImpUid());
@@ -28,4 +31,7 @@ public class PaymentService {
     return ResponseType.of(paymentResultInfo.isSameAs(result));
   }
 
+  public PaymentCompleteResult getPaymentResult(String orderUid) {
+    return paymentRepository.findCompletedPaymentByOrderUid(orderUid);
+  }
 }

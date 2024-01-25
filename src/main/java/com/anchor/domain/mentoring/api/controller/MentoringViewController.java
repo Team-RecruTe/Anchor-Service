@@ -14,7 +14,6 @@ import com.anchor.global.auth.SessionUser;
 import com.anchor.global.util.view.ViewResolver;
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,7 +48,7 @@ public class MentoringViewController {
       Model model
   ) {
     Page<MentoringSearchResult> mentoringSearchResults = mentoringService.getMentorings(tags, keyword, pageable);
-    Set<String> popularMentoringTags = mentoringService.getPopularMentoringTags();
+    List<String> popularMentoringTags = mentoringService.getPopularMentoringTags();
     MentoringSearchInfo mentoringSearchInfo = MentoringSearchInfo.of(mentoringSearchResults, popularMentoringTags);
     model.addAttribute("mentoringSearchInfo", mentoringSearchInfo);
     return viewResolver.getViewPath("mentoring", "mentoring-search");
@@ -61,7 +60,7 @@ public class MentoringViewController {
   @GetMapping("/{id}")
   public String viewMentoringDetailPage(@PathVariable("id") Long id, Model model) {
     MentoringDetailSearchResult mentoringDetailSearchResult = mentoringService.getMentoringDetailInfo(id);
-    Set<String> popularMentoringTags = mentoringService.getPopularMentoringTags();
+    List<String> popularMentoringTags = mentoringService.getPopularMentoringTags();
     MentoringDetailInfo mentoringDetailInfo = MentoringDetailInfo.of(mentoringDetailSearchResult, popularMentoringTags);
     List<MentoringReviewInfoInterface> reviewList = mentoringService.getMentoringReviews(id);
     MentoringRatingInterface averageRatings = mentoringService.getMentoringRatings(id);
@@ -90,19 +89,11 @@ public class MentoringViewController {
   @PostMapping("/{id}/payment")
   public String viewMentoringPayment(@PathVariable("id") Long id,
       @ModelAttribute MentoringApplicationTime applicationTime, HttpSession session, Model model) {
-    SessionUser sessionUser = getSessionUser(session);
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
     MentoringPayConfirmInfo mentoringConfirmInfo = mentoringService.getMentoringConfirmInfo(id, applicationTime,
         sessionUser);
     model.addAttribute("confirmInfo", mentoringConfirmInfo);
     return viewResolver.getViewPath("mentoring", "mentoring-payment");
   }
 
-  private SessionUser getSessionUser(HttpSession session) {
-    SessionUser sessionUser = (SessionUser) session.getAttribute("user");
-    if (sessionUser == null) {
-      throw new RuntimeException("로그인 정보가 없습니다. 잘못된 접근입니다.");
-    }
-    return sessionUser;
-  }
-  
 }

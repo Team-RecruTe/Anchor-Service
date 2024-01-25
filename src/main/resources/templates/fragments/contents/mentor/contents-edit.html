@@ -6,7 +6,6 @@
 <head>
   <title>Anchor-service</title>
   <link href="/css/library/toast/toastui-editor.min.css" rel="stylesheet"/>
-  <script src="/js/axios.min.js"></script>
 </head>
 <body>
 <div class="d-flex flex-column justify-content-center" layout:fragment="content">
@@ -29,13 +28,13 @@
   <!-- TUI 에디터 JS CDN -->
   <script src="/js/library/toast/toastui-editor-all.min.js"></script>
 
-  <script>
+  <script th:inline="javascript">
     const submitButton = document.querySelector('#submit-btn');
     const editor = new toastui.Editor({
       el: document.querySelector('#content'), // 에디터를 적용할 요소 (컨테이너)
       height: '800px',                        // 에디터 영역의 높이 값 (OOOpx || auto)
       initialEditType: 'markdown',            // 최초로 보여줄 에디터 타입 (markdown || wysiwyg)
-      initialValue: '',                       // 내용의 초기 값으로, 반드시 마크다운 문자열 형태여야 함
+      initialValue: [[${mentorContents.contents}]],                       // 내용의 초기 값으로, 반드시 마크다운 문자열 형태여야 함
       previewStyle: 'vertical',               // 마크다운 프리뷰 스타일 (tab || vertical)
       placeholder: '내용을 입력해 주세요.',
       hooks: {
@@ -55,7 +54,6 @@
         },
       }
     });
-
     const submit = (axios, editor) => {
       console.log(editor.getHTML())
       const json = {
@@ -63,7 +61,7 @@
       }
       const currentPath = window.location.pathname
       const path = currentPath.substring(0)
-
+      const mentorId = [[${session.user.mentorId}]]
       axios.put(path, json)
       .then((res) => {
         if (res.status === 200) {
@@ -76,7 +74,7 @@
               }
             }
           }
-          window.location.href = "/"
+          window.location.href = "/mentors/" + mentorId;
         } else {
           alert('url이 반환되지 않았습니다.')
         }
@@ -91,23 +89,6 @@
       submitButton.addEventListener('click',
           () => submit(axios, editor));
     }
-  </script>
-
-
-  <script th:inline="javascript">
-    const initContents = (editor, submitEvent, submit) => {
-      const mentorContents = [[${mentorContents}]] || {}; // 기본값을 빈 객체로 설정
-      const submitButton = document.querySelector('#submit-btn');
-
-      // 1. 에디터 초기화
-      const initalContents = mentorContents.contents
-      editor.setHTML(initalContents)
-
-      // 4. 제출 이벤트
-      submitEvent(axios, submitButton, editor, submit)
-    }
-
-    initContents(editor, submitEvent, submit)
   </script>
 </div>
 </body>

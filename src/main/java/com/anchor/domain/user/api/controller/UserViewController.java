@@ -83,7 +83,7 @@ public class UserViewController {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
     RequiredEditReview review = userService.getReview(sessionUser, reservedTime);
     model.addAttribute("requiredEditReview", review);
-    return "fragments/contents/user/edit-review";
+    return viewResolver.getViewPath("user", "edit-review");
   }
 
   @PostMapping("/me/review/edit")

@@ -6,6 +6,7 @@ import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.user.domain.User;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -23,7 +24,6 @@ public class MentorInfoResponse {
   private List<Mentoring> mentorings = new ArrayList<>();
   private User user;
 
-
   public MentorInfoResponse(Mentor mentor) {
     this.id = mentor.getId();
     this.companyEmail = mentor.getCompanyEmail();
@@ -31,8 +31,8 @@ public class MentorInfoResponse {
     this.bankName = mentor.getBankName();
     this.accountNumber = mentor.getAccountNumber();
     this.accountName = mentor.getAccountName();
-    this.mentorIntroduction = mentor.getMentorIntroduction()
-        .getContents();
+    this.mentorIntroduction = Objects.nonNull(mentor.getMentorIntroduction()) ? mentor.getMentorIntroduction()
+        .getContents() : "";
     this.mentorings = mentor.getMentorings();
     this.user = mentor.getUser();
   }

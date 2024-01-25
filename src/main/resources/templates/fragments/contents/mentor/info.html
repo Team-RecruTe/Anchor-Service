@@ -31,8 +31,12 @@
             </div>
             <a class="btn btn-success mt-3"
                th:href="@{/mentors/me/introduction}"
-               th:if="${session.user != null && mentorInfo.id eq session.user.mentorId}">
+               th:if="${session.user ne null && mentorInfo.id eq session.user.mentorId && mentorInfo.mentorIntroduction ne null}">
               멘토 소개글 수정</a>
+            <a class="btn btn-success mt-3"
+               th:href="@{/mentors/me/introduction}"
+               th:if="${session.user ne null && mentorInfo.id eq session.user.mentorId && mentorInfo.mentorIntroduction eq null}">
+              멘토 소개글 작성</a>
           </div>
 
           <!--멘토링 목록-->

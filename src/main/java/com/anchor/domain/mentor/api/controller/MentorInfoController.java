@@ -4,7 +4,6 @@ package com.anchor.domain.mentor.api.controller;
 import com.anchor.domain.mentor.api.controller.request.MentorContentsRequest;
 import com.anchor.domain.mentor.api.controller.request.MentorInfoRequest;
 import com.anchor.domain.mentor.api.service.MentorInfoService;
-import com.anchor.domain.mentor.api.service.response.MentorContents;
 import com.anchor.global.auth.SessionUser;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -23,24 +22,28 @@ public class MentorInfoController {
   private final MentorInfoService mentorInfoService;
 
   @PutMapping("/info")
-  public ResponseEntity<String> modifyInfo(@RequestBody MentorInfoRequest mentorInfoRequest, HttpSession httpSession){
-    SessionUser user = (SessionUser) httpSession.getAttribute("user");
-    mentorInfoService.editInfo(user.getMentorId(), mentorInfoRequest);
-    return ResponseEntity.ok().build();
+  public ResponseEntity<String> modifyInfo(@RequestBody MentorInfoRequest mentorInfoRequest, HttpSession session) {
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
+    mentorInfoService.editInfo(sessionUser, mentorInfoRequest);
+    return ResponseEntity.ok()
+        .build();
   }
 
   @DeleteMapping
-  public ResponseEntity<String> deleteMentor(HttpSession httpSession){
-    SessionUser user = (SessionUser) httpSession.getAttribute("user");
-    mentorInfoService.deleteMentors(user.getMentorId());
-    return ResponseEntity.ok().build();
+  public ResponseEntity<String> deleteMentor(HttpSession session) {
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
+    mentorInfoService.deleteMentors(sessionUser);
+    return ResponseEntity.ok()
+        .build();
   }
 
   @PutMapping("/introduction")
-  public ResponseEntity<String> modifyIntroduction(@RequestBody MentorContentsRequest mentorContentsRequest, HttpSession httpSession){
-    SessionUser user = (SessionUser) httpSession.getAttribute("user");
-    mentorInfoService.editContents(user.getMentorId(), mentorContentsRequest);
-    return ResponseEntity.ok().build();
+  public ResponseEntity<String> modifyIntroduction(@RequestBody MentorContentsRequest mentorContentsRequest,
+      HttpSession session) {
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
+    mentorInfoService.editContents(sessionUser, mentorContentsRequest);
+    return ResponseEntity.ok()
+        .build();
   }
 
 }

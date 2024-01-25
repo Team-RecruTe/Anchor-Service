@@ -49,6 +49,7 @@ public class ApplicationTimeInfo {
       List<DateTimeRange> paymentTimes) {
     Map<LocalDate, List<TimeRange>> unavailableTimeMap = new HashMap<>();
     applications.stream()
+        .filter(MentoringApplication::isNotCancelled)
         .map(application -> DateTimeRange.of(application.getStartDateTime(), application.getEndDateTime()))
         .forEach(dateTimeRange -> addUnavailableTimes(dateTimeRange, unavailableTimeMap));
     paymentTimes.forEach(dateTimeRange -> addUnavailableTimes(dateTimeRange, unavailableTimeMap));

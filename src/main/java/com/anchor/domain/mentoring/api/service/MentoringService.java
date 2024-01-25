@@ -17,13 +17,12 @@ import com.anchor.domain.mentoring.api.service.response.ApplicationTimeInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringContents;
 import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
-import com.anchor.domain.mentoring.api.service.response.MentoringDefaultInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringDeleteResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo.MentoringDetailSearchResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
+import com.anchor.domain.mentoring.api.service.response.MentoringOrderUid;
 import com.anchor.domain.mentoring.api.service.response.MentoringPayConfirmInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringPaymentInfo;
-import com.anchor.domain.mentoring.api.service.response.MentoringSaveRequestInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
 import com.anchor.domain.mentoring.api.service.response.TopMentoring;
 import com.anchor.domain.mentoring.domain.Mentoring;
@@ -44,8 +43,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -126,13 +123,15 @@ public class MentoringService {
   }
 
   @Transactional(readOnly = true)
-  public Set<String> getPopularMentoringTags() {
+  public List<String> getPopularMentoringTags() {
     List<Mentoring> mentoringList = mentoringRepository.findPopularMentoringTags();
     return mentoringList.stream()
         .flatMap(mentoring -> mentoring.getMentoringTags()
             .stream())
         .map(MentoringTag::getTag)
-        .collect(Collectors.toSet());
+        .distinct()
+        .sorted()
+        .toList();
   }
 
   /**
@@ -146,15 +145,6 @@ public class MentoringService {
   }
 
   /**
-   * 멘토링 신청페이지에서 사용할 멘토링 정보를 조회합니다.
-   */
-  @Transactional(readOnly = true)
-  public MentoringDefaultInfo getMentoringDefaultInfo(Long id) {
-    Mentoring mentoring = getMentoringById(id);
-    return MentoringDefaultInfo.of(mentoring);
-  }
-
-  /**
    * 멘토의 활동시간과 이미 신청된 멘토링시간, 결제중인 멘토링시간을 조회합니다.
    */
   @Transactional(readOnly = true)
@@ -162,8 +152,8 @@ public class MentoringService {
     Mentor mentor = getMentoringById(id).getMentor();
     String pattern = ApplicationLockClient.createMatchPattern(mentor);
     List<DateTimeRange> paymentTimes = applicationLockClient.findAllByKeyword(pattern);
-    List<MentoringApplication> mentoringApplications = mentoringApplicationRepository.findByMentoringId(id);
-    List<MentorSchedule> mentorSchedules = mentorScheduleRepository.findMentorScheduleByMentorId(id);
+    List<MentoringApplication> mentoringApplications = mentoringApplicationRepository.findAllByMentorId(mentor.getId());
+    List<MentorSchedule> mentorSchedules = mentorScheduleRepository.findMentorScheduleByMentorId(mentor.getId());
     return ApplicationTimeInfo.create(mentoringApplications, mentorSchedules, paymentTimes);
   }
 
@@ -197,7 +187,7 @@ public class MentoringService {
    * 멘토링 신청이 완료되면 멘토링 신청내역을 저장합니다.
    */
   @Transactional
-  public MentoringSaveRequestInfo saveMentoringApplication(SessionUser sessionUser,
+  public MentoringOrderUid saveMentoringApplication(SessionUser sessionUser,
       Long id, MentoringApplicationInfo applicationInfo) {
     Mentoring mentoring = getMentoringById(id);
     Mentor mentor = mentoring.getMentor();
@@ -210,7 +200,7 @@ public class MentoringService {
         loginUser);
     mentoringApplicationRepository.save(mentoringApplication);
     applicationLockClient.remove(key);
-    return new MentoringSaveRequestInfo(mentoringApplication);
+    return new MentoringOrderUid(mentoringApplication);
   }
 
   /**

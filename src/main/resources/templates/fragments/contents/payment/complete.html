@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko"
+      layout:decorate="~{layout/default}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+>
+<head>
+  <title>결제완료 페이지</title>
+</head>
+<body>
+<div class="d-flex flex-column justify-content-center" layout:fragment="content">
+  <div class="row">
+    <div class="col-3"></div>
+    <div class="col-6">
+      <div class="card shadow p-3 rounded-2 text-dark bg-light mb-3">
+        <div class="card-header">
+          <h3 class="card-title text-center">🎊멘토링 결제가 완료되었습니다.🎊</h3>
+        </div>
+        <div class="card-body text-center">
+          <h5 class="card-subtitle mt-3 mb-5" th:text="${paymentResult.mentoringInfo.mentoringTitle}"></h5>
+          <table class="table table-striped">
+            <tbody>
+            <tr>
+              <th scope="row">멘토 닉네임</th>
+              <td th:text="${paymentResult.mentoringInfo.mentorNickname}"></td>
+            </tr>
+            <tr>
+              <th scope="row">멘토링 결제시간</th>
+              <td th:text="${#temporals.format(paymentResult.mentoringInfo.mentoringReservedTime.from,'yyyy.MM.dd HH:mm')+' ~ '
+              +#temporals.format(paymentResult.mentoringInfo.mentoringReservedTime.to,'HH:mm')}"></td>
+            </tr>
+            <tr>
+              <th scope="row">주문번호</th>
+              <td th:text="${paymentResult.paymentInfo.getOrderUid()}"></td>
+            </tr>
+            <tr>
+              <th scope="row">결제금액</th>
+              <td th:text="${paymentResult.paymentInfo.getAmount()}"></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card-footer d-flex justify-content-end">
+          <button class="btn btn-success  " id="home-button">메인화면으로</button>
+        </div>
+      </div>
+    </div>
+    <div class="col-3"></div>
+  </div>
+  <script th:inline="javascript">
+    const value = [[${paymentResult}]]
+    console.log(value);
+    let homeButton = document.getElementById('home-button');
+    homeButton.addEventListener('click', () => {
+      location.href = '/';
+    });
+  </script>
+</div>
+</body>
+</html>

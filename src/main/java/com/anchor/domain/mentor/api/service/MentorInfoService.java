@@ -1,5 +1,6 @@
 package com.anchor.domain.mentor.api.service;
 
+import com.anchor.domain.mentor.api.controller.request.MentorContentsRequest;
 import com.anchor.domain.mentor.api.controller.request.MentorInfoRequest;
 import com.anchor.domain.mentor.api.service.response.MentorContents;
 import com.anchor.domain.mentor.api.service.response.MentorContentsEditResult;
@@ -24,8 +25,8 @@ public class MentorInfoService {
   }
 
   @Transactional
-  public void editInfo(Long mentorId, MentorInfoRequest mentorInfoRequest) {
-    Mentor mentor = getMentor(mentorId);
+  public void editInfo(SessionUser sessionUser, MentorInfoRequest mentorInfoRequest) {
+    Mentor mentor = getMentor(sessionUser.getMentorId());
     mentor.modify(mentorInfoRequest);
     mentorRepository.save(mentor);
   }
@@ -33,18 +34,17 @@ public class MentorInfoService {
   @Transactional(readOnly = true)
   public MentorContents getContents(SessionUser sessionUser) {
     Mentor mentor = getMentor(sessionUser.getMentorId());
-    return new MentorContents(mentor.getMentorIntroduction()
-        .getContents());
+    return new MentorContents(mentor);
   }
 
   @Transactional
-  public void deleteMentors(Long mentorId) {
-    mentorRepository.deleteById(mentorId);
+  public void deleteMentors(SessionUser sessionUser) {
+    mentorRepository.deleteById(sessionUser.getMentorId());
   }
 
   @Transactional
-  public MentorContentsEditResult editContents(Long mentorId, MentorContents mentorContents) {
-    Mentor mentor = getMentor(mentorId);
+  public MentorContentsEditResult editContents(SessionUser sessionUser, MentorContentsRequest mentorContents) {
+    Mentor mentor = getMentor(sessionUser.getMentorId());
     mentor.editContents(mentorContents);
     Mentor savedMentor = mentorRepository.save(mentor);
     return new MentorContentsEditResult(savedMentor.getId());

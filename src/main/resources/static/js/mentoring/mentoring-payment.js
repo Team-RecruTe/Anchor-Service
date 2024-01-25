@@ -16,8 +16,8 @@ function paymentProcess() {
 
   let requestUri = currentUri + '-process';
 
-  let nickname = document.getElementById('user-nickname').textContent;
-  let email = document.getElementById('user-email').textContent;
+  let nickname = document.getElementById('user-nickname').value;
+  let email = document.getElementById('user-email').value;
   let tel = document.getElementById('user-tel').value;
 
   axios.post(requestUri, {
@@ -85,7 +85,7 @@ function saveMentoringApplication(res, amount) {
   })
   .then(res => {
     if (res.status === 200) {
-      window.location.href = '/payment/complete';
+      window.location.href = '/payment/complete?order=' + res.data.order_uid;
     } else {
       alert('멘토링 신청내역 저장에 실패했습니다.');
     }

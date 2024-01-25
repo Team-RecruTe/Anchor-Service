@@ -1,6 +1,6 @@
 package com.anchor.domain.mentoring.api.service.response;
 
-import java.util.Set;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -11,14 +11,14 @@ public class MentoringSearchInfo {
 
   private Page<MentoringSearchResult> mentoringInfos;
 
-  private Set<String> tags;
+  private List<String> tags;
 
-  private MentoringSearchInfo(Page<MentoringSearchResult> mentoringInfos, Set<String> tags) {
+  private MentoringSearchInfo(Page<MentoringSearchResult> mentoringInfos, List<String> tags) {
     this.mentoringInfos = mentoringInfos;
     this.tags = tags;
   }
 
-  public static MentoringSearchInfo of(Page<MentoringSearchResult> mentoringInfos, Set<String> tags) {
+  public static MentoringSearchInfo of(Page<MentoringSearchResult> mentoringInfos, List<String> tags) {
     return new MentoringSearchInfo(mentoringInfos, tags);
   }
 }

@@ -96,9 +96,11 @@ public class QMentoringApplicationRepositoryImpl implements QMentoringApplicatio
   }
 
   @Override
-  public List<MentoringApplication> findByMentoringId(Long mentoringId) {
+  public List<MentoringApplication> findAllByMentorId(Long mentorId) {
     return jpaQueryFactory.selectFrom(mentoringApplication)
-        .where(mentoringApplication.mentoring.id.eq(mentoringId))
+        .leftJoin(mentoringApplication.mentoring, mentoring)
+        .leftJoin(mentoring.mentor, mentor)
+        .where(mentoringApplication.mentoring.mentor.id.eq(mentorId))
         .fetch();
   }
 

@@ -83,6 +83,10 @@ public class MentoringApplication extends BaseEntity {
     this.mentoringStatus = mentoringStatus;
   }
 
+  public boolean isNotCancelled() {
+    return mentoringStatus != MentoringStatus.CANCELLED;
+  }
+
   public void completedReview() {
     hasReview = true;
   }

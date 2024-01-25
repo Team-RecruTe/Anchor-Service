@@ -4,169 +4,176 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 >
 <head>
-  <title>Anchor-service</title>
+  <title>회원 정보</title>
   <style>
     .info-table {
       border: 2px solid #cecece; /* 테두리 색 설정 */
     }
+
     .info-table th {
       background-color: rgba(33, 37, 41, 0.03); /* 레이블 칸의 배경색 */
     }
+
     .info-table th, .info-table td, .info-table td input { /* 테이블 내 텍스트 크기 조정 */
       font-size: 1.2em; /* 텍스트 크기 */
     }
   </style>
 </head>
 
-<div layout:fragment="content" class="main">
-  <h2 style="text-align: center;">회원 정보 조회 페이지</h2>
-  <div class="container mt-4">
-    <hr>
-    <div class="row justify-content-center">
-      <div class="col-md-8">
-        <div class="card">
-          <div class="card-header">
-            프로필 이미지
-          </div>
-          <div class="card-body text-center">
-            <div id="current-profile-image" class="mb-4">
-              <!-- 기존 이미지 -->
-              <th:block th:if="${userInfo.image==null}">
-                <img src="https://anchor-image-stroage.s3.ap-northeast-2.amazonaws.com/%EA%B3%A0%EC%8A%B4%EB%8F%84%EC%B9%98_1704431943574.jpg"
-                     id="userProfileImage" width="200px">
-              </th:block>
-              <th:block th:unless="${userInfo.image==null}">
-                <img th:src="${userInfo.image}" id="userProfileImage" width="200px">
-              </th:block>
-            </div>
-            <div id="new-profile-image" class="mb-4"></div>
-            <div class="input-group mb-4">
-              <input th:type="file" class="form-control" id="imageUpload" name="profileImageUrl">
-            </div>
-            <div id="new-profile-image-control" class="d-grid gap-2">
-              <button class="btn btn-outline-success" id="btn-saveImage">프로필 사진 변경</button>
-            </div>
-          </div>
+<div class="d-flex flex-column justify-content-center" layout:fragment="content">
+  <div class="row">
+    <div class="col-md-3">
+      <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+    </div>
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          프로필 이미지
         </div>
-
-        <div class="mt-4">
-          <table class="table info-table">
-            <tbody>
-            <tr>
-              <th scope="row">계정</th>
-              <td><span id="email" th:text="${userInfo.email}"></span></td>
-            </tr>
-            <tr>
-              <th scope="row" class="align-middle">닉네임</th>
-              <td><input type="text" class="form-control" id="nickname" name="nickname" th:value="${userInfo.nickname}"></td>
-            </tr>
-            <tr>
-              <th scope="row">역할</th>
-              <td><span id="isMentor" th:text="${userInfo.mentor != null ? '멘토' : '멘티'}"></span></td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="text-center mt-4">
-          <button class="btn btn-primary" id="btn-update">정보 수정</button>
-          <button class="btn btn-danger" id="btn-delete">회원 탈퇴</button>
+        <div class="card-body text-center">
+          <div class="mb-4" id="current-profile-image">
+            <!-- 기존 이미지 -->
+            <th:block th:if="${userInfo.image eq null}">
+              <img
+                  id="userProfileImage"
+                  src="https://anchor-image-stroage.s3.ap-northeast-2.amazonaws.com/%EA%B3%A0%EC%8A%B4%EB%8F%84%EC%B9%98_1704431943574.jpg"
+                  width="200px">
+            </th:block>
+            <th:block th:unless="${userInfo.image eq null}">
+              <img id="userProfileImage" th:src="${userInfo.image}" width="200px">
+            </th:block>
+          </div>
+          <div class="mb-4" id="new-profile-image"></div>
+          <div class="input-group mb-4">
+            <input class="form-control" id="imageUpload" name="profileImageUrl" th:type="file">
+          </div>
+          <div class="d-grid gap-2" id="new-profile-image-control">
+            <button class="btn btn-outline-success" id="btn-saveImage">프로필 사진 변경</button>
+          </div>
         </div>
       </div>
+
+      <div class="mt-4">
+        <table class="table info-table">
+          <tbody>
+          <tr>
+            <th class="text-center" scope="row">계정</th>
+            <td><span id="email" th:text="${userInfo.email}"></span></td>
+          </tr>
+          <tr>
+            <th class="text-center align-middle" scope="row">닉네임</th>
+            <td><input class="form-control form-control-sm" id="nickname" name="nickname"
+                       th:value="${userInfo.nickname}" type="text">
+            </td>
+          </tr>
+          <tr>
+            <th class="text-center" scope="row">역할</th>
+            <td><span id="isMentor" th:text="${userInfo.mentor ne null ? '멘토' : '멘티'}"></span></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="text-center mt-4">
+        <button class="btn btn-primary" id="btn-update">정보 수정</button>
+        <button class="btn btn-danger" id="btn-delete">회원 탈퇴</button>
+      </div>
     </div>
+    <div class="col-md-3"></div>
   </div>
-  <script th:inline="javascript">
+
+  <script>
     let imgUrl = null;
 
-      let index = {
-        init: function () {
-          $("#btn-update").on("click", () => {
-            this.update();
-          });
-          $("#btn-delete").on("click", () => {
-            this.delete();
-          });
-          $("#imageUpload").on("change", () => {
-            this.uploadImage();
-          });
-          $("#btn-saveImage").on("click", () => {
-            this.saveImage(imgUrl);
-          });
-        },
+    let index = {
+      init: function () {
+        $("#btn-update").on("click", () => {
+          this.update();
+        });
+        $("#btn-delete").on("click", () => {
+          this.delete();
+        });
+        $("#imageUpload").on("change", () => {
+          this.uploadImage();
+        });
+        $("#btn-saveImage").on("click", () => {
+          this.saveImage(imgUrl);
+        });
+      },
 
-        /*이미지 업로드*/
-        uploadImage: function () {
-          let formData = new FormData();
-          let imageFile = $("#imageUpload")[0].files[0];
-          formData.append("image", imageFile);
-          $.ajax({
-            type: "POST",
-            url: "/image/upload",
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function (response) {
-              imgUrl = response;
-              console.log(response.imageUrl);
-              let tempHtml = "";
-              if (response) {
-                tempHtml = `<img src='${response.imageUrl}' id='updateProfileImage' width='200px'>`;
-                $("#current-profile-image").hide(); // 기존 이미지 숨기기
-              }
-              $("#new-profile-image").html(tempHtml); // 임시로 html에 넣어주기
-            },
-            error: function (error) {
+      /*이미지 업로드*/
+      uploadImage: function () {
+        let formData = new FormData();
+        let imageFile = $("#imageUpload")[0].files[0];
+        formData.append("image", imageFile);
+        $.ajax({
+          type: "POST",
+          url: "/image/upload",
+          data: formData,
+          contentType: false,
+          processData: false,
+          success: function (response) {
+            imgUrl = response;
+            console.log(response.imageUrl);
+            let tempHtml = "";
+            if (response) {
+              tempHtml = `<img src='${response.imageUrl}' id='updateProfileImage' width='200px'>`;
+              $("#current-profile-image").hide(); // 기존 이미지 숨기기
             }
-          });
-        },
+            $("#new-profile-image").html(tempHtml); // 임시로 html에 넣어주기
+          },
+          error: function (error) {
+          }
+        });
+      },
 
-        /*이미지url user테이블에 저장*/
-        saveImage: function (data) {
-          let image = $("#uploadedImageUrl").val();
-          console.log(image);
-          $.ajax({
-            type: "PUT",
-            url: "/users/me/image",
-            data: JSON.stringify({"image": data.imageUrl}),
-            contentType: "application/json; charset=utf-8",
-            success: function (response) {
-              alert("프로필 이미지가 성공적으로 업데이트되었습니다.");
-              location.href = "/users/me";
-            },
-            error: function (error) {
-              alert("이미지 저장 실패");
-            }
-          });
-        },
+      /*이미지url user테이블에 저장*/
+      saveImage: function (data) {
+        let image = $("#uploadedImageUrl").val();
+        console.log(image);
+        $.ajax({
+          type: "PUT",
+          url: "/users/me/image",
+          data: JSON.stringify({"image": data.imageUrl}),
+          contentType: "application/json; charset=utf-8",
+          success: function (response) {
+            alert("프로필 이미지가 성공적으로 업데이트되었습니다.");
+            location.href = "/users/me";
+          },
+          error: function (error) {
+            alert("이미지 저장 실패");
+          }
+        });
+      },
 
-        /*정보 수정*/
-        update: function () {
-          console.log("click");
-          let data = {
-            email: $("#email").val(),
-            nickname: $("#nickname").val()
-          };
-          $.ajax({
-            type: "put",
-            url: "/users/me",
-            data: JSON.stringify(data),
-            contentType: "application/json; charset=utf-8",
-          }).done(function (resp) {
-            if (resp.status === 500) {
-              alert("회원정보수정을 실패했습니다.");
-            } else {
-              alert("회원정보수정을 성공했습니다.");
-              location.href = "/users/me";
-            }
-          }).fail(function (error) {
-            alert(JSON.stringify(error));
-          });
-        },
+      /*정보 수정*/
+      update: function () {
+        console.log("click");
+        let data = {
+          email: $("#email").val(),
+          nickname: $("#nickname").val()
+        };
+        $.ajax({
+          type: "put",
+          url: "/users/me",
+          data: JSON.stringify(data),
+          contentType: "application/json; charset=utf-8",
+        }).done(function (resp) {
+          if (resp.status === 500) {
+            alert("회원정보수정을 실패했습니다.");
+          } else {
+            alert("회원정보수정을 성공했습니다.");
+            location.href = "/users/me";
+          }
+        }).fail(function (error) {
+          alert(JSON.stringify(error));
+        });
+      },
 
       /*회원 탈퇴*/
-      delete: function(){
+      delete: function () {
         let data = {
-          email:$("#email").val()
+          email: $("#email").val()
         };
         $.ajax({
           type: "delete",
@@ -174,20 +181,20 @@
           data: JSON.stringify(data),
           contentType: "application/json; charset=utf-8",
         }).done(function (resp) {
-          if(resp.status===500){
+          if (resp.status === 500) {
             alert("회원 탈퇴 실패");
           } else {
             alert("회원 탈퇴 성공");
-            location.href="/users/me";
+            location.href = "/users/me";
           }
         }).fail(function (error) {
           alert("신청한 멘토링을 모두 취소 후 회원탈퇴가 가능합니다.");
-          location.href="/users/me/applied-mentorings";
+          location.href = "/users/me/applied-mentorings";
         });
       },
     }
 
-      index.init();
-    </script>
-  </div>
+    index.init();
+  </script>
+</div>
 </html>
