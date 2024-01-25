@@ -1,6 +1,8 @@
 package com.anchor.domain.mentoring.api.service.response;
 
 import com.anchor.domain.mentoring.domain.Mentoring;
+import com.anchor.domain.mentoring.domain.MentoringReview;
+import com.anchor.domain.mentoring.domain.MentoringTag;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,25 +13,33 @@ import lombok.NoArgsConstructor;
 public class MentoringDetailInfo {
 
   private MentoringDetailSearchResult mentoringDetailSearchResult;
+  private MentoringReviewSearchResult mentoringReviewSearchResult;
   private List<String> searchTags;
 
-  @Builder
-  private MentoringDetailInfo(MentoringDetailSearchResult mentoringDetailSearchResult, List<String> searchTags) {
+
+  private MentoringDetailInfo(MentoringDetailSearchResult mentoringDetailSearchResult,
+      MentoringReviewSearchResult mentoringReviewSearchResult, List<String> searchTags) {
     this.mentoringDetailSearchResult = mentoringDetailSearchResult;
+    this.mentoringReviewSearchResult = mentoringReviewSearchResult;
     this.searchTags = searchTags;
   }
 
-  public static MentoringDetailInfo of(MentoringDetailSearchResult mentoringDetailSearchResult,
-      List<String> searchTags) {
-    return MentoringDetailInfo.builder()
-        .mentoringDetailSearchResult(mentoringDetailSearchResult)
-        .searchTags(searchTags)
-        .build();
+  public static MentoringDetailInfo of(Mentoring mentoring, List<MentoringReview> reviews,
+      List<Mentoring> popularMentorings) {
+    List<String> popularTags = popularMentorings.stream()
+        .flatMap(popularMentoring -> mentoring.getMentoringTags()
+            .stream())
+        .map(MentoringTag::getTag)
+        .distinct()
+        .sorted()
+        .toList();
+    return new MentoringDetailInfo(MentoringDetailSearchResult.of(mentoring), MentoringReviewSearchResult.of(reviews),
+        popularTags);
   }
 
   @Getter
   @NoArgsConstructor
-  public static class MentoringDetailSearchResult {
+  static class MentoringDetailSearchResult {
 
     private Long mentoringId;
     private Long mentorId;
@@ -58,7 +68,7 @@ public class MentoringDetailInfo {
       this.tags = tags;
     }
 
-    public static MentoringDetailSearchResult of(Mentoring mentoring) {
+    static MentoringDetailSearchResult of(Mentoring mentoring) {
       return MentoringDetailSearchResult.builder()
           .mentoringId(mentoring.getId())
           .mentorId(mentoring.getMentor()

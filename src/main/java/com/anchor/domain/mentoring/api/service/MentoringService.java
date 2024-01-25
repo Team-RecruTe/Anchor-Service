@@ -13,14 +13,12 @@ import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTi
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationUserInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
-import com.anchor.domain.mentoring.api.controller.request.MentoringRatingInterface;
-import com.anchor.domain.mentoring.api.controller.request.MentoringReviewInfoInterface;
 import com.anchor.domain.mentoring.api.service.response.ApplicationTimeInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringContents;
 import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringDeleteResult;
-import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo.MentoringDetailSearchResult;
+import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringOrderUid;
 import com.anchor.domain.mentoring.api.service.response.MentoringPayConfirmInfo;
@@ -30,6 +28,7 @@ import com.anchor.domain.mentoring.api.service.response.TopMentoring;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringDetail;
+import com.anchor.domain.mentoring.domain.MentoringReview;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
 import com.anchor.domain.mentoring.domain.MentoringTag;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
@@ -74,16 +73,6 @@ public class MentoringService {
   private final ApplicationLockClient applicationLockClient;
   private final PayNumberCreator payNumberCreator;
   private final AsyncMailSender asyncMailSender;
-
-  public List<MentoringReviewInfoInterface> getMentoringReviews(Long mentoringId) {
-    List<MentoringReviewInfoInterface> reviewList = mentoringReviewRepository.getReviewList(mentoringId);
-    return reviewList;
-  }
-
-  public MentoringRatingInterface getMentoringRatings(Long mentoringId) {
-    MentoringRatingInterface averageRatings = mentoringReviewRepository.getAverageRatings(mentoringId);
-    return averageRatings;
-  }
 
   @Transactional
   public MentoringCreateResult create(Long mentorId, MentoringBasicInfo mentoringBasicInfo) {
@@ -148,10 +137,12 @@ public class MentoringService {
    * 입력한 ID를 통해 멘토링 상세정보를 조회합니다.
    */
   @Transactional(readOnly = true)
-  public MentoringDetailSearchResult getMentoringDetailInfo(Long id) {
-    Mentoring findMentoring = mentoringRepository.findMentoringDetailInfo(id)
+  public MentoringDetailInfo getMentoringDetailInfo(Long id) {
+    Mentoring mentoring = mentoringRepository.findMentoringDetailInfo(id)
         .orElseThrow(() -> new NoSuchElementException(id + "에 해당하는 멘토링이 존재하지 않습니다."));
-    return MentoringDetailSearchResult.of(findMentoring);
+    List<Mentoring> popularMentorings = mentoringRepository.findPopularMentoringTags();
+    List<MentoringReview> mentoringReviews = mentoringReviewRepository.findAllByMentoringId(id);
+    return MentoringDetailInfo.of(mentoring, mentoringReviews, popularMentorings);
   }
 
   /**

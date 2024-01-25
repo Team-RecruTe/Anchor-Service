@@ -181,9 +181,10 @@
             </div>
           </div>
 
-          <div class="row mt-4">
-            <th:block th:if="${averageRatings ne null and reviewList ne null and !reviewList.isEmpty()}">
-              <p style="font-size: 36px">⭐평균 별점 : <span th:text="${averageRatings.getAverage_ratings()}">별점 평균</span>⭐
+          <div class="row mt-4" th:with="reviewResult = ${mentoringDetail.mentoringReviewSearchResult}">
+            <th:block
+                th:if="${reviewResult.averageRatings ne null and reviewResult.reviewInfos ne null and !reviewResult.reviewInfos.isEmpty()}">
+              <p style="font-size: 36px">⭐평균 별점 : <span th:text="${reviewResult.averageRatings}">별점 평균</span>⭐
               </p>
               <table class="table table-striped-columns text-center">
                 <thead>
@@ -194,11 +195,11 @@
                 </tr>
                 </thead>
                 <tbody>
-                <th:block th:each="item:${reviewList}">
+                <th:block th:each="reviewInfo:${reviewResult.reviewInfos}">
                   <tr>
-                    <td th:text="${item.nickname}">Mark</td>
-                    <td th:text="${item.ratings}">4.5</td>
-                    <td th:text="${item.contents}">실력 쌓기 좋은 수업</td>
+                    <td th:text="${reviewInfo.userNickname}">Mark</td>
+                    <td th:text="${reviewInfo.ratings}">4.5</td>
+                    <td th:text="${reviewInfo.contents}">실력 쌓기 좋은 수업</td>
                   </tr>
                 </th:block>
                 </tbody>
