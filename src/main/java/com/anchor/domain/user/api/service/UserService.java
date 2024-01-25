@@ -10,10 +10,11 @@ import com.anchor.domain.mentoring.domain.repository.MentoringApplicationReposit
 import com.anchor.domain.mentoring.domain.repository.MentoringReviewRepository;
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.domain.payment.domain.Payup;
-import com.anchor.domain.payment.domain.repository.PaymentRepository;
 import com.anchor.domain.payment.domain.repository.PayupRepository;
+import com.anchor.domain.user.api.controller.request.MentoringReservedTime;
 import com.anchor.domain.user.api.controller.request.MentoringStatusInfo;
 import com.anchor.domain.user.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
+import com.anchor.domain.user.api.controller.request.RequiredEditReview;
 import com.anchor.domain.user.api.controller.request.UserImageRequest;
 import com.anchor.domain.user.api.controller.request.UserNicknameRequest;
 import com.anchor.domain.user.api.service.response.AppliedMentoringInfo;
@@ -45,55 +46,63 @@ public class UserService {
 
   private final UserRepository userRepository;
   private final MentoringApplicationRepository mentoringApplicationRepository;
+  private final MentoringReviewRepository mentoringReviewRepository;
   private final PayupRepository payupRepository;
   private final PaymentUtils paymentUtils;
-  private final MentoringReviewRepository mentoringReviewRepository;
 
-  public void writeReview(Long id, MentoringReviewInfo mentoringReviewInfo) {
-    Optional<MentoringApplication> mentoringApplication = mentoringApplicationRepository.findById(id);
+  @Transactional
+  public void writeReview(SessionUser sessionUser, MentoringReviewInfo mentoringReviewInfo) {
+    MentoringApplication mentoringApplication = getMentoringApplicationByTimeRange(sessionUser.getId(),
+        mentoringReviewInfo.getTimeRange()
+            .getFrom(), mentoringReviewInfo.getTimeRange()
+            .getTo());
     MentoringReview dbMentoringReviewInsert = MentoringReview.builder()
-        .contents(mentoringReviewInfo.getContents())
         .ratings(mentoringReviewInfo.getRatings())
-        .mentoringApplication(mentoringApplication.get())
+        .contents(mentoringReviewInfo.getContents())
+        .mentoringApplication(mentoringApplication)
         .build();
+    mentoringApplication.completedReview();
     mentoringReviewRepository.save(dbMentoringReviewInsert);
   }
 
+  @Transactional(readOnly = true)
+  public RequiredEditReview getReview(SessionUser sessionUser, MentoringReservedTime reservedTime) {
+    DateTimeRange dateTimeRange = DateTimeRange.of(reservedTime.getStartTime(), reservedTime.getEndTime());
+    MentoringReview mentoringReview = mentoringReviewRepository.findByTimeRange(dateTimeRange, sessionUser.getId());
+    return RequiredEditReview.of(mentoringReview);
+  }
+
   @Transactional
-  public UserInfoResponse getProfile(String email){
-    User user = userRepository.findByEmail(email)
-        .orElseThrow(()->{
-          return new RuntimeException("해당 유저를 찾을 수 없습니다.");
-        });
+  public void editReview(RequiredEditReview editReview) {
+    MentoringReview mentoringReview = mentoringReviewRepository.findById(editReview.getId())
+        .orElseThrow(() -> new RuntimeException("리뷰가 존재하지 않습니다."));
+    mentoringReview.editReview(editReview);
+    mentoringReviewRepository.save(mentoringReview);
+  }
+
+  @Transactional(readOnly = true)
+  public UserInfoResponse getProfile(SessionUser sessionUser) {
+    User user = getUser(sessionUser);
     return new UserInfoResponse(user);
   }
 
   @Transactional
-  public void editNickname(String email, UserNicknameRequest userNicknameRequest){
-    User user = userRepository.findByEmail(email)
-        .orElseThrow(()->{
-          return new RuntimeException("해당 유저를 찾을 수 없습니다.");
-        });
+  public void editNickname(SessionUser sessionUser, UserNicknameRequest userNicknameRequest) {
+    User user = getUser(sessionUser);
     user.editNickname(userNicknameRequest);
     userRepository.save(user);
   }
 
   @Transactional
-  public void uploadImage(String email, UserImageRequest userImageRequest){
-    User user = userRepository.findByEmail(email)
-        .orElseThrow(()->{
-          return new RuntimeException("해당 유저를 찾을 수 없습니다.");
-        });
+  public void uploadImage(SessionUser sessionUser, UserImageRequest userImageRequest) {
+    User user = getUser(sessionUser);
     user.uploadImage(userImageRequest);
     userRepository.save(user);
   }
 
   @Transactional
-  public void deleteUser(String email){
-    User user = userRepository.findByEmail(email)
-        .orElseThrow(()->{
-          return new RuntimeException("해당 유저를 찾을 수 없습니다.");
-        });
+  public void deleteUser(SessionUser sessionUser) {
+    User user = getUser(sessionUser);
     userRepository.delete(user);
   }
 
@@ -132,15 +141,17 @@ public class UserService {
         .orElseThrow(() -> new NoSuchElementException(sessionUser.getEmail() + "에 해당하는 회원이 존재하지 않습니다."));
   }
 
+  private MentoringApplication getMentoringApplicationByTimeRange(Long userId,
+      LocalDateTime startDateTime, LocalDateTime endDateTime) {
+    return mentoringApplicationRepository.findByStartDateTimeAndEndDateTimeAndUserId(
+            startDateTime, endDateTime, userId)
+        .orElseThrow(() -> new RuntimeException("신청내역이 존재하지 않습니다."));
+  }
+
   private void changeStatus(User user, RequiredMentoringStatusInfo mentoringStatusInfo) {
     DateTimeRange dateTimeRange = mentoringStatusInfo.getMentoringReservedTime();
-    LocalDateTime startDateTime = dateTimeRange.getFrom();
-    LocalDateTime endDateTime = dateTimeRange.getTo();
-    Long userId = user.getId();
-
-    MentoringApplication mentoringApplication =
-        mentoringApplicationRepository.findByStartDateTimeAndEndDateTimeAndUserId(startDateTime, endDateTime, userId)
-            .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링 신청이력이 존재하지 않습니다."));
+    MentoringApplication mentoringApplication = getMentoringApplicationByTimeRange(user.getId(),
+        dateTimeRange.getFrom(), dateTimeRange.getTo());
     mentoringApplication.changeStatus(mentoringStatusInfo.getMentoringStatus());
     processMentoringStatus(mentoringApplication);
     mentoringApplicationRepository.save(mentoringApplication);
@@ -169,7 +180,6 @@ public class UserService {
     Mentor mentor = mentoring.getMentor();
     Payment payment = application.getPayment();
     Payup payup = Payup.builder()
-        .payupDateTime(LocalDateTime.MIN)
         .mentor(mentor)
         .payment(payment)
         .build();

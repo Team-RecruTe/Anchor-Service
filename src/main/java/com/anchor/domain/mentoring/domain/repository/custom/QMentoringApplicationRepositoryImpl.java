@@ -96,28 +96,11 @@ public class QMentoringApplicationRepositoryImpl implements QMentoringApplicatio
   }
 
   @Override
-  public List<MentoringApplication> findPayupListByCompleteAndLastMonth(MentoringStatus status, LocalDateTime lastMonth,
-      LocalDateTime thisMonth) {
-
+  public List<MentoringApplication> findAllByMentorId(Long mentorId) {
     return jpaQueryFactory.selectFrom(mentoringApplication)
-        .join(mentoringApplication.mentoring)
-        .fetchJoin()
-        .join(mentoring.mentor)
-        .fetchJoin()
-        .join(mentoringApplication.payment)
-        .fetchJoin()
-        .where(
-            mentoringApplication.mentoringStatus.eq(status)
-                .and(mentoringApplication.updateDate.between(lastMonth, thisMonth))
-        )
-        .fetch();
-  }
-
-
-  @Override
-  public List<MentoringApplication> findByMentoringId(Long mentoringId) {
-    return jpaQueryFactory.selectFrom(mentoringApplication)
-        .where(mentoringApplication.mentoring.id.eq(mentoringId))
+        .leftJoin(mentoringApplication.mentoring, mentoring)
+        .leftJoin(mentoring.mentor, mentor)
+        .where(mentoringApplication.mentoring.mentor.id.eq(mentorId))
         .fetch();
   }
 

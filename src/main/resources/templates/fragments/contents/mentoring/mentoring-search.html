@@ -7,7 +7,7 @@
   <title>멘토링 조회</title>
   <meta charset="UTF-8">
 </head>
-<div layout:fragment="content">
+<div class="d-flex flex-column justify-content-center" layout:fragment="content">
   <div class="container">
     <div class="row">
       <div class="col-lg-3">
@@ -85,6 +85,63 @@
 
     </div>
   </div>
+
+  <div>
+    <nav aria-label="Page navigation example">
+      <ul class="pagination justify-content-center">
+      </ul>
+    </nav>
+  </div>
+  <script th:inline="javascript">
+    console.log([[${mentoringSearchInfo.mentoringInfos}]])
+
+    let currentPage = parseInt(new URLSearchParams(location.search).get("page")) || 1;
+    currentPage = currentPage < 1 ? 1 : currentPage
+    const pagenation = document.querySelector('.pagination')
+
+    const createPage = (totalPage, currentPage, content, page) => {
+      const isPrevDisable = currentPage === 1 && content === "Prev"
+      const isCurrentDisable = currentPage === page
+      const isPageDisable = totalPage < page
+      const li = document.createElement("li")
+      const a = document.createElement("a")
+      li.classList.add("page-item")
+      a.classList.add("page-link")
+      a.href = `?page=${page}`
+      a.textContent = content
+      if (isPrevDisable || isCurrentDisable || isPageDisable) {
+        li.classList.add("disabled")
+      }
+      li.appendChild(a)
+      return li
+    }
+
+    const totalPage = [[${mentoringSearchInfo.mentoringInfos.getSize()}]]
+    pagenation.appendChild(createPage(totalPage, currentPage, "Prev", currentPage - 1))
+    if (totalPage === 2) {
+      if (currentPage === 1) {
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage + 1, currentPage + 1))
+      } else {
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage - 1, currentPage - 1))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
+      }
+    } else if (totalPage > 2) {
+      if (currentPage === 1) {
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage + 1, currentPage + 1))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage + 2, currentPage + 2))
+      } else if (currentPage === totalPage) {
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage - 2, currentPage - 2))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage - 1, currentPage - 1))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
+      } else {
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage - 1, currentPage - 1))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage + 1, currentPage + 1))
+      }
+    }
+    pagenation.appendChild(createPage(totalPage, currentPage, "Next", currentPage + 1))
+  </script>
 </div>
-<script src="/js/mentoring/mentoring-search.js"></script>
 </html>

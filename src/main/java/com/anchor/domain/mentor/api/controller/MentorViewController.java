@@ -4,7 +4,9 @@ import com.anchor.domain.mentor.api.controller.request.MentorRegisterInfo;
 import com.anchor.domain.mentor.api.service.MentorService;
 import com.anchor.domain.mentor.api.service.response.AppliedMentoringSearchResult;
 import com.anchor.domain.mentor.api.service.response.MentorOpenCloseTimes;
+import com.anchor.domain.mentor.domain.Career;
 import com.anchor.global.auth.SessionUser;
+import com.anchor.global.util.BankCode;
 import com.anchor.global.util.view.ViewResolver;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -46,14 +48,16 @@ public class MentorViewController {
   }
 
   @GetMapping("/register")
-  public String register() {
-    return "/register";
+  public String register(Model model) {
+    model.addAttribute("bankCodes", BankCode.values());
+    model.addAttribute("careers", Career.values());
+    return viewResolver.getViewPath("mentor", "register");
   }
 
-  @PostMapping("")
+  @PostMapping
   public String registerProcess(@ModelAttribute MentorRegisterInfo mentorRegisterInfo) {
     mentorService.register(mentorRegisterInfo);
-    return "멘토 등록 완료. 로그인 페이지로 이동해주세요.";
+    return "redirect:/";
   }
 
   @GetMapping("/me/payup")

@@ -1,11 +1,9 @@
-<header
-    class="mb-4 border-bottom">
-  <div
-      class="mx-5 d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3">
-    <div class="col-md-3 mb-2 mb-md-0">
+<header class="mb-4 border-bottom">
+  <div class="mx-5 d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3">
+    <div class="col-md-1 mb-2 mb-md-0">
       <a class="d-inline-flex link-body-emphasis text-decoration-none" href="/">
         <div class="d-flex align-items-center">
-          <img height="32" role="img" src="/images/logo.png" width="32">
+          <img alt="" height="32" role="img" src="/images/logo.png" width="32">
           <span
               class="m-1 fs-4 fw-semibold">Anchor</span>
         </div>
@@ -20,27 +18,31 @@
       <li><a class="nav-link px-2" href="#">About</a></li>
     </ul>
 
-    <div class="col-md-3 text-end">
-      <button class="btn btn-outline-primary me-2" type="button">Login</button>
-      <button class="btn btn-primary" type="button">Sign-up</button>
+    <div class="col-md-1 text-end">
+      <button class="btn btn-outline-primary me-2" id="header-login" th:if="${session.user eq null}" type="button">
+        Login
+      </button>
+      <div class="dropdown" th:unless="${session.user eq null}">
+        <a aria-expanded="false" class="d-block link-body-emphasis text-decoration-none dropdown-toggle"
+           data-bs-toggle="dropdown"
+           href="">
+          <img alt="mdo" class="rounded-circle" height="32" th:src="${session.user.image}" width="32">
+        </a>
+        <ul class="dropdown-menu">
+          <li><p class="dropdown-item" th:text="${session.user.nickname}"></p></li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li><a class="dropdown-item" th:href="@{/users/me}">내 프로필</a></li>
+          <li><a class="dropdown-item" th:href="@{/users/me/applied-mentorings}">신청내역 조회</a></li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li><a class="dropdown-item" href="/logout">Logout</a></li>
+        </ul>
+      </div>
     </div>
   </div>
 </header>
 
 
-<!--      <div class="dropdown text-end">-->
-<!--        <a aria-expanded="false" class="d-block link-body-emphasis text-decoration-none dropdown-toggle"-->
-<!--           data-bs-toggle="dropdown"-->
-<!--           href="#">-->
-<!--          <img alt="mdo" class="rounded-circle" height="32" src="https://github.com/mdo.png" width="32">-->
-<!--        </a>-->
-<!--        <ul class="dropdown-menu text-small">-->
-<!--          <li><a class="dropdown-item" href="#">New project...</a></li>-->
-<!--          <li><a class="dropdown-item" href="#">Settings</a></li>-->
-<!--          <li><a class="dropdown-item" href="#">Profile</a></li>-->
-<!--          <li>-->
-<!--            <hr class="dropdown-divider">-->
-<!--          </li>-->
-<!--          <li><a class="dropdown-item" href="#">Sign out</a></li>-->
-<!--        </ul>-->
-<!--      </div>-->

@@ -1,3 +1,10 @@
+let loginButton = document.getElementById('header-login');
+if (loginButton !== null) {
+  loginButton.addEventListener('click', () => {
+    location.href = '/login';
+  });
+}
+
 setInterval(paymentPageValidation, 270_000);
 
 function paymentPageValidation() {
@@ -13,7 +20,7 @@ function paymentPageValidation() {
       .then(res => {
         if (res.status !== 200) {
           alert(res.data);
-          location.href = '/';
+          history.back();
         }
       });
     }
@@ -31,6 +38,6 @@ function currentUriMatcher(currentUri) {
 }
 
 function unlock(currentUri) {
-  let requestUri = currentUri.replace(/\/payment$/, '/unlock');
-  axios.delete(requestUri).then(res => location.href = '/');
+  let requestUri = currentUri.replace(/\/payment$/, '/lock');
+  axios.delete(requestUri).then(res => history.back());
 }

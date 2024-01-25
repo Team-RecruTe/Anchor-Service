@@ -8,21 +8,28 @@
   <link href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" rel="stylesheet"/>
 </head>
 <body>
-<div class="d-flex justify-content-center" layout:fragment="content">
-  <!-- 에디터를 적용할 요소 (컨테이너) -->
-  <div class="w-75" id="editor-container">
-    <h2 class="border rounded border-dark-subtle p-2 fs-3 fw-semibold" id="title" style="text-align: center;">멘토링
-      제목</h2>
-    <div id="content">
+<div class="d-flex flex-column justify-content-center" layout:fragment="content">
+  <div class="row">
+    <div class="col-md-3">
+      <div th:replace="~{fragments/sidebar :: sidebar}"></div>
     </div>
-    <div class="d-flex justify-content-end align-items-center" id="tags-container">
-      <div id="tags"></div>
-      <input placeholder="태그를 입력하세요" type="text">
-      <button id="tag-add-btn">추가</button>
+    
+    <div class=" col-md-9">
+      <!-- 에디터를 적용할 요소 (컨테이너) -->
+      <div class="w-75" id="editor-container">
+        <h2 class="border rounded border-dark-subtle p-2 fs-3 fw-semibold" id="title" style="text-align: center;">멘토링
+          제목</h2>
+        <div id="content">
+        </div>
+        <div class="d-flex justify-content-end align-items-center" id="tags-container">
+          <div id="tags"></div>
+          <input placeholder="태그를 입력하세요" type="text">
+          <button id="tag-add-btn">추가</button>
+        </div>
+        <button class="w-100 btn btn-primary" id="submit-btn" type="button">제출하기</button>
+      </div>
     </div>
-    <button class="w-100 btn btn-primary" id="submit-btn" type="button">제출하기</button>
   </div>
-
   <!-- TUI 에디터 JS CDN -->
   <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
   <script src="/js/mentoring/mentoring-edit.js"></script>

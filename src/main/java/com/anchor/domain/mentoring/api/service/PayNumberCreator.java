@@ -24,13 +24,13 @@ public class PayNumberCreator {
     return merchantUid;
   }
 
-  private boolean isDuplicate(List<Payment> payments, String impUid) {
+  private boolean isDuplicate(List<Payment> payments, String merchantUid) {
     if (payments.isEmpty()) {
       return false;
     }
     for (Payment payment : payments) {
-      String savedImpUid = payment.getImpUid();
-      if (savedImpUid.equals(impUid)) {
+      String savedImpUid = payment.getMerchantUid();
+      if (savedImpUid.equals(merchantUid)) {
         return true;
       }
     }

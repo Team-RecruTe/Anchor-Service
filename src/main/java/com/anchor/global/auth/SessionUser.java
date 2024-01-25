@@ -3,6 +3,7 @@ package com.anchor.global.auth;
 import com.anchor.domain.user.domain.User;
 import jakarta.servlet.http.HttpSession;
 import java.io.Serializable;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -21,17 +22,18 @@ public class SessionUser implements Serializable {
     this.email = user.getEmail();
     this.nickname = user.getNickname();
     this.image = user.getImage();
-    if (user.getMentor() != null) {
-      this.mentorId = user.getMentor().getId();
+    if (Objects.nonNull(user.getMentor())) {
+      this.mentorId = user.getMentor()
+          .getId();
     }
   }
 
   public static SessionUser getSessionUser(HttpSession session) {
     SessionUser sessionUser = (SessionUser) session.getAttribute("user");
-    if (sessionUser == null) {
-      throw new RuntimeException("로그인 정보가 존재하지 않습니다.");
+    if (Objects.nonNull(sessionUser)) {
+      return sessionUser;
     }
-    return sessionUser;
+    throw new RuntimeException("로그인 정보가 존재하지 않습니다.");
   }
 
   public void addMentorId(Long mentorId) {

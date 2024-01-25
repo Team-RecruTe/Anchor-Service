@@ -1,7 +1,7 @@
 package com.anchor.domain.mentor.domain;
 
-import com.anchor.domain.mentor.api.controller.request.MentorInfoRequest;
 import com.anchor.domain.mentor.api.controller.request.MentorContentsRequest;
+import com.anchor.domain.mentor.api.controller.request.MentorInfoRequest;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.payment.domain.Payup;
 import com.anchor.domain.user.domain.User;
@@ -18,6 +18,7 @@ import jakarta.persistence.OneToOne;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -45,10 +46,7 @@ public class Mentor extends BaseEntity {
   @Column(length = 20, nullable = false)
   private String accountName;
 
-  @OneToOne(
-      fetch = FetchType.LAZY,
-      cascade = CascadeType.ALL
-  )
+  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
   @JoinColumn(name = "mentor_introduction_id")
   private MentorIntroduction mentorIntroduction;
 
@@ -90,10 +88,10 @@ public class Mentor extends BaseEntity {
   }
 
   public void editContents(MentorContentsRequest mentorContentsRequest) {
-    if (this.mentorIntroduction == null) {
-      this.mentorIntroduction = MentorIntroduction.addContents(mentorContentsRequest.getContents());
-    } else {
+    if (Objects.nonNull(mentorIntroduction)) {
       this.mentorIntroduction.editContents(mentorContentsRequest.getContents());
+    } else {
+      this.mentorIntroduction = MentorIntroduction.addContents(mentorContentsRequest.getContents());
     }
   }
 

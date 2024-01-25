@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko"
+      layout:decorate="~{layout/default}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+  <title>Anchor-service</title>
+  <link href="/css/swiper.min.css" rel="stylesheet"/>
+  <link href="/css/swiper-custom.css" rel="stylesheet">
+  <style>
+    .login-image {
+      width: 100px;
+      height: auto;
+      display: block;
+      margin: 0 30px;
+    }
+  </style>
+</head>
+<div class="main" layout:fragment="content">
+
+  <div class="container d-flex align-items-center justify-content-center h-100" style="max-width: 800px; width: 100%;">
+    <div class="border border-3 p-4 shadow p-3 mb-5 bg-body-tertiary rounded" style="width: 100%">
+      <h2 class="text-center mb-4">Anchor 로그인</h2>
+      <h4 class="text-center">소셜로그인으로 Anchor를 이용하세요!</h4>
+      <hr>
+      <br>
+      <div class="d-flex justify-content-center">
+        <a href="/oauth2/authorization/google">
+          <img alt="" class="login-image" src="/images/googleLogin.png">
+        </a>
+        <a href="/oauth2/authorization/naver">
+          <img alt="" class="login-image" src="/images/naverLogin.png">
+        </a>
+      </div>
+    </div>
+  </div>
+  <script>
+
+  </script>
+</div>

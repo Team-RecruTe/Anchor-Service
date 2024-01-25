@@ -97,6 +97,7 @@ public class MentoringSearchResult {
           .mentoringTags(mentoring.getMentoringTags()
               .stream()
               .map(MentoringTag::getTag)
+              .sorted()
               .toList())
           .cost(mentoring.getCost())
           .build();

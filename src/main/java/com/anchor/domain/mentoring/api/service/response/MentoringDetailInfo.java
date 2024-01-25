@@ -2,7 +2,6 @@ package com.anchor.domain.mentoring.api.service.response;
 
 import com.anchor.domain.mentoring.domain.Mentoring;
 import java.util.List;
-import java.util.Set;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,16 +11,16 @@ import lombok.NoArgsConstructor;
 public class MentoringDetailInfo {
 
   private MentoringDetailSearchResult mentoringDetailSearchResult;
-  private Set<String> searchTags;
+  private List<String> searchTags;
 
   @Builder
-  private MentoringDetailInfo(MentoringDetailSearchResult mentoringDetailSearchResult, Set<String> searchTags) {
+  private MentoringDetailInfo(MentoringDetailSearchResult mentoringDetailSearchResult, List<String> searchTags) {
     this.mentoringDetailSearchResult = mentoringDetailSearchResult;
     this.searchTags = searchTags;
   }
 
   public static MentoringDetailInfo of(MentoringDetailSearchResult mentoringDetailSearchResult,
-      Set<String> searchTags) {
+      List<String> searchTags) {
     return MentoringDetailInfo.builder()
         .mentoringDetailSearchResult(mentoringDetailSearchResult)
         .searchTags(searchTags)

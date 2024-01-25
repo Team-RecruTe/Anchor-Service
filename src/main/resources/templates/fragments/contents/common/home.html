@@ -5,28 +5,29 @@
 >
 <head>
   <title>Anchor-service</title>
-  <link rel="stylesheet" href="/css/swiper.min.css" />
+  <link href="/css/swiper.min.css" rel="stylesheet"/>
   <link href="/css/swiper-custom.css" rel="stylesheet">
 </head>
 
-<div layout:fragment="content" class="main">
+<div class="main" layout:fragment="content">
   <h2 style="text-align: center;">당신의 멘토를 찾아보세요</h2>
   <div class="container mt-4">
     <hr>
     <!--인기 멘토링(9번째까지)-->
-    <br>
     <div class="row">
       <h3 style="text-align: center;">💚인기 멘토링</h3>
       <div class="swiper mask">
         <div class="swiper-wrapper">
-          <div class="swiper-slide" th:each="mentoring, iterStat : ${topMentorings.mentoringRank}" th:if="${iterStat.count <= 9}">
+          <div class="swiper-slide" th:each="mentoring, iterStat : ${topMentorings.mentoringRank}"
+               th:if="${iterStat.count <= 9}">
             <div class="card">
               <div class="card-body d-flex flex-column align-items-center text-center">
                 <!-- Title -->
                 <h4 class="card-title mb-3" th:text="${mentoring.mentoringInfo.title}"></h4>
                 <!-- Career and Nickname -->
-                <p class="card-text mb-1 mr-2" style="font-size: 20px" th:text="${mentoring.mentorInfo.career}" ></p>
-                <a class="card-text mb-1" style="font-size: 20px" th:href="@{/mentors/{id}(id=${mentoring.mentorInfo.id})}"
+                <p class="card-text mb-1 mr-2" style="font-size: 20px" th:text="${mentoring.mentorInfo.career}"></p>
+                <a class="card-text mb-1" style="font-size: 20px"
+                   th:href="@{/mentors/{id}(id=${mentoring.mentorInfo.id})}"
                    th:text="${mentoring.mentorInfo.mentorNickname}">닉네임</a>
                 <!-- Tags -->
                 <div class="d-flex flex-wrap">
@@ -38,7 +39,8 @@
                   </th:block>
                 </div>
                 <!-- Mentoring Detail page -->
-                <a href="#" th:href="@{/mentorings/{id}(id=${mentoring.mentoringInfo.id})}" class="btn btn-primary">멘토링 상세보기</a>
+                <a class="btn btn-primary" href="#" th:href="@{/mentorings/{id}(id=${mentoring.mentoringInfo.id})}">멘토링
+                  상세보기</a>
               </div>
             </div>
           </div>
@@ -64,8 +66,8 @@
           <h3 style="text-align: center;">🔍멘토링 검색</h3>
           <br>
           <div class="form-row d-flex">
-            <input type="text" id="keyword" name="keyword" class="form-control me-2 flex-grow-1" placeholder="검색어 입력">
-            <button type="submit" class="btn btn-primary" style="width: 70px">검색</button>
+            <input class="form-control me-2 flex-grow-1" id="keyword" name="keyword" placeholder="검색어 입력" type="text">
+            <button class="btn btn-primary" style="width: 70px" type="submit">검색</button>
           </div>
         </div>
         <!-- 태그 -->
@@ -77,16 +79,17 @@
                 태그를 선택해주세요. (1개이상)
               </button>
             </h2>
-            <div aria-labelledby="headingOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample"
+            <div aria-labelledby="headingOne" class="accordion-collapse collapse show"
+                 data-bs-parent="#accordionExample"
                  id="collapseOne">
-              <div class="accordion-body">
-                <th:block th:each="tagResponse : ${popularTags}">
-                  <div th:each="tag : ${tagResponse.tags}">
-                    <input autocomplete="off" class="btn-check" th:name="'tag-' + ${tagStat.index}"
-                           th:id="'btn-check-outlined-' + ${tagStat.index}" th:value="${tag}" type="checkbox">
-                    <label class="btn btn-outline-primary mx-2 mb-1" th:for="'btn-check-outlined-' + ${tagStat.index}"
-                           th:text="${tag}">태그 이름</label>
-                  </div>
+              <div class="accordion-body d-flex justify-content-center flex-wrap">
+                <th:block th:each="tag : ${popularTags.tags}">
+                  <input autocomplete="off" class="btn-check" name="tag"
+                         th:id="${'btn-check-outlined' + ' ' + tagStat.count}"
+                         th:value="${tag}" type="checkbox">
+                  <label class="btn btn-outline-primary mx-2 mb-1"
+                         th:for="${'btn-check-outlined' + ' ' + tagStat.count}"
+                         th:text="${tag}">태그 이름</label>
                 </th:block>
               </div>
             </div>
@@ -98,6 +101,5 @@
 
   <script src="/js/swiper.min.js"></script>
   <script src="/js/swiper-custom.js"></script>
-
 </div>
 </html>

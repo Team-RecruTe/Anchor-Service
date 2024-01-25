@@ -11,13 +11,14 @@ import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditRes
 import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringDeleteResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
+import com.anchor.domain.mentoring.api.service.response.MentoringOrderUid;
 import com.anchor.domain.mentoring.api.service.response.MentoringPaymentInfo;
-import com.anchor.domain.mentoring.api.service.response.MentoringSaveRequestInfo;
 import com.anchor.domain.mentoring.api.service.response.TopMentoring;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.util.type.Link;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -131,7 +132,7 @@ public class MentoringController {
   /**
    * 멘토링 신청 도중 페이지를 벗어나거나, 시간이 만료되면 잠금을 해제합니다.
    */
-  @DeleteMapping("/{id}/unlock")
+  @DeleteMapping("/{id}/lock")
   public ResponseEntity<String> mentoringTimeSessionRemove(@PathVariable("id") Long id, HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
     mentoringService.unlock(id, sessionUser);
@@ -155,14 +156,14 @@ public class MentoringController {
    * 멘토링 결제 완료가 되면 멘토링 신청이력을 저장합니다.
    */
   @PostMapping("/{id}/apply")
-  public ResponseEntity<MentoringSaveRequestInfo> mentoringApplicationSave
+  public ResponseEntity<MentoringOrderUid> mentoringApplicationSave
   (@PathVariable("id") Long id, @RequestBody MentoringApplicationInfo applicationInfo, HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
-    MentoringSaveRequestInfo mentoringSaveRequestInfo =
+    MentoringOrderUid mentoringOrderUid =
         mentoringService.saveMentoringApplication(sessionUser, id, applicationInfo);
-    if (mentoringSaveRequestInfo != null) {
+    if (Objects.nonNull(mentoringOrderUid)) {
       return ResponseEntity.ok()
-          .body(mentoringSaveRequestInfo);
+          .body(mentoringOrderUid);
     }
     return ResponseEntity.badRequest()
         .build();

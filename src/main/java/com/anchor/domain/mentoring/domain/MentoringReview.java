@@ -1,11 +1,11 @@
 package com.anchor.domain.mentoring.domain;
 
+import com.anchor.domain.user.api.controller.request.RequiredEditReview;
 import com.anchor.global.util.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -17,8 +17,7 @@ import lombok.NoArgsConstructor;
 @Entity
 public class MentoringReview extends BaseEntity {
 
-  @Lob
-  @Column(nullable = false)
+  @Column(nullable = false, columnDefinition = "mediumtext")
   private String contents;
 
   @Column(nullable = false)
@@ -33,5 +32,10 @@ public class MentoringReview extends BaseEntity {
     this.contents = contents;
     this.ratings = ratings;
     this.mentoringApplication = mentoringApplication;
+  }
+
+  public void editReview(RequiredEditReview editReview) {
+    this.contents = editReview.getContents();
+    this.ratings = editReview.getRatings();
   }
 }

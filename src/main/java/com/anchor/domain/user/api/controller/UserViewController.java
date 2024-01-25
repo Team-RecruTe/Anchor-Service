@@ -1,6 +1,8 @@
 package com.anchor.domain.user.api.controller;
 
 import com.anchor.domain.mentoring.api.controller.request.MentoringReviewInfo;
+import com.anchor.domain.user.api.controller.request.MentoringReservedTime;
+import com.anchor.domain.user.api.controller.request.RequiredEditReview;
 import com.anchor.domain.user.api.service.UserService;
 import com.anchor.domain.user.api.service.response.AppliedMentoringInfo;
 import com.anchor.domain.user.api.service.response.UserInfoResponse;
@@ -16,9 +18,9 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -31,9 +33,9 @@ public class UserViewController {
   private final ViewResolver viewResolver;
 
   @GetMapping("/me")
-  public String getInfo(Model model, HttpSession httpSession){
-    SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
-    UserInfoResponse userInfoResponse = userService.getProfile(sessionUser.getEmail());
+  public String getInfo(Model model, HttpSession session) {
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
+    UserInfoResponse userInfoResponse = userService.getProfile(sessionUser);
     model.addAttribute("userInfo", userInfoResponse);
     return viewResolver.getViewPath("user", "userInfo");
   }
@@ -54,22 +56,44 @@ public class UserViewController {
     return viewResolver.getViewPath("user", "user-mentoring-application");
   }
 
-  @GetMapping("/me/applied-mentorings/{id}/review")
-  public String review(@PathVariable Long id, Model model) {
-    MentoringReviewInfo mentoringReviewInfo = new MentoringReviewInfo("", 0);
-    model.addAttribute("mentoringReviewInfo", mentoringReviewInfo);
+  @GetMapping("/me/applied-mentorings/review")
+  public String review(@ModelAttribute MentoringReservedTime reservedTime, Model model) {
+    model.addAttribute("mentoringReviewInfo", MentoringReviewInfo.builder()
+        .build());
+    model.addAttribute("mentoringReservedTime", reservedTime);
     return viewResolver.getViewPath("user", "review-write");
   }
 
-  @PostMapping("/me/applied-mentorings/{id}/review")
-  public String reviewProcess(@PathVariable Long id, @Valid @ModelAttribute MentoringReviewInfo mentoringReviewInfo,
-      BindingResult bindingResult, Model model) {
+  @PostMapping("/me/applied-mentorings/review")
+  public String reviewProcess(@Valid @ModelAttribute MentoringReviewInfo mentoringReviewInfo,
+      BindingResult bindingResult, HttpSession session, Model model) {
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
     if (bindingResult.hasErrors()) {
+      model.addAttribute("mentoringReservedTime", MentoringReservedTime.of(mentoringReviewInfo.getTimeRange()));
       model.addAttribute("mentoringReviewInfo", mentoringReviewInfo);
       return viewResolver.getViewPath("user", "review-write");
     }
-    userService.writeReview(id, mentoringReviewInfo);
-    return viewResolver.getViewPath("user", "user-mentoring-application");
+    userService.writeReview(sessionUser, mentoringReviewInfo);
+    return "redirect:/users/me/applied-mentorings";
   }
 
+  @GetMapping("/me/review/edit")
+  public String viewReviewEditPage(@ModelAttribute MentoringReservedTime reservedTime, HttpSession session,
+      Model model) {
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
+    RequiredEditReview review = userService.getReview(sessionUser, reservedTime);
+    model.addAttribute("requiredEditReview", review);
+    return viewResolver.getViewPath("user", "edit-review");
+  }
+
+  @PostMapping("/me/review/edit")
+  public String editReview(@Validated @ModelAttribute RequiredEditReview requiredEditReview,
+      BindingResult bindingResult, Model model) {
+    if (bindingResult.hasErrors()) {
+      model.addAttribute("requiredEditReview", requiredEditReview);
+      return viewResolver.getViewPath("user", "edit-review");
+    }
+    userService.editReview(requiredEditReview);
+    return "redirect:/users/me/applied-mentorings";
+  }
 }

@@ -1,5 +1,14 @@
 document.getElementById('payment-button').addEventListener("click",
     paymentProcess);
+document.getElementById('cancel-button').addEventListener('click', () => {
+  cancelPaymentProcess();
+});
+
+function cancelPaymentProcess() {
+  let currentUri = String(window.location.pathname);
+  let requestUri = currentUri.replace(/\/payment$/, '/lock');
+  axios.delete(requestUri).then(res => history.back());
+}
 
 function paymentProcess() {
 
@@ -7,8 +16,8 @@ function paymentProcess() {
 
   let requestUri = currentUri + '-process';
 
-  let nickname = document.getElementById('user-nickname').textContent;
-  let email = document.getElementById('user-email').textContent;
+  let nickname = document.getElementById('user-nickname').value;
+  let email = document.getElementById('user-email').value;
   let tel = document.getElementById('user-tel').value;
 
   axios.post(requestUri, {
@@ -61,7 +70,7 @@ function paymentValidation(res, amount) {
       }
     });
   } else {
-    alert('결제에 실패하였습니다. 에러내용: ' + res.error_msg);
+    alert('에러내용: ' + res.error_msg);
   }
 }
 
@@ -76,7 +85,7 @@ function saveMentoringApplication(res, amount) {
   })
   .then(res => {
     if (res.status === 200) {
-      window.location.href = '/payment/complete';
+      window.location.href = '/payment/complete?order=' + res.data.order_uid;
     } else {
       alert('멘토링 신청내역 저장에 실패했습니다.');
     }
