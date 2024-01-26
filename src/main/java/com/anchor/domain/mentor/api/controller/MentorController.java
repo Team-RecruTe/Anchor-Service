@@ -1,6 +1,5 @@
 package com.anchor.domain.mentor.api.controller;
 
-import com.anchor.domain.mentor.api.controller.request.MailDto;
 import com.anchor.domain.mentor.api.controller.request.MentoringStatusInfo;
 import com.anchor.domain.mentor.api.controller.request.RandomCodeMaker;
 import com.anchor.domain.mentor.api.service.MailService;
@@ -56,12 +55,7 @@ public class MentorController {
   public ResponseEntity emailSend(String receiver) {
     String emailCode = RandomCodeMaker.makeRandomCode();
     session.setAttribute("ecode", emailCode);
-    MailDto mailDto = MailDto.builder()
-        .receiver(receiver)
-        .title("Anchor-Service: 이메일 인증키입니다.")
-        .content(emailCode)
-        .build();
-    mailService.sendMail(mailDto);
+    mailService.sendAuthMail(receiver, emailCode);
     return new ResponseEntity("success", HttpStatus.OK);
   }
 

@@ -33,7 +33,6 @@ class UserServiceTest {
   @InjectMocks
   UserService userService;
 
-
   @DisplayName("회원 정보 조회 - 성공")
   @Test
   void getProfile() {

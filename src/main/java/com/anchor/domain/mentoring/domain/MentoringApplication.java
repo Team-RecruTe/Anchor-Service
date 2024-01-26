@@ -58,7 +58,6 @@ public class MentoringApplication extends BaseEntity {
     this.mentoring = mentoring;
     this.payment = payment;
     this.user = user;
-
     this.user.getMentoringApplicationList()
         .add(this);
   }

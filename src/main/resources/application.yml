@@ -3,10 +3,8 @@ spring:
   profiles:
     active: local
     include:
-      - oauth
-      - session
       - aws
-
+      - pay
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${MYSQL_URL}
@@ -32,6 +30,7 @@ spring:
     password: ${MAIL_PASSWORD}
     properties:
       mail:
+        debug: true
         smtp:
           auth: true
           timeout: 5000
@@ -94,4 +93,3 @@ cloud:
 #  h2:
 #    console:
 #      enabled: true
-

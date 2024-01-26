@@ -32,10 +32,10 @@ public class QMentoringApplicationRepositoryImpl implements QMentoringApplicatio
   private final JPAQueryFactory jpaQueryFactory;
 
   @Override
-  public MentoringApplication findByMentoringIdAndProgressTime(Long mentoringId,
+  public MentoringApplication findByMentorIdAndProgressTime(Long mentorId,
       LocalDateTime startDateTime, LocalDateTime endDateTime) {
     return jpaQueryFactory.selectFrom(mentoringApplication)
-        .where(mentoringApplication.mentoring.id.eq(mentoringId)
+        .where(mentoringApplication.mentoring.mentor.id.eq(mentorId)
             .and(mentoringApplication.startDateTime.eq(startDateTime))
             .and(mentoringApplication.endDateTime.eq(endDateTime)))
         .fetchOne();
@@ -135,6 +135,13 @@ public class QMentoringApplicationRepositoryImpl implements QMentoringApplicatio
         .toList();
 
     return new PageImpl<>(appliedMentoringInfos, pageable, totalElements);
+  }
+
+  public Long getMentoringId(MentoringApplication application) {
+    return jpaQueryFactory.select(mentoringApplication.mentoring.id)
+        .from(mentoringApplication)
+        .where(mentoringApplication.eq(application))
+        .fetchOne();
   }
 
   private BooleanBuilder equalsStatuses(MentoringStatus... statuses) {
