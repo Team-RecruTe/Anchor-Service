@@ -2,7 +2,6 @@ package com.anchor.domain.mentoring.api.service.response;
 
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringReview;
-import com.anchor.domain.mentoring.domain.MentoringTag;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,27 +13,22 @@ public class MentoringDetailInfo {
 
   private MentoringDetailSearchResult mentoringDetailSearchResult;
   private MentoringReviewSearchResult mentoringReviewSearchResult;
-  private List<String> searchTags;
+  private List<PopularTag> searchTags;
 
 
   private MentoringDetailInfo(MentoringDetailSearchResult mentoringDetailSearchResult,
-      MentoringReviewSearchResult mentoringReviewSearchResult, List<String> searchTags) {
+      MentoringReviewSearchResult mentoringReviewSearchResult) {
     this.mentoringDetailSearchResult = mentoringDetailSearchResult;
     this.mentoringReviewSearchResult = mentoringReviewSearchResult;
-    this.searchTags = searchTags;
   }
 
-  public static MentoringDetailInfo of(Mentoring mentoring, List<MentoringReview> reviews,
-      List<Mentoring> popularMentorings) {
-    List<String> popularTags = popularMentorings.stream()
-        .flatMap(popularMentoring -> mentoring.getMentoringTags()
-            .stream())
-        .map(MentoringTag::getTag)
-        .distinct()
-        .sorted()
-        .toList();
-    return new MentoringDetailInfo(MentoringDetailSearchResult.of(mentoring), MentoringReviewSearchResult.of(reviews),
-        popularTags);
+  public static MentoringDetailInfo of(Mentoring mentoring, List<MentoringReview> reviews) {
+    return new MentoringDetailInfo(MentoringDetailSearchResult.of(mentoring), MentoringReviewSearchResult.of(reviews));
+  }
+
+  public void addPopularTags(List<PopularTag> popularTags) {
+    popularTags.sort(PopularTag::compareTo);
+    this.searchTags = popularTags;
   }
 
   @Getter

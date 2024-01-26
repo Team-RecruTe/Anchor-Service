@@ -8,11 +8,13 @@ import static com.anchor.domain.user.domain.QUser.user;
 import static com.querydsl.core.types.dsl.Expressions.numberTemplate;
 
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
+import com.anchor.domain.mentoring.api.service.response.PopularTag;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
@@ -90,19 +92,21 @@ public class QMentoringRepositoryImpl implements QMentoringRepository {
   }
 
   @Override
-  public List<Mentoring> findPopularMentoringTags() {
-
-    List<Long> mentoringIds = jpaQueryFactory.select(mentoring.id)
-        .from(mentoring)
-        .orderBy(mentoring.totalApplicationNumber.desc())
+  public List<PopularTag> findPopularTags() {
+    return jpaQueryFactory.select(
+            Projections.constructor(
+                PopularTag.class,
+                mentoringTag.tag.as("tagName"),
+                mentoringTag.tag.count()
+                    .as("tagCount")
+            )
+        )
+        .from(mentoringTag)
+        .groupBy(mentoringTag.tag)
+        .orderBy(mentoringTag.tag.count()
+            .desc())
         .offset(0)
         .limit(10)
-        .fetch();
-
-    return jpaQueryFactory.selectFrom(mentoring)
-        .join(mentoring.mentoringTags, mentoringTag)
-        .fetchJoin()
-        .where(mentoring.id.in(mentoringIds))
         .fetch();
   }
 

@@ -94,9 +94,9 @@
                   <th:block th:each="tag: ${mentoringDetail.searchTags}">
                     <input autocomplete="off" class="btn-check" name="tag"
                            th:id="'btn-check-outlined '+${tagStat.count}"
-                           th:value="${tag}" type="checkbox">
+                           th:value="${tag.tagName}" type="checkbox">
                     <label class="btn btn-outline-primary mx-2 mb-1" th:for="'btn-check-outlined '+${tagStat.count}"
-                           th:text="${tag}">자바</label>
+                           th:text="${tag.tagName}">자바</label>
                   </th:block>
                 </div>
               </div>

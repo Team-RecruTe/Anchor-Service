@@ -24,13 +24,13 @@ import com.anchor.domain.mentoring.api.service.response.MentoringOrderUid;
 import com.anchor.domain.mentoring.api.service.response.MentoringPayConfirmInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringPaymentInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
+import com.anchor.domain.mentoring.api.service.response.PopularTag;
 import com.anchor.domain.mentoring.api.service.response.TopMentoring;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringDetail;
 import com.anchor.domain.mentoring.domain.MentoringReview;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
-import com.anchor.domain.mentoring.domain.MentoringTag;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
 import com.anchor.domain.mentoring.domain.repository.MentoringReviewRepository;
@@ -121,18 +121,6 @@ public class MentoringService {
     return new MentoringContents(mentoring.getTitle(), mentoring.getContents(), mentoring.getTags());
   }
 
-  @Transactional(readOnly = true)
-  public List<String> getPopularMentoringTags() {
-    List<Mentoring> mentoringList = mentoringRepository.findPopularMentoringTags();
-    return mentoringList.stream()
-        .flatMap(mentoring -> mentoring.getMentoringTags()
-            .stream())
-        .map(MentoringTag::getTag)
-        .distinct()
-        .sorted()
-        .toList();
-  }
-
   /**
    * 입력한 ID를 통해 멘토링 상세정보를 조회합니다.
    */
@@ -140,9 +128,8 @@ public class MentoringService {
   public MentoringDetailInfo getMentoringDetailInfo(Long id) {
     Mentoring mentoring = mentoringRepository.findMentoringDetailInfo(id)
         .orElseThrow(() -> new NoSuchElementException(id + "에 해당하는 멘토링이 존재하지 않습니다."));
-    List<Mentoring> popularMentorings = mentoringRepository.findPopularMentoringTags();
     List<MentoringReview> mentoringReviews = mentoringReviewRepository.findAllByMentoringId(id);
-    return MentoringDetailInfo.of(mentoring, mentoringReviews, popularMentorings);
+    return MentoringDetailInfo.of(mentoring, mentoringReviews);
   }
 
   /**
@@ -299,6 +286,12 @@ public class MentoringService {
   public TopMentoring getTopMentorings() {
     List<MentoringSearchResult> topMentorings = mentoringRepository.findTopMentorings();
     return new TopMentoring(topMentorings);
+  }
+
+  @Cacheable(cacheNames = "topTag", key = "'topTag'")
+  @Transactional(readOnly = true)
+  public List<PopularTag> getPopularTags() {
+    return mentoringRepository.findPopularTags();
   }
 
   private String createMerchantUid() {

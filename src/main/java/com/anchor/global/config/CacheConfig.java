@@ -40,7 +40,8 @@ public class CacheConfig {
 
   @Getter
   public enum CacheType {
-    TOP_MENTORING("topMentoring", 3_600, 100);
+    TOP_MENTORING("topMentoring", 3_600, 100),
+    TOP_TAG("topTag", 3_600, 100);
 
     private final String name;
     private final int expireAfterWrite;

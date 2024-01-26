@@ -25,58 +25,60 @@
     <div class="col-md-3">
       <div th:replace="~{fragments/sidebar :: sidebar}"></div>
     </div>
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-header">
-          프로필 이미지
+    <div class="col-md-6 d-flex justify-content-center">
+      <div style="width: 700px">
+        <div class="card">
+          <div class="card-header">
+            프로필 이미지
+          </div>
+          <div class="card-body text-center">
+            <div class="mb-4" id="current-profile-image">
+              <!-- 기존 이미지 -->
+              <th:block th:if="${userInfo.image eq null}">
+                <img
+                    id="userProfileImage"
+                    src="https://anchor-image-stroage.s3.ap-northeast-2.amazonaws.com/%EA%B3%A0%EC%8A%B4%EB%8F%84%EC%B9%98_1704431943574.jpg"
+                    width="200px">
+              </th:block>
+              <th:block th:unless="${userInfo.image eq null}">
+                <img id="userProfileImage" th:src="${userInfo.image}" width="200px">
+              </th:block>
+            </div>
+            <div class="mb-4" id="new-profile-image"></div>
+            <div class="input-group mb-4">
+              <input class="form-control" id="imageUpload" name="profileImageUrl" th:type="file">
+            </div>
+            <div class="d-grid gap-2" id="new-profile-image-control">
+              <button class="btn btn-outline-success" id="btn-saveImage">프로필 사진 변경</button>
+            </div>
+          </div>
         </div>
-        <div class="card-body text-center">
-          <div class="mb-4" id="current-profile-image">
-            <!-- 기존 이미지 -->
-            <th:block th:if="${userInfo.image eq null}">
-              <img
-                  id="userProfileImage"
-                  src="https://anchor-image-stroage.s3.ap-northeast-2.amazonaws.com/%EA%B3%A0%EC%8A%B4%EB%8F%84%EC%B9%98_1704431943574.jpg"
-                  width="200px">
-            </th:block>
-            <th:block th:unless="${userInfo.image eq null}">
-              <img id="userProfileImage" th:src="${userInfo.image}" width="200px">
-            </th:block>
-          </div>
-          <div class="mb-4" id="new-profile-image"></div>
-          <div class="input-group mb-4">
-            <input class="form-control" id="imageUpload" name="profileImageUrl" th:type="file">
-          </div>
-          <div class="d-grid gap-2" id="new-profile-image-control">
-            <button class="btn btn-outline-success" id="btn-saveImage">프로필 사진 변경</button>
-          </div>
+
+        <div class="mt-4">
+          <table class="table info-table">
+            <tbody>
+            <tr>
+              <th class="text-center" scope="row">계정</th>
+              <td><span id="email" th:text="${userInfo.email}"></span></td>
+            </tr>
+            <tr>
+              <th class="text-center align-middle" scope="row">닉네임</th>
+              <td><input class="form-control form-control-sm" id="nickname" name="nickname"
+                         th:value="${userInfo.nickname}" type="text">
+              </td>
+            </tr>
+            <tr>
+              <th class="text-center" scope="row">역할</th>
+              <td><span id="isMentor" th:text="${userInfo.mentor ne null ? '멘토' : '멘티'}"></span></td>
+            </tr>
+            </tbody>
+          </table>
         </div>
-      </div>
 
-      <div class="mt-4">
-        <table class="table info-table">
-          <tbody>
-          <tr>
-            <th class="text-center" scope="row">계정</th>
-            <td><span id="email" th:text="${userInfo.email}"></span></td>
-          </tr>
-          <tr>
-            <th class="text-center align-middle" scope="row">닉네임</th>
-            <td><input class="form-control form-control-sm" id="nickname" name="nickname"
-                       th:value="${userInfo.nickname}" type="text">
-            </td>
-          </tr>
-          <tr>
-            <th class="text-center" scope="row">역할</th>
-            <td><span id="isMentor" th:text="${userInfo.mentor ne null ? '멘토' : '멘티'}"></span></td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="text-center mt-4">
-        <button class="btn btn-primary" id="btn-update">정보 수정</button>
-        <button class="btn btn-danger" id="btn-delete">회원 탈퇴</button>
+        <div class="text-center mt-4">
+          <button class="btn btn-primary" id="btn-update">정보 수정</button>
+          <button class="btn btn-danger" id="btn-delete">회원 탈퇴</button>
+        </div>
       </div>
     </div>
     <div class="col-md-3"></div>
@@ -84,7 +86,6 @@
 
   <script>
     let imgUrl = null;
-
     let index = {
       init: function () {
         $("#btn-update").on("click", () => {
@@ -101,7 +102,7 @@
         });
       },
 
-      /*이미지 업로드*/
+      /*이미지 S3 업로드*/
       uploadImage: function () {
         let formData = new FormData();
         let imageFile = $("#imageUpload")[0].files[0];
@@ -185,7 +186,7 @@
             alert("회원 탈퇴 실패");
           } else {
             alert("회원 탈퇴 성공");
-            location.href = "/users/me";
+            location.href = "/";
           }
         }).fail(function (error) {
           alert("신청한 멘토링을 모두 취소 후 회원탈퇴가 가능합니다.");

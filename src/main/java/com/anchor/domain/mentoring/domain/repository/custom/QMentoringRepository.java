@@ -1,6 +1,7 @@
 package com.anchor.domain.mentoring.domain.repository.custom;
 
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
+import com.anchor.domain.mentoring.api.service.response.PopularTag;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +14,7 @@ public interface QMentoringRepository {
 
   List<MentoringSearchResult> findTopMentorings();
 
-  List<Mentoring> findPopularMentoringTags();
+  List<PopularTag> findPopularTags();
 
   Optional<Mentoring> findMentoringDetailInfo(Long id);
 }
