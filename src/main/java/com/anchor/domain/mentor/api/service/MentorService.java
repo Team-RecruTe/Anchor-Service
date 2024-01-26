@@ -150,7 +150,8 @@ public class MentorService {
   }
 
   public Mentor register(MentorRegisterInfo mentorRegisterInfo) {
-    if (mentorRepository.findByCompanyEmail(mentorRegisterInfo.getCompanyEmail()).isPresent()) {
+    if (mentorRepository.findByCompanyEmail(mentorRegisterInfo.getCompanyEmail())
+        .isPresent()) {
       throw new IllegalStateException("이미 존재하는 이메일");
     }
     Mentor dbInsertMentor = Mentor.builder()
@@ -176,19 +177,31 @@ public class MentorService {
   }
 
   @Transactional(readOnly = true)
-  public MentorPayupResult getMentorPayupResult(LocalDateTime currentMonth, SessionUser sessionUser) {
+  public MentorPayupResult getMentorPayupResult(LocalDateTime startMonth, LocalDateTime currentMonth,
+      SessionUser sessionUser) {
 //    Long mentorId = sessionUser.getMentorId();
     Long mentorId = 1L;
     DateTimeRange actualCalendarRange = DateTimeRange.of(
-        getFirstDayOfMonth(currentMonth),
-        getFirstDayOfNextMonth(currentMonth)
+        setFirstDayOfMonth(startMonth),
+        setFirstDayOfNextMonth(currentMonth)
     );
     List<PayupInfo> payupInfos = payupRepository.findAllByMonthRange(actualCalendarRange, mentorId);
     return MentorPayupResult.of(payupInfos);
   }
 
-  private LocalDateTime getFirstDayOfMonth(LocalDateTime dateTime) {
+  private LocalDateTime setFirstDayOfMonth(LocalDateTime startMonth) {
+    return startMonth.with(TemporalAdjusters.firstDayOfMonth())
+        .truncatedTo(ChronoUnit.DAYS);
+  }
+
+  private LocalDateTime setFirstDayOfNextMonth(LocalDateTime currentMonth) {
+    return currentMonth.with(TemporalAdjusters.firstDayOfNextMonth())
+        .truncatedTo(ChronoUnit.DAYS);
+  }
+
+  private LocalDateTime getFirstDayOfSixMonthAgo(LocalDateTime dateTime) {
     return dateTime.with(TemporalAdjusters.firstDayOfMonth())
+        .minusMonths(5L)
         .truncatedTo(ChronoUnit.DAYS);
   }
 

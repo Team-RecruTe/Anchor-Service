@@ -72,13 +72,14 @@ public class MentorController {
 
   @GetMapping("/me/payup-info")
   public ResponseEntity<MentorPayupResult> getTest(
-      @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") LocalDateTime currentMonth
+      @RequestParam("currentMonth") @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") LocalDateTime currentMonth,
+      @RequestParam("startMonth") @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") LocalDateTime startMonth
       /*,HttpSession session*/) {
     SessionUser sessionUser = new SessionUser();
     if (isFutureDate(currentMonth)) {
       return ResponseEntity.ok(new MentorPayupResult());
     }
-    MentorPayupResult payupInfos = mentorService.getMentorPayupResult(currentMonth, sessionUser);
+    MentorPayupResult payupInfos = mentorService.getMentorPayupResult(startMonth, currentMonth, sessionUser);
     return ResponseEntity.ok(payupInfos);
   }
 

@@ -22,15 +22,35 @@ const calendar = new tuiCalendar(calendarContainer, {
 
 // 캘린더 이동을 체크하는 함수
 // 한번 조회한 달이라면 조회요청을 하지 않는다.
-let processedMonths = [];
+let visitedMonths = [];
 
 function handleCalendarChange() {
   currentMonthRange(calendar);
-  const newMonth = getFormattedMonth(calendar.getDate().toDate());
+  let thisMonth = calendar.getDate().toDate();
+  let startMonth = getSixMonthAgo(thisMonth);
+  const newMonth = getFormattedMonth(thisMonth);
+  if (visitedMonths.length === 0) {
+    generateMonthsList(startMonth, thisMonth);
+    getPayupInfos(startMonth, thisMonth);
+  }
+  if (!visitedMonths.includes(newMonth)) {
+    generateMonthsList(startMonth, thisMonth);
+    getPayupInfos(startMonth, thisMonth);
+  }
+  console.log(visitedMonths);
+}
 
-  if (!processedMonths.includes(newMonth)) {
-    getPayupInfos(calendar);
-    processedMonths.push(newMonth);
+function getSixMonthAgo(date) {
+  return new Date(date.getFullYear(), date.getMonth() - 5, date.getDate());
+}
+
+function generateMonthsList(startMonth, endMonth) {
+
+  let currentDate = new Date(startMonth);
+
+  while (currentDate <= endMonth) {
+    visitedMonths.push(getFormattedMonth(currentDate));
+    currentDate.setMonth(currentDate.getMonth() + 1);
   }
 }
 
@@ -56,18 +76,19 @@ todayButton.addEventListener('click', function () {
 // value : Array 해당일자에 진행한 멘토링 중 정산된 멘토링 내역의 정보 (시간, 멘티 닉네임, 멘토링 제목, 금액)
 let scheduleMap = new Map();
 
-function getPayupInfos(calendar) {
-  let todayDate = calendar.getDate().toDate();
-  let today = parseDateTime(todayDate);
+function getPayupInfos(startMonth, thisMonth) {
+  let today = parseDateTime(thisMonth);
+  let startDay = parseDateTime(startMonth);
   let events = [];
   axios.get('/mentors/me/payup-info', {
     params: {
-      currentMonth: today
+      currentMonth: today,
+      startMonth: startDay
     }
   })
   .then(res => {
     let data = res.data;
-    scheduleMap.set(parseYearMonth(todayDate), data.dailyMentoringPayupInfo);
+    scheduleMap.set(parseYearMonth(thisMonth), data.dailyMentoringPayupInfo);
     // 정산된 멘토링 정보가 담길 Array
     let dailyTotalAmountMap = data.dailyTotalAmount;
     if (dailyTotalAmountMap !== null) {
