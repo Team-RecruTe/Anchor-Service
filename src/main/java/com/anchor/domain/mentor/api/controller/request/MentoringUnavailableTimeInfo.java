@@ -1,7 +1,7 @@
 package com.anchor.domain.mentor.api.controller.request;
 
 import com.anchor.global.util.type.DateTimeRange;
-import com.anchor.global.util.valid.ValidRange;
+import com.anchor.global.valid.ValidRange;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

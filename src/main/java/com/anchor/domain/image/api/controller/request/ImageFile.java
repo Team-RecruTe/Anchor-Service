@@ -1,6 +1,6 @@
 package com.anchor.domain.image.api.controller.request;
 
-import com.anchor.global.util.valid.ValidFile;
+import com.anchor.global.valid.ValidFile;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.web.multipart.MultipartFile;

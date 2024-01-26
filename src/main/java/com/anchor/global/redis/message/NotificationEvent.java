@@ -1,6 +1,7 @@
 package com.anchor.global.redis.message;
 
 import com.anchor.domain.mentoring.domain.MentoringStatus;
+import com.anchor.domain.notification.domain.ReceiverType;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
