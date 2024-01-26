@@ -44,12 +44,14 @@ import com.anchor.global.mail.AsyncMailSender;
 import com.anchor.global.mail.MailMessage;
 import com.anchor.global.redis.client.ApplicationLockClient;
 import com.anchor.global.redis.message.NotificationEvent;
+import com.anchor.global.util.CodeCreator;
 import com.anchor.global.util.type.DateTimeRange;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -71,8 +73,10 @@ public class MentoringService {
   private final ApplicationEventPublisher applicationEventPublisher;
   private final MentoringReviewRepository mentoringReviewRepository;
   private final ApplicationLockClient applicationLockClient;
-  private final PayNumberCreator payNumberCreator;
   private final AsyncMailSender asyncMailSender;
+
+  @Value("${payment.imp-code}")
+  private String impCode;
 
   @Transactional
   public MentoringCreateResult create(Long mentorId, MentoringBasicInfo mentoringBasicInfo) {
@@ -167,7 +171,6 @@ public class MentoringService {
     String key = ApplicationLockClient.createKey(mentor, sessionUser);
     DateTimeRange myApplicationLockTime = applicationLockClient.findByKey(key);
     String merchantUid = createMerchantUid();
-    String impCode = payNumberCreator.getImpCode();
     return MentoringPaymentInfo.of(mentoring, myApplicationLockTime, userInfo, merchantUid, impCode);
   }
 
@@ -299,7 +302,7 @@ public class MentoringService {
         .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
     List<Payment> paymentList = paymentRepository.findPaymentListStartWithToday(today);
-    return payNumberCreator.getMerchantUid(paymentList, today);
+    return CodeCreator.getMerchantUid(paymentList, today);
   }
 
 }

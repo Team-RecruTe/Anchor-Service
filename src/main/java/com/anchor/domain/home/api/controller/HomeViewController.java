@@ -1,4 +1,4 @@
-package com.anchor.global.homepage.api.controller;
+package com.anchor.domain.home.api.controller;
 
 import com.anchor.domain.mentoring.api.service.MentoringService;
 import com.anchor.domain.mentoring.api.service.response.PopularTag;

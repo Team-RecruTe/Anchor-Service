@@ -154,15 +154,15 @@ public class MentorService {
         .isPresent()) {
       throw new IllegalStateException("이미 존재하는 이메일");
     }
-    Mentor dbInsertMentor = Mentor.builder()
+    Mentor mentor = Mentor.builder()
         .companyEmail(mentorRegisterInfo.getCompanyEmail())
         .career(mentorRegisterInfo.getCareer())
         .accountNumber(mentorRegisterInfo.getAccountNumber())
         .bankName(mentorRegisterInfo.getBankName())
         .accountName(mentorRegisterInfo.getAccountName())
         .build();
-    mentorRepository.save(dbInsertMentor);
-    return dbInsertMentor;
+    mentorRepository.save(mentor);
+    return mentor;
   }
 
   @Transactional(readOnly = true)
@@ -182,31 +182,20 @@ public class MentorService {
 //    Long mentorId = sessionUser.getMentorId();
     Long mentorId = 1L;
     DateTimeRange actualCalendarRange = DateTimeRange.of(
-        setFirstDayOfMonth(startMonth),
-        setFirstDayOfNextMonth(currentMonth)
+        getFirstDayOfMonth(startMonth),
+        getFirstDayOfNextMonth(currentMonth)
     );
     List<PayupInfo> payupInfos = payupRepository.findAllByMonthRange(actualCalendarRange, mentorId);
     return MentorPayupResult.of(payupInfos);
   }
 
-  private LocalDateTime setFirstDayOfMonth(LocalDateTime startMonth) {
+  private LocalDateTime getFirstDayOfMonth(LocalDateTime startMonth) {
     return startMonth.with(TemporalAdjusters.firstDayOfMonth())
         .truncatedTo(ChronoUnit.DAYS);
   }
 
-  private LocalDateTime setFirstDayOfNextMonth(LocalDateTime currentMonth) {
+  private LocalDateTime getFirstDayOfNextMonth(LocalDateTime currentMonth) {
     return currentMonth.with(TemporalAdjusters.firstDayOfNextMonth())
-        .truncatedTo(ChronoUnit.DAYS);
-  }
-
-  private LocalDateTime getFirstDayOfSixMonthAgo(LocalDateTime dateTime) {
-    return dateTime.with(TemporalAdjusters.firstDayOfMonth())
-        .minusMonths(5L)
-        .truncatedTo(ChronoUnit.DAYS);
-  }
-
-  private LocalDateTime getFirstDayOfNextMonth(LocalDateTime dateTime) {
-    return dateTime.with(TemporalAdjusters.firstDayOfNextMonth())
         .truncatedTo(ChronoUnit.DAYS);
   }
 }

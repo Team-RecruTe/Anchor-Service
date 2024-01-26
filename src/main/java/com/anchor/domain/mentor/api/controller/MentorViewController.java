@@ -30,8 +30,8 @@ public class MentorViewController {
   private final ViewResolver viewResolver;
 
   @GetMapping("/me/schedule")
-  public String getUnavailableTimes(HttpSession httpSession, Model model) {
-    SessionUser user = (SessionUser) httpSession.getAttribute("user");
+  public String getUnavailableTimes(HttpSession session, Model model) {
+    SessionUser user = SessionUser.getSessionUser(session);
     MentorOpenCloseTimes result = mentorService.getMentorSchedule(1L);
     model.addAttribute("openCloseTimes", result);
     return viewResolver.getViewPath("mentor", "schedule");
@@ -39,9 +39,8 @@ public class MentorViewController {
 
   @GetMapping("/me/applied-mentorings")
   public String getMentoringApplications(
-      @PageableDefault(sort = {"id"}, direction = Direction.DESC) Pageable pageable, HttpSession httpSession,
-      Model model) {
-    SessionUser user = (SessionUser) httpSession.getAttribute("user");
+      @PageableDefault(sort = {"id"}, direction = Direction.DESC) Pageable pageable, HttpSession session, Model model) {
+    SessionUser user = SessionUser.getSessionUser(session);
     Page<AppliedMentoringSearchResult> results = mentorService.getMentoringApplications(1L, pageable);
     model.addAttribute("mentoringApplications", results);
     return viewResolver.getViewPath("mentor", "mentoring-application");
