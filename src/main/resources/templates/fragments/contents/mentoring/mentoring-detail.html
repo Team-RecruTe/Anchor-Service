@@ -30,6 +30,7 @@
   </style>
 </head>
 <div layout:fragment="content">
+
   <div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="myModal" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
       <div class="modal-content">
@@ -67,10 +68,11 @@
   </div>
 
 
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-3 mb-3">
-        <!-- 왼쪽 사이드바 -->
+  <div class="row">
+    <div class="col-3" style="width: 20%">
+
+      <!-- 왼쪽 사이드바 -->
+      <div class="d-flex flex-column p-3 bg-body-tertiary shadow rounded">
         <form id="mentor-search" method="get" th:action="@{/mentorings}">
           <div class="mb-3 me-1">
             <div class="input-group">
@@ -95,7 +97,7 @@
                     <input autocomplete="off" class="btn-check" name="tag"
                            th:id="'btn-check-outlined '+${tagStat.count}"
                            th:value="${tag.tagName}" type="checkbox">
-                    <label class="btn btn-outline-primary mx-2 mb-1" th:for="'btn-check-outlined '+${tagStat.count}"
+                    <label class="btn btn-outline-success mx-2 mb-1" th:for="'btn-check-outlined '+${tagStat.count}"
                            th:text="${tag.tagName}">자바</label>
                   </th:block>
                 </div>
@@ -104,61 +106,64 @@
           </div>
         </form>
       </div>
+    </div>
 
-      <!-- 오른쪽 컨텐츠 -->
-      <div class="col-lg-9">
-        <div class="container mt-5">
-          <!-- Mentoring Title -->
-          <h3 class="text-center mb-4" th:text="${mentoringDetail.mentoringDetailSearchResult.title}">멘토링 제목</h3>
+    <!-- 오른쪽 컨텐츠 -->
+    <div class="col-9" style="width: 70%">
+      <div class="card mt-5">
+        <!-- Mentoring Title -->
+        <div class="card-header">
+          <h3 class="card-title text-center mb-4 mt-3" th:text="${mentoringDetail.mentoringDetailSearchResult.title}">
+            멘토링
+            제목</h3>
+          <div class="card-subtitle">
 
-          <div class="row">
-            <div class="col-md-10"></div>
-            <div class="col-md-2">
-              <a class="text-decoration-none text-dark"
+            <div class="d-flex justify-content-end align-items-center mb-3" id="mentor-icon">
+              <a class="z-3 mr-4 d-flex gap-2 justify-content-center align-items-center text-decoration-none text-dark"
+                 style="border-radius: 4px; width: 132px;"
                  th:href="@{/mentors/{id}(id=${mentoringDetail.mentoringDetailSearchResult.mentorId})}">
-                <img alt="멘토프로필" style="height: 3rem; width: 4rem; border-radius: 50%; float: right"
+                      <span class="fs-6"
+                            th:text="${mentoringDetail.mentoringDetailSearchResult.getMentorNickname}"></span>
+                <img style="width: 50px; height: 50px; border-radius: 50%;"
                      th:src="${mentoringDetail.getMentoringDetailSearchResult.mentorImage}">
-                <p class="lead"
-                   th:text="${mentoringDetail.mentoringDetailSearchResult.getMentorNickname}">
-                  멘토 닉네임</p>
               </a>
             </div>
-          </div>
 
-          <div class="row">
-            <div class="col-md-12">
-              <div id="viewer">
-                <!--          Contents 들어갈 자리-->
-              </div>
+          </div>
+        </div>
+
+        <div class="row card-body">
+          <div class="col-md-12" style="min-height: 500px">
+            <div id="viewer">
+              <!--          Contents 들어갈 자리-->
             </div>
           </div>
+        </div>
 
-          <!-- Duration and Cost -->
+        <!-- Duration and Cost -->
+        <div class="card-footer">
           <div class="row mt-3">
             <div class="col-md-6">
-              <p class="lead">시간:
-                <span class="lead"
-                      th:text="${#strings.replace(#strings.replace(mentoringDetail.mentoringDetailSearchResult.durationTime,'h','시간'),'m','분')}">
+              <span class="fs-5" style="width: 48px">시간</span>
+              <span class="mr-2 fs-5 text-success"
+                    th:text="${#strings.replace(#strings.replace(mentoringDetail.mentoringDetailSearchResult.durationTime,'h','시간'),'m','분')}">
                   2시간</span>
-              </p>
             </div>
             <div class="col-md-6">
-              <p class="lead">비용:
-                <span class="lead"
-                      th:text="${#numbers.formatInteger(mentoringDetail.mentoringDetailSearchResult.cost,3,'COMMA')}+'원'">30,000원</span>
-              </p>
+              <span class="fs-5" style="width: 48px">비용</span>
+              <span class="mr-2 fs-5 text-success"
+                    th:text="${#numbers.formatInteger(mentoringDetail.mentoringDetailSearchResult.cost,3,'COMMA')}+'원'">30,000원</span>
             </div>
           </div>
 
           <!-- Tags -->
+          <hr>
           <div class="row mt-3">
-            <div class="col-md-12">
-              <p class="lead">Tags:
-                <th:block th:each="tag : ${mentoringDetail.mentoringDetailSearchResult.tags}">
-                  <span class="badge bg-primary mx-1" th:text="${tag}">Tag1</span>
-                </th:block>
-                <!-- Add more tags as needed -->
-              </p>
+            <div class="d-flex flex-wrap align-items-center h-25">
+              <span class="fs-5" style="width: 48px">태그</span>
+              <th:block th:each="tag : ${mentoringDetail.mentoringDetailSearchResult.tags}">
+                <h5><span class="badge bg-success mx-1 mr-2" th:text="${tag}">Tag1</span></h5>
+              </th:block>
             </div>
           </div>
 
@@ -180,37 +185,37 @@
               </button>
             </div>
           </div>
-
-          <div class="row mt-4" th:with="reviewResult = ${mentoringDetail.mentoringReviewSearchResult}">
-            <th:block
-                th:if="${reviewResult.averageRatings ne null and reviewResult.reviewInfos ne null and !reviewResult.reviewInfos.isEmpty()}">
-              <p style="font-size: 36px">⭐평균 별점 : <span th:text="${reviewResult.averageRatings}">별점 평균</span>⭐
-              </p>
-              <table class="table table-striped-columns text-center">
-                <thead>
-                <tr>
-                  <th scope="col">닉네임</th>
-                  <th scope="col">평점</th>
-                  <th scope="col">리뷰</th>
-                </tr>
-                </thead>
-                <tbody>
-                <th:block th:each="reviewInfo:${reviewResult.reviewInfos}">
-                  <tr>
-                    <td th:text="${reviewInfo.userNickname}">Mark</td>
-                    <td th:text="${reviewInfo.ratings}">4.5</td>
-                    <td th:text="${reviewInfo.contents}">실력 쌓기 좋은 수업</td>
-                  </tr>
-                </th:block>
-                </tbody>
-              </table>
-            </th:block>
-          </div>
-
         </div>
-      </div>
 
+        <div class="row mt-4" th:with="reviewResult = ${mentoringDetail.mentoringReviewSearchResult}">
+          <th:block
+              th:if="${reviewResult.averageRatings ne null and reviewResult.reviewInfos ne null and !reviewResult.reviewInfos.isEmpty()}">
+            <p style="font-size: 36px">⭐평균 별점 : <span th:text="${reviewResult.averageRatings}">별점 평균</span>⭐
+            </p>
+            <table class="table table-striped-columns text-center">
+              <thead>
+              <tr>
+                <th scope="col">닉네임</th>
+                <th scope="col">평점</th>
+                <th scope="col">리뷰</th>
+              </tr>
+              </thead>
+              <tbody>
+              <th:block th:each="reviewInfo:${reviewResult.reviewInfos}">
+                <tr>
+                  <td th:text="${reviewInfo.userNickname}">Mark</td>
+                  <td th:text="${reviewInfo.ratings}">4.5</td>
+                  <td th:text="${reviewInfo.contents}">실력 쌓기 좋은 수업</td>
+                </tr>
+              </th:block>
+              </tbody>
+            </table>
+          </th:block>
+        </div>
+
+      </div>
     </div>
+
   </div>
   <script src="/js/library/toast/toastui-editor-all.min.js"></script>
   <script src="/js/library/toast/tui-date-picker.min.js"></script>
@@ -220,6 +225,7 @@
     const viewer = new toastui.Editor.factory({
       el: document.getElementById('viewer'), // toast ui editor 적용할 div
       viewer: true, // viewer 사용 여부
+      height: '500px',
       initialValue: [[${mentoringDetail.getMentoringDetailSearchResult().getContent()}]] //초기 입력값
     });
     let editButton = document.getElementById('edit-button');
@@ -234,6 +240,8 @@
         location.href = '/login';
       })
     }
+    let viewerTexts = document.querySelectorAll('.toastui-editor-contents p');
+    viewerTexts.forEach(text => text.classList.add('fs-5'));
   </script>
 </div>
 </html>

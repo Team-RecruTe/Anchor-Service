@@ -6,12 +6,40 @@
 <head>
   <title>멘토링 조회</title>
   <meta charset="UTF-8">
+  <style>
+    #card-container {
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    #card-container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+    }
+
+    a {
+      text-decoration-line: none;
+      color: black;
+    }
+
+    .clamp-lines {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      -webkit-line-clamp: 2; /* 원하는 줄 수 */
+      text-align: center;
+    }
+
+    h5 {
+      margin: 0;
+    }
+  </style>
 </head>
-<div class="d-flex flex-column justify-content-center" layout:fragment="content">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-3">
-        <!-- 왼쪽 사이드바 -->
+<div class="d-flex flex-column" layout:fragment="content">
+  <div class="row">
+    <div class="col-3" style="width: 20%">
+      <!-- 왼쪽 사이드바 -->
+      <div class="d-flex flex-column p-3 bg-body-tertiary shadow rounded">
         <form action="/mentorings" id="mentor-search" method="get">
           <div class="mb-3 me-1">
             <div class="input-group">
@@ -36,7 +64,7 @@
                     <input autocomplete="off" class="btn-check" name="tag"
                            th:id="'btn-check-outlined '+${tagStat.count}"
                            th:value="${tag.tagName}" type="checkbox">
-                    <label class="btn btn-outline-primary mx-2 mb-1" th:for="'btn-check-outlined '+${tagStat.count}"
+                    <label class="btn btn-outline-success mx-2 mb-1" th:for="'btn-check-outlined '+${tagStat.count}"
                            th:text="${tag.tagName}">자바</label>
                   </th:block>
                 </div>
@@ -45,45 +73,61 @@
           </div>
         </form>
       </div>
+    </div>
 
-      <div class="col-lg-9">
-        <div class="row row-cols-2 row-cols2-md-3 row-cols-lg-4">
-          <th:block th:each="mentoring: ${mentoringSearchInfo.mentoringInfos}">
-            <div class="col-mb-4 mb-2">
-              <div class="card" style="width: 14rem; height: 16rem">
-                <div class="card-body d-flex flex-column ">
-                  <!-- Title -->
-                  <h6 class="card-title mb-3">
-                    <a class="text-decoration-none text-dark"
-                       th:href="@{/mentorings/{id}(id=${mentoring.mentoringInfo.id})}"
-                       th:text="${mentoring.mentoringInfo.title}">타이틀</a></h6>
+    <div class="col-9" style="width:70%">
+      <div class="row row-cols-4">
+        <div class="col-mb-4 mb-2" th:each="mentoring: ${mentoringSearchInfo.mentoringInfos}">
+          <div class="card mb-2 shadow rounded " id="card-container">
+            <!-- Title -->
+            <div class="card-header clamp-lines d-flex justify-content-center align-items-center mb-2 mt-1 m-0"
+                 style="min-height: 80px; max-height: 80px;">
+              <a class="text-decoration-none fs-5 text-center mt-3"
+                 th:href="@{/mentorings/{id}(id=${mentoring.mentoringInfo.id})}">
+                <p class="clamp-lines" th:text="${mentoring.mentoringInfo.title}"></p>
+              </a>
+            </div>
 
-                  <!-- Career and Nickname -->
-                  <p class="card-text mb-1 mr-2" th:text="${mentoring.mentorInfo.career}"></p>
-                  <a class="card-text mb-1" th:href="@{/mentors/{id}(id=${mentoring.mentorInfo.id})}"
-                     th:text="${mentoring.mentorInfo.mentorNickname}">닉네임</a>
-
-                  <!-- Image -->
-                  <img alt="멘토이미지" class="card-img-bottom mb-2 mt-auto" style="width: 50px; height: 50px;"
-                       th:src="${mentoring.mentorInfo.mentorImage}">
-
-                  <!-- Tags -->
-                  <div class="d-flex flex-wrap">
-                    <th:block th:if="${mentoring.mentoringInfo.mentoringTags.isEmpty()}">
-                      <span>태그 x</span>
-                    </th:block>
-                    <th:block th:each="tag, tagStat : ${mentoring.mentoringInfo.mentoringTags}">
-                      <span class="card-text me-2 mr-2" th:text="${tag}"></span>
-                    </th:block>
-                  </div>
+            <div class="card-body d-flex flex-column text-center align-items-center">
+              <!-- Career and Nickname -->
+              <div class="h-50 d-flex flex-column justify-content-center" id="mentor-mentoring-info">
+                <div class="pb-1 d-flex mb-3" id="mentor-career">
+                  <span class="fs-6" style="width: 48px">경력</span>
+                  <span class="mr-2 fs-6 text-success" style="font-size: 20px; width: 80px"
+                        th:text="${mentoring.mentorInfo.career}"></span>
+                </div>
+                <div class="pb-1 d-flex" id="mentoring-info">
+                  <span class="fs-6" style="width: 48px">시간</span>
+                  <span class="mr-2 fs-6 text-success" style="font-size: 20px; width: 80px"
+                        th:text="${#strings.replace(#strings.replace(mentoring.mentoringInfo.durationTime,'h','시간'),'m','분')}"></span>
                 </div>
               </div>
+              <div class="p-2 h-25  d-flex align-items-center mb-3" id="mentor-icon">
+                <a class="z-3 p-2 d-flex gap-2 justify-content-center align-items-center bg-success-subtle"
+                   style="border-radius: 4px; width: 132px;"
+                   th:href="@{/mentors/{id}(id=${mentoring.mentorInfo.id})}">
+                      <span class="fs-6 mr-2"
+                            th:text="${mentoring.mentorInfo.mentorNickname}"></span>
+                  <img style="width: 28px; height: 28px; border-radius: 50%;"
+                       th:src="@{${mentoring.mentorInfo.mentorImage}}">
+                </a>
+              </div>
+
+              <!-- Tags -->
+              <div class="d-flex flex-wrap align-items-center h-25">
+                <th:block th:if="${mentoring.mentoringInfo.mentoringTags.isEmpty()}">
+                  <h5><span class="badge bg-secondary-subtle mx-1 mr-2">No Tags</span></h5>
+                </th:block>
+                <th:block th:each="tag, tagStat : ${mentoring.mentoringInfo.mentoringTags}">
+                  <h5><span class="badge bg-success mx-1 mr-2" th:text="${tag}"></span></h5>
+                </th:block>
+              </div>
             </div>
-          </th:block>
+          </div>
         </div>
       </div>
-
     </div>
+
   </div>
 
   <div>

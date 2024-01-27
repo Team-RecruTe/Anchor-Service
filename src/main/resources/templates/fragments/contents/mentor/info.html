@@ -16,7 +16,7 @@
     <div class="row">
       <div class="col-md-2">
         <div th:if="${session.user != null && mentorInfo.id eq session.user.mentorId}">
-          <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+          <div th:replace="~{fragments/sidebar/info-sidebar :: sidebar}"></div>
         </div>
       </div>
 
