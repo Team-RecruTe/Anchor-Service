@@ -54,8 +54,9 @@ public class MentorViewController {
   }
 
   @PostMapping
-  public String registerProcess(@ModelAttribute MentorRegisterInfo mentorRegisterInfo) {
-    mentorService.register(mentorRegisterInfo);
+  public String registerProcess(@ModelAttribute MentorRegisterInfo mentorRegisterInfo, HttpSession session) {
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
+    mentorService.register(mentorRegisterInfo, sessionUser);
     return "redirect:/";
   }
 

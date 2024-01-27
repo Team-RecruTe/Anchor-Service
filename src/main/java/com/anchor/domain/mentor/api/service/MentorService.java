@@ -19,6 +19,7 @@ import com.anchor.domain.notification.domain.ReceiverType;
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.domain.payment.domain.repository.PayupRepository;
 import com.anchor.domain.user.domain.User;
+import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.mail.AsyncMailSender;
 import com.anchor.global.mail.MailMessage;
@@ -51,6 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MentorService {
 
   private final MentoringApplicationRepository mentoringApplicationRepository;
+  private final UserRepository userRepository;
   private final MentorRepository mentorRepository;
   private final PayupRepository payupRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
@@ -149,12 +151,15 @@ public class MentorService {
         pageable);
   }
 
-  public Mentor register(MentorRegisterInfo mentorRegisterInfo) {
+  public Mentor register(MentorRegisterInfo mentorRegisterInfo, SessionUser sessionUser) {
     if (mentorRepository.findByCompanyEmail(mentorRegisterInfo.getCompanyEmail())
         .isPresent()) {
       throw new IllegalStateException("이미 존재하는 이메일");
     }
+    User user = userRepository.findByEmail(sessionUser.getEmail())
+        .orElseThrow(() -> new NoSuchElementException("회원정보가 존재하지 않습니다."));
     Mentor mentor = Mentor.builder()
+        .user(user)
         .companyEmail(mentorRegisterInfo.getCompanyEmail())
         .career(mentorRegisterInfo.getCareer())
         .accountNumber(mentorRegisterInfo.getAccountNumber())
