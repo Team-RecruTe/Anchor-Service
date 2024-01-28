@@ -1,6 +1,7 @@
 package com.anchor.domain.mentor.api.controller;
 
 import com.anchor.domain.mentor.api.controller.request.MentoringStatusInfo;
+import com.anchor.domain.mentor.api.controller.request.RequiredMentorEmailInfo;
 import com.anchor.domain.mentor.api.service.MailService;
 import com.anchor.domain.mentor.api.service.MentorService;
 import com.anchor.domain.mentor.api.service.response.MentorOpenCloseTimes;
@@ -50,19 +51,20 @@ public class MentorController {
   }
 
   @PostMapping("/register/email/send")
-  public ResponseEntity<String> emailSend(String receiver, HttpSession session) {
+  public ResponseEntity<String> emailSend(@RequestBody RequiredMentorEmailInfo emailInfo, HttpSession session) {
     String emailCode = CodeCreator.createEmailAuthCode();
     session.setAttribute("ecode", emailCode);
-    mailService.sendAuthMail(receiver, emailCode);
+    mailService.sendAuthMail(emailInfo.getReceiver(), emailCode);
     return ResponseEntity.ok()
         .body("success");
   }
 
   @PostMapping("/register/email/auth")
-  public ResponseEntity<String> emailVerify(String userEmailCode, HttpSession session) {
+  public ResponseEntity<String> emailVerify(@RequestBody RequiredMentorEmailInfo emailInfo, HttpSession session) {
     String emailCode = (String) session.getAttribute("ecode");
     log.info("auth session email code===" + emailCode);
-    if (userEmailCode.equals(emailCode)) {
+    if (emailInfo.getUserEmailCode()
+        .equals(emailCode)) {
       return ResponseEntity.ok()
           .body("success");
     } else {
