@@ -13,103 +13,120 @@
 
   <div class="row">
 
-    <div class="col-1">
+    <div class="col-2">
       <div th:replace="~{fragments/sidebar/info-sidebar::sidebar}"></div>
     </div>
 
-    <div class="col-11" id="table-container">
-      <table class="table w-75 table-striped table-hover" id="application-list"
-             style="margin-left: auto;margin-right: auto">
-        <tbody>
-        <tr th:each="app: ${mentoringApplications}">
-          <td class="ma"
-              th:id="${app.mentoringApplicationInfo.dateTimeRange.from} + ' ' + ${app.mentoringApplicationInfo.dateTimeRange.to}"></td>
-          <td class="align-middle"><input type="checkbox"></td>
-          <td class="align-middle">
-            <a th:href="'/mentorings/' + ${app.mentoringInfo.id}" th:text="${app.mentoringInfo.title}"></a>
-          </td>
-          <td class="align-middle">
-            <img alt="" class="rounded-circle" height="32" th:src="${app.mentorInfo.image}" width="32">
-          </td>
-          <td class="align-middle" th:text="${app.mentorInfo.nickname}"></td>
-          <td class="align-middle" th:text="${app.mentorInfo.email}"></td>
-          <td class="align-middle" th:text="${app.paymentInfo.amount}"></td>
-          <td class="align-middle">
+    <div class="col-10" id="table-container" style="width: 70%;">
+      <div class="card border d-flex justify-content-center mb-5 border-success-subtle border-3">
+        <h2 class="text-center">멘토링 신청내역</h2>
+      </div>
+      <div class="h-75">
+        <table class="table table-hover mb-3 " id="application-list"
+               style="margin: 0 auto 0 auto">
+          <thead class="table-light">
+          <tr class="text-center">
+            <th scope="col">번호</th>
+            <th scope="col">제목</th>
+            <th scope="col">멘토</th>
+            <th scope="col">멘토 이메일</th>
+            <th scope="col">결제금액</th>
+            <th scope="col">신청 시간</th>
+            <th scope="col">상태</th>
+          </tr>
+          </thead>
+          <tbody class="text-center">
+          <tr th:each="app: ${mentoringApplications}">
+            <th class="align-middle" scope="col" th:text="${appStat.count}"></th>
+            <td class="align-middle">
+              <a class="text-black" th:href="@{/mentorings/{id}(id=${app.mentoringInfo.id})}"
+                 th:text="${app.mentoringInfo.title}"></a>
+            </td>
+            <td class="align-middle">
+              <span th:text="${app.mentorInfo.nickname}"></span>
+              <img alt="" class="rounded-circle" height="32" th:src="${app.mentorInfo.image}" width="32">
+            </td>
+            <td class="align-middle" th:text="${app.mentorInfo.email}"></td>
+            <td class="align-middle" th:text="${#numbers.formatInteger(app.paymentInfo.amount,3,'COMMA')}+'원'"></td>
+            <td class="align-middle ma"
+                th:id="${app.mentoringApplicationInfo.dateTimeRange.from} + ' ' + ${app.mentoringApplicationInfo.dateTimeRange.to}">
           <span>
             [[${app.mentoringApplicationInfo.dateTimeRange.from.toString().replace("T", " ")}]] ~
             [[${app.mentoringApplicationInfo.dateTimeRange.to.toString().replace("T", " ")}]]
           </span>
-          </td>
-          <td class="align-middle" th:id="status">
-            <div class="btn-group d-flex justify-content-center">
-              <th:block
-                  th:if="${app.mentoringApplicationInfo.status == '완료' || app.mentoringApplicationInfo.status == '취소'}">
-                <th:block th:if="${app.mentoringApplicationInfo.status == '완료'}">
-                  <form method="get" th:action="@{/users/me/review/edit}"
-                        th:if="${app.mentoringApplicationInfo.hasReview}">
-                    <input name="startTime" th:value="${app.mentoringApplicationInfo.dateTimeRange.from}"
-                           type="hidden">
-                    <input name="endTime" th:value="${app.mentoringApplicationInfo.dateTimeRange.to}" type="hidden">
-                    <button class="btn btn-outline-success">
-                      리뷰 수정
-                    </button>
-                  </form>
-                  <form method="get" th:action="@{/users/me/applied-mentorings/review}"
-                        th:unless="${app.mentoringApplicationInfo.hasReview}">
-                    <input name="startTime" th:value="${app.mentoringApplicationInfo.dateTimeRange.from}"
-                           type="hidden">
-                    <input name="endTime" th:value="${app.mentoringApplicationInfo.dateTimeRange.to}" type="hidden">
-                    <button class="btn btn-outline-success"
-                            type="submit">
-                      리뷰 작성
-                    </button>
-                  </form>
-                </th:block>
-                <span th:unless="${app.mentoringApplicationInfo.status == '완료'}">
+            </td>
+            <td class="align-middle" th:id="status">
+              <div class="btn-group d-flex justify-content-center">
+                <th:block
+                    th:if="${app.mentoringApplicationInfo.status == '완료' || app.mentoringApplicationInfo.status == '취소'}">
+                  <th:block th:if="${app.mentoringApplicationInfo.status == '완료'}">
+                    <form method="get" th:action="@{/users/me/review/edit}"
+                          th:if="${app.mentoringApplicationInfo.hasReview}">
+                      <input name="startTime" th:value="${app.mentoringApplicationInfo.dateTimeRange.from}"
+                             type="hidden">
+                      <input name="endTime" th:value="${app.mentoringApplicationInfo.dateTimeRange.to}" type="hidden">
+                      <button class="btn btn-outline-success">
+                        리뷰 수정
+                      </button>
+                    </form>
+                    <form method="get" th:action="@{/users/me/applied-mentorings/review}"
+                          th:unless="${app.mentoringApplicationInfo.hasReview}">
+                      <input name="startTime" th:value="${app.mentoringApplicationInfo.dateTimeRange.from}"
+                             type="hidden">
+                      <input name="endTime" th:value="${app.mentoringApplicationInfo.dateTimeRange.to}" type="hidden">
+                      <button class="btn btn-outline-success"
+                              type="submit">
+                        리뷰 작성
+                      </button>
+                    </form>
+                  </th:block>
+                  <span th:unless="${app.mentoringApplicationInfo.status == '완료'}">
                 [[${app.mentoringApplicationInfo.status}]]
               </span>
-              </th:block>
-              <th:block
-                  th:unless="${app.mentoringApplicationInfo.status == '완료' || app.mentoringApplicationInfo.status == '취소'}">
-                <button aria-expanded="false" class="btn dropdown-toggle" data-bs-toggle="dropdown"
-                        th:id="dropdown-button" type="button">
-                  [[${app.mentoringApplicationInfo.status}]]
-                </button>
-                <ul class="dropdown-menu">
-                  <th:block th:if="${app.mentoringApplicationInfo.status} == '대기'">
-                    <li class="dropdown-item" id="waiting">
-                      <span class="current-status" th:if="${app.mentoringApplicationInfo.status} == '대기'">대기</span>
-                      <span th:unless="${app.mentoringApplicationInfo.status} == '대기'">대기</span>
-                    </li>
-                    <li class="dropdown-item" id="cancel">
-                      <span class="current-status" th:if="${app.mentoringApplicationInfo.status} == '취소'">취소</span>
-                      <span th:unless="${app.mentoringApplicationInfo.status} == '취소'">취소</span>
-                    </li>
-                  </th:block>
-                  <th:block th:if="${app.mentoringApplicationInfo.status} == '승인'">
-                    <li class="dropdown-item" id="approval">
-                      <span class="current-status" th:if="${app.mentoringApplicationInfo.status} == '승인'">승인</span>
-                      <span th:unless="${app.mentoringApplicationInfo.status} == '승인'">승인</span>
-                    </li>
-                    <li class="dropdown-item" id="complete">
-                      <span class="current-status" th:if="${app.mentoringApplicationInfo.status} == '완료'">완료</span>
-                      <span th:unless="${app.mentoringApplicationInfo.status} == '완료'">완료</span>
-                    </li>
-                    <li class="dropdown-item" id="cancel">
-                      <span class="current-status" th:if="${app.mentoringApplicationInfo.status} == '취소'">취소</span>
-                      <span th:unless="${app.mentoringApplicationInfo.status} == '취소'">취소</span>
-                    </li>
-                  </th:block>
-                </ul>
-              </th:block>
-            </div>
-          </td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="d-flex justify-content-end">
-      <button class="btn btn-primary" id="save-button" type="button">저장하기</button>
+                </th:block>
+                <th:block
+                    th:unless="${app.mentoringApplicationInfo.status == '완료' || app.mentoringApplicationInfo.status == '취소'}">
+                  <button aria-expanded="false" class="btn dropdown-toggle" data-bs-toggle="dropdown"
+                          th:id="dropdown-button" type="button">
+                    [[${app.mentoringApplicationInfo.status}]]
+                  </button>
+                  <ul class="dropdown-menu">
+                    <th:block th:if="${app.mentoringApplicationInfo.status} == '대기'">
+                      <li class="dropdown-item" id="waiting">
+                        <span class="current-status" th:if="${app.mentoringApplicationInfo.status} == '대기'">대기</span>
+                        <span th:unless="${app.mentoringApplicationInfo.status} == '대기'">대기</span>
+                      </li>
+                      <li class="dropdown-item" id="cancel">
+                        <span class="current-status" th:if="${app.mentoringApplicationInfo.status} == '취소'">취소</span>
+                        <span th:unless="${app.mentoringApplicationInfo.status} == '취소'">취소</span>
+                      </li>
+                    </th:block>
+                    <th:block th:if="${app.mentoringApplicationInfo.status} == '승인'">
+                      <li class="dropdown-item" id="approval">
+                        <span class="current-status" th:if="${app.mentoringApplicationInfo.status} == '승인'">승인</span>
+                        <span th:unless="${app.mentoringApplicationInfo.status} == '승인'">승인</span>
+                      </li>
+                      <li class="dropdown-item" id="complete">
+                        <span class="current-status" th:if="${app.mentoringApplicationInfo.status} == '완료'">완료</span>
+                        <span th:unless="${app.mentoringApplicationInfo.status} == '완료'">완료</span>
+                      </li>
+                      <li class="dropdown-item" id="cancel">
+                        <span class="current-status" th:if="${app.mentoringApplicationInfo.status} == '취소'">취소</span>
+                        <span th:unless="${app.mentoringApplicationInfo.status} == '취소'">취소</span>
+                      </li>
+                    </th:block>
+                  </ul>
+                </th:block>
+              </div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="d-flex justify-content-end">
+        <button class="btn btn-primary" id="save-button" type="button">저장하기</button>
+      </div>
     </div>
 
     <div>
@@ -172,7 +189,7 @@
     pagenation.appendChild(createPage(totalPage, currentPage, "Next", currentPage + 1))
 
     const appList = document.querySelector('#application-list')
-    const apps = appList.querySelectorAll('tr')
+    const apps = appList.querySelectorAll('tbody tr')
     const addEvent = (ma, approval, cancel, waiting, complete, dropdownButton) => {
       if (cancel !== null) {
         cancel.addEventListener('click', () => {

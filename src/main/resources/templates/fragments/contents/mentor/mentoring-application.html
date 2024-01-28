@@ -9,25 +9,42 @@
 <body>
 <div class="d-flex flex-column justify-content-center" layout:fragment="content">
   <div class="row">
-    <div class="col-1">
+    <div class="col-2">
       <div th:replace="~{fragments/sidebar/info-sidebar::sidebar}"></div>
     </div>
-    <div class="col-11" id="table-container">
-      <table class="table w-75 table-striped table-hover" id="application-list" style="margin: 0 auto 0 auto">
+    <div class="col-10" id="table-container" style="width: 70%">
+      <div class="card border d-flex justify-content-center mb-5 border-success-subtle border-3">
+        <h2 class="text-center">신청내역 관리</h2>
+      </div>
+
+
+      <table class="table table-hover h-75 mb-3" id="application-list" style="margin: 0 auto 0 auto">
+        <thead class="table-light">
+        <tr class="text-center">
+          <th scope="col">번호</th>
+          <th scope="col">제목</th>
+          <th scope="col">신청회원</th>
+          <th scope="col">회원 이메일</th>
+          <th scope="col">결제금액</th>
+          <th scope="col">신청시간</th>
+          <th scope="col">상태</th>
+        </tr>
+        </thead>
+        <tbody class="text-center">
         <tr th:each="app: ${mentoringApplications}">
-          <td class="ma"
-              th:id="${app.mentoringApplicationInfo.dateTimeRange.from} + ' ' + ${app.mentoringApplicationInfo.dateTimeRange.to}"></td>
-          <td class="align-middle"><input type="checkbox"></td>
+          <th class="align-middle" scope="col" th:text="${appStat.count}"></th>
           <td class="align-middle">
-            <a th:href="'/mentorings/' + ${app.mentoringInfo.id}" th:text="${app.mentoringInfo.title}"></a>
+            <a class="text-black" th:href="@{/mentorings/{id}(id=${app.mentoringInfo.id})}"
+               th:text="${app.mentoringInfo.title}"></a>
           </td>
           <td class="align-middle">
+            <span th:text="${app.userInfo.nickname}"></span>
             <img class="rounded-circle" height="32" th:src="${app.userInfo.image}" width="32">
           </td>
-          <td class="align-middle" th:text="${app.userInfo.nickname}"></td>
           <td class="align-middle" th:text="${app.userInfo.email}"></td>
-          <td class="align-middle" th:text="${app.paymentInfo.amount}"></td>
-          <td class="align-middle">
+          <td class="align-middle" th:text="${#numbers.formatInteger(app.paymentInfo.amount,3,'COMMA')}+'원'"></td>
+          <td class="align-middle ma"
+              th:id="${app.mentoringApplicationInfo.dateTimeRange.from} + ' ' + ${app.mentoringApplicationInfo.dateTimeRange.to}">
           <span>
             [[${app.mentoringApplicationInfo.dateTimeRange.from.toString().replace("T", " ")}]] ~
             [[${app.mentoringApplicationInfo.dateTimeRange.to.toString().replace("T", " ")}]]
@@ -77,10 +94,12 @@
             </div>
           </td>
         </tr>
+        </tbody>
       </table>
-    </div>
-    <div class="d-flex justify-content-end">
-      <button class="btn btn-primary" id="save-button" type="button">저장하기</button>
+
+      <div class="d-flex justify-content-end">
+        <button class="btn btn-primary" id="save-button" type="button">저장하기</button>
+      </div>
     </div>
     <div>
       <nav aria-label="Page navigation example">
@@ -140,7 +159,7 @@
       pagenation.appendChild(createPage(totalPage, currentPage, "Next", currentPage + 1))
 
       const appList = document.querySelector('#application-list')
-      const apps = appList.querySelectorAll('tr')
+      const apps = appList.querySelectorAll('tbody tr')
       const addEvent = (ma, approval, cancel, waiting, dropdownButton) => {
         if (cancel !== null) {
           cancel.addEventListener('click', () => {
