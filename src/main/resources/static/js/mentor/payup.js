@@ -88,7 +88,15 @@ function getPayupInfos(startMonth, thisMonth) {
   })
   .then(res => {
     let data = res.data;
-    scheduleMap.set(parseYearMonth(thisMonth), data.dailyMentoringPayupInfo);
+    Object.entries(data.dailyMentoringPayupInfo).forEach(([key, value]) => {
+      let mapKey = parseYearMonth(key);
+      let mapValue = scheduleMap.get(mapKey);
+      if (!mapValue) {
+        mapValue = new Map();
+      }
+      mapValue.set(key, value);
+      scheduleMap.set(mapKey, mapValue);
+    })
     // 정산된 멘토링 정보가 담길 Array
     let dailyTotalAmountMap = data.dailyTotalAmount;
     if (dailyTotalAmountMap !== null) {
@@ -104,7 +112,7 @@ function getPayupInfos(startMonth, thisMonth) {
               category: 'allday',
               start: day.replace(/T.*/, ""),
               end: day.replace(/T.*/, ""),
-              backgroundColor: `${status === 'COMPLETE' ? '#abf7da' : '#a796eb'}`
+              backgroundColor: `${status === 'COMPLETE' ? '#99BC85' : '#F3D7CA'}`
             });
           });
         });
@@ -125,7 +133,7 @@ calendar.on('clickEvent', (e) => {
 
   modalTitleElement.innerHTML = parseDate(id);
   let schedule = scheduleMap.get(parseYearMonth(id));
-  schedule[id].forEach((element) => {
+  schedule.get(id).forEach((element) => {
     let fromDate = parseTime(element.dateTimeRange.from);
     let toDate = parseTime(element.dateTimeRange.to);
 
