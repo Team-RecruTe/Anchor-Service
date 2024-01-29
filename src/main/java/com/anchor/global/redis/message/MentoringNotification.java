@@ -10,24 +10,28 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MentoringNotification extends ResponseDto implements NotificationResponse {
 
-  private Long NotificationId;
+  private Long notificationId;
   private Long mentoringId;
   private String message;
+  private boolean isRead;
 
-  private MentoringNotification(Long NotificationId, Long mentoringId, String message) {
-    this.NotificationId = NotificationId;
+  private MentoringNotification(Long NotificationId, Long mentoringId, String message, boolean isRead) {
+    this.notificationId = NotificationId;
     this.mentoringId = mentoringId;
     this.message = message;
+    this.isRead = isRead;
   }
 
   public static MentoringNotification of(Notification notification) {
-    return new MentoringNotification(notification.getId(), notification.getMentoringId(), notification.getMessage());
+    return new MentoringNotification(notification.getId(), notification.getMentoringId(), notification.getMessage(),
+        notification.isRead());
   }
 
   public void setFrom(Notification notification) {
-    this.NotificationId = notification.getMentoringId();
+    this.notificationId = notification.getMentoringId();
     this.mentoringId = notification.getMentoringId();
     this.message = notification.getMessage();
+    this.isRead = notification.isRead();
   }
 
 }

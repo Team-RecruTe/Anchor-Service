@@ -7,71 +7,73 @@
   <title>Anchor-service</title>
   <link href="/css/swiper.min.css" rel="stylesheet"/>
   <link href="/css/swiper-custom.css" rel="stylesheet">
+  <style>
+    .swiper-slide {
+      opacity: 0.25;
+      transition: opacity 0.3s;
+    }
+
+    .swiper-slide-next, .swiper-slide-prev {
+      opacity: 0.5;
+      transition: opacity 0.3s;
+    }
+
+    .swiper-slide-active {
+      opacity: 1
+    }
+
+    #card-container {
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    #card-container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+    }
+
+    a {
+      text-decoration-line: none;
+      color: black;
+    }
+
+    .swiper {
+      height: 360px;
+    }
+
+    .swiper .swiper-pagination {
+      position: absolute;
+      bottom: 20px !important;
+    }
+
+    .clamp-lines {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      -webkit-line-clamp: 2; /* 원하는 줄 수 */
+      text-align: center;
+    }
+
+    h5 {
+      margin: 0;
+    }
+  </style>
 </head>
 
 <div class="main" layout:fragment="content">
-  <h2 style="text-align: center;">당신의 멘토를 찾아보세요</h2>
   <div class="container mt-4">
-    <hr>
-    <!--인기 멘토링(9번째까지)-->
-    <div class="row">
-      <h3 style="text-align: center;">💚인기 멘토링</h3>
-      <div class="swiper mask">
-        <div class="swiper-wrapper">
-          <div class="swiper-slide" th:each="mentoring, iterStat : ${topMentorings.mentoringRank}"
-               th:if="${iterStat.count <= 9}">
-            <div class="card">
-              <div class="card-body d-flex flex-column align-items-center text-center">
-                <!-- Title -->
-                <h4 class="card-title mb-3" th:text="${mentoring.mentoringInfo.title}"></h4>
-                <!-- Career and Nickname -->
-                <p class="card-text mb-1 mr-2" style="font-size: 20px" th:text="${mentoring.mentorInfo.career}"></p>
-                <a class="card-text mb-1" style="font-size: 20px"
-                   th:href="@{/mentors/{id}(id=${mentoring.mentorInfo.id})}"
-                   th:text="${mentoring.mentorInfo.mentorNickname}">닉네임</a>
-                <!-- Tags -->
-                <div class="d-flex flex-wrap">
-                  <th:block th:if="${mentoring.mentoringInfo.mentoringTags.isEmpty()}">
-                    <span style="font-size: 20px">태그 x</span>
-                  </th:block>
-                  <th:block th:each="tag, tagStat : ${mentoring.mentoringInfo.mentoringTags}">
-                    <span class="card-text me-2 mr-2" style="font-size: 20px" th:text="'#' + ${tag}"></span>
-                  </th:block>
-                </div>
-                <!-- Mentoring Detail page -->
-                <a class="btn btn-primary" href="#" th:href="@{/mentorings/{id}(id=${mentoring.mentoringInfo.id})}">멘토링
-                  상세보기</a>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="swiper-pagination"></div>
-        <div class="justify-content-between">
-          <div class="swiper-button-prev">
-            <div class="material-icons"></div>
-          </div>
-          <div class="swiper-button-next">
-            <div class="material-icons"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <br>
-    <br>
     <!--검색 서비스 : 키워드, 태그-->
-    <div class="row">
+    <div class="row mb-4">
       <form action="/mentorings" id="mentor-search" method="get">
         <!-- 검색 -->
-        <div class="my-4">
-          <h3 style="text-align: center;">🔍멘토링 검색</h3>
-          <br>
+        <div class="mb-4">
           <div class="form-row d-flex">
             <input class="form-control me-2 flex-grow-1" id="keyword" name="keyword" placeholder="검색어 입력" type="text">
             <button class="btn btn-primary" style="width: 70px" type="submit">검색</button>
           </div>
         </div>
         <!-- 태그 -->
-        <div class="accordion" id="accordionExample">
+        <div class="accordion mb-2" id="accordionExample">
           <div class="accordion-item">
             <h2 class="accordion-header" id="headingOne">
               <button aria-controls="collapseOne" aria-expanded="true" class="accordion-button"
@@ -97,6 +99,73 @@
         </div>
       </form>
     </div>
+    <hr class="mb-4">
+    <!--인기 멘토링(9번째까지)-->
+    <div class="row mx-1" style="background-color: #F1F6F9">
+      <h3 class="my-4 fw-bold" style="text-align: center;">인기 멘토링</h3>
+      <div class="swiper mask">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide col-lg-4 d-flex align-items-stretch"
+               th:each="mentoring, iterStat : ${topMentorings.mentoringRank}"
+               th:if="${iterStat.count <= 9}">
+            <div class="card" id="card-container">
+              <!--              <a class="card h-100" th:href="@{/mentorings/{id}(id=${mentoring.mentoringInfo.id})}">-->
+              <div class="d-flex justify-content-center align-items-center card-header"
+                   style="min-height: 80px; max-height: 80px;">
+                <h5 class="fs-5 m-0 clamp-lines" th:text="${mentoring.mentoringInfo.title}"></h5>
+              </div>
+              <div class="card-body d-flex flex-column align-items-center text-center">
+                <div class="h-50 d-flex flex-column justify-content-center" id="mentor-mentoring-info">
+                  <div class="pb-1 d-flex" id="mentor-company">
+                    <span class="fs-6" style="width: 48px">현직</span>
+                    <span class="mr-2 fs-6 text-success" style="font-size: 20px; width: 80px">[[${mentoring.mentorInfo.companyEmail.split("@")[1]}]]</span>
+                  </div>
+                  <div class="pb-1 d-flex" id="mentor-career">
+                    <span class="fs-6" style="width: 48px">경력</span>
+                    <span class="mr-2 fs-6 text-success" style="font-size: 20px; width: 80px">[[${mentoring.mentorInfo.career}]]</span>
+                  </div>
+                  <div class="pb-1 d-flex" id="mentoring-info">
+                    <span class="fs-6" style="width: 48px">시간</span>
+                    <span class="mr-2 fs-6 text-success" style="font-size: 20px; width: 80px">[[${mentoring.mentoringInfo.durationTime}]]</span>
+                  </div>
+                </div>
+
+                <div class="p-2 h-25  d-flex align-items-center" id="mentor-icon">
+                  <a class="z-3 p-2 d-flex gap-2 justify-content-center align-items-center bg-success-subtle"
+                     style="border-radius: 4px; width: 132px;"
+                     th:href="@{/mentors/{id}(id=${mentoring.mentorInfo.id})}">
+                      <span class="fs-6 mr-2">[[${mentoring.mentorInfo.mentorNickname}]]
+                      </span>
+                    <img style="width: 28px; height: 28px; border-radius: 50%;"
+                         th:src="@{${mentoring.mentorInfo.mentorImage}}">
+                  </a>
+                </div>
+                <div class="d-flex flex-wrap align-items-center h-25">
+                  <th:block th:if="${mentoring.mentoringInfo.mentoringTags.isEmpty()}">
+                    <h5><span class="badge bg-secondary-subtle mx-1 mr-2">No Tags</span></h5>
+                  </th:block>
+                  <th:block th:each="tag, tagStat : ${mentoring.mentoringInfo.mentoringTags}" th:limit="4">
+                    <h5><span class="badge bg-success mx-1 mr-2" th:text="${tag}"></span></h5>
+                  </th:block>
+                </div>
+                <!-- Mentoring Detail page -->
+              </div>
+              <!--              </a>-->
+            </div>
+          </div>
+        </div>
+        <div class="swiper-pagination"></div>
+        <div class="justify-content-between">
+          <div class="swiper-button-prev">
+            <div class="material-icons"></div>
+          </div>
+          <div class="swiper-button-next">
+            <div class="material-icons"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <hr class="my-4">
   </div>
 
   <script src="/js/swiper.min.js"></script>

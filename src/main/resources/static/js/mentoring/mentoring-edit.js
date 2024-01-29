@@ -29,7 +29,7 @@ const editor = new toastui.Editor({
 
 const isUnique = (tags, inputValue) => {
   for (const tag of tags.children) {
-    if (tag.textContent === inputValue) {
+    if (tag.querySelector('span').textContent === inputValue) {
       return false;
     }
   }
@@ -39,12 +39,29 @@ const isUnique = (tags, inputValue) => {
 const addTag = (tagInput, tags) => {
   const inputValue = tagInput.value.trim();
   if (inputValue !== '' && isUnique(tags, inputValue)) {
+    tagInput.placeholder = '태그를 입력하세요.'
+    const delBtn = document.createElement('button')
+    delBtn.classList.add('tag-del-btn')
+    delBtn.classList.add('me-2')
+    const tagh5 = document.createElement('h5')
+    tagh5.classList.add('h-tag')
+    tagh5.classList.add('h-tag-' + tags.children.length)
+    tagh5.classList.add('d-flex')
+    tagh5.classList.add('align-items-center')
     const tagSpan = document.createElement('span');
     tagSpan.textContent = inputValue;
     tagSpan.classList.add('tag-' + tags.children.length)
-    tagSpan.classList.add('me-2')
-    tags.appendChild(tagSpan);
+    tagSpan.classList.add('badge')
+    tagSpan.classList.add('bg-success')
+    tagh5.appendChild(tagSpan)
+    tagh5.appendChild(delBtn)
+    tags.appendChild(tagh5);
     tagInput.value = '';
+
+    delBtn.addEventListener('click', e => {
+      tagh5.parentNode.removeChild(tagh5);
+    })
+
   } else if (inputValue === '') {
     tagInput.value = '';
     tagInput.placeholder = '값을 입력해주세요.'
@@ -72,9 +89,9 @@ const submit = (axios, editor, tags) => {
   console.log(editor.getHTML())
   const addedImages = document.querySelectorAll('img[id*="add"]')
   console.log(addedImages)
-  alert("alert")
   const imageIds = Array.from(addedImages).map(image => image.id.split(" ")[1])
-  const tagList = Array.from(tags.children).map(tag => tag.textContent)
+  const tagList = Array.from(tags.children).map(
+      tag => tag.querySelector('span').textContent)
   const json = {
     contents: editor.getHTML(),
     tags: tagList,

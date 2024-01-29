@@ -30,7 +30,7 @@ spring:
     password: ${MAIL_PASSWORD}
     properties:
       mail:
-        debug: true
+        #        debug: true
         smtp:
           auth: true
           timeout: 5000

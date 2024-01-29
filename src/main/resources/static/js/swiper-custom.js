@@ -1,22 +1,21 @@
 new Swiper('.swiper', {
-  autoplay: {
-    delay: 5000
-  },
+  // autoplay: {
+  //   delay: 5000
+  // },
   loop: true,
-  slidesPerView: 3,
+  slidesPerView: 4,
   slidesPerGroup: 1,
-  spaceBetween: 30,
+  spaceBetween: 8,
   centeredSlides: true,
 
   pagination: {
     el: '.swiper-pagination',
-    clickable: true
+    clickable: true,
   },
   navigation: {
     prevEl: '.swiper-button-prev',
     nextEl: '.swiper-button-next'
   },
-
 
   // 반응형 웹 디자인을 위한 breakpoints 설정
   breakpoints: {

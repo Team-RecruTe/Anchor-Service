@@ -118,11 +118,9 @@ public class QMentoringRepositoryImpl implements QMentoringRepository {
         .fetchJoin()
         .fetch();
 
-    List<MentoringSearchResult> topMentorings = result.stream()
+    return result.stream()
         .map(MentoringSearchResult::of)
         .toList();
-
-    return topMentorings;
   }
 
   public Optional<Mentoring> findMentoringDetailInfo(Long id) {

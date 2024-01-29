@@ -25,11 +25,12 @@ import org.springframework.web.client.RestClient.RequestHeadersSpec.ConvertibleC
 @Component
 public class PayupClient {
 
-
   private final RestClient restClient;
   private final ObjectMapper objectMapper;
+
   @Value("${payup.access-token}")
   private String accessToken;
+
   @Value("${payup.iscd}")
   private String institutionCode;
 
