@@ -75,17 +75,18 @@
     </form>
   </div>
 
-  <div class="d-flex justify-content-center">
+  <div class="d-flex justify-content-center" style="min-height: 600px">
     <div class="row row-cols-4" style="width: 60vw;">
-      <div class="col-md-3 mb-3" style="height:30vh" th:each="mentoring: ${mentoringSearchInfo.mentoringInfos}">
+      <div class="col-md-3 mb-3 card-box" th:each="mentoring: ${mentoringSearchInfo.mentoringInfos}"
+           th:id="${mentoring.mentoringInfo.id}">
         <div class="card mb-2 shadow rounded" id="card-container">
           <!-- Title -->
           <div class="card-header clamp-lines d-flex justify-content-center align-items-center mb-2 mt-1 m-0"
-               style="min-height: 80px; max-height: 60px;">
-            <a class="text-decoration-none fs-5 text-center"
-               th:href="@{/mentorings/{id}(id=${mentoring.mentoringInfo.id})}">
-              <p class="clamp-lines" th:text="${mentoring.mentoringInfo.title}"></p>
-            </a>
+               style="min-height: 60px; max-height: 80px;">
+            <!--            <a class="text-decoration-none fs-5 text-center"-->
+            <!--               th:href="@{/mentorings/{id}(id=${mentoring.mentoringInfo.id})}">-->
+            <p class="clamp-lines fs-5" th:text="${mentoring.mentoringInfo.title}"></p>
+            <!--            </a>-->
           </div>
 
           <div class="card-body d-flex flex-column text-center align-items-center">
@@ -136,6 +137,22 @@
   </div>
 
   <script th:inline="javascript">
+    document.querySelectorAll('.card-box').forEach(box => boxEvent(box));
+
+    function boxEvent(box) {
+      box.addEventListener('click', (e) => {
+        let card = e.target.closest('.card-box');
+        console.log(card);
+        if (card) {
+          let mentorIcon = e.target.closest('#mentor-icon');
+          if (mentorIcon) {
+            mentorIcon.querySelector('a').click();
+          }
+          location.href = `mentorings/${card.id}`;
+        }
+      });
+    }
+
     console.log([[${mentoringSearchInfo.mentoringInfos}]])
 
     let currentPage = parseInt(new URLSearchParams(location.search).get("page")) || 1;

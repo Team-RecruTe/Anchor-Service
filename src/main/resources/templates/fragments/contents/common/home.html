@@ -105,11 +105,10 @@
       <h3 class="my-4 fw-bold" style="text-align: center;">인기 멘토링</h3>
       <div class="swiper mask">
         <div class="swiper-wrapper">
-          <div class="swiper-slide col-lg-4 d-flex align-items-stretch"
-               th:each="mentoring, iterStat : ${topMentorings.mentoringRank}"
+          <div class="swiper-slide col-lg-4 d-flex align-items-stretch" th:each="mentoring, iterStat : ${topMentorings.mentoringRank}"
+               th:id="${mentoring.mentoringInfo.id}"
                th:if="${iterStat.count <= 9}">
             <div class="card" id="card-container">
-              <!--              <a class="card h-100" th:href="@{/mentorings/{id}(id=${mentoring.mentoringInfo.id})}">-->
               <div class="d-flex justify-content-center align-items-center card-header"
                    style="min-height: 80px; max-height: 80px;">
                 <h5 class="fs-5 m-0 clamp-lines" th:text="${mentoring.mentoringInfo.title}"></h5>
@@ -150,10 +149,10 @@
                 </div>
                 <!-- Mentoring Detail page -->
               </div>
-              <!--              </a>-->
             </div>
           </div>
         </div>
+
         <div class="swiper-pagination"></div>
         <div class="justify-content-between">
           <div class="swiper-button-prev">
@@ -167,7 +166,6 @@
     </div>
     <hr class="my-4">
   </div>
-
   <script src="/js/swiper.min.js"></script>
   <script src="/js/swiper-custom.js"></script>
 </div>
