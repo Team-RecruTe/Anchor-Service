@@ -13,25 +13,24 @@ import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTi
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationUserInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringBasicInfo;
 import com.anchor.domain.mentoring.api.controller.request.MentoringContentsInfo;
-import com.anchor.domain.mentoring.api.controller.request.MentoringRatingInterface;
-import com.anchor.domain.mentoring.api.controller.request.MentoringReviewInfoInterface;
 import com.anchor.domain.mentoring.api.service.response.ApplicationTimeInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringContents;
 import com.anchor.domain.mentoring.api.service.response.MentoringContentsEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringCreateResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringDeleteResult;
-import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo.MentoringDetailSearchResult;
+import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringEditResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringOrderUid;
 import com.anchor.domain.mentoring.api.service.response.MentoringPayConfirmInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringPaymentInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
+import com.anchor.domain.mentoring.api.service.response.PopularTag;
 import com.anchor.domain.mentoring.api.service.response.TopMentoring;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringDetail;
+import com.anchor.domain.mentoring.domain.MentoringReview;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
-import com.anchor.domain.mentoring.domain.MentoringTag;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
 import com.anchor.domain.mentoring.domain.repository.MentoringReviewRepository;
@@ -45,12 +44,14 @@ import com.anchor.global.mail.AsyncMailSender;
 import com.anchor.global.mail.MailMessage;
 import com.anchor.global.redis.client.ApplicationLockClient;
 import com.anchor.global.redis.message.NotificationEvent;
+import com.anchor.global.util.CodeCreator;
 import com.anchor.global.util.type.DateTimeRange;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -72,18 +73,10 @@ public class MentoringService {
   private final ApplicationEventPublisher applicationEventPublisher;
   private final MentoringReviewRepository mentoringReviewRepository;
   private final ApplicationLockClient applicationLockClient;
-  private final PayNumberCreator payNumberCreator;
   private final AsyncMailSender asyncMailSender;
 
-  public List<MentoringReviewInfoInterface> getMentoringReviews(Long mentoringId) {
-    List<MentoringReviewInfoInterface> reviewList = mentoringReviewRepository.getReviewList(mentoringId);
-    return reviewList;
-  }
-
-  public MentoringRatingInterface getMentoringRatings(Long mentoringId) {
-    MentoringRatingInterface averageRatings = mentoringReviewRepository.getAverageRatings(mentoringId);
-    return averageRatings;
-  }
+  @Value("${payment.imp-code}")
+  private String impCode;
 
   @Transactional
   public MentoringCreateResult create(Long mentorId, MentoringBasicInfo mentoringBasicInfo) {
@@ -132,26 +125,15 @@ public class MentoringService {
     return new MentoringContents(mentoring.getTitle(), mentoring.getContents(), mentoring.getTags());
   }
 
-  @Transactional(readOnly = true)
-  public List<String> getPopularMentoringTags() {
-    List<Mentoring> mentoringList = mentoringRepository.findPopularMentoringTags();
-    return mentoringList.stream()
-        .flatMap(mentoring -> mentoring.getMentoringTags()
-            .stream())
-        .map(MentoringTag::getTag)
-        .distinct()
-        .sorted()
-        .toList();
-  }
-
   /**
    * 입력한 ID를 통해 멘토링 상세정보를 조회합니다.
    */
   @Transactional(readOnly = true)
-  public MentoringDetailSearchResult getMentoringDetailInfo(Long id) {
-    Mentoring findMentoring = mentoringRepository.findMentoringDetailInfo(id)
+  public MentoringDetailInfo getMentoringDetailInfo(Long id) {
+    Mentoring mentoring = mentoringRepository.findMentoringDetailInfo(id)
         .orElseThrow(() -> new NoSuchElementException(id + "에 해당하는 멘토링이 존재하지 않습니다."));
-    return MentoringDetailSearchResult.of(findMentoring);
+    List<MentoringReview> mentoringReviews = mentoringReviewRepository.findAllByMentoringId(id);
+    return MentoringDetailInfo.of(mentoring, mentoringReviews);
   }
 
   /**
@@ -189,7 +171,6 @@ public class MentoringService {
     String key = ApplicationLockClient.createKey(mentor, sessionUser);
     DateTimeRange myApplicationLockTime = applicationLockClient.findByKey(key);
     String merchantUid = createMerchantUid();
-    String impCode = payNumberCreator.getImpCode();
     return MentoringPaymentInfo.of(mentoring, myApplicationLockTime, userInfo, merchantUid, impCode);
   }
 
@@ -272,6 +253,12 @@ public class MentoringService {
     }
   }
 
+  public void autoChangeStatus(DateTimeRange targetDateRange) {
+    List<MentoringApplication> result = mentoringApplicationRepository.findAllByNotCompleteForWeek(targetDateRange);
+    result.forEach(application -> application.changeStatus(MentoringStatus.COMPLETE));
+    mentoringApplicationRepository.saveAll(result);
+  }
+
   private Mentor getMentorById(Long id) {
     return mentorRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("일치하는 멘토 정보가 없습니다."));
@@ -304,12 +291,18 @@ public class MentoringService {
     return new TopMentoring(topMentorings);
   }
 
+  @Cacheable(cacheNames = "topTag", key = "'topTag'")
+  @Transactional(readOnly = true)
+  public List<PopularTag> getPopularTags() {
+    return mentoringRepository.findPopularTags();
+  }
+
   private String createMerchantUid() {
     String today = LocalDate.now()
         .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
     List<Payment> paymentList = paymentRepository.findPaymentListStartWithToday(today);
-    return payNumberCreator.getMerchantUid(paymentList, today);
+    return CodeCreator.getMerchantUid(paymentList, today);
   }
 
 }

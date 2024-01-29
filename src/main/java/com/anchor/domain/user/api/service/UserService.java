@@ -68,13 +68,13 @@ public class UserService {
         mentoringReviewInfo.getTimeRange()
             .getFrom(), mentoringReviewInfo.getTimeRange()
             .getTo());
-    MentoringReview dbMentoringReviewInsert = MentoringReview.builder()
+    MentoringReview mentoringReview = MentoringReview.builder()
         .ratings(mentoringReviewInfo.getRatings())
         .contents(mentoringReviewInfo.getContents())
         .mentoringApplication(mentoringApplication)
         .build();
     mentoringApplication.completedReview();
-    mentoringReviewRepository.save(dbMentoringReviewInsert);
+    mentoringReviewRepository.save(mentoringReview);
   }
 
   @Transactional(readOnly = true)

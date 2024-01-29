@@ -7,8 +7,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum NHRequestUrl {
 
-  ACCOUNT_HOLDER_URI("/InquireDepositorOtherBank.nh"),
-  DEPOSIT_URI("/ReceivedTransferOtherBank.nh");
+  NH_ACCOUNT_HOLDER_URI("/InquireDepositorAccountNumber.nh"),
+  NH_DEPOSIT_URI("/ReceivedTransferAccountNumber.nh"),
+  OTHER_ACCOUNT_HOLDER_URI("/InquireDepositorOtherBank.nh"),
+  OTHER_DEPOSIT_URI("/ReceivedTransferOtherBank.nh");
 
   private final String url;
 }

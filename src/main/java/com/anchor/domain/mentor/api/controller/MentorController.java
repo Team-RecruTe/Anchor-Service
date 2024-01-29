@@ -1,19 +1,19 @@
 package com.anchor.domain.mentor.api.controller;
 
 import com.anchor.domain.mentor.api.controller.request.MentoringStatusInfo;
-import com.anchor.domain.mentor.api.controller.request.RandomCodeMaker;
+import com.anchor.domain.mentor.api.controller.request.RequiredMentorEmailInfo;
 import com.anchor.domain.mentor.api.service.MailService;
 import com.anchor.domain.mentor.api.service.MentorService;
 import com.anchor.domain.mentor.api.service.response.MentorOpenCloseTimes;
 import com.anchor.domain.mentor.api.service.response.MentorPayupResult;
 import com.anchor.global.auth.SessionUser;
+import com.anchor.global.util.CodeCreator;
 import jakarta.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,12 +31,11 @@ public class MentorController {
 
   private final MentorService mentorService;
   private final MailService mailService;
-  private final HttpSession session;
 
   @PutMapping("/me/schedule")
   public ResponseEntity<String> editMentorSchedule(@RequestBody MentorOpenCloseTimes mentorOpenCloseTimes,
-      HttpSession httpSession) {
-//    SessionUser user = (SessionUser) httpSession.getAttribute("user");
+      HttpSession session) {
+//    SessionUser user = SessionUser.getSessionUser(session);
     mentorService.setMentorSchedule(1L, mentorOpenCloseTimes);
     return ResponseEntity.ok()
         .build();
@@ -44,41 +43,46 @@ public class MentorController {
 
   @PostMapping("/me/applied-mentorings")
   public ResponseEntity<String> changeMentoringStatus(@RequestBody MentoringStatusInfo mentoringStatusInfo,
-      HttpSession httpSession) {
-    SessionUser user = (SessionUser) httpSession.getAttribute("user");
+      HttpSession session) {
+    SessionUser user = SessionUser.getSessionUser(session);
     mentorService.changeMentoringStatus(1L, mentoringStatusInfo.getRequiredMentoringStatusInfos());
     return ResponseEntity.ok()
         .build();
   }
 
   @PostMapping("/register/email/send")
-  public ResponseEntity emailSend(String receiver) {
-    String emailCode = RandomCodeMaker.makeRandomCode();
+  public ResponseEntity<String> emailSend(@RequestBody RequiredMentorEmailInfo emailInfo, HttpSession session) {
+    String emailCode = CodeCreator.createEmailAuthCode();
     session.setAttribute("ecode", emailCode);
-    mailService.sendAuthMail(receiver, emailCode);
-    return new ResponseEntity("success", HttpStatus.OK);
+    mailService.sendAuthMail(emailInfo.getReceiver(), emailCode);
+    return ResponseEntity.ok()
+        .body("success");
   }
 
   @PostMapping("/register/email/auth")
-  public ResponseEntity emailVerify(String userEmailCode) {
+  public ResponseEntity<String> emailVerify(@RequestBody RequiredMentorEmailInfo emailInfo, HttpSession session) {
     String emailCode = (String) session.getAttribute("ecode");
     log.info("auth session email code===" + emailCode);
-    if (userEmailCode.equals(emailCode)) {
-      return new ResponseEntity("success", HttpStatus.OK);
+    if (emailInfo.getUserEmailCode()
+        .equals(emailCode)) {
+      return ResponseEntity.ok()
+          .body("success");
     } else {
-      return new ResponseEntity("fail", HttpStatus.OK);
+      return ResponseEntity.badRequest()
+          .body("fail");
     }
   }
 
   @GetMapping("/me/payup-info")
   public ResponseEntity<MentorPayupResult> getTest(
-      @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") LocalDateTime currentMonth
+      @RequestParam("currentMonth") @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") LocalDateTime currentMonth,
+      @RequestParam("startMonth") @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") LocalDateTime startMonth
       /*,HttpSession session*/) {
     SessionUser sessionUser = new SessionUser();
     if (isFutureDate(currentMonth)) {
       return ResponseEntity.ok(new MentorPayupResult());
     }
-    MentorPayupResult payupInfos = mentorService.getMentorPayupResult(currentMonth, sessionUser);
+    MentorPayupResult payupInfos = mentorService.getMentorPayupResult(startMonth, currentMonth, sessionUser);
     return ResponseEntity.ok(payupInfos);
   }
 

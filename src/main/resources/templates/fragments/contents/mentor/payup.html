@@ -14,8 +14,8 @@
     }
 
     #calendar {
-      height: 800px;
-      width: 1200px;
+      height: 70vh;
+      width: 100vw;
     }
 
     .sidebar hr {
@@ -59,10 +59,9 @@
     }
   </style>
   <link href="/css/library/toast/toastui-calendar.min.css" rel="stylesheet"/>
-  <link href="/css/library/bulma.min.css" rel="stylesheet"/>
 </head>
 <body>
-<div class="d-flex flex-column justify-content-center" layout:fragment="content">
+<div layout:fragment="content">
   <!--  Modal -->
   <div aria-hidden="true" aria-labelledby="exampleModalLabel" class="modal fade" id="myModal" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
@@ -94,35 +93,36 @@
     </div>
   </div>
 
-  <div class="row">
-
-    <div class="col-md-3">
-      <div th:replace="~{fragments/sidebar :: sidebar}"></div>
-    </div>
-
-    <div class="d-flex flex-column col-md-6">
-      <div class="row">
-        <nav class="navbar">
-          <button class="button is-rounded prev">
+  <div th:replace="~{fragments/sidebar/info-sidebar :: sidebar}"></div>
+  <div class="d-flex justify-content-center">
+    <div class="row border border-success p-3 shadow rounded-2" style="width: 70%">
+      <nav class="navbar row">
+        <div class="col-3 text-start">
+          <button class="btn rounded-pill border-success border prev">
             <img alt="prev" src="/images/cal/ic-arrow-line-left.png" srcset="
                   /images/cal/ic-arrow-line-left@2x.png 2x,
                   /images/cal/ic-arrow-line-left@3x.png 3x">
           </button>
-          <span class="navbar--range"></span>
-          <button class="button is-rounded today">Today</button>
-          <button class="button is-rounded next">
+        </div>
+        <div class="col-3 text-end align-items-center">
+          <span class="navbar--range border-success border rounded-pill btn"></span>
+        </div>
+        <div class="col-3 text-start">
+          <button class="btn rounded-pill border-success today border">Today</button>
+        </div>
+        <div class="col-3 text-end">
+          <button class="btn rounded-pill border-success next border">
             <img alt="prev" src="/images/cal/ic-arrow-line-right.png" srcset="
                   /images/cal/ic-arrow-line-right@2x.png 2x,
                   /images/cal/ic-arrow-line-right@3x.png 3">
           </button>
-        </nav>
-      </div>
-      <div class="row">
-        <div id="calendar"></div>
-      </div>
+        </div>
+      </nav>
+      <hr>
+      <div id="calendar"></div>
     </div>
-    <div class="col-md-3"></div>
   </div>
+
   <script src="/js/library/toast/toastui-calendar.min.js"></script>
   <script src="/js/mentor/payup.js"></script>
 </div>

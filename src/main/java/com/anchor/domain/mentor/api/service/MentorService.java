@@ -19,6 +19,7 @@ import com.anchor.domain.notification.domain.ReceiverType;
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.domain.payment.domain.repository.PayupRepository;
 import com.anchor.domain.user.domain.User;
+import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.mail.AsyncMailSender;
 import com.anchor.global.mail.MailMessage;
@@ -51,6 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MentorService {
 
   private final MentoringApplicationRepository mentoringApplicationRepository;
+  private final UserRepository userRepository;
   private final MentorRepository mentorRepository;
   private final PayupRepository payupRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
@@ -149,19 +151,23 @@ public class MentorService {
         pageable);
   }
 
-  public Mentor register(MentorRegisterInfo mentorRegisterInfo) {
-    if (mentorRepository.findByCompanyEmail(mentorRegisterInfo.getCompanyEmail()).isPresent()) {
+  public Mentor register(MentorRegisterInfo mentorRegisterInfo, SessionUser sessionUser) {
+    if (mentorRepository.findByCompanyEmail(mentorRegisterInfo.getCompanyEmail())
+        .isPresent()) {
       throw new IllegalStateException("이미 존재하는 이메일");
     }
-    Mentor dbInsertMentor = Mentor.builder()
+    User user = userRepository.findByEmail(sessionUser.getEmail())
+        .orElseThrow(() -> new NoSuchElementException("회원정보가 존재하지 않습니다."));
+    Mentor mentor = Mentor.builder()
+        .user(user)
         .companyEmail(mentorRegisterInfo.getCompanyEmail())
         .career(mentorRegisterInfo.getCareer())
         .accountNumber(mentorRegisterInfo.getAccountNumber())
         .bankName(mentorRegisterInfo.getBankName())
         .accountName(mentorRegisterInfo.getAccountName())
         .build();
-    mentorRepository.save(dbInsertMentor);
-    return dbInsertMentor;
+    mentorRepository.save(mentor);
+    return mentor;
   }
 
   @Transactional(readOnly = true)
@@ -176,24 +182,25 @@ public class MentorService {
   }
 
   @Transactional(readOnly = true)
-  public MentorPayupResult getMentorPayupResult(LocalDateTime currentMonth, SessionUser sessionUser) {
+  public MentorPayupResult getMentorPayupResult(LocalDateTime startMonth, LocalDateTime currentMonth,
+      SessionUser sessionUser) {
 //    Long mentorId = sessionUser.getMentorId();
     Long mentorId = 1L;
     DateTimeRange actualCalendarRange = DateTimeRange.of(
-        getFirstDayOfMonth(currentMonth),
+        getFirstDayOfMonth(startMonth),
         getFirstDayOfNextMonth(currentMonth)
     );
     List<PayupInfo> payupInfos = payupRepository.findAllByMonthRange(actualCalendarRange, mentorId);
     return MentorPayupResult.of(payupInfos);
   }
 
-  private LocalDateTime getFirstDayOfMonth(LocalDateTime dateTime) {
-    return dateTime.with(TemporalAdjusters.firstDayOfMonth())
+  private LocalDateTime getFirstDayOfMonth(LocalDateTime startMonth) {
+    return startMonth.with(TemporalAdjusters.firstDayOfMonth())
         .truncatedTo(ChronoUnit.DAYS);
   }
 
-  private LocalDateTime getFirstDayOfNextMonth(LocalDateTime dateTime) {
-    return dateTime.with(TemporalAdjusters.firstDayOfNextMonth())
+  private LocalDateTime getFirstDayOfNextMonth(LocalDateTime currentMonth) {
+    return currentMonth.with(TemporalAdjusters.firstDayOfNextMonth())
         .truncatedTo(ChronoUnit.DAYS);
   }
 }

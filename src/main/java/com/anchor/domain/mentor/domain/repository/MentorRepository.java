@@ -11,6 +11,4 @@ public interface MentorRepository extends JpaRepository<Mentor, Long>, QMentorRe
 
   Optional<Mentor> findByCompanyEmail(String email);
 
-  Optional<Mentor> findByIdAndMentorIntroduction_Id(Long id, Long mentorIntroductionId);
-
 }

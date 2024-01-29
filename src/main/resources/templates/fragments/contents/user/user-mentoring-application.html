@@ -6,35 +6,51 @@
 <head>
   <title>멘토링 신청내역</title>
   <meta charset="UTF-8">
+  <style>
+    .mentor-title {
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+  </style>
   <script src="/js/library/axios/axios.min.js"></script>
 </head>
 <body>
-<div class="d-flex flex-column justify-content-center" layout:fragment="content">
-
-  <div class="row">
-
-    <div class="col-1">
-      <div th:replace="~{fragments/sidebar::sidebar}"></div>
-    </div>
-
-    <div class="col-11" id="table-container">
-      <table class="table w-75 table-striped table-hover" id="application-list"
-             style="margin-left: auto;margin-right: auto">
-        <tbody>
+<div layout:fragment="content">
+  <div th:replace="~{fragments/sidebar/info-sidebar::sidebar}"></div>
+  <div class="d-flex justify-content-center">
+    <div class="mx-auto" id="table-container" style="height:82vh; width: 60vw">
+      <div class="card border d-flex justify-content-center mb-5 border-success-subtle border-3">
+        <h2 class="text-center">멘토링 신청내역</h2>
+      </div>
+      <table class="table table-hover mb-3 " id="application-list"
+             style="margin: 0 auto 0 auto; table-layout: fixed">
+        <thead class="table-light">
+        <tr class="text-center">
+          <th scope="col">번호</th>
+          <th scope="col">제목</th>
+          <th scope="col">멘토</th>
+          <th scope="col">멘토 이메일</th>
+          <th scope="col">결제금액</th>
+          <th scope="col">신청 시간</th>
+          <th scope="col">상태</th>
+        </tr>
+        </thead>
+        <tbody class="text-center">
         <tr th:each="app: ${mentoringApplications}">
-          <td class="ma"
-              th:id="${app.mentoringApplicationInfo.dateTimeRange.from} + ' ' + ${app.mentoringApplicationInfo.dateTimeRange.to}"></td>
-          <td class="align-middle"><input type="checkbox"></td>
-          <td class="align-middle">
-            <a th:href="'/mentorings/' + ${app.mentoringInfo.id}" th:text="${app.mentoringInfo.title}"></a>
+          <th class="align-middle" scope="col" th:text="${appStat.count}"></th>
+          <td class="align-middle mentor-title">
+            <a class="text-black" th:href="@{/mentorings/{id}(id=${app.mentoringInfo.id})}"
+               th:text="${app.mentoringInfo.title}"></a>
           </td>
           <td class="align-middle">
+            <span th:text="${app.mentorInfo.nickname}"></span>
             <img alt="" class="rounded-circle" height="32" th:src="${app.mentorInfo.image}" width="32">
           </td>
-          <td class="align-middle" th:text="${app.mentorInfo.nickname}"></td>
           <td class="align-middle" th:text="${app.mentorInfo.email}"></td>
-          <td class="align-middle" th:text="${app.paymentInfo.amount}"></td>
-          <td class="align-middle">
+          <td class="align-middle" th:text="${#numbers.formatInteger(app.paymentInfo.amount,3,'COMMA')}+'원'"></td>
+          <td class="align-middle ma"
+              th:id="${app.mentoringApplicationInfo.dateTimeRange.from} + ' ' + ${app.mentoringApplicationInfo.dateTimeRange.to}">
           <span>
             [[${app.mentoringApplicationInfo.dateTimeRange.from.toString().replace("T", " ")}]] ~
             [[${app.mentoringApplicationInfo.dateTimeRange.to.toString().replace("T", " ")}]]
@@ -108,17 +124,21 @@
         </tbody>
       </table>
     </div>
-    <div class="d-flex justify-content-end">
-      <button class="btn btn-primary" id="save-button" type="button">저장하기</button>
-    </div>
+  </div>
 
-    <div>
+  <div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
       <nav aria-label="Page navigation example">
         <ul class="pagination justify-content-center">
         </ul>
       </nav>
     </div>
-
+    <div class="col-md-3">
+      <div class="d-flex justify-content-start">
+        <button class="btn btn-primary" id="save-button" type="button">저장하기</button>
+      </div>
+    </div>
   </div>
   <script th:inline="javascript">
     console.log([[${mentoringApplications}]])
@@ -172,7 +192,7 @@
     pagenation.appendChild(createPage(totalPage, currentPage, "Next", currentPage + 1))
 
     const appList = document.querySelector('#application-list')
-    const apps = appList.querySelectorAll('tr')
+    const apps = appList.querySelectorAll('tbody tr')
     const addEvent = (ma, approval, cancel, waiting, complete, dropdownButton) => {
       if (cancel !== null) {
         cancel.addEventListener('click', () => {

@@ -11,25 +11,26 @@
   <div class="row justify-content-center">
 
     <div class="col-3">
-      <div th:replace="~{fragments/sidebar::sidebar}"></div>
+      <div th:replace="~{fragments/sidebar/info-sidebar::sidebar}"></div>
     </div>
 
     <div class="col-6 d-flex justify-content-center">
 
-      <div class="card" style="width:400px;">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title text-center mt-2 mb-2">멘토 등록 페이지</h2>
+        </div>
         <div class="card-body d-flex justify-content-center align-items-center">
-          <form action="/mentors" method="post">
-            <h2 class="text-center">멘토 등록 페이지</h2>
-            <hr>
+          <form action="/mentors" id="register-form" method="post">
             <div class="input-group mb-3">
               <label class="input-group-text" for="companyEmail">이메일</label>
               <input class="form-control" id="companyEmail" name="companyEmail" placeholder="companyEmail" type="email">
-              <button class="btn btn-outline-primary" id="btnEmailSend">이메일 발송</button>
+              <button class="btn btn-outline-primary" id="email-send-button">이메일 발송</button>
             </div>
             <div class="input-group mb-3">
               <label class="input-group-text" for="emailCheck">이메일 인증</label>
               <input class="form-control" id="emailCheck" name="emailCheck" placeholder="emailCheck" type="text">
-              <button class="btn btn-outline-success" id="btnEmailCheck">이메일 인증</button>
+              <button class="btn btn-outline-success" id="email-auth-button">이메일 인증</button>
             </div>
             <div class="input-group mb-3">
               <label class="input-group-text" for="career">경력</label>
@@ -57,94 +58,92 @@
               <label class="input-group-text" for="accountName">예금주 명</label>
               <input class="form-control" id="accountName" name="accountName" placeholder="예금주 명을 입력하세요." type="text">
             </div>
-            <div class="d-flex justify-content-end">
-              <button class="btn btn-outline-success" id="btnSubmit">제출</button>
-            </div>
           </form>
         </div>
+        <div class="card-footer">
+          <div class="d-flex justify-content-end">
+            <button class="btn btn-outline-success" id="submit-button">제출</button>
+          </div>
+        </div>
       </div>
-
 
     </div>
     <div class="col-3"></div>
   </div>
   <script>
     let emailVerified = false;
-    const bankName = $("#bankName");
-    $("#btnEmailSend").on("click", function (e) {
-      $.ajax({
-        url: "/mentors/register/email/send",
-        data: {
-          receiver: $("#companyEmail").val(),
-        },
-        method: "post",
-        success: function (data) {
-          console.log(data);
-          if (data === "success") {
-            alert("이메일을 전송하였습니다.");
-          } else {
-            alert("이메일 전송에 실패하였습니다");
-          }
-        },
-        complete: function (data) {
-          console.log("complete");
-          console.log(data);
-        },
-      });
-      return false;
+    let bankName = document.getElementById('bankName');
+    let accountNumber = document.getElementById('accountNumber');
+    let accountName = document.getElementById('accountName');
+    let emailSendButton = document.getElementById('email-send-button');
+    let emailAuthButton = document.getElementById('email-auth-button');
+    let companyEmailInput = document.getElementById('companyEmail');
+    let emailAuthCode = document.getElementById('emailCheck');
+    emailSendButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      let companyEmail = companyEmailInput.value;
+      axios.post('/mentors/register/email/send', {
+        receiver: companyEmail
+      }).then(response => {
+        let result = response.data;
+        if (result === 'success') {
+          alert('이메일을 전송하였습니다. 메일을 확인해주세요.');
+        } else {
+          alert('이메일 전송에 실패하였습니다. 이메일을 다시 입력해주세요.');
+        }
+      }).catch(error => alert(error.message));
     });
 
-    $("#btnEmailCheck").on("click", function (e) {
-      $.ajax({
-        url: "/mentors/register/email/auth",
-        data: {
-          userEmailCode: $("#emailCheck").val(),
-        },
-        method: "post",
-        success: function (data) {
-          console.log(data);
-          if (data === "success") {
-            alert("이메일 인증에 성공하였습니다.");
-            emailVerified = true;
-            // 나중에 이메일 쓴 칸도 readonly로 바꾸기
-            $("#btnEmailSend").attr("disabled", true);
-            $("#btnEmailCheck").attr("disabled", true);
-          } else {
-            alert("이메일 인증에 실패하였습니다.");
-          }
-        },
-        complete: function (data) {
-          console.log("complete");
-          console.log(data);
-        },
-      });
-      return false;
+    emailAuthButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      let authCode = emailAuthCode.value;
+      axios.post('/mentors/register/email/auth', {
+        userEmailCode: authCode
+      }).then(response => {
+        let result = response.data;
+        if (result === 'success') {
+          alert('인증에 성공하였습니다.');
+          emailVerified = true;
+          companyEmailInput.readOnly = true;
+          emailAuthCode.readOnly = true;
+          emailSendButton.disabled = true;
+          emailAuthButton.disabled = true;
+        } else {
+          alert('인증에 실패하였습니다. 다시 확인해주세요.');
+        }
+      }).catch(error => alert(error.message));
     });
-    $("#btnSubmit").on("click", function (e) {
-      if ($("#companyEmail").val() === "") {
-        alert("이메일 입력은 필수사항이에요.");
+
+    document.getElementById('submit-button').addEventListener('click', () => {
+      let careerSelectedIndex = document.getElementById('career').selectedIndex;
+      let bankNameSelectedIndex = document.getElementById('bankName').selectedIndex;
+
+      if (companyEmailInput.value === '') {
+        alert('이메일 입력을 필수입니다.');
         return false;
       }
       if (emailVerified === false) {
-        alert("이메일 인증을 완료해주세요.");
+        alert('이메일 인증은 필수입니다.');
         return false;
       }
-      if ($(':selected[name="career"]:checked').length < 1) {
-        alert("아직 경력을 입력하지 않으셨네요.");
+      if (careerSelectedIndex === 0) {
+        alert('경력 선택은 필수입니다.');
         return false;
       }
-      if (bankName.val() === "") {
-        alert("본인 계좌의 은행명을 입력해주세요.");
+      if (bankNameSelectedIndex === 0) {
+        alert('은행 선택을 필수입니다.');
         return false;
       }
-      if (accountNumber.val() === "") {
-        alert("본인 소유의 계좌번호를 입력해주세요.");
+      if (accountNumber.value === '') {
+        alert('계좌번호 입력은 필수입니다.');
         return false;
       }
-      if (accountName.val() === "") {
-        alert("계좌 소유자의 이름을 입력해주세요.");
+
+      if (accountName.value === '') {
+        alert('예금주명 입력을 필수입니다.');
         return false;
       }
+      document.getElementById('register-form').submit();
     });
   </script>
 </div>

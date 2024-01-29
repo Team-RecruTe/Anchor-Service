@@ -53,6 +53,7 @@ public class UserController {
   public ResponseEntity<String> deleteUser(HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
     userService.deleteUser(sessionUser);
+    session.invalidate();
     return ResponseEntity.ok()
         .build();
   }
@@ -64,11 +65,8 @@ public class UserController {
   @PutMapping("/me/applied-mentorings")
   public ResponseEntity<String> appliedMentoringStatusChange(@RequestBody MentoringStatusInfo mentoringStatus,
       HttpSession session) {
-
     SessionUser sessionUser = SessionUser.getSessionUser(session);
-
     boolean changeStatusResult = userService.changeAppliedMentoringStatus(sessionUser, mentoringStatus);
-
     if (changeStatusResult) {
       return ResponseEntity.ok()
           .body(SUCCESS);

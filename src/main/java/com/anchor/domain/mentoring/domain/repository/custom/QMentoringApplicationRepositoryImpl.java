@@ -8,6 +8,7 @@ import com.anchor.domain.mentor.api.service.response.AppliedMentoringSearchResul
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringStatus;
 import com.anchor.domain.user.api.service.response.AppliedMentoringInfo;
+import com.anchor.global.util.type.DateTimeRange;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -142,6 +143,16 @@ public class QMentoringApplicationRepositoryImpl implements QMentoringApplicatio
         .from(mentoringApplication)
         .where(mentoringApplication.eq(application))
         .fetchOne();
+  }
+
+  @Override
+  public List<MentoringApplication> findAllByNotCompleteForWeek(DateTimeRange weekAgoDate) {
+    return jpaQueryFactory.selectFrom(mentoringApplication)
+        .where(
+            mentoringApplication.mentoringStatus.eq(MentoringStatus.APPROVAL)
+                .and(mentoringApplication.endDateTime.goe(weekAgoDate.getFrom()))
+                .and(mentoringApplication.endDateTime.before(weekAgoDate.getTo())))
+        .fetch();
   }
 
   private BooleanBuilder equalsStatuses(MentoringStatus... statuses) {

@@ -38,8 +38,7 @@ public class RequiredDepositData implements RequiredPayupData {
     this.depositAccountInfo = accountMessage;
   }
 
-  public static RequiredDepositData of(String institutionCode, String accessToken, Mentor mentor, Integer totalAmount) {
-    PayupRequestHeader header = PayupRequestHeader.createDepositRequestHeader(institutionCode, accessToken);
+  public static RequiredDepositData of(PayupRequestHeader header, Mentor mentor, Integer totalAmount) {
     BankCode bankCode = BankCode.find(mentor.getBankName());
     String accountMessage = "Anchor 멘토링 정산";
     return new RequiredDepositData(header, bankCode.getCode(), mentor.getAccountNumber(), String.valueOf(totalAmount),

@@ -4,6 +4,8 @@ import com.anchor.domain.mentor.api.controller.request.MentorRegisterInfo;
 import com.anchor.domain.mentor.domain.Career;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentor.domain.repository.MentorRepository;
+import com.anchor.domain.user.domain.User;
+import com.anchor.global.auth.SessionUser;
 import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -27,6 +29,9 @@ class MentorServiceTest {
   @Test
   @DisplayName("멘토 등록 성공")
   void registerSuccess() {
+    SessionUser sessionUser = new SessionUser(User.builder()
+        .email("test@test.com")
+        .build());
     Mentor mentor = Mentor.builder()
         .bankName("NH농협")
         .accountNumber("020-3039-765")
@@ -45,7 +50,7 @@ class MentorServiceTest {
         .accountName("leejuyoon")
         .career(Career.JUNIOR)
         .build();
-    Mentor registerResult = mentorService.register(mentorRegisterInfo);
+    Mentor registerResult = mentorService.register(mentorRegisterInfo, sessionUser);
 
     Assertions.assertThat(registerResult.getCompanyEmail())
         .isEqualTo(mentor.getCompanyEmail());
@@ -54,6 +59,9 @@ class MentorServiceTest {
   @Test
   @DisplayName("멘토 등록 실패")
   void registerFail() {
+    SessionUser sessionUser = new SessionUser(User.builder()
+        .email("test@test.com")
+        .build());
     Mentor mentor = Mentor.builder()
         .bankName("NH농협")
         .accountNumber("020-3039-765")
@@ -74,7 +82,7 @@ class MentorServiceTest {
         .build();
 
     Assertions.assertThatThrownBy(() ->
-            mentorService.register(mentorRegisterInfo))
+            mentorService.register(mentorRegisterInfo, sessionUser))
         .isInstanceOf(IllegalStateException.class);
   }
 }

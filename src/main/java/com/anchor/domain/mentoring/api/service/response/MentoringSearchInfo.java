@@ -11,14 +11,15 @@ public class MentoringSearchInfo {
 
   private Page<MentoringSearchResult> mentoringInfos;
 
-  private List<String> tags;
+  private List<PopularTag> tags;
 
-  private MentoringSearchInfo(Page<MentoringSearchResult> mentoringInfos, List<String> tags) {
+  private MentoringSearchInfo(Page<MentoringSearchResult> mentoringInfos, List<PopularTag> tags) {
     this.mentoringInfos = mentoringInfos;
     this.tags = tags;
   }
 
-  public static MentoringSearchInfo of(Page<MentoringSearchResult> mentoringInfos, List<String> tags) {
+  public static MentoringSearchInfo of(Page<MentoringSearchResult> mentoringInfos, List<PopularTag> tags) {
+    tags.sort(PopularTag::compareTo);
     return new MentoringSearchInfo(mentoringInfos, tags);
   }
 }

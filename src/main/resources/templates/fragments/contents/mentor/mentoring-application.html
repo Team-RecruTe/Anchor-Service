@@ -5,29 +5,51 @@
 >
 <head>
   <title>멘토 - 멘토링 신청내역 페이지</title>
+  <style>
+    .mentor-title {
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+  </style>
 </head>
 <body>
-<div class="d-flex flex-column justify-content-center" layout:fragment="content">
-  <div class="row">
-    <div class="col-1">
-      <div th:replace="~{fragments/sidebar::sidebar}"></div>
-    </div>
-    <div class="col-11" id="table-container">
-      <table class="table w-75 table-striped table-hover" id="application-list" style="margin: 0 auto 0 auto">
+<div layout:fragment="content">
+  <div th:replace="~{fragments/sidebar/info-sidebar::sidebar}"></div>
+  <div class="d-flex justify-content-center">
+    <div class="mx-auto" id="table-container" style="height: 82vh; width:60vw">
+      <div class="card border d-flex justify-content-center mb-5 border-success-subtle border-3">
+        <h2 class="text-center">신청내역 관리</h2>
+      </div>
+
+      <table class="table table-hover mb-3" id="application-list"
+             style="margin: 0 auto 0 auto; table-layout:fixed;">
+        <thead class="table-light">
+        <tr class="text-center">
+          <th scope="col">번호</th>
+          <th scope="col">제목</th>
+          <th scope="col">신청회원</th>
+          <th scope="col">회원 이메일</th>
+          <th scope="col">결제금액</th>
+          <th scope="col">신청시간</th>
+          <th scope="col">상태</th>
+        </tr>
+        </thead>
+        <tbody class="text-center">
         <tr th:each="app: ${mentoringApplications}">
-          <td class="ma"
-              th:id="${app.mentoringApplicationInfo.dateTimeRange.from} + ' ' + ${app.mentoringApplicationInfo.dateTimeRange.to}"></td>
-          <td class="align-middle"><input type="checkbox"></td>
-          <td class="align-middle">
-            <a th:href="'/mentorings/' + ${app.mentoringInfo.id}" th:text="${app.mentoringInfo.title}"></a>
+          <th class="align-middle" scope="col" th:text="${appStat.count}"></th>
+          <td class="align-middle mentor-title">
+            <a class="text-black" th:href="@{/mentorings/{id}(id=${app.mentoringInfo.id})}"
+               th:text="${app.mentoringInfo.title}"></a>
           </td>
           <td class="align-middle">
+            <span th:text="${app.userInfo.nickname}"></span>
             <img class="rounded-circle" height="32" th:src="${app.userInfo.image}" width="32">
           </td>
-          <td class="align-middle" th:text="${app.userInfo.nickname}"></td>
           <td class="align-middle" th:text="${app.userInfo.email}"></td>
-          <td class="align-middle" th:text="${app.paymentInfo.amount}"></td>
-          <td class="align-middle">
+          <td class="align-middle" th:text="${#numbers.formatInteger(app.paymentInfo.amount,3,'COMMA')}+'원'"></td>
+          <td class="align-middle ma"
+              th:id="${app.mentoringApplicationInfo.dateTimeRange.from} + ' ' + ${app.mentoringApplicationInfo.dateTimeRange.to}">
           <span>
             [[${app.mentoringApplicationInfo.dateTimeRange.from.toString().replace("T", " ")}]] ~
             [[${app.mentoringApplicationInfo.dateTimeRange.to.toString().replace("T", " ")}]]
@@ -77,158 +99,165 @@
             </div>
           </td>
         </tr>
+        </tbody>
       </table>
     </div>
-    <div class="d-flex justify-content-end">
-      <button class="btn btn-primary" id="save-button" type="button">저장하기</button>
-    </div>
-    <div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
       <nav aria-label="Page navigation example">
         <ul class="pagination justify-content-center">
         </ul>
       </nav>
     </div>
-    <script th:inline="javascript">
-      console.log([[${mentoringApplications}]])
+    <div class="col-md-3">
+      <div class="d-flex justify-content-start">
+        <button class="btn btn-primary" id="save-button" type="button">저장하기</button>
+      </div>
+    </div>
+  </div>
+  <script th:inline="javascript">
+    console.log([[${mentoringApplications}]])
 
-      let currentPage = parseInt(new URLSearchParams(location.search).get("page")) || 1;
-      currentPage = currentPage < 1 ? 1 : currentPage
-      const pagenation = document.querySelector('.pagination')
+    let currentPage = parseInt(new URLSearchParams(location.search).get("page")) || 1;
+    currentPage = currentPage < 1 ? 1 : currentPage
+    const pagenation = document.querySelector('.pagination')
 
-      const createPage = (totalPage, currentPage, content, page) => {
-        const isPrevDisable = currentPage === 1 && content === "Prev"
-        const isCurrentDisable = currentPage === page
-        const isPageDisable = totalPage < page
-        const li = document.createElement("li")
-        const a = document.createElement("a")
-        li.classList.add("page-item")
-        a.classList.add("page-link")
-        a.href = `?page=${page}`
-        a.textContent = content
-        if (isPrevDisable || isCurrentDisable || isPageDisable) {
-          li.classList.add("disabled")
-        }
-        li.appendChild(a)
-        return li
+    const createPage = (totalPage, currentPage, content, page) => {
+      const isPrevDisable = currentPage === 1 && content === "Prev"
+      const isCurrentDisable = currentPage === page
+      const isPageDisable = totalPage < page
+      const li = document.createElement("li")
+      const a = document.createElement("a")
+      li.classList.add("page-item")
+      a.classList.add("page-link")
+      a.href = `?page=${page}`
+      a.textContent = content
+      if (isPrevDisable || isCurrentDisable || isPageDisable) {
+        li.classList.add("disabled")
       }
+      li.appendChild(a)
+      return li
+    }
 
-      const totalPage = 4
-      pagenation.appendChild(createPage(totalPage, currentPage, "Prev", currentPage - 1))
-      if (totalPage === 2) {
-        if (currentPage === 1) {
-          pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
-          pagenation.appendChild(createPage(totalPage, currentPage, currentPage + 1, currentPage + 1))
-        } else {
-          pagenation.appendChild(createPage(totalPage, currentPage, currentPage - 1, currentPage - 1))
-          pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
-        }
-      } else if (totalPage > 2) {
-        if (currentPage === 1) {
-          pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
-          pagenation.appendChild(createPage(totalPage, currentPage, currentPage + 1, currentPage + 1))
-          pagenation.appendChild(createPage(totalPage, currentPage, currentPage + 2, currentPage + 2))
-        } else if (currentPage === totalPage) {
-          pagenation.appendChild(createPage(totalPage, currentPage, currentPage - 2, currentPage - 2))
-          pagenation.appendChild(createPage(totalPage, currentPage, currentPage - 1, currentPage - 1))
-          pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
-        } else {
-          pagenation.appendChild(createPage(totalPage, currentPage, currentPage - 1, currentPage - 1))
-          pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
-          pagenation.appendChild(createPage(totalPage, currentPage, currentPage + 1, currentPage + 1))
-        }
+    const totalPage = 4
+    pagenation.appendChild(createPage(totalPage, currentPage, "Prev", currentPage - 1))
+    if (totalPage === 2) {
+      if (currentPage === 1) {
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage + 1, currentPage + 1))
+      } else {
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage - 1, currentPage - 1))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
       }
-      pagenation.appendChild(createPage(totalPage, currentPage, "Next", currentPage + 1))
-
-      const appList = document.querySelector('#application-list')
-      const apps = appList.querySelectorAll('tr')
-      const addEvent = (ma, approval, cancel, waiting, dropdownButton) => {
-        if (cancel !== null) {
-          cancel.addEventListener('click', () => {
-            dropdownButton.textContent = ' 취소 '
-            if (!cancel.querySelector('span').classList.contains('current-status')) {
-              dropdownButton.classList.add('border')
-              dropdownButton.classList.add('border-primary')
-              ma.classList.add('changed')
-            } else {
-              dropdownButton.classList.remove('border')
-              dropdownButton.classList.remove('border-primary')
-              ma.classList.remove('changed')
-            }
-          })
-        }
-
-        if (approval !== null) {
-          approval.addEventListener('click', () => {
-            dropdownButton.textContent = ' 승인 '
-            if (!approval.querySelector('span').classList.contains('current-status')) {
-              dropdownButton.classList.add('border')
-              dropdownButton.classList.add('border-primary')
-              ma.classList.add('changed')
-            } else {
-              dropdownButton.classList.remove('border')
-              dropdownButton.classList.remove('border-primary')
-              ma.classList.remove('changed')
-            }
-          })
-        }
-        if (waiting !== null) {
-          waiting.addEventListener('click', () => {
-            dropdownButton.textContent = ' 대기 '
-            if (!waiting.querySelector('span').classList.contains('current-status')) {
-              dropdownButton.classList.add('border')
-              dropdownButton.classList.add('border-primary')
-              ma.classList.add('changed')
-            } else {
-              dropdownButton.classList.remove('border')
-              dropdownButton.classList.remove('border-primary')
-              ma.classList.remove('changed')
-            }
-          })
-        }
+    } else if (totalPage > 2) {
+      if (currentPage === 1) {
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage + 1, currentPage + 1))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage + 2, currentPage + 2))
+      } else if (currentPage === totalPage) {
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage - 2, currentPage - 2))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage - 1, currentPage - 1))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
+      } else {
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage - 1, currentPage - 1))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage, currentPage))
+        pagenation.appendChild(createPage(totalPage, currentPage, currentPage + 1, currentPage + 1))
       }
+    }
+    pagenation.appendChild(createPage(totalPage, currentPage, "Next", currentPage + 1))
 
-      const saveButton = document.querySelector('#save-button')
-      saveButton.addEventListener('click', () => {
-        const json = {requiredMentoringStatusInfos: []}
-        for (const app of apps) {
-          const ma = app.querySelector('.ma')
-          if (ma.classList.contains('changed')) {
-            const maInfo = ma.id.split(' ')
-            const from = maInfo[0] + ':00';
-            const to = maInfo[1] + ':00';
-            let status = app.querySelector('#dropdown-button').textContent.trim()
-            status = status === '승인' ? 'APPROVAL' : 'CANCELLED'
-            json.requiredMentoringStatusInfos.push({
-              mentoringReservedTime: {
-                from: from,
-                to: to
-              },
-              mentoringStatus: status
-            })
-          }
-        }
-        console.log(json)
-        axios.post("/mentors/me/applied-mentorings", json)
-        .then(res => {
-          if (res.status === 200) {
-            alert('성공했습니다.')
+    const appList = document.querySelector('#application-list')
+    const apps = appList.querySelectorAll('tbody tr')
+    const addEvent = (ma, approval, cancel, waiting, dropdownButton) => {
+      if (cancel !== null) {
+        cancel.addEventListener('click', () => {
+          dropdownButton.textContent = ' 취소 '
+          if (!cancel.querySelector('span').classList.contains('current-status')) {
+            dropdownButton.classList.add('border')
+            dropdownButton.classList.add('border-primary')
+            ma.classList.add('changed')
+          } else {
+            dropdownButton.classList.remove('border')
+            dropdownButton.classList.remove('border-primary')
+            ma.classList.remove('changed')
           }
         })
-        .catch(error => {
-          console.log(error)
-        })
-      })
+      }
 
+      if (approval !== null) {
+        approval.addEventListener('click', () => {
+          dropdownButton.textContent = ' 승인 '
+          if (!approval.querySelector('span').classList.contains('current-status')) {
+            dropdownButton.classList.add('border')
+            dropdownButton.classList.add('border-primary')
+            ma.classList.add('changed')
+          } else {
+            dropdownButton.classList.remove('border')
+            dropdownButton.classList.remove('border-primary')
+            ma.classList.remove('changed')
+          }
+        })
+      }
+      if (waiting !== null) {
+        waiting.addEventListener('click', () => {
+          dropdownButton.textContent = ' 대기 '
+          if (!waiting.querySelector('span').classList.contains('current-status')) {
+            dropdownButton.classList.add('border')
+            dropdownButton.classList.add('border-primary')
+            ma.classList.add('changed')
+          } else {
+            dropdownButton.classList.remove('border')
+            dropdownButton.classList.remove('border-primary')
+            ma.classList.remove('changed')
+          }
+        })
+      }
+    }
+
+    const saveButton = document.querySelector('#save-button')
+    saveButton.addEventListener('click', () => {
+      const json = {requiredMentoringStatusInfos: []}
       for (const app of apps) {
         const ma = app.querySelector('.ma')
-        const approval = app.querySelector('#approval')
-        const cancel = app.querySelector('#cancel')
-        const waiting = app.querySelector('#waiting')
-        const dropdownButton = app.querySelector('#dropdown-button')
-        addEvent(ma, approval, cancel, waiting, dropdownButton)
+        if (ma.classList.contains('changed')) {
+          const maInfo = ma.id.split(' ')
+          const from = maInfo[0] + ':00';
+          const to = maInfo[1] + ':00';
+          let status = app.querySelector('#dropdown-button').textContent.trim()
+          status = status === '승인' ? 'APPROVAL' : 'CANCELLED'
+          json.requiredMentoringStatusInfos.push({
+            mentoringReservedTime: {
+              from: from,
+              to: to
+            },
+            mentoringStatus: status
+          })
+        }
       }
-    </script>
-  </div>
+      console.log(json)
+      axios.post("/mentors/me/applied-mentorings", json)
+      .then(res => {
+        if (res.status === 200) {
+          alert('성공했습니다.')
+        }
+      })
+      .catch(error => {
+        console.log(error)
+      })
+    })
+
+    for (const app of apps) {
+      const ma = app.querySelector('.ma')
+      const approval = app.querySelector('#approval')
+      const cancel = app.querySelector('#cancel')
+      const waiting = app.querySelector('#waiting')
+      const dropdownButton = app.querySelector('#dropdown-button')
+      addEvent(ma, approval, cancel, waiting, dropdownButton)
+    }
+  </script>
 </div>
 </body>
 </html>

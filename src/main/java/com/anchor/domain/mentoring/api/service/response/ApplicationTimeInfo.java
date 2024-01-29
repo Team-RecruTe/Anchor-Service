@@ -112,7 +112,7 @@ public class ApplicationTimeInfo {
       this.activeStatus = activeStatus;
     }
 
-    public static MentorActiveTime of(MentorSchedule mentorSchedule) {
+    static MentorActiveTime of(MentorSchedule mentorSchedule) {
       return new MentorActiveTime(mentorSchedule.getOpenTime(), mentorSchedule.getCloseTime(),
           mentorSchedule.getDayOfWeek(), mentorSchedule.getActiveStatus());
     }

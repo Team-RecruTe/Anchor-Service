@@ -17,6 +17,27 @@ new Swiper('.swiper', {
     nextEl: '.swiper-button-next'
   },
 
+  on: {
+    click: function (e) {
+      let slide = e.target.closest('.swiper-slide');
+      if (slide.classList.contains('swiper-slide-prev')) {
+        this.slidePrev();
+        return;
+      }
+      if (slide.classList.contains('swiper-slide-next')) {
+        this.slideNext();
+        return;
+      }
+      if (slide.classList.contains('swiper-slide-active')) {
+        let mentorIcon = e.target.closest('#mentor-icon');
+        if (mentorIcon) {
+          mentorIcon.querySelector('a').click();
+        }
+        location.href = `/mentorings/${slide.id}`
+      }
+    }
+  },
+
   // 반응형 웹 디자인을 위한 breakpoints 설정
   breakpoints: {
     // 화면 너비가 768px 미만일 때

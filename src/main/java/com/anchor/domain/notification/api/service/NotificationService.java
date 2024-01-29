@@ -59,8 +59,6 @@ public class NotificationService {
     redisEventManager.convertAndSend(id, serialize(notification));
   }
 
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
-  @TransactionalEventListener
   public SseEmitter subscribe(String email) throws IOException {
     String id = String.valueOf(email);
     SseEmitter emitter = createAndSetEmitter(id);

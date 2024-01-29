@@ -1,4 +1,4 @@
-package com.anchor.global.portone.request;
+package com.anchor.global.payment.portone.request;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

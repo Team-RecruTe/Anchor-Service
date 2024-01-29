@@ -1,15 +1,13 @@
 package com.anchor.domain.mentoring.api.controller;
 
 import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationTime;
-import com.anchor.domain.mentoring.api.controller.request.MentoringRatingInterface;
-import com.anchor.domain.mentoring.api.controller.request.MentoringReviewInfoInterface;
 import com.anchor.domain.mentoring.api.service.MentoringService;
 import com.anchor.domain.mentoring.api.service.response.MentoringContents;
 import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo;
-import com.anchor.domain.mentoring.api.service.response.MentoringDetailInfo.MentoringDetailSearchResult;
 import com.anchor.domain.mentoring.api.service.response.MentoringPayConfirmInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchInfo;
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
+import com.anchor.domain.mentoring.api.service.response.PopularTag;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.util.view.ViewResolver;
 import jakarta.servlet.http.HttpSession;
@@ -48,7 +46,7 @@ public class MentoringViewController {
       Model model
   ) {
     Page<MentoringSearchResult> mentoringSearchResults = mentoringService.getMentorings(tags, keyword, pageable);
-    List<String> popularMentoringTags = mentoringService.getPopularMentoringTags();
+    List<PopularTag> popularMentoringTags = mentoringService.getPopularTags();
     MentoringSearchInfo mentoringSearchInfo = MentoringSearchInfo.of(mentoringSearchResults, popularMentoringTags);
     model.addAttribute("mentoringSearchInfo", mentoringSearchInfo);
     return viewResolver.getViewPath("mentoring", "mentoring-search");
@@ -59,14 +57,10 @@ public class MentoringViewController {
    */
   @GetMapping("/{id}")
   public String viewMentoringDetailPage(@PathVariable("id") Long id, Model model) {
-    MentoringDetailSearchResult mentoringDetailSearchResult = mentoringService.getMentoringDetailInfo(id);
-    List<String> popularMentoringTags = mentoringService.getPopularMentoringTags();
-    MentoringDetailInfo mentoringDetailInfo = MentoringDetailInfo.of(mentoringDetailSearchResult, popularMentoringTags);
-    List<MentoringReviewInfoInterface> reviewList = mentoringService.getMentoringReviews(id);
-    MentoringRatingInterface averageRatings = mentoringService.getMentoringRatings(id);
-    model.addAttribute("reviewList", reviewList);
+    List<PopularTag> popularTags = mentoringService.getPopularTags();
+    MentoringDetailInfo mentoringDetailInfo = mentoringService.getMentoringDetailInfo(id);
+    mentoringDetailInfo.addPopularTags(popularTags);
     model.addAttribute("mentoringDetail", mentoringDetailInfo);
-    model.addAttribute("averageRatings", averageRatings);
     return viewResolver.getViewPath("mentoring", "mentoring-detail");
   }
 

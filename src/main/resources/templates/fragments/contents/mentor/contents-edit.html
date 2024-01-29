@@ -6,12 +6,13 @@
 <head>
   <title>Anchor-service</title>
   <link href="/css/library/toast/toastui-editor.min.css" rel="stylesheet"/>
+  <script src="/js/library/turndown/turndown.js"></script>
 </head>
 <body>
 <div class="d-flex flex-column justify-content-center" layout:fragment="content">
   <div class="row">
     <div class="col-md-3">
-      <div th:replace="~{fragments/sidebar::sidebar}"></div>
+      <div th:replace="~{fragments/sidebar/info-sidebar::sidebar}"></div>
     </div>
     <div class="col-md-9">
       <!-- 에디터를 적용할 요소 (컨테이너) -->
@@ -28,12 +29,18 @@
   <script src="/js/library/toast/toastui-editor-all.min.js"></script>
 
   <script th:inline="javascript">
-    const submitButton = document.querySelector('#submit-btn');
+    const submitButton = document.getElementById('submit-btn');
+    let turndownService = new TurndownService({
+      codeBlockStyle: 'fenced'
+    });
+    let content = [[${mentorContents.contents}]];
+    let markdown = turndownService.turndown(content);
+
     const editor = new toastui.Editor({
       el: document.querySelector('#content'), // 에디터를 적용할 요소 (컨테이너)
       height: '800px',                        // 에디터 영역의 높이 값 (OOOpx || auto)
       initialEditType: 'markdown',            // 최초로 보여줄 에디터 타입 (markdown || wysiwyg)
-      initialValue: [[${mentorContents.contents}]],                       // 내용의 초기 값으로, 반드시 마크다운 문자열 형태여야 함
+      initialValue: markdown,                       // 내용의 초기 값으로, 반드시 마크다운 문자열 형태여야 함
       previewStyle: 'vertical',               // 마크다운 프리뷰 스타일 (tab || vertical)
       placeholder: '내용을 입력해 주세요.',
       hooks: {
@@ -42,7 +49,7 @@
           formData.append('image', blob);
 
           axios.post("/image/upload", formData)
-          .then((res) => {
+          .then(res => {
             if (res.status === 200) {
               callback(res.data.imageUrl, 'image');
             }
@@ -53,41 +60,19 @@
         },
       }
     });
-    const submit = (axios, editor) => {
-      console.log(editor.getHTML())
-      const json = {
-        contents: editor.getHTML(),
-      }
-      const currentPath = window.location.pathname
-      const path = currentPath.substring(0)
-      const mentorId = [[${session.user.mentorId}]]
-      axios.put(path, json)
-      .then((res) => {
-        if (res.status === 200) {
-          // 'links' 배열이 존재하고, 배열인지 확인
-          if (Array.isArray(res.data.links)) {
-            for (const link of res.data.links) {
-              if (link.rel === "self") {
-                window.location.href = link.href;
-                return;
-              }
-            }
-          }
-          window.location.href = "/mentors/" + mentorId;
-        } else {
-          alert('url이 반환되지 않았습니다.')
+
+    submitButton.addEventListener('click', () => {
+      axios.put('/mentors/me/introduction', {
+        contents: editor.getHTML()
+      }).then(response => {
+        if (response.status === 200) {
+          location.href = '/mentors/' + [[${session.user.mentorId}]];
         }
-      })
-      .catch((error) => {
+      }).catch((error) => {
         console.error('PUT 요청 중 오류가 발생했습니다.', error);
         alert('PUT 요청 중에 문제가 발생했습니다.')
       });
-    }
-
-    const submitEvent = (axios, submitButton, editor, submit) => {
-      submitButton.addEventListener('click',
-          () => submit(axios, editor));
-    }
+    });
   </script>
 </div>
 </body>
