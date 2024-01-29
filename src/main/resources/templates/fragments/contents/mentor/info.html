@@ -4,7 +4,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 >
 <head>
-  <title>Anchor-service</title>
+  <title>멘토 페이지</title>
   <script src="/js/library/jquery/jquery-3.7.1.min.js"></script>
   <style>
     #card-container {
@@ -34,7 +34,7 @@
 
 <div class="main" layout:fragment="content">
 
-  <div class="row">
+  <div class="row d-flex justify-content-center">
     <div class="col-md-2">
       <div th:if="${session.user != null && mentorInfo.id eq session.user.mentorId}">
         <div th:replace="~{fragments/sidebar/info-sidebar :: sidebar}"></div>
@@ -108,14 +108,19 @@
     <!-- [좌측] 멘토 소개글 및 멘토링 목록  끝-->
 
     <!-- [우측] 멘토 정보 시작 -->
-    <div class="col-md-3 text-center">
+
+    <div class="col-md-3 text-center" style="width: 22vw">
       <!--방문자, 멘티, 다른 멘토 페이지-->
       <div class="card">
         <div class="card-header">멘토 정보</div>
         <div class="mt-3" id="current-profile-image">
           <div class="profile">
-            <img alt="" src="/images/x.png" th:if="${mentorInfo.user.image eq null}" width="200px">
-            <img alt="" th:src="${mentorInfo.user.image}" th:unless="${mentorInfo.user.image eq null}" width="200px">
+            <img alt="" src="/images/x.png" style="border-radius: 50%; width: 150px; height: 150px"
+                 th:if="${mentorInfo.user.image eq null}"
+            >
+            <img alt="" style="border-radius: 50%; width: 150px; height: 150px" th:src="${mentorInfo.user.image}"
+                 th:unless="${mentorInfo.user.image eq null}"
+            >
           </div>
         </div>
         <div class="card-body">
@@ -124,23 +129,23 @@
           <div class="form-group row justify-content-center">
             <label class="col-sm-4 col-form-label text-end" for="nickname" style="color: #808080;">닉네임</label>
             <div class="col-sm-8">
-                <span class="form-control-plaintext text-start" id="nickname" name="nickname"
-                      th:text="${mentorInfo.user.nickname}"></span>
+              <span class="form-control-plaintext text-start" id="nickname"
+                    th:text="${mentorInfo.user.nickname}"></span>
             </div>
           </div>
           <!--회사 계정-->
           <div class="form-group row justify-content-center">
-            <label class="col-sm-4 col-form-label text-end" for="companyEmail" style="color: #808080;">회사 계정</label>
+            <label class="col-sm-4 col-form-label text-end" for="companyEmail" style="color: #808080;">회사 메일</label>
             <div class="col-sm-8">
-                <span class="form-control-plaintext text-start" id="companyEmail" name="companyEmail"
-                      th:text="${mentorInfo.companyEmail}"></span>
+              <span class="form-control-plaintext text-start" id="companyEmail"
+                    th:text="${mentorInfo.companyEmail}"></span>
             </div>
           </div>
           <!--커리어-->
           <div class="form-group row justify-content-center">
-            <label class="col-sm-4 col-form-label text-end" for="current-career" style="color: #808080;">연차</label>
+            <label class="col-sm-4 col-form-label text-end" for="current-career" style="color: #808080;">경력</label>
             <div class="col-sm-8">
-                <span class="form-control-plaintext text-start" id="current-career" name="current-career"
+                <span class="form-control-plaintext text-start" id="current-career"
                       th:text="${mentorInfo.career} +' (' + ${mentorInfo.career.rangeOfYear} +')'"></span>
             </div>
           </div>
@@ -149,65 +154,66 @@
 
       <!--멘토 + 자신의 페이지-->
       <div class="card mt-3" th:if="${session.user != null and mentorInfo.id eq session.user.mentorId}">
-        <div class="card-header">멘토 필수정보</div>
+        <div class="card-header">멘토 정보 수정</div>
         <div class="card-body">
           <!--커리어-->
-          <div class="form-group row justify-content-center">
-            <label class="col-sm-4 col-form-label text-end" for="career" style="color: #808080;">연차</label>
-            <div class="col-sm-8">
-              <select class="form-control" id="career" name="career">
-                <option value=''>-선택-</option>
-                <option th:each="career : ${careers}"
-                        th:selected="${career eq mentorInfo.career}"
-                        th:text="${career.name} +' (' + ${career.rangeOfYear} + ')'"
-                        th:value="${career.name}">
-                  Select Career
-                </option>
-              </select>
+          <div class="form-group">
+            <div class=" d-flex row">
+              <div class="input-group mb-2 justify-content-center">
+                <span class="input-group-text w-25">경력</span>
+                <div class="col-sm-5">
+                  <select aria-label="career" class="form-control text-center" id="career" name="career">
+                    <option value=''>-선택-</option>
+                    <option th:each="career : ${careers}"
+                            th:selected="${career eq mentorInfo.career}"
+                            th:text="${career.name} +' (' + ${career.rangeOfYear} + ')'"
+                            th:value="${career.name}">
+                      Select Career
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <!--은행명-->
+              <div class="input-group mb-2 justify-content-center">
+                <span class="input-group-text w-25">은행명</span>
+                <div class="col-sm-5">
+                  <select aria-label="bankName" class="form-control text-center" id="bankName" name="bankName">
+                    <option value=''>-선택-</option>
+                    <option th:each="bankCode : ${bankCodes}" th:selected="${bankCode.bankName eq mentorInfo.bankName}"
+                            th:text="${bankCode.bankName}" th:value="${bankCode.bankName}"></option>
+                  </select>
+                </div>
+              </div>
+              <!--계좌 번호-->
+              <div class="input-group mb-2 justify-content-center">
+                <span class="input-group-text text-center w-25">계좌번호</span>
+                <div class="col-sm-5">
+                  <input aria-label="accountNumber" class="form-control text-center" id="accountNumber"
+                         name="accountNumber"
+                         th:value="${mentorInfo.accountNumber}"
+                         type="text">
+                </div>
+              </div>
+              <!--계좌 소유주 이름-->
+              <div class="input-group mb-2 justify-content-center">
+                <span class="input-group-text w-25">예금주명</span>
+                <div class="col-sm-5">
+                  <input aria-label="accountName" class="form-control text-center" id="accountName" name="accountName"
+                         th:value="${mentorInfo.accountName}"
+                         type="text">
+                </div>
+              </div>
             </div>
-          </div>
 
-          <!--은행명-->
-          <div class="form-group row justify-content-center">
-            <label class="col-sm-4 col-form-label text-end" for="bankName" style="color: #808080;">은행명</label>
-            <div class="col-sm-8">
-              <select class="form-control" id="bankName" name="bankName">
-                <option value=''>-선택-</option>
-                <option th:each="bankCode : ${bankCodes}" th:selected="${bankCode.bankName eq mentorInfo.bankName}"
-                        th:text="${bankCode.bankName}" th:value="${bankCode.bankName}"></option>
-              </select>
+            <div>
+              <button class="btn btn-outline-success mt-3" id="btn-mentor-update" type="button">수정하기</button>
+              <button class="btn btn-outline-danger mt-3" id="btn-mentor-delete" type="button">멘토 권한 해제하기</button>
             </div>
-          </div>
-
-          <!--계좌 번호-->
-          <div class="form-group row justify-content-center">
-            <label class="col-sm-4 col-form-label text-end" for="accountNumber" style="color: #808080;">계좌
-              번호</label>
-            <div class="col-sm-8">
-              <input class="form-control" id="accountNumber" name="accountNumber"
-                     th:value="${mentorInfo.accountNumber}"
-                     type="text">
-            </div>
-          </div>
-
-          <!--계좌 소유주 이름-->
-          <div class="form-group row justify-content-center">
-            <label class="col-sm-4 col-form-label text-end" for="accountName" style="color: #808080;">계좌 소유주</label>
-            <div class="col-sm-8">
-              <input class="form-control" id="accountName" name="accountName" th:value="${mentorInfo.accountName}"
-                     type="text">
-            </div>
-          </div>
-          <div>
-            <button class="btn btn-outline-success mt-3" id="btn-mentor-update" type="button">수정하기</button>
-            <button class="btn btn-outline-danger mt-3" id="btn-mentor-delete" type="button">멘토 권한 해제하기</button>
           </div>
         </div>
       </div>
+      <!-- [우측] 멘토 정보 끝 -->
     </div>
-    <!-- [우측] 멘토 정보 끝 -->
-
-
   </div>
 
   <script src="/js/library/toast/toastui-editor-all.min.js"></script>

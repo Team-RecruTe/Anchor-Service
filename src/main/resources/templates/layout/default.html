@@ -17,11 +17,15 @@
     .toast-bottom-right {
       top: 80px;
     }
+
+    #main-content {
+      flex-grow: 1;
+    }
   </style>
 </head>
 <body>
 <header th:replace="~{fragments/header :: header}"></header>
-<div class="main-container" layout:fragment="content"></div>
+<div class="main-container" id="main-content" layout:fragment="content"></div>
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 <script src="/js/library/bootstrap/bootstrap.bundle.js"></script>
 <script src="/js/payment-timeout.js"></script>
