@@ -20,8 +20,8 @@ public class HomeViewController {
   @GetMapping({"", "/"})
   public String viewHome(Model model) {
     PopularTagResponse popularTags = homeService.getPopularTags();
-    model.addAttribute("popularTags", popularTags);
     TopMentoring topMentorings = homeService.getTopMentorings();
+    model.addAttribute("popularTags", popularTags);
     model.addAttribute("topMentorings", topMentorings);
     return viewResolver.getViewPath("common", "home");
   }

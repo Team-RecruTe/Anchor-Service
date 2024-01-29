@@ -32,8 +32,8 @@ public class MentorInfoService {
   }
 
   @Transactional(readOnly = true)
-  public MentorContents getContents(SessionUser sessionUser) {
-    Mentor mentor = getMentor(sessionUser.getMentorId());
+  public MentorContents getContents(Long mentorId) {
+    Mentor mentor = getMentor(mentorId);
     return new MentorContents(mentor);
   }
 

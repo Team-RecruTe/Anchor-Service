@@ -29,7 +29,7 @@
 <script src="/js/library/bootstrap/bootstrap.bundle.js"></script>
 <script src="/js/payment-timeout.js"></script>
 
-<script sec:authorize="isAnonymous()">
+<script sec:authorize="isAuthenticated()">
   const notiBadge = document.querySelector('#noti-badge');
 
   /* (isRead > 0) 인지 체크 */
@@ -52,6 +52,52 @@
       notiBadge.classList.remove("hidden")
     }
   });
+
+  axios.get("/api/notifications").then(res => {
+    const noties = res.data.notifications
+    for (const noti of noties) {
+      const notiContents = document.querySelector('#noti-modal-contents')
+      const spanTag = document.createElement('span')
+      spanTag.classList.add('noti-content')
+      spanTag.textContent = noti.message
+      console.log(noti)
+      if (noti.read) {
+        spanTag.classList.add('is-read')
+      }
+      spanTag.onclick = () => {
+        axios.put(`/api/notifications/${noti.notificationId}`).catch(err => {
+          console.log(err)
+        })
+        location.href = `/mentorings/${noti.mentoringId}`
+      }
+      notiContents.appendChild(spanTag)
+    }
+  })
+
+  const notiModal = document.getElementById('noti-modal')
+
+  const modalEvent = (e) => {
+    closeModal()
+  }
+
+  document.getElementById('noti-button').addEventListener('click', (e) => {
+    notiModal.style.display = 'block';
+    e.stopPropagation()
+    window.addEventListener('click', modalEvent)
+  });
+
+  function closeModal() {
+    notiModal.style.display = 'none';
+    window.removeEventListener('click', modalEvent)
+  }
+
+  function readAll() {
+    if (confirm("모든 알림을 읽음 처리하시겠습니까?")) {
+      axios.put(`/api/notifications/read-all`).catch(err => {
+        console.log(err)
+      })
+    }
+  }
 </script>
 </body>
 </html>
