@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -29,11 +28,6 @@ public class PayupClient {
   private final RestClient restClient;
   private final ObjectMapper objectMapper;
   private final PayupRequestHeaderCreator headerCreator;
-  @Value("${payup.access-token}")
-  private String accessToken;
-
-  @Value("${payup.iscd}")
-  private String institutionCode;
 
   public PayupClient(@Qualifier("payUpRestClient") RestClient restClient, ObjectMapper objectMapper,
       PayupRequestHeaderCreator headerCreator) {

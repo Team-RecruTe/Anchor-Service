@@ -9,13 +9,6 @@
   <style>
     #card-container {
       transition: transform 0.2s, box-shadow 0.2s;
-      position: relative;
-      min-height: 300px;
-    }
-
-    nav.pagination {
-      position: relative;
-      top: 100%;
     }
 
     #card-container:hover {
@@ -89,7 +82,7 @@
           <!-- Title -->
           <div class="card-header clamp-lines d-flex justify-content-center align-items-center mb-2 mt-1 m-0"
                style="min-height: 80px; max-height: 60px;">
-            <a class="text-decoration-none fs-5 text-center mt-3"
+            <a class="text-decoration-none fs-5 text-center"
                th:href="@{/mentorings/{id}(id=${mentoring.mentoringInfo.id})}">
               <p class="clamp-lines" th:text="${mentoring.mentoringInfo.title}"></p>
             </a>

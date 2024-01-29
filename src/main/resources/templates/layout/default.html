@@ -38,7 +38,7 @@
   .then(res => {
     console.log(res)
     if (res.status === 200 && res.data > 0) {
-      notiBadge.classList.remove("hidden")
+      notiBadge.classList.remove("visually-hidden")
     }
   })
   .catch(error => {
@@ -50,7 +50,7 @@
   eventSource.addEventListener('sse', event => {
     if (event.data.message !== undefined) {
       toastr.info(event.data.message);
-      notiBadge.classList.remove("hidden")
+      notiBadge.classList.remove("visually-hidden")
     }
   });
 

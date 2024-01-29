@@ -53,6 +53,7 @@ public class UserController {
   public ResponseEntity<String> deleteUser(HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
     userService.deleteUser(sessionUser);
+    session.invalidate();
     return ResponseEntity.ok()
         .build();
   }
