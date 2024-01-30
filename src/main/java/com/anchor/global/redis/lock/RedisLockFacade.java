@@ -1,6 +1,7 @@
 package com.anchor.global.redis.lock;
 
 import com.anchor.domain.mentoring.domain.Mentoring;
+import com.anchor.global.exception.type.redis.LockAcquisitionFailedException;
 import groovy.util.logging.Slf4j;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +21,15 @@ public class RedisLockFacade {
     RLock lock = redissonClient.getLock(mentoringId.toString());
 
     try {
-      boolean available = lock.tryLock(1, 1, TimeUnit.SECONDS);
+      boolean available = lock.tryLock(3, 1, TimeUnit.SECONDS);
       if (!available) {
-        throw new RuntimeException("lock 획득에 실패했습니다.");
+        throw new LockAcquisitionFailedException();
       }
       return mentoringServiceWithLock.increaseTotalApplication(mentoringId);
     } catch (InterruptedException e) {
-      throw new RuntimeException(e);
+      Thread.currentThread()
+          .interrupt();
+      throw new LockAcquisitionFailedException();
     } finally {
       lock.unlock();
     }

@@ -3,6 +3,10 @@ package com.anchor.global.util;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 import com.anchor.domain.mentor.domain.Mentor;
+import com.anchor.global.exception.ServiceException;
+import com.anchor.global.exception.type.api.ApiClientException;
+import com.anchor.global.exception.type.api.HttpClientException;
+import com.anchor.global.exception.type.api.JsonDeserializationFailedException;
 import com.anchor.global.nhpay.request.PayupRequestHeader;
 import com.anchor.global.nhpay.request.PayupRequestHeaderCreator;
 import com.anchor.global.nhpay.request.RequiredAccountHolderData;
@@ -17,9 +21,9 @@ import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse;
 
 @Slf4j
 @Component
@@ -39,34 +43,27 @@ public class PayupClient {
   public boolean validateAccountHolder(Mentor mentor, Set<Mentor> failMentor) {
     String requestUrl = headerCreator.createAccountRequestUrl(mentor);
     PayupRequestHeader accountHolderHeader = headerCreator.createAccountRequestHeader(mentor);
-    RequiredAccountHolderData requiredData = RequiredAccountHolderData.of(accountHolderHeader, mentor);
     try {
+      RequiredAccountHolderData requiredData = RequiredAccountHolderData.of(accountHolderHeader, mentor);
       String body = objectMapper.writeValueAsString(requiredData);
-      AccountHolderResult entity = request(requestUrl, body, AccountHolderResult.class);
-      if (entity.validateResponseCode() && entity.isSameAs(mentor.getAccountName())) {
-        return true;
-      }
-      log.warn(entity.getMessage());
+      AccountHolderResult result = request(requestUrl, body, AccountHolderResult.class);
+      return validateResponse(result);
+    } catch (JsonProcessingException | ServiceException e) {
       failMentor.add(mentor);
       return false;
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException("직렬화 불가능한 객체거나 null입니다.");
     }
   }
 
   public void requestPayup(Mentor mentor, Integer totalAmount, Set<Mentor> failMentor) {
     String requestUrl = headerCreator.createDepositRequestUrl(mentor);
     PayupRequestHeader depositRequestHeader = headerCreator.createDepositRequestHeader(mentor);
-    RequiredDepositData requiredData = RequiredDepositData.of(depositRequestHeader, mentor, totalAmount);
     try {
+      RequiredDepositData requiredData = RequiredDepositData.of(depositRequestHeader, mentor, totalAmount);
       String body = objectMapper.writeValueAsString(requiredData);
-      DepositResult entity = request(requestUrl, body, DepositResult.class);
-      if (!entity.validateResponseCode()) {
-        log.warn(entity.getMessage());
-        failMentor.add(mentor);
-      }
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException("직렬화 불가능한 객체거나 null입니다.");
+      DepositResult result = request(requestUrl, body, DepositResult.class);
+      validateResponse(result);
+    } catch (JsonProcessingException | ServiceException e) {
+      failMentor.add(mentor);
     }
   }
 
@@ -79,14 +76,25 @@ public class PayupClient {
         .exchange((request, response) -> checkStatusCode(response, clazz));
   }
 
-  private <T extends PayupResult> T checkStatusCode(ConvertibleClientHttpResponse response, Class<T> clazz)
-      throws IOException {
-    HttpStatusCode statusCode = response.getStatusCode();
-    if (statusCode.is2xxSuccessful()) {
+  private <T extends PayupResult> T checkStatusCode(ClientHttpResponse response, Class<T> clazz) {
+    try {
+      HttpStatusCode statusCode = response.getStatusCode();
+      if (statusCode.is4xxClientError() || statusCode.is5xxServerError()) {
+        throw new ApiClientException();
+      }
       return objectMapper.readValue(response.getBody(), clazz);
-    } else {
-      throw new RuntimeException("서버 에러입니다.");
+    } catch (JsonProcessingException e) {
+      throw new JsonDeserializationFailedException(e);
+    } catch (IOException e) {
+      throw new HttpClientException(e);
     }
+  }
+
+  private boolean validateResponse(PayupResult payupResult) {
+    if (payupResult.validateResponseCode()) {
+      return true;
+    }
+    throw new ApiClientException(payupResult.getMessage());
   }
 
 }

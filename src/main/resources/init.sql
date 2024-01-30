@@ -26,7 +26,7 @@ start transaction;
 insert into mentor(id, company_email, account_name, account_number, bank_name, career, create_date,
                    update_date, user_id, mentor_introduction_id)
 values (1, 'testCompany@test.com', '기홍', '1000002663004', '국민은행', 'MIDDLE', now(), now(), 1, 1),
-       (2, 'recrute1602@gamil.com', '기홍', '3020000010088', '농협은행', 'JUNIOR', now(), now(), 3, 2);
+       (2, 'team.recrute1602@gmail.com', '기홍', '3020000010088', '농협은행', 'JUNIOR', now(), now(), 3, 2);
 commit;
 
 

@@ -2,6 +2,7 @@ package com.anchor.global.redis.lock;
 
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
+import com.anchor.global.exception.type.entity.MentoringNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +16,7 @@ public class MentoringServiceWithLock {
   @Transactional
   public Mentoring increaseTotalApplication(Long mentoringId) {
     Mentoring mentoring = mentoringRepository.findById(mentoringId)
-        .orElseThrow(() -> new RuntimeException("존재하지 않는 멘토링입니다."));
+        .orElseThrow(MentoringNotFoundException::new);
     mentoring.increaseTotalApplication();
     return mentoringRepository.save(mentoring);
   }

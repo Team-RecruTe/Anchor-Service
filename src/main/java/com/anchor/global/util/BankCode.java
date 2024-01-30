@@ -1,5 +1,6 @@
 package com.anchor.global.util;
 
+import com.anchor.global.exception.type.api.BankNameNotFoundException;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -39,6 +40,6 @@ public enum BankCode {
     if (BANK_CODES.containsKey(bankName)) {
       return BANK_CODES.get(bankName);
     }
-    throw new IllegalArgumentException("존재하지 않는 은행명 입니다.");
+    throw new BankNameNotFoundException();
   }
 }

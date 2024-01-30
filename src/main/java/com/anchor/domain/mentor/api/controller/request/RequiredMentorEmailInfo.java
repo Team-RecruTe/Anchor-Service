@@ -11,4 +11,8 @@ public class RequiredMentorEmailInfo {
 
   private String receiver;
   private String userEmailCode;
+
+  public boolean isSameAs(String emailCode) {
+    return userEmailCode.equals(emailCode);
+  }
 }

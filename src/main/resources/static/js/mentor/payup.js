@@ -27,6 +27,13 @@ let visitedMonths = [];
 function handleCalendarChange() {
   currentMonthRange(calendar);
   let thisMonth = calendar.getDate().toDate();
+  console.log(isFutureDate(thisMonth));
+  if (isFutureDate(thisMonth)) {
+    alert('미래시점의 정산내역은 조회할수 없습니다.');
+    calendar.today();
+    currentMonthRange(calendar);
+    return;
+  }
   let startMonth = getSixMonthAgo(thisMonth);
   const newMonth = getFormattedMonth(thisMonth);
   if (visitedMonths.length === 0) {
@@ -38,6 +45,19 @@ function handleCalendarChange() {
     getPayupInfos(startMonth, thisMonth);
   }
   console.log(visitedMonths);
+}
+
+function isFutureDate(thisDate) {
+  let currentDate = new Date();
+  let currentYear = currentDate.getFullYear();
+  let currentMonth = currentDate.getMonth();
+  let thisYear = thisDate.getFullYear();
+  let thisMonth = thisDate.getMonth();
+  if (thisMonth > 11) {
+    thisMonth = 0;
+    thisYear++;
+  }
+  return thisYear > currentYear || (thisYear === currentYear && thisMonth > currentMonth);
 }
 
 function getSixMonthAgo(date) {
@@ -119,6 +139,11 @@ function getPayupInfos(startMonth, thisMonth) {
       });
     }
     calendar.createEvents(events);
+  })
+  .catch(error => {
+    alert(error.response.data.error.message);
+    calendar.today();
+    currentMonthRange(calendar);
   });
 
 }

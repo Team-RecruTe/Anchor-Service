@@ -3,6 +3,7 @@ package com.anchor.global.auth;
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.UserRole;
 import com.anchor.global.auth.OAuth2UserProviderRegistry.OAuth2LoginProviderType;
+import com.anchor.global.exception.type.auth.AttributeNotFoundException;
 import java.util.Map;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,7 +40,7 @@ public class OAuth2UserAttributes {
       try {
         attributes = (Map<String, Object>) oAuth2UserResponse.get(providerType.ATTRIBUTES_FIELD);
       } catch (ClassCastException e) {
-        throw new IllegalArgumentException("주어진 속성 필드가 존재하지 않습니다.");
+        throw new AttributeNotFoundException(e);
       }
     }
 

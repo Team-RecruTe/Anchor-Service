@@ -3,6 +3,7 @@ package com.anchor.global.exception.response;
 import com.anchor.global.exception.ServiceException;
 import com.anchor.global.exception.error.ServiceErrorCode;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,11 +23,12 @@ public class ServiceErrorResponse {
         errorCode.name(),
         ex.getMessage()
     );
-    this.details = ex.getDetails();
+    this.details = Objects.requireNonNullElse(ex.getDetails(), new SimpleErrorDetail(""));
   }
 
+  @Getter
   @RequiredArgsConstructor
-  public static class ErrorCode {
+  static class ErrorCode {
 
     private final String code;
     private final String message;

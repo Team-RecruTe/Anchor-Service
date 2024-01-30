@@ -21,6 +21,11 @@ import com.anchor.domain.payment.domain.repository.PayupRepository;
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
+import com.anchor.global.exception.ServiceException;
+import com.anchor.global.exception.type.entity.MentorNotFoundException;
+import com.anchor.global.exception.type.entity.MentoringApplicationNotUniqueException;
+import com.anchor.global.exception.type.entity.UserNotFoundException;
+import com.anchor.global.exception.type.mentor.DuplicateEmailException;
 import com.anchor.global.mail.AsyncMailSender;
 import com.anchor.global.mail.MailMessage;
 import com.anchor.global.mail.MentoringMailMessage;
@@ -30,12 +35,10 @@ import com.anchor.global.payment.portone.response.PaymentResult;
 import com.anchor.global.redis.message.NotificationEvent;
 import com.anchor.global.util.PaymentClient;
 import com.anchor.global.util.type.DateTimeRange;
-import jakarta.persistence.PersistenceException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -60,6 +63,34 @@ public class MentorService {
   private final AsyncMailSender asyncMailSender;
 
   @Transactional
+  public Mentor register(MentorRegisterInfo mentorRegisterInfo, SessionUser sessionUser) {
+    mentorRepository.findByCompanyEmail(mentorRegisterInfo.getCompanyEmail())
+        .ifPresent(mentor -> {
+          throw new DuplicateEmailException();
+        });
+    User user = getUser(sessionUser);
+    Mentor mentor = Mentor.of(user, mentorRegisterInfo);
+    mentorRepository.save(mentor);
+    return mentor;
+  }
+
+  @Transactional(readOnly = true)
+  public MentorOpenCloseTimes getMentorSchedule(Long mentorId) {
+    return mentorRepository.findScheduleById(mentorId);
+  }
+
+  @Transactional
+  public void setMentorSchedule(Long mentorId, MentorOpenCloseTimes mentorOpenCloseTimes) {
+    mentorRepository.deleteAllSchedules(mentorId);
+    mentorRepository.saveMentoSchedules(mentorId, mentorOpenCloseTimes);
+  }
+
+  @Transactional(readOnly = true)
+  public Page<AppliedMentoringSearchResult> getMentoringApplications(Long mentorId, Pageable pageable) {
+    return mentoringApplicationRepository.findAllByMentorId(mentorId, pageable);
+  }
+
+  @Transactional
   public void changeMentoringStatus(Long mentorId, List<RequiredMentoringStatusInfo> requiredMentoringStatusInfos) {
     Mentor mentor = getMentor(mentorId);
     List<MailMessage> mailMessages = requiredMentoringStatusInfos.stream()
@@ -68,14 +99,30 @@ public class MentorService {
     asyncMailSender.sendMails(mailMessages);
   }
 
-  private Mentor getMentor(Long id) {
-    Mentor mentor = mentorRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("일치하는 멘토 정보가 없습니다."));
-    return mentor;
+  @Transactional(readOnly = true)
+  public MentorPayupResult getMentorPayupResult(LocalDateTime startMonth, LocalDateTime currentMonth,
+      SessionUser sessionUser) {
+//    Long mentorId = sessionUser.getMentorId();
+    Long mentorId = 1L;
+    DateTimeRange actualCalendarRange = DateTimeRange.of(
+        getFirstDayOfMonth(startMonth),
+        getFirstDayOfNextMonth(currentMonth)
+    );
+    List<PayupInfo> payupInfos = payupRepository.findAllByMonthRange(actualCalendarRange, mentorId);
+    return MentorPayupResult.of(payupInfos);
   }
 
-  private MailMessage changeStatus(Long mentorId,
-      RequiredMentoringStatusInfo requiredMentoringStatusInfo) {
+  private User getUser(SessionUser sessionUser) {
+    return userRepository.findByEmail(sessionUser.getEmail())
+        .orElseThrow(UserNotFoundException::new);
+  }
+
+  private Mentor getMentor(Long id) {
+    return mentorRepository.findById(id)
+        .orElseThrow(MentorNotFoundException::new);
+  }
+
+  private MailMessage changeStatus(Long mentorId, RequiredMentoringStatusInfo requiredMentoringStatusInfo) {
     MailMessage mailMessage = null;
     DateTimeRange mentoringReservedTime = requiredMentoringStatusInfo.getMentoringReservedTime();
     MentoringStatus mentoringStatus = requiredMentoringStatusInfo.getMentoringStatus();
@@ -85,15 +132,43 @@ public class MentorService {
       User user = mentoringApplication.getUser();
       Mentor mentor = mentoring.getMentor();
       Payment payment = mentoringApplication.getPayment();
-      mentoringApplication.changeStatus(mentoringStatus);
       cancelPayemntIfCancelled(mentoringStatus, payment);
+      mentoringApplication.changeStatus(mentoringStatus);
       mentoringApplicationRepository.save(mentoringApplication);
       publishNotification(mentoringApplication, mentoring, mentoringStatus);
       mailMessage = createMailMessage(user, mentoring, mentor, mentoringReservedTime.getFrom(), mentoringStatus);
-    } catch (NullPointerException | PersistenceException e) {
-      log.info("Exception: {}", e);
+    } catch (ServiceException e) {
+      log.warn("[멘토번호 :: {} || 멘토링시간 :: {}] 상태변경 실패", mentorId, mentoringReservedTime.toString());
     }
     return mailMessage;
+  }
+
+  private MentoringApplication getMentoringApplication(Long id, DateTimeRange mentoringReservedTime) {
+    LocalDateTime startDateTime = mentoringReservedTime.getFrom();
+    LocalDateTime endDateTime = mentoringReservedTime.getTo();
+    try {
+      return mentoringApplicationRepository.findByMentorIdAndProgressTime(id, startDateTime, endDateTime);
+    } catch (NonUniqueResultException e) {
+      throw new MentoringApplicationNotUniqueException(e);
+    }
+  }
+
+  private void cancelPayemntIfCancelled(MentoringStatus status, Payment payment) {
+    RequiredPaymentCancelData requiredPaymentCancelData = new RequiredPaymentCancelData(payment);
+    Optional<PaymentResult> paymentCancelResult = paymentClient.request(status, requiredPaymentCancelData);
+    paymentCancelResult.ifPresent(result -> payment.editPaymentCancelStatus((PaymentCancelResult) result));
+  }
+
+  private void publishNotification(MentoringApplication mentoringApplication, Mentoring mentoring,
+      MentoringStatus mentoringStatus) {
+    applicationEventPublisher.publishEvent(NotificationEvent.builder()
+        .email(mentoringApplication.getUser()
+            .getEmail())
+        .mentoringId(mentoring.getId())
+        .title(mentoring.getTitle())
+        .mentoringStatus(mentoringStatus)
+        .receiverType(ReceiverType.TO_MENTEE)
+        .build());
   }
 
   private MentoringMailMessage createMailMessage(User user, Mentoring mentoring, Mentor mentor,
@@ -113,85 +188,6 @@ public class MentorService {
         .startDateTime(startDateTime)
         .receiverType(ReceiverType.TO_MENTEE)
         .build();
-  }
-
-  private void publishNotification(MentoringApplication mentoringApplication, Mentoring mentoring,
-      MentoringStatus mentoringStatus) {
-    applicationEventPublisher.publishEvent(NotificationEvent.builder()
-        .email(mentoringApplication.getUser()
-            .getEmail())
-        .mentoringId(mentoring.getId())
-        .title(mentoring.getTitle())
-        .mentoringStatus(mentoringStatus)
-        .receiverType(ReceiverType.TO_MENTEE)
-        .build());
-  }
-
-  private void cancelPayemntIfCancelled(MentoringStatus status, Payment payment) {
-    RequiredPaymentCancelData requiredPaymentCancelData = new RequiredPaymentCancelData(payment);
-    Optional<PaymentResult> paymentCancelResult = paymentClient.request(status, requiredPaymentCancelData);
-    paymentCancelResult.ifPresent(result -> {
-      payment.editPaymentCancelStatus((PaymentCancelResult) result);
-    });
-  }
-
-  private MentoringApplication getMentoringApplication(Long id, DateTimeRange mentoringReservedTime) {
-    LocalDateTime startDateTime = mentoringReservedTime.getFrom();
-    LocalDateTime endDateTime = mentoringReservedTime.getTo();
-    try {
-      return mentoringApplicationRepository.findByMentorIdAndProgressTime(id, startDateTime, endDateTime);
-    } catch (NonUniqueResultException e) {
-      log.warn("Exception: {}", e);
-      throw new RuntimeException(e);
-    }
-  }
-
-  public Page<AppliedMentoringSearchResult> getMentoringApplications(Long mentorId, Pageable pageable) {
-    return mentoringApplicationRepository.findAllByMentorId(mentorId,
-        pageable);
-  }
-
-  public Mentor register(MentorRegisterInfo mentorRegisterInfo, SessionUser sessionUser) {
-    if (mentorRepository.findByCompanyEmail(mentorRegisterInfo.getCompanyEmail())
-        .isPresent()) {
-      throw new IllegalStateException("이미 존재하는 이메일");
-    }
-    User user = userRepository.findByEmail(sessionUser.getEmail())
-        .orElseThrow(() -> new NoSuchElementException("회원정보가 존재하지 않습니다."));
-    Mentor mentor = Mentor.builder()
-        .user(user)
-        .companyEmail(mentorRegisterInfo.getCompanyEmail())
-        .career(mentorRegisterInfo.getCareer())
-        .accountNumber(mentorRegisterInfo.getAccountNumber())
-        .bankName(mentorRegisterInfo.getBankName())
-        .accountName(mentorRegisterInfo.getAccountName())
-        .build();
-    mentorRepository.save(mentor);
-    return mentor;
-  }
-
-  @Transactional(readOnly = true)
-  public MentorOpenCloseTimes getMentorSchedule(Long mentorId) {
-    return mentorRepository.findScheduleById(mentorId);
-  }
-
-  @Transactional
-  public void setMentorSchedule(Long mentorId, MentorOpenCloseTimes mentorOpenCloseTimes) {
-    mentorRepository.deleteAllSchedules(mentorId);
-    mentorRepository.saveMentoSchedules(mentorId, mentorOpenCloseTimes);
-  }
-
-  @Transactional(readOnly = true)
-  public MentorPayupResult getMentorPayupResult(LocalDateTime startMonth, LocalDateTime currentMonth,
-      SessionUser sessionUser) {
-//    Long mentorId = sessionUser.getMentorId();
-    Long mentorId = 1L;
-    DateTimeRange actualCalendarRange = DateTimeRange.of(
-        getFirstDayOfMonth(startMonth),
-        getFirstDayOfNextMonth(currentMonth)
-    );
-    List<PayupInfo> payupInfos = payupRepository.findAllByMonthRange(actualCalendarRange, mentorId);
-    return MentorPayupResult.of(payupInfos);
   }
 
   private LocalDateTime getFirstDayOfMonth(LocalDateTime startMonth) {

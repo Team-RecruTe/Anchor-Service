@@ -2,6 +2,7 @@ package com.anchor.domain.mentor.domain;
 
 import com.anchor.domain.mentor.api.controller.request.MentorContentsRequest;
 import com.anchor.domain.mentor.api.controller.request.MentorInfoRequest;
+import com.anchor.domain.mentor.api.controller.request.MentorRegisterInfo;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.payment.domain.Payup;
 import com.anchor.domain.user.domain.User;
@@ -78,6 +79,17 @@ public class Mentor extends BaseEntity {
     this.accountName = accountName;
     this.bankName = bankName;
     this.user = user;
+  }
+
+  public static Mentor of(User user, MentorRegisterInfo registerInfo) {
+    return Mentor.builder()
+        .user(user)
+        .companyEmail(registerInfo.getCompanyEmail())
+        .career(registerInfo.getCareer())
+        .accountNumber(registerInfo.getAccountNumber())
+        .bankName(registerInfo.getBankName())
+        .accountName(registerInfo.getAccountName())
+        .build();
   }
 
   public void modify(MentorInfoRequest mentorInfoRequest) {

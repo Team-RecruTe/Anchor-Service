@@ -1,6 +1,5 @@
 package com.anchor.domain.mentor.api.controller;
 
-import com.anchor.domain.mentor.api.controller.request.MentorRegisterInfo;
 import com.anchor.domain.mentor.api.service.MentorService;
 import com.anchor.domain.mentor.api.service.response.AppliedMentoringSearchResult;
 import com.anchor.domain.mentor.api.service.response.MentorOpenCloseTimes;
@@ -17,8 +16,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @RequestMapping("/mentors")
@@ -28,6 +25,13 @@ public class MentorViewController {
 
   private final MentorService mentorService;
   private final ViewResolver viewResolver;
+
+  @GetMapping("/register")
+  public String register(Model model) {
+    model.addAttribute("bankCodes", BankCode.values());
+    model.addAttribute("careers", Career.values());
+    return viewResolver.getViewPath("mentor", "register");
+  }
 
   @GetMapping("/me/schedule")
   public String getUnavailableTimes(HttpSession session, Model model) {
@@ -44,20 +48,6 @@ public class MentorViewController {
     Page<AppliedMentoringSearchResult> results = mentorService.getMentoringApplications(1L, pageable);
     model.addAttribute("mentoringApplications", results);
     return viewResolver.getViewPath("mentor", "mentoring-application");
-  }
-
-  @GetMapping("/register")
-  public String register(Model model) {
-    model.addAttribute("bankCodes", BankCode.values());
-    model.addAttribute("careers", Career.values());
-    return viewResolver.getViewPath("mentor", "register");
-  }
-
-  @PostMapping
-  public String registerProcess(@ModelAttribute MentorRegisterInfo mentorRegisterInfo, HttpSession session) {
-    SessionUser sessionUser = SessionUser.getSessionUser(session);
-    mentorService.register(mentorRegisterInfo, sessionUser);
-    return "redirect:/";
   }
 
   @GetMapping("/me/payup")

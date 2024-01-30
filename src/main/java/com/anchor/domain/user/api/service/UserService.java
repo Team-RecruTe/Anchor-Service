@@ -26,6 +26,11 @@ import com.anchor.domain.user.api.service.response.UserInfoResponse;
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
+import com.anchor.global.exception.ServiceException;
+import com.anchor.global.exception.type.entity.InvalidStatusException;
+import com.anchor.global.exception.type.entity.MentoringApplicationNotFoundException;
+import com.anchor.global.exception.type.entity.ReviewNotFoundException;
+import com.anchor.global.exception.type.entity.UserNotFoundException;
 import com.anchor.global.mail.AsyncMailSender;
 import com.anchor.global.mail.MailMessage;
 import com.anchor.global.mail.MentoringMailMessage;
@@ -36,9 +41,9 @@ import com.anchor.global.redis.lock.RedisLockFacade;
 import com.anchor.global.redis.message.NotificationEvent;
 import com.anchor.global.util.PaymentClient;
 import com.anchor.global.util.type.DateTimeRange;
+import jakarta.persistence.PersistenceException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -87,7 +92,7 @@ public class UserService {
   @Transactional
   public void editReview(RequiredEditReview editReview) {
     MentoringReview mentoringReview = mentoringReviewRepository.findById(editReview.getId())
-        .orElseThrow(() -> new RuntimeException("리뷰가 존재하지 않습니다."));
+        .orElseThrow(ReviewNotFoundException::new);
     mentoringReview.editReview(editReview);
     mentoringReviewRepository.save(mentoringReview);
   }
@@ -126,22 +131,22 @@ public class UserService {
 
   @Transactional
   public boolean changeAppliedMentoringStatus(SessionUser sessionUser, MentoringStatusInfo changeRequest) {
+    User user = getUser(sessionUser);
     List<RequiredMentoringStatusInfo> mentoringStatusList = changeRequest.getRequiredMentoringStatusInfos();
     List<MailMessage> mailMessages = mentoringStatusList.stream()
         .map(status -> {
           MailMessage mailMessage = null;
+          DateTimeRange range = status.getMentoringReservedTime();
+          MentoringApplication mentoringApplication = getMentoringApplication(range.getFrom(), range.getTo(),
+              user.getId());
+          Mentoring mentoring = mentoringApplication.getMentoring();
+          Mentor mentor = mentoring.getMentor();
           try {
-            User user = getUser(sessionUser);
-            DateTimeRange range = status.getMentoringReservedTime();
-            MentoringApplication mentoringApplication = getMentoringApplication(range.getFrom(), range.getTo(),
-                user.getId());
-            Mentoring mentoring = mentoringApplication.getMentoring();
-            Mentor mentor = mentoring.getMentor();
             validateMentoringStatus(status);
             changeStatus(mentoringApplication, mentoring, status.getMentoringStatus());
             mailMessage = createMailMessage(user, mentoring, mentor, range.getFrom(), status.getMentoringStatus());
-          } catch (NoSuchElementException | IllegalArgumentException e) {
-            log.info(e.getMessage());
+          } catch (ServiceException | PersistenceException e) {
+            log.warn("[회원번호 :: {} || 신청내역 번호 :: {}] 상태변경 실패", user.getId(), mentoringApplication.getId());
           }
           return mailMessage;
         })
@@ -153,7 +158,7 @@ public class UserService {
   private MentoringApplication getMentoringApplication(LocalDateTime startDateTime, LocalDateTime endDateTime,
       Long userId) {
     return mentoringApplicationRepository.findByStartDateTimeAndEndDateTimeAndUserId(startDateTime, endDateTime, userId)
-        .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링 신청이력이 존재하지 않습니다."));
+        .orElseThrow(MentoringApplicationNotFoundException::new);
   }
 
   private MentoringMailMessage createMailMessage(User user, Mentoring mentoring, Mentor mentor,
@@ -178,26 +183,25 @@ public class UserService {
   private void validateMentoringStatus(RequiredMentoringStatusInfo statusInfo) {
     MentoringStatus status = statusInfo.getMentoringStatus();
     if (status.equals(MentoringStatus.WAITING) || status.equals(MentoringStatus.APPROVAL)) {
-      throw new IllegalArgumentException("변경하려는 상태가 'CANCELED' 또는 'COMPLETE'가 아닙니다.");
+      throw new InvalidStatusException();
     }
   }
 
   private User getUser(SessionUser sessionUser) {
     return userRepository.findByEmail(sessionUser.getEmail())
-        .orElseThrow(() -> new NoSuchElementException(sessionUser.getEmail() + "에 해당하는 회원이 존재하지 않습니다."));
+        .orElseThrow(UserNotFoundException::new);
   }
 
   private MentoringApplication getMentoringApplicationByTimeRange(Long userId,
       LocalDateTime startDateTime, LocalDateTime endDateTime) {
-    return mentoringApplicationRepository.findByStartDateTimeAndEndDateTimeAndUserId(
-            startDateTime, endDateTime, userId)
-        .orElseThrow(() -> new RuntimeException("신청내역이 존재하지 않습니다."));
+    return mentoringApplicationRepository.findByStartDateTimeAndEndDateTimeAndUserId(startDateTime, endDateTime, userId)
+        .orElseThrow(MentoringApplicationNotFoundException::new);
   }
 
   private void changeStatus(MentoringApplication mentoringApplication, Mentoring mentoring,
       MentoringStatus mentoringStatus) {
-    mentoringApplication.changeStatus(mentoringStatus);
     processPayment(mentoringApplication, mentoringStatus);
+    mentoringApplication.changeStatus(mentoringStatus);
     publishNotification(mentoring, mentoringStatus);
     mentoringApplicationRepository.save(mentoringApplication);
   }

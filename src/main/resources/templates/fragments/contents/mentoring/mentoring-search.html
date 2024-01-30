@@ -77,9 +77,9 @@
 
   <div class="d-flex justify-content-center" style="min-height: 600px">
     <div class="row row-cols-4" style="width: 60vw;">
-      <div class="col-md-3 mb-3 card-box" th:each="mentoring: ${mentoringSearchInfo.mentoringInfos}"
-           th:id="${mentoring.mentoringInfo.id}">
-        <div class="card mb-2 shadow rounded" id="card-container">
+      <div class="col-md-3 mb-3 card-box" style="max-height: 300px"
+           th:each="mentoring: ${mentoringSearchInfo.mentoringInfos}" th:id="${mentoring.mentoringInfo.id}">
+        <div class="card mb-2 shadow rounded" id="card-container" style="min-height: 300px; min-width: 80px">
           <!-- Title -->
           <div class="card-header clamp-lines d-flex justify-content-center align-items-center mb-2 mt-1 m-0"
                style="min-height: 60px; max-height: 80px;">
