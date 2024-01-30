@@ -2,6 +2,7 @@ package com.anchor.global.redis.client;
 
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.global.auth.SessionUser;
+import com.anchor.global.exception.type.redis.ReservationTimeExpiredException;
 import com.anchor.global.util.type.DateTimeRange;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -70,7 +71,7 @@ public class ApplicationLockClient implements RedisClient<DateTimeRange> {
       redis.opsForValue()
           .set(key, dateTimeRange, expiredTime);
     } else {
-      throw new RuntimeException("이미 예약시간이 만료되었습니다. 홈페이지로 이동합니다.");
+      throw new ReservationTimeExpiredException();
     }
   }
 }

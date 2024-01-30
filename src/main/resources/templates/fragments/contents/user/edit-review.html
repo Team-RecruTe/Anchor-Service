@@ -10,27 +10,32 @@
       color: red;
       margin-top: 5px;
     }
+
+    .star {
+      font-size: 60px;
+      color: #ead161;
+    }
   </style>
 </head>
 <div class="main" layout:fragment="content">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-6">
-        <div class="card shadow p-3 rounded-2">
+        <div class="card shadow rounded-2">
           <div class="card-header">
             <h2 class="mt-5 mb-2 text-center"
                 style="font-weight:700; color: #0a58ca">
-              리뷰 작성 페이지</h2>
+              리뷰 수정 페이지</h2>
           </div>
           <div class="card-body">
             <form method="post" th:action="@{/users/me/review/edit}"
                   th:object="${requiredEditReview}">
               <div class="mb-3 d-flex justify-content-center star-box">
-                <i class="bi bi-star mx-2 star" id="star1" style="font-size: 60px"></i>
-                <i class="bi bi-star mx-2 star" id="star2" style="font-size: 60px"></i>
-                <i class="bi bi-star mx-2 star" id="star3" style="font-size: 60px"></i>
-                <i class="bi bi-star mx-2 star" id="star4" style="font-size: 60px"></i>
-                <i class="bi bi-star mx-2 star" id="star5" style="font-size: 60px"></i>
+                <i class="bi bi-star mx-2 star" id="star1"></i>
+                <i class="bi bi-star mx-2 star" id="star2"></i>
+                <i class="bi bi-star mx-2 star" id="star3"></i>
+                <i class="bi bi-star mx-2 star" id="star4"></i>
+                <i class="bi bi-star mx-2 star" id="star5"></i>
               </div>
               <div class="mb-3">
                 <div class="form-floating">

@@ -15,6 +15,7 @@ import com.anchor.domain.mentoring.api.service.response.MentoringOrderUid;
 import com.anchor.domain.mentoring.api.service.response.MentoringPaymentInfo;
 import com.anchor.domain.mentoring.api.service.response.TopMentoring;
 import com.anchor.global.auth.SessionUser;
+import com.anchor.global.util.ResponseType;
 import com.anchor.global.util.type.Link;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -37,7 +38,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MentoringController {
 
-  private static final String SUCCESS = "success";
   private final MentoringService mentoringService;
 
   @PostMapping
@@ -97,47 +97,39 @@ public class MentoringController {
   @GetMapping("/{id}/reservation-time")
   public ResponseEntity<ApplicationTimeInfo> mentoringActiveTime(@PathVariable("id") Long id) {
     ApplicationTimeInfo mentoringActiveTimes = mentoringService.getMentoringActiveTimes(id);
-    return ResponseEntity.ok()
-        .body(mentoringActiveTimes);
+    return ResponseEntity.ok(mentoringActiveTimes);
   }
 
   /**
    * 신청중인 멘토링 시간을 잠금처리하고, 세션에 멘토링 신청중인 데이터를 저장합니다.
    */
   @PostMapping("/{id}/lock")
-  public ResponseEntity<String> applicationTimeLock(@PathVariable("id") Long id,
+  public ResponseEntity<ResponseType> applicationTimeLock(@PathVariable("id") Long id,
       @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
     mentoringService.lock(id, sessionUser, applicationTime);
-    return ResponseEntity.ok()
-        .body(SUCCESS);
+    return ResponseEntity.ok(ResponseType.SUCCESS);
   }
 
   /**
    * 결제중인 멘토링 시간대의 잠금 유효시간을 갱신합니다.
    */
   @PutMapping("/{id}/refresh")
-  public ResponseEntity<String> refreshPaymentTime(@PathVariable("id") Long id, HttpSession session) {
+  public ResponseEntity<ResponseType> refreshPaymentTime(@PathVariable("id") Long id, HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
     boolean refreshResult = mentoringService.refresh(id, sessionUser);
-    if (refreshResult) {
-      return ResponseEntity.ok()
-          .build();
-    } else {
-      return ResponseEntity.badRequest()
-          .body("이미 예약시간이 만료되었습니다. 홈페이지로 이동합니다.");
-    }
+    return ResponseEntity.ok(ResponseType.of(refreshResult));
   }
+
 
   /**
    * 멘토링 신청 도중 페이지를 벗어나거나, 시간이 만료되면 잠금을 해제합니다.
    */
   @DeleteMapping("/{id}/lock")
-  public ResponseEntity<String> mentoringTimeSessionRemove(@PathVariable("id") Long id, HttpSession session) {
+  public ResponseEntity<ResponseType> mentoringTimeSessionRemove(@PathVariable("id") Long id, HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
     mentoringService.unlock(id, sessionUser);
-    return ResponseEntity.ok()
-        .body(SUCCESS);
+    return ResponseEntity.ok(ResponseType.SUCCESS);
   }
 
   /**
@@ -148,8 +140,7 @@ public class MentoringController {
       @PathVariable("id") Long id, @RequestBody MentoringApplicationUserInfo userInfo, HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
     MentoringPaymentInfo mentoringPaymentInfo = mentoringService.createPaymentInfo(id, userInfo, sessionUser);
-    return ResponseEntity.ok()
-        .body(mentoringPaymentInfo);
+    return ResponseEntity.ok(mentoringPaymentInfo);
   }
 
   /**
@@ -162,8 +153,7 @@ public class MentoringController {
     MentoringOrderUid mentoringOrderUid =
         mentoringService.saveMentoringApplication(sessionUser, id, applicationInfo);
     if (Objects.nonNull(mentoringOrderUid)) {
-      return ResponseEntity.ok()
-          .body(mentoringOrderUid);
+      return ResponseEntity.ok(mentoringOrderUid);
     }
     return ResponseEntity.badRequest()
         .build();

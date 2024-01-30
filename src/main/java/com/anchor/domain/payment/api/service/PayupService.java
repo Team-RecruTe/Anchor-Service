@@ -33,15 +33,11 @@ public class PayupService {
     Map<Mentor, Integer> mentorTotalAmount = new HashMap<>();
     payupList.forEach(payup -> mentorTotalAmount.merge(payup.getMentor(), payup.getAmount(), Integer::sum));
     Set<Mentor> payupFailMentors = new HashSet<>();
-    try {
-      mentorTotalAmount.keySet()
-          .parallelStream()
-          .filter(key -> payupClient.validateAccountHolder(key, payupFailMentors))
-          .forEach(key -> payupClient.requestPayup(key, mentorTotalAmount.get(key), payupFailMentors));
-      payupRepository.updateStatus(dateTimeRange, payupFailMentors);
-    } catch (Exception e) {
-      log.warn(e.getMessage());
-    }
+    mentorTotalAmount.keySet()
+        .parallelStream()
+        .filter(key -> payupClient.validateAccountHolder(key, payupFailMentors))
+        .forEach(key -> payupClient.requestPayup(key, mentorTotalAmount.get(key), payupFailMentors));
+    payupRepository.updateStatus(dateTimeRange, payupFailMentors);
   }
 
   private DateTimeRange createMonthRange() {

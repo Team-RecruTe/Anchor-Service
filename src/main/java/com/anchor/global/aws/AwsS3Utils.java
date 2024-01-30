@@ -8,6 +8,8 @@ import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.anchor.global.exception.type.image.ImageDeleteException;
+import com.anchor.global.exception.type.image.ImageUploadException;
 import java.io.InputStream;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -36,8 +38,7 @@ public class AwsS3Utils {
           new PutObjectRequest(bucketName, fileName, inputStream, objectMetadata)
               .withCannedAcl(CannedAccessControlList.PublicRead));
     } catch (Exception e) {
-      log.error("Exeption is {}", e);
-      throw new RuntimeException("이미지를 업로드할 수 없습니다.");
+      throw new ImageUploadException(e);
     }
 
     return amazonS3Client.getUrl(bucketName, fileName)
@@ -57,7 +58,7 @@ public class AwsS3Utils {
       deleteObjectsRequest.setKeys(fileKeys);
       amazonS3Client.deleteObjects(deleteObjectsRequest);
     } catch (SdkClientException e) {
-      throw new RuntimeException("Error deleting file from S3", e);
+      throw new ImageDeleteException(e);
     }
   }
 

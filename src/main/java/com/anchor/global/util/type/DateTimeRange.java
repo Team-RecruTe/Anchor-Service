@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,6 +33,13 @@ public class DateTimeRange implements Serializable {
 
   public static DateTimeRange of(LocalDateTime from, LocalDateTime to) {
     return new DateTimeRange(from, to);
+  }
+
+  @Override
+  public String toString() {
+    return from.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+        + " ~ " +
+        to.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
   }
 
   @Override

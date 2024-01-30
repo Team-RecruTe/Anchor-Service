@@ -1,5 +1,6 @@
 package com.anchor.global.mail;
 
+import com.anchor.global.exception.type.mail.MailSendException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.util.List;
@@ -39,7 +40,7 @@ public class AsyncMailSender {
     try {
       javaMailSender.send(mimeMessages);
     } catch (MailException e) {
-      throw new RuntimeException(e);
+      throw new MailSendException(e);
     }
   }
 

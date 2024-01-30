@@ -40,6 +40,10 @@ import com.anchor.domain.payment.domain.repository.PaymentRepository;
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
+import com.anchor.global.exception.type.entity.MentorNotFoundException;
+import com.anchor.global.exception.type.entity.MentoringNotFoundException;
+import com.anchor.global.exception.type.entity.UserNotFoundException;
+import com.anchor.global.exception.type.redis.ReservationTimeExpiredException;
 import com.anchor.global.mail.AsyncMailSender;
 import com.anchor.global.mail.MailMessage;
 import com.anchor.global.redis.client.ApplicationLockClient;
@@ -247,10 +251,10 @@ public class MentoringService {
     String key = ApplicationLockClient.createKey(mentor, sessionUser);
     try {
       applicationLockClient.refresh(key);
-      return true;
-    } catch (RuntimeException e) {
+    } catch (ReservationTimeExpiredException e) {
       return false;
     }
+    return true;
   }
 
   public void autoChangeStatus(DateTimeRange targetDateRange) {
@@ -261,22 +265,22 @@ public class MentoringService {
 
   private Mentor getMentorById(Long id) {
     return mentorRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("일치하는 멘토 정보가 없습니다."));
+        .orElseThrow(MentorNotFoundException::new);
   }
 
   private Mentoring getMentoringByIdAndMentor(Long id, Mentor mentor) {
     return mentoringRepository.findByIdAndMentor(id, mentor)
-        .orElseThrow(() -> new NoSuchElementException("일치하는 멘토링 정보가 없습니다."));
+        .orElseThrow(MentoringNotFoundException::new);
   }
 
   private Mentoring getMentoringById(Long id) {
     return mentoringRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException(id + "에 해당하는 멘토링이 존재하지 않습니다."));
+        .orElseThrow(MentoringNotFoundException::new);
   }
 
   private User getUser(SessionUser sessionUser) {
     return userRepository.findByEmail(sessionUser.getEmail())
-        .orElseThrow(() -> new NoSuchElementException(sessionUser.getEmail() + "에 해당하는 회원이 존재하지 않습니다."));
+        .orElseThrow(UserNotFoundException::new);
   }
 
   @Transactional(readOnly = true)

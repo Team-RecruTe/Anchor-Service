@@ -65,8 +65,11 @@ function paymentValidation(res, amount) {
       merchantUid: merchantUid,
       amount: amount
     }).then(res => {
-      if (res.status === 200) {
+      let body = res.data;
+      if (res.status === 200 && body.validationResult === 'SUCCESS') {
         saveMentoringApplication(res, amount);
+      } else {
+        alert('결제 검증에 실패하였습니다.');
       }
     });
   } else {

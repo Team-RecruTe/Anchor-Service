@@ -1,5 +1,6 @@
 package com.anchor.global.payment.portone.response;
 
+import com.anchor.global.exception.type.payment.PaymentValidationException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -22,7 +23,7 @@ public class PaymentRequestResult {
     if (isSuccess()) {
       return response;
     }
-    throw new RuntimeException(message);
+    throw new PaymentValidationException(message);
   }
 
   private boolean isSuccess() {

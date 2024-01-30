@@ -106,123 +106,128 @@
   </div>
 
   <!-- 오른쪽 컨텐츠 -->
-  <div class="d-flex justify-content-center" style="width: 100%;">
-    <div class="card" style="width:60%">
-      <!-- Mentoring Title -->
-      <div class="card-header">
-        <h3 class="card-title text-center mb-4 mt-3" th:text="${mentoringDetail.mentoringDetailSearchResult.title}">
-          멘토링 제목</h3>
-        <!--          <div class="card-subtitle">-->
-
-        <!--          -->
-
-        <!--          </div>-->
-      </div>
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item">
-          <div class="d-flex align-items-center mb-3" id="mentor-icon" style="width:100%">
-            <a class="z-3 mr-5 d-flex gap-2 justify-content-center align-items-center text-decoration-none text-dark"
-               style=" margin-left: auto"
-               th:href="@{/mentors/{id}(id=${mentoringDetail.mentoringDetailSearchResult.mentorId})}">
-              <div class="d-flex flex-column align-items-start" style="flex-shrink: 0">
+  <div class="row">
+    <div class="d-flex justify-content-center" style="width: 100%;">
+      <div class="card" style="width:60%">
+        <!-- Mentoring Title -->
+        <div class="card-header">
+          <h3 class="card-title text-center mb-4 mt-3" th:text="${mentoringDetail.mentoringDetailSearchResult.title}">
+            멘토링 제목</h3>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">
+            <div class="d-flex align-items-center mb-3" id="mentor-icon" style="width:100%">
+              <a class="z-3 mr-5 d-flex gap-2 justify-content-center align-items-center text-decoration-none text-dark"
+                 style=" margin-left: auto"
+                 th:href="@{/mentors/{id}(id=${mentoringDetail.mentoringDetailSearchResult.mentorId})}">
+                <div class="d-flex flex-column align-items-start" style="flex-shrink: 0">
                       <span class="fs-5" style="white-space: nowrap;overflow: hidden;"
                             th:text="${mentoringDetail.mentoringDetailSearchResult.getMentorNickname}"></span>
-              </div>
-              <img style="width: 50px; height: 50px; border-radius: 50%;"
-                   th:src="${mentoringDetail.getMentoringDetailSearchResult.mentorImage}">
-            </a>
-          </div>
-        </li>
-      </ul>
+                </div>
+                <img style="width: 50px; height: 50px; border-radius: 50%;"
+                     th:src="${mentoringDetail.getMentoringDetailSearchResult.mentorImage}">
+              </a>
+            </div>
+          </li>
+        </ul>
 
-      <div class="row card-body">
-        <div class="col-md-12" style="min-height: 500px">
-          <div id="viewer">
-            <!--          Contents 들어갈 자리-->
+        <div class="row card-body">
+          <div class="col-md-12" style="min-height: 500px">
+            <div id="viewer">
+              <!--          Contents 들어갈 자리-->
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Duration and Cost -->
-      <div class="card-footer">
-        <div class="row mt-3">
-          <div class="col-md-6">
-            <span class="fs-5" style="width: 48px">시간</span>
-            <span class="mr-2 fs-5 text-success"
-                  th:text="${#strings.replace(#strings.replace(mentoringDetail.mentoringDetailSearchResult.durationTime,'h','시간'),'m','분')}">
+        <!-- Duration and Cost -->
+        <div class="card-footer">
+          <div class="row mt-3">
+            <div class="col-md-6">
+              <span class="fs-5" style="width: 48px">시간</span>
+              <span class="mr-2 fs-5 text-success"
+                    th:text="${#strings.replace(#strings.replace(mentoringDetail.mentoringDetailSearchResult.durationTime,'h','시간'),'m','분')}">
                   2시간</span>
-          </div>
-          <div class="col-md-6">
-            <span class="fs-5" style="width: 48px">비용</span>
-            <span class="mr-2 fs-5 text-success"
-                  th:text="${#numbers.formatInteger(mentoringDetail.mentoringDetailSearchResult.cost,3,'COMMA')}+'원'">30,000원</span>
-          </div>
-        </div>
-
-        <!-- Tags -->
-        <hr>
-        <div class="row mt-3">
-          <div class="col-6 d-flex justify-content-start">
-            <div class="d-flex flex-wrap align-items-center h-25">
-              <span class="fs-5" style="width: 48px">태그</span>
-              <th:block th:each="tag : ${mentoringDetail.mentoringDetailSearchResult.tags}">
-                <h5><span class="badge bg-success mx-1 mr-2" th:text="${tag}">Tag1</span></h5>
-              </th:block>
+            </div>
+            <div class="col-md-6">
+              <span class="fs-5" style="width: 48px">비용</span>
+              <span class="mr-2 fs-5 text-success"
+                    th:text="${#numbers.formatInteger(mentoringDetail.mentoringDetailSearchResult.cost,3,'COMMA')}+'원'">30,000원</span>
             </div>
           </div>
-          <div class="col-6 d-flex justify-content-end">
-            <div class="col-md-12 text-end">
-              <button class="btn btn-success" id="login-button" th:if="${session.user eq null}">
-                로그인이 필요한 기능입니다.
-              </button>
-              <button
-                  class="btn btn-success modal-button"
-                  th:if="${session.user != null && mentoringDetail.mentoringDetailSearchResult.mentorId ne session.user.mentorId}">
-                신청하기
-              </button>
-              <button
-                  class="btn btn-outline-success" id="edit-button"
-                  th:if="${session.user != null && mentoringDetail.mentoringDetailSearchResult.mentorId eq session.user.mentorId}">
-                수정하기
-              </button>
+
+          <!-- Tags -->
+          <hr>
+          <div class="row mt-3">
+            <div class="col-6 d-flex justify-content-start">
+              <div class="d-flex flex-wrap align-items-center h-25">
+                <span class="fs-5" style="width: 48px">태그</span>
+                <th:block th:each="tag : ${mentoringDetail.mentoringDetailSearchResult.tags}">
+                  <h5><span class="badge bg-success mx-1 mr-2" th:text="${tag}">Tag1</span></h5>
+                </th:block>
+              </div>
+            </div>
+            <div class="col-6 d-flex justify-content-end">
+              <div class="col-md-12 text-end">
+                <button class="btn btn-success" id="login-button" th:if="${session.user eq null}">
+                  로그인이 필요한 기능입니다.
+                </button>
+                <button
+                    class="btn btn-success modal-button"
+                    th:if="${session.user != null && mentoringDetail.mentoringDetailSearchResult.mentorId ne session.user.mentorId}">
+                  신청하기
+                </button>
+                <button
+                    class="btn btn-outline-success" id="edit-button"
+                    th:if="${session.user != null && mentoringDetail.mentoringDetailSearchResult.mentorId eq session.user.mentorId}">
+                  수정하기
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <div th:with="reviewResult = ${mentoringDetail.mentoringReviewSearchResult}">
-      <div class="card  mt-4"
-           th:if="${reviewResult.averageRatings ne null and reviewResult.reviewInfos ne null and !reviewResult.reviewInfos.isEmpty()}">
-        <div class="card-header">
-          <h2 class="card-title text-center">Review's</h2>
-          <p class="card-subtitle fs-5 text-end">⭐평균 별점 : <span
-              th:text="${#numbers.formatDecimal(reviewResult.averageRatings,1,1)}">별점 평균</span>⭐
-          </p>
-        </div>
-        <div class="card-body">
-          <table class="table text-center table-bordered">
-            <thead class="table-light">
-            <tr>
-              <th class="col-2" scope="col">닉네임</th>
-              <th class="col-2" scope="col">평점</th>
-              <th class="col-8" scope="col">리뷰</th>
-            </tr>
-            </thead>
-            <tbody>
-            <th:block th:each="reviewInfo:${reviewResult.reviewInfos}">
-              <tr>
-                <td th:text="${reviewInfo.userNickname}">Mark</td>
-                <td th:text="${reviewInfo.ratings}">4.5</td>
-                <td th:text="${reviewInfo.contents}">실력 쌓기 좋은 수업</td>
-              </tr>
-            </th:block>
-            </tbody>
-          </table>
         </div>
       </div>
     </div>
   </div>
+
+
+  <div class="row">
+    <div class="d-flex justify-content-center" style="width:100%">
+      <div style="width: 60%" th:with="reviewResult = ${mentoringDetail.mentoringReviewSearchResult}">
+        <div class="card  mt-4"
+             th:if="${reviewResult.averageRatings ne null and reviewResult.reviewInfos ne null and !reviewResult.reviewInfos.isEmpty()}">
+          <div class="card-header">
+            <h2 class="card-title text-center">Review's</h2>
+            <p class="card-subtitle fs-5 text-end">⭐평균 별점 : <span
+                th:text="${#numbers.formatDecimal(reviewResult.averageRatings,1,1)}">별점 평균</span>⭐
+            </p>
+          </div>
+          <div class="card-body">
+            <table class="table text-center table-bordered">
+              <thead class="table-light">
+              <tr>
+                <th class="col-2" scope="col">닉네임</th>
+                <th class="col-2" scope="col">평점</th>
+                <th class="col-8" scope="col">리뷰</th>
+              </tr>
+              </thead>
+              <tbody>
+              <th:block th:each="reviewInfo:${reviewResult.reviewInfos}">
+                <tr>
+                  <td th:text="${reviewInfo.userNickname}">Mark</td>
+                  <td th:text="${reviewInfo.ratings}">4.5</td>
+                  <td th:text="${reviewInfo.contents}">실력 쌓기 좋은 수업</td>
+                </tr>
+              </th:block>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+
 
   <script src="/js/library/toast/toastui-editor-all.min.js"></script>
   <script src="/js/library/toast/tui-date-picker.min.js"></script>

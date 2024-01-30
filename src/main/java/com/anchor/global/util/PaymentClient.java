@@ -2,6 +2,13 @@ package com.anchor.global.util;
 
 
 import com.anchor.domain.mentoring.domain.MentoringStatus;
+import com.anchor.global.exception.ServiceException;
+import com.anchor.global.exception.type.api.ApiClientException;
+import com.anchor.global.exception.type.api.HttpClientException;
+import com.anchor.global.exception.type.api.InvalidAccessTokenException;
+import com.anchor.global.exception.type.api.InvalidImpUidException;
+import com.anchor.global.exception.type.api.JsonDeserializationFailedException;
+import com.anchor.global.exception.type.api.JsonSerializationFailedException;
 import com.anchor.global.payment.portone.request.AccessTokenRequest;
 import com.anchor.global.payment.portone.request.PortOneRequestUrl;
 import com.anchor.global.payment.portone.request.RequiredPaymentData;
@@ -12,12 +19,15 @@ import com.anchor.global.payment.portone.response.PaymentResult;
 import com.anchor.global.payment.portone.response.SinglePaymentResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -69,58 +79,73 @@ public class PaymentClient {
   private AccessTokenResult getToken(AccessTokenRequest accessTokenRequest) {
     try {
       String tokenRequestToJson = objectMapper.writeValueAsString(accessTokenRequest);
-      ResponseEntity<PaymentRequestResult> entity = restClient.post()
+      PaymentRequestResult entity = restClient.post()
           .uri(PortOneRequestUrl.ACCESS_TOKEN_URL.getUrl())
           .contentType(MediaType.APPLICATION_JSON)
           .body(tokenRequestToJson)
-          .retrieve()
-          .toEntity(PaymentRequestResult.class);
+          .exchange((request, response) -> checkStatus(response));
 
-      Object response = getPaymentRequestDetail(entity);
-      return objectMapper.convertValue(response, AccessTokenResult.class);
+      return objectMapper.convertValue(entity.getResponse(), AccessTokenResult.class);
     } catch (JsonProcessingException e) {
-      throw new RuntimeException("직렬화 불가능한 객체거나 null입니다.");
+      throw new JsonSerializationFailedException(e);
     }
   }
 
   private Optional<PaymentResult> getSinglePayment(String requestUrl, String accessToken) {
-    ResponseEntity<PaymentRequestResult> entity = restClient.get()
+    PaymentRequestResult entity = restClient.get()
         .uri(requestUrl)
         .headers(header -> {
           header.add(HttpHeaders.AUTHORIZATION, accessToken);
           header.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         })
-        .retrieve()
-        .toEntity(PaymentRequestResult.class);
+        .exchange((request, response) -> checkStatus(response));
 
-    Object response = getPaymentRequestDetail(entity);
-    return Optional.ofNullable(objectMapper.convertValue(response, SinglePaymentResult.class));
+    return Optional.ofNullable(objectMapper.convertValue(entity.getResponse(), SinglePaymentResult.class));
   }
 
   private Optional<PaymentResult> cancelPayment(String requestUrl, String accessToken, RequiredPaymentData data) {
     try {
       String requestBody = objectMapper.writeValueAsString(data);
-      ResponseEntity<PaymentRequestResult> entity = restClient.post()
+      PaymentRequestResult entity = restClient.post()
           .uri(requestUrl)
           .header(HttpHeaders.AUTHORIZATION, accessToken)
           .contentType(MediaType.APPLICATION_JSON)
           .body(requestBody)
-          .retrieve()
-          .toEntity(PaymentRequestResult.class);
+          .exchange((request, response) -> checkStatus(response));
 
-      Object response = getPaymentRequestDetail(entity);
-      return Optional.ofNullable(objectMapper.convertValue(response, PaymentCancelResult.class));
+      return Optional.ofNullable(objectMapper.convertValue(entity.getResponse(), PaymentCancelResult.class));
     } catch (JsonProcessingException e) {
-      throw new RuntimeException("직렬화 불가능한 객체거나 null입니다.");
+      throw new JsonSerializationFailedException(e);
     }
   }
 
-  private Object getPaymentRequestDetail(ResponseEntity<PaymentRequestResult> result) {
+  private PaymentRequestResult checkStatus(ClientHttpResponse response) {
     try {
-      PaymentRequestResult paymentCancelResult = result.getBody();
-      return paymentCancelResult.getResponse();
-    } catch (NullPointerException e) {
-      throw new RuntimeException("요청이 제대로 처리되지 않았습니다.");
+      HttpStatusCode statusCode = response.getStatusCode();
+      if (statusCode.is5xxServerError()) {
+        throw new ApiClientException();
+      }
+      PaymentRequestResult result = objectMapper.readValue(response.getBody(), PaymentRequestResult.class);
+      if (statusCode.is4xxClientError()) {
+        throw exceptionByStatusCode(statusCode, result);
+      }
+      return result;
+    } catch (JsonProcessingException e) {
+      throw new JsonDeserializationFailedException(e);
+    } catch (IOException e) {
+      throw new HttpClientException(e);
     }
   }
+
+  private ServiceException exceptionByStatusCode(HttpStatusCode statusCode, PaymentRequestResult result) {
+    String message = result.getMessage();
+    if (statusCode.isSameCodeAs(HttpStatusCode.valueOf(HttpStatus.UNAUTHORIZED.value()))) {
+      return new InvalidAccessTokenException(message);
+    }
+    if (statusCode.isSameCodeAs(HttpStatusCode.valueOf(HttpStatus.NOT_FOUND.value()))) {
+      return new InvalidImpUidException(message);
+    }
+    return new ApiClientException(message);
+  }
+
 }

@@ -4,6 +4,7 @@ import com.anchor.domain.mentoring.domain.MentoringStatus;
 import com.anchor.domain.payment.api.controller.request.PaymentResultInfo;
 import com.anchor.domain.payment.api.service.response.PaymentCompleteResult;
 import com.anchor.domain.payment.domain.repository.PaymentRepository;
+import com.anchor.global.exception.ServiceException;
 import com.anchor.global.payment.portone.request.RequiredPaymentCreateData;
 import com.anchor.global.payment.portone.response.PaymentResult;
 import com.anchor.global.payment.portone.response.SinglePaymentResult;
@@ -25,11 +26,17 @@ public class PaymentService {
 
   public ResponseType validatePaymentResult(PaymentResultInfo paymentResultInfo) {
     RequiredPaymentCreateData requiredPaymentCreateData = new RequiredPaymentCreateData(paymentResultInfo.getImpUid());
-    Optional<PaymentResult> paymentSelectResult = paymentClient.request(MentoringStatus.WAITING,
-        requiredPaymentCreateData);
-    SinglePaymentResult result = (SinglePaymentResult) paymentSelectResult.orElseThrow(
-        () -> new NoSuchElementException("PaymentSelectResult 값이 존재하지 않습니다."));
-    return ResponseType.of(paymentResultInfo.isSameAs(result));
+    try {
+      Optional<PaymentResult> paymentSelectResult = paymentClient.request(MentoringStatus.WAITING,
+          requiredPaymentCreateData);
+      SinglePaymentResult result = (SinglePaymentResult) paymentSelectResult.orElseThrow(
+          () -> new NoSuchElementException("PaymentSelectResult 값이 존재하지 않습니다."));
+
+      return ResponseType.of(paymentResultInfo.isSameAs(result));
+    } catch (ServiceException e) {
+      log.info(e.getMessage());
+      return ResponseType.FAIL;
+    }
   }
 
   public PaymentCompleteResult getPaymentResult(String orderUid) {

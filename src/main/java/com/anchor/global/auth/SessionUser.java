@@ -1,9 +1,11 @@
 package com.anchor.global.auth;
 
 import com.anchor.domain.user.domain.User;
+import com.anchor.global.exception.type.auth.UserNotLoggedInException;
 import jakarta.servlet.http.HttpSession;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -29,11 +31,8 @@ public class SessionUser implements Serializable {
   }
 
   public static SessionUser getSessionUser(HttpSession session) {
-    SessionUser sessionUser = (SessionUser) session.getAttribute("user");
-    if (Objects.nonNull(sessionUser)) {
-      return sessionUser;
-    }
-    throw new RuntimeException("로그인 정보가 존재하지 않습니다.");
+    return Optional.ofNullable((SessionUser) session.getAttribute("user"))
+        .orElseThrow(UserNotLoggedInException::new);
   }
 
   public void addMentorId(Long mentorId) {

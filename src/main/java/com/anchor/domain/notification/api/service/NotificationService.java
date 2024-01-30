@@ -4,6 +4,7 @@ import com.anchor.domain.notification.api.service.response.AllNotification;
 import com.anchor.domain.notification.api.service.response.NotificationResponse;
 import com.anchor.domain.notification.domain.Notification;
 import com.anchor.domain.notification.domain.repository.NotificationRepository;
+import com.anchor.global.exception.type.entity.NotificationNotFoundException;
 import com.anchor.global.redis.message.MentoringNotification;
 import com.anchor.global.redis.message.NotificationEvent;
 import com.anchor.global.redis.message.RedisEventManager;
@@ -91,7 +92,6 @@ public class NotificationService {
       return this.objectMapper.writeValueAsString(notification);
     } catch (IOException e) {
       throw new RuntimeException(e);
-//      throw new InvalidRedisMessageException(message);
     }
   }
 
@@ -100,7 +100,6 @@ public class NotificationService {
       return this.objectMapper.readValue(message.getBody(), Notification.class);
     } catch (IOException e) {
       throw new RuntimeException(e);
-//      throw new InvalidRedisMessageException(message);
     }
   }
 
@@ -135,7 +134,7 @@ public class NotificationService {
   @Transactional
   public void readNotification(Long id) {
     Notification notification = notificationRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("일치하는 알림이 없습니다."));
+        .orElseThrow(NotificationNotFoundException::new);
     notification.read();
     notificationRepository.save(notification);
   }

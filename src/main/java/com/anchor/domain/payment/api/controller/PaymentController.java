@@ -25,12 +25,6 @@ public class PaymentController {
   public ResponseEntity<PaymentValidationInfo> paymentValidation(@RequestBody PaymentResultInfo paymentResultInfo) {
     ResponseType validationResult = paymentService.validatePaymentResult(paymentResultInfo);
     PaymentValidationInfo paymentValidationInfo = new PaymentValidationInfo(paymentResultInfo, validationResult);
-    if (validationResult.equals(ResponseType.SUCCESS)) {
-      return ResponseEntity.ok()
-          .body(paymentValidationInfo);
-    } else {
-      return ResponseEntity.badRequest()
-          .build();
-    }
+    return ResponseEntity.ok(paymentValidationInfo);
   }
 }
