@@ -121,6 +121,7 @@ public class MentoringController {
     return ResponseEntity.ok(ResponseType.of(refreshResult));
   }
 
+
   /**
    * 멘토링 신청 도중 페이지를 벗어나거나, 시간이 만료되면 잠금을 해제합니다.
    */
