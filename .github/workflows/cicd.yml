@@ -1,0 +1,33 @@
+name: Anchor CI/CD with Gradle
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Set up Gradle
+      uses: gradle/gradle-build-action@v3
+      with:
+        gradle-version: current
+        cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+        
+    - name: Build Project
+      run: gradle build
