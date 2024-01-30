@@ -251,16 +251,10 @@ public class MentoringService {
     String key = ApplicationLockClient.createKey(mentor, sessionUser);
     try {
       applicationLockClient.refresh(key);
+      return true;
     } catch (ReservationTimeExpiredException e) {
       return false;
     }
-    return true;
-  }
-
-  public void autoChangeStatus(DateTimeRange targetDateRange) {
-    List<MentoringApplication> result = mentoringApplicationRepository.findAllByNotCompleteForWeek(targetDateRange);
-    result.forEach(application -> application.changeStatus(MentoringStatus.COMPLETE));
-    mentoringApplicationRepository.saveAll(result);
   }
 
   public void autoChangeStatus(DateTimeRange targetDateRange) {
