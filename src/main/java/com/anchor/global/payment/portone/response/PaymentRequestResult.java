@@ -1,12 +1,13 @@
 package com.anchor.global.payment.portone.response;
 
 import com.anchor.global.exception.type.payment.PaymentValidationException;
+import com.anchor.global.util.type.JsonSerializable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class PaymentRequestResult {
+public class PaymentRequestResult implements JsonSerializable {
 
   private static final Integer SUCCESS_CODE = 0;
   private Integer code;

@@ -26,7 +26,7 @@ import com.anchor.domain.user.api.service.response.UserInfoResponse;
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
-import com.anchor.global.exception.ServiceException;
+import com.anchor.global.exception.AnchorException;
 import com.anchor.global.exception.type.entity.InvalidStatusException;
 import com.anchor.global.exception.type.entity.MentoringApplicationNotFoundException;
 import com.anchor.global.exception.type.entity.ReviewNotFoundException;
@@ -145,7 +145,7 @@ public class UserService {
             validateMentoringStatus(status);
             changeStatus(mentoringApplication, mentoring, status.getMentoringStatus());
             mailMessage = createMailMessage(user, mentoring, mentor, range.getFrom(), status.getMentoringStatus());
-          } catch (ServiceException | PersistenceException e) {
+          } catch (AnchorException | PersistenceException e) {
             log.warn("[회원번호 :: {} || 신청내역 번호 :: {}] 상태변경 실패", user.getId(), mentoringApplication.getId());
           }
           return mailMessage;

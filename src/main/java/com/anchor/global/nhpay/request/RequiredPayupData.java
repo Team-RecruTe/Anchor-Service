@@ -1,5 +1,7 @@
 package com.anchor.global.nhpay.request;
 
-public interface RequiredPayupData {
+import com.anchor.global.util.type.JsonSerializable;
+
+public interface RequiredPayupData extends JsonSerializable {
 
 }

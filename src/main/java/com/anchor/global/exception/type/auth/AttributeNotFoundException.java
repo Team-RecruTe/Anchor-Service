@@ -1,12 +1,12 @@
 package com.anchor.global.exception.type.auth;
 
 import com.anchor.global.exception.ServiceException;
-import com.anchor.global.exception.error.ServiceErrorCode;
+import com.anchor.global.exception.error.AnchorErrorCode;
 
 public class AttributeNotFoundException extends ServiceException {
 
-  public AttributeNotFoundException(Exception ex) {
-    super(ServiceErrorCode.ATTRIBUTE_NOT_FOUND, ex);
+  public AttributeNotFoundException(Throwable ex) {
+    super(AnchorErrorCode.ATTRIBUTE_NOT_FOUND, ex);
   }
 
 }

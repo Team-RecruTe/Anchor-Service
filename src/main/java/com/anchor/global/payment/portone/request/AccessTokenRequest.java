@@ -1,10 +1,10 @@
 package com.anchor.global.payment.portone.request;
 
 
+import com.anchor.global.util.type.JsonSerializable;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.io.Serializable;
 
-public class AccessTokenRequest implements Serializable {
+public class AccessTokenRequest implements JsonSerializable {
 
   @JsonProperty("imp_key")
   private String impKey;

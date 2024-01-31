@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @RequiredArgsConstructor
-public enum ServiceErrorCode {
+public enum AnchorErrorCode {
 
   CUSTOM_ERROR_CODE(HttpStatus.BAD_REQUEST, "커스텀 에러 코드"),
 
@@ -20,6 +20,8 @@ public enum ServiceErrorCode {
 
   INVALID_STATUS(HttpStatus.CONFLICT, "변경 불가능한 상태를 요청하였습니다."),
 
+  INCREASE_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "멘토링 신청자수 증가에 실패하였습니다."),
+
   ATTRIBUTE_NOT_FOUND(HttpStatus.NOT_FOUND, "주어진 속성 필드가 존재하지 않습니다."),
 
   NOT_LOGIN(HttpStatus.NOT_FOUND, "로그인 정보가 존재하지 않습니다."),
@@ -30,9 +32,9 @@ public enum ServiceErrorCode {
 
   DESERIALIZATION_FAIL(HttpStatus.CONFLICT, "역직렬화에 실패하였습니다."),
 
-  HTTP_ERROR(HttpStatus.BAD_GATEWAY, "HTTP 통신 중 에러가 발생하였습니다."),
-
   INVALID_PAYMENT(HttpStatus.CONFLICT, "결제 검증에 실패하였습니다."),
+
+  PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "결제 검증 결과가 존재하지 않습니다."),
 
   INVALID_IMP_UID(HttpStatus.NOT_FOUND, "유효하지않은 imp_uid입니다."),
 
@@ -40,7 +42,7 @@ public enum ServiceErrorCode {
 
   INVALID_PARAM(HttpStatus.BAD_REQUEST, "파라미터가 유효하지 않습니다."),
 
-  EXTERNAL_API_ERROR(HttpStatus.SERVICE_UNAVAILABLE, "외부 API서버 오류입니다."),
+  RESPONSE_NOT_FOUND(HttpStatus.SERVICE_UNAVAILABLE, "API서버에서 응답이 전달되지 않았습니다."),
 
   BANK_NAME_NOT_FOUND(HttpStatus.NOT_FOUND, "일치하는 은행명이 존재하지 않습니다."),
 

@@ -1,12 +1,12 @@
 package com.anchor.global.exception.type.image;
 
-import com.anchor.global.exception.ServiceException;
-import com.anchor.global.exception.error.ServiceErrorCode;
+import com.anchor.global.exception.ExternalApiException;
+import com.anchor.global.exception.error.AnchorErrorCode;
 
-public class ImageDeleteException extends ServiceException {
+public class ImageDeleteException extends ExternalApiException {
 
-  public ImageDeleteException(Exception ex) {
-    super(ServiceErrorCode.IMAGE_DELETE_ERROR, ex);
+  public ImageDeleteException(Throwable ex) {
+    super(AnchorErrorCode.IMAGE_DELETE_ERROR, ex);
   }
 
 }

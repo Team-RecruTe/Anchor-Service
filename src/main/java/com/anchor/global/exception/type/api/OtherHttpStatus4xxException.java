@@ -4,9 +4,9 @@ import com.anchor.global.exception.ExternalApiException;
 import com.anchor.global.exception.error.AnchorErrorCode;
 import com.anchor.global.exception.response.SimpleErrorDetail;
 
-public class InvalidImpUidException extends ExternalApiException {
+public class OtherHttpStatus4xxException extends ExternalApiException {
 
-  public InvalidImpUidException(String message) {
-    super(AnchorErrorCode.INVALID_IMP_UID, new SimpleErrorDetail(message));
+  public OtherHttpStatus4xxException(String message) {
+    super(AnchorErrorCode.INVALID_PARAM, new SimpleErrorDetail(message));
   }
 }

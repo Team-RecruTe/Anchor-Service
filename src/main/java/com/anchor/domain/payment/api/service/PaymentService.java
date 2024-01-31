@@ -4,13 +4,13 @@ import com.anchor.domain.mentoring.domain.MentoringStatus;
 import com.anchor.domain.payment.api.controller.request.PaymentResultInfo;
 import com.anchor.domain.payment.api.service.response.PaymentCompleteResult;
 import com.anchor.domain.payment.domain.repository.PaymentRepository;
-import com.anchor.global.exception.ServiceException;
+import com.anchor.global.exception.AnchorException;
+import com.anchor.global.exception.type.payment.PaymentResultNotFoundException;
 import com.anchor.global.payment.portone.request.RequiredPaymentCreateData;
 import com.anchor.global.payment.portone.response.PaymentResult;
 import com.anchor.global.payment.portone.response.SinglePaymentResult;
 import com.anchor.global.util.PaymentClient;
 import com.anchor.global.util.ResponseType;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,12 +29,10 @@ public class PaymentService {
     try {
       Optional<PaymentResult> paymentSelectResult = paymentClient.request(MentoringStatus.WAITING,
           requiredPaymentCreateData);
-      SinglePaymentResult result = (SinglePaymentResult) paymentSelectResult.orElseThrow(
-          () -> new NoSuchElementException("PaymentSelectResult 값이 존재하지 않습니다."));
-
+      SinglePaymentResult result = (SinglePaymentResult) paymentSelectResult
+          .orElseThrow(PaymentResultNotFoundException::new);
       return ResponseType.of(paymentResultInfo.isSameAs(result));
-    } catch (ServiceException e) {
-      log.info(e.getMessage());
+    } catch (AnchorException e) {
       return ResponseType.FAIL;
     }
   }
