@@ -6,7 +6,7 @@ import com.anchor.global.exception.error.AnchorErrorCode;
 public class JsonSerializationFailedException extends ServiceException {
 
   public JsonSerializationFailedException(Exception ex) {
-    super(AnchorErrorCode.DESERIALIZATION_FAIL, ex);
+    super(AnchorErrorCode.SERIALRIZATION_FAIL, ex);
   }
 
 }
