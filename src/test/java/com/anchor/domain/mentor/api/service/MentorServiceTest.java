@@ -1,11 +1,16 @@
 package com.anchor.domain.mentor.api.service;
 
+import static org.mockito.ArgumentMatchers.anyString;
+
 import com.anchor.domain.mentor.api.controller.request.MentorRegisterInfo;
 import com.anchor.domain.mentor.domain.Career;
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentor.domain.repository.MentorRepository;
 import com.anchor.domain.user.domain.User;
+import com.anchor.domain.user.domain.UserRole;
+import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
+import com.anchor.global.exception.type.mentor.DuplicateEmailException;
 import java.util.Optional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -25,13 +30,19 @@ class MentorServiceTest {
   @Mock
   private MentorRepository mentorRepository;
 
+  @Mock
+  private UserRepository userRepository;
 
   @Test
   @DisplayName("멘토 등록 성공")
   void registerSuccess() {
-    SessionUser sessionUser = new SessionUser(User.builder()
+    User user = User.builder()
         .email("test@test.com")
-        .build());
+        .image("image")
+        .role(UserRole.USER)
+        .nickname("nickname")
+        .build();
+    SessionUser sessionUser = new SessionUser(user);
     Mentor mentor = Mentor.builder()
         .bankName("NH농협")
         .accountNumber("020-3039-765")
@@ -42,6 +53,10 @@ class MentorServiceTest {
 
     Mockito.when(mentorRepository.save(mentor))
         .thenReturn(mentor);
+    Mockito.when(mentorRepository.existsMentorByCompanyEmail(anyString()))
+        .thenReturn(false);
+    Mockito.when(userRepository.findByEmail(anyString()))
+        .thenReturn(Optional.ofNullable(user));
 
     MentorRegisterInfo mentorRegisterInfo = MentorRegisterInfo.builder()
         .bankName("NH농협")
@@ -59,9 +74,13 @@ class MentorServiceTest {
   @Test
   @DisplayName("멘토 등록 실패")
   void registerFail() {
-    SessionUser sessionUser = new SessionUser(User.builder()
+    User user = User.builder()
         .email("test@test.com")
-        .build());
+        .image("image")
+        .role(UserRole.USER)
+        .nickname("nickname")
+        .build();
+    SessionUser sessionUser = new SessionUser(user);
     Mentor mentor = Mentor.builder()
         .bankName("NH농협")
         .accountNumber("020-3039-765")
@@ -70,8 +89,12 @@ class MentorServiceTest {
         .career(Career.JUNIOR)
         .build();
 
-    Mockito.when(mentorRepository.findByCompanyEmail("0000@naver.com"))
-        .thenReturn(Optional.of(mentor));
+    Mockito.when(mentorRepository.save(mentor))
+        .thenReturn(mentor);
+    Mockito.when(mentorRepository.existsMentorByCompanyEmail(anyString()))
+        .thenReturn(true);
+    Mockito.when(userRepository.findByEmail(anyString()))
+        .thenReturn(Optional.ofNullable(user));
 
     MentorRegisterInfo mentorRegisterInfo = MentorRegisterInfo.builder()
         .bankName("NH농협")
@@ -83,6 +106,6 @@ class MentorServiceTest {
 
     Assertions.assertThatThrownBy(() ->
             mentorService.register(mentorRegisterInfo, sessionUser))
-        .isInstanceOf(IllegalStateException.class);
+        .isInstanceOf(DuplicateEmailException.class);
   }
 }

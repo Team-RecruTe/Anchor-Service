@@ -64,10 +64,9 @@ public class MentorService {
 
   @Transactional
   public Mentor register(MentorRegisterInfo mentorRegisterInfo, SessionUser sessionUser) {
-    mentorRepository.findByCompanyEmail(mentorRegisterInfo.getCompanyEmail())
-        .ifPresent(mentor -> {
-          throw new DuplicateEmailException();
-        });
+    if (mentorRepository.existsMentorByCompanyEmail(mentorRegisterInfo.getCompanyEmail())) {
+      throw new DuplicateEmailException();
+    }
     User user = getUser(sessionUser);
     Mentor mentor = Mentor.of(user, mentorRegisterInfo);
     mentorRepository.save(mentor);

@@ -20,6 +20,9 @@ import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.UserRole;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.config.QueryDslConfig;
+import com.anchor.global.config.RestClientConfig;
+import com.anchor.global.mail.AsyncMailSender;
+import com.anchor.global.util.PaymentClient;
 import com.anchor.global.util.type.DateTimeRange;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,11 +43,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.test.context.ActiveProfiles;
 
 @DisplayName("멘토 서비스 테스트 - DB 의존성 포함")
 @ActiveProfiles("test")
-@Import({QueryDslConfig.class, MentorService.class, ObjectMapper.class})
+@Import({QueryDslConfig.class, MentorService.class, ObjectMapper.class, PaymentClient.class, RestClientConfig.class,
+    AsyncMailSender.class, JavaMailSenderImpl.class})
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DataJpaTest
 class MentorDataTest {
@@ -246,7 +251,7 @@ class MentorDataTest {
 
     LocalDateTime now = LocalDateTime.now();
     LocalDateTime time = now;
-    List<Payment> payments = new ArrayList<>();
+    
     for (int i = 0; i < 30; i++) {
       time = time.plusHours(i);
       MentoringApplication mentoringApplication = MentoringApplication.builder()
@@ -278,7 +283,7 @@ class MentorDataTest {
     log.info("{}", result);
 
     // then
-    assertThat(results.getTotalElements()).isEqualTo(10);
+    assertThat(results.getTotalElements()).isEqualTo(30);
   }
 
 }
