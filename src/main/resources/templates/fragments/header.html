@@ -1,0 +1,156 @@
+<header
+    class="mb-4 border-bottom">
+  <style>
+    p, h3 {
+      margin: 4px 0px;
+    }
+
+    .noti-content {
+      padding: 8px;
+      margin-bottom: 2px;
+      color: rgba(0, 0, 0, 0.75);
+      border: 1px solid rgba(0, 0, 0, 0.35);
+      border-radius: 5px;
+      text-align: left;
+      transition: background-color 0.5s ease;
+      font-weight: 600;
+    }
+
+    .noti-content.is-read {
+      color: rgba(0, 0, 0, 0.35);
+    }
+
+    .noti-content:hover {
+      background-color: #b6d4fe;
+      cursor: pointer;
+    }
+
+    #noti-button {
+      padding: 2px;
+      width: 36px;
+      height: 36px;
+      /*background-color: #3498db; !* 버튼의 배경색 *!*/
+      /*color: #fff; !* 텍스트 색상 *!*/
+      border: solid 1px rgba(0, 0, 0, 0.35);
+      border-radius: 50%; /* 원 모양을 만들기 위해 50%의 border-radius 사용 */
+      /*text-align: center;*/
+      /*line-height: 100px; !* 버튼 내 텍스트를 세로 가운데 정렬하기 위한 설정 *!*/
+      /*text-decoration: none;*/
+    }
+
+    /* 버튼에 호버 효과 추가 */
+    #noti-button:hover {
+      color: black;
+      background-color: #b6d4ff; /* 호버시 배경색 변경 */
+    }
+
+    #noti-bell {
+      color: rgba(0, 0, 0, 0.35);
+    }
+
+    #noti-badge {
+      bottom: 70%;
+      left: 80%;
+    }
+
+    #noti-modal {
+      z-index: 100;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      display: none;
+      position: absolute;
+      top: 80px;
+      right: 40px;
+      width: 400px;
+      height: 420px;
+      border: solid 1px black;
+    }
+
+    #noti-modal-contents {
+      padding: 8px;
+      margin-bottom: 24px;
+      height: 268px;
+      overflow-y: auto; /* 수직 스크롤을 활성화합니다. */
+    }
+  </style>
+
+  <div
+      class="mx-5 d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3">
+    <div class="col-md-3 mb-2 mb-md-0 w-25">
+      <a class="d-inline-flex link-body-emphasis text-decoration-none" href="/">
+        <div class="d-flex align-items-center">
+          <img height="32" role="img" src="/images/logo.png" width="32">
+          <span
+              class="m-1 fs-4 p-1 fw-semibold">Anchor</span>
+        </div>
+      </a>
+    </div>
+
+    <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+      <li><a class="nav-link px-2 text-secondary" href="#">멘토링</a></li>
+      <li><a class="nav-link px-2" href="#">About</a></li>
+    </ul>
+
+    <div class="col-md-1 text-end w-25" th:if="${session.user eq null}">
+      <button class="btn btn-outline-primary me-2" id="header-login" th:if="${session.user eq null}" type="button">
+        Login
+      </button>
+    </div>
+    <div class="d-flex justify-content-end col-md-1 text-end w-25" th:unless="${session.user eq null}">
+      <button class="d-flex justify-content-center align-items-center btn me-2 position-relative" id="noti-button"
+              sec:authorize="isAuthenticated()"
+              th:unless="${session.user eq null}" type="button">
+
+        <!--        onclick="location.href='/api/notifications'"-->
+
+        <svg class="bi bi-bell" fill="currentColor" height="20" id="noti-bell" viewBox="0 0 16 16"
+             width="20"
+             xmlns="http://www.w3.org/2000/svg">
+          <path
+              d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4.002 4.002 0 0 0-3.203-3.92L8 1.917zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5.002 5.002 0 0 1 13 6c0 .88.32 4.2 1.22 6z"/>
+        </svg>
+        <span
+            class="position-absolute p-1 translate-middle bg-danger border border-light rounded-circle  visually-hidden"
+            id="noti-badge">
+                  <span class="visually-hidden">New alerts</span>
+        </span>
+      </button>
+
+      <div id="noti-modal">
+        <div class="mb-2 d-flex justify-content-center" id="noti-modal-header">
+          <h3>알림 목록</h3>
+        </div>
+        <div class="d-flex flex-column align-items-start" id="noti-modal-contents">
+        </div>
+        <div class="d-flex justify-content-end gap-2" id="noti-modal-buttons">
+          <button class="btn btn-primary" onclick="readAll()">모든 알림 읽기</button>
+          <button class="btn btn-primary" onclick="closeModal()">닫기</button>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center dropdown">
+        <a aria-expanded="false"
+           class="d-block link-body-emphasis text-decoration-none dropdown-toggle"
+           data-bs-toggle="dropdown"
+           href="">
+          <img alt="mdo" class="rounded-circle" height="36" style="border: solid 1px rgba(0, 0, 0, 0.35);"
+               th:src="${session.user.image}"
+               width="36">
+        </a>
+        <ul class="dropdown-menu">
+          <li><p class="dropdown-item" th:text="${session.user.nickname}"></p></li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li><a class="dropdown-item" th:href="@{/users/me}">내 프로필</a></li>
+          <li><a class="dropdown-item" th:href="@{/users/me/applied-mentorings}">신청내역 조회</a></li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li><a class="dropdown-item" href="/logout">Logout</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</header>

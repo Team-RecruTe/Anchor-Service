@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org"
+>
+<head>
+  <title>Layout page</title>
+  <meta content="no-referrer" name="referrer"/>
+  <link href="/css/library/bootstrap/bootstrap.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="/js/library/jquery/jquery-3.7.1.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+  <script src="/js/library/axios/axios.min.js"></script>
+  <script src="/js/library/jquery/jquery-3.7.1.min.js"></script>
+  <style>
+    .toast-bottom-right {
+      top: 80px;
+    }
+
+    #main-content {
+      min-height: 70vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+  </style>
+</head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+<div class="main-container" id="main-content" layout:fragment="content"></div>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<script src="/js/library/bootstrap/bootstrap.bundle.js"></script>
+<script src="/js/payment-timeout.js"></script>
+
+<script sec:authorize="isAuthenticated()">
+  const notiBadge = document.querySelector('#noti-badge');
+
+  /* (isRead > 0) 인지 체크 */
+  axios.get("/api/notifications/count")
+  .then(res => {
+    console.log(res)
+    if (res.status === 200 && res.data > 0) {
+      notiBadge.classList.remove("visually-hidden")
+    }
+  })
+  .catch(error => {
+    console.log(error)
+  })
+
+  toastr.options.positionClass = "toast-bottom-right";
+  const eventSource = new EventSource('http://localhost:8080/api/notifications/connect');
+  eventSource.addEventListener('sse', event => {
+    if (event.data.message !== undefined) {
+      toastr.info(event.data.message);
+      notiBadge.classList.remove("visually-hidden")
+    }
+  });
+
+  axios.get("/api/notifications").then(res => {
+    const noties = res.data.notifications
+    for (const noti of noties) {
+      const notiContents = document.querySelector('#noti-modal-contents')
+      const spanTag = document.createElement('span')
+      spanTag.classList.add('noti-content')
+      spanTag.textContent = noti.message
+      console.log(noti)
+      if (noti.read) {
+        spanTag.classList.add('is-read')
+      }
+      spanTag.onclick = () => {
+        axios.put(`/api/notifications/${noti.notificationId}`).catch(err => {
+          console.log(err)
+        })
+        location.href = `/mentorings/${noti.mentoringId}`
+      }
+      notiContents.appendChild(spanTag)
+    }
+  })
+
+  const notiModal = document.getElementById('noti-modal')
+
+  const modalEvent = (e) => {
+    closeModal()
+  }
+
+  document.getElementById('noti-button').addEventListener('click', (e) => {
+    notiModal.style.display = 'block';
+    e.stopPropagation()
+    window.addEventListener('click', modalEvent)
+  });
+
+  function closeModal() {
+    notiModal.style.display = 'none';
+    window.removeEventListener('click', modalEvent)
+  }
+
+  function readAll() {
+    if (confirm("모든 알림을 읽음 처리하시겠습니까?")) {
+      axios.put(`/api/notifications/read-all`).catch(err => {
+        console.log(err)
+      })
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko"
+      layout:decorate="~{layout/default}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+>
+<head>
+  <title>멘토 - 멘토링 에디터 페이지</title>
+  <link href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" rel="stylesheet"/>
+  <style>
+    h5 {
+      margin: 0;
+    }
+
+    .tag-del-btn {
+      background-color: transparent;
+      color: #DB4455;
+      border: none;
+      padding: 8px;
+    }
+
+    .tag-del-btn {
+      position: relative;
+    }
+
+    .tag-del-btn:before, .tag-del-btn:after {
+      position: absolute;
+      /*right: 7px;*/
+      top: 5px;
+      content: '';
+      height: 8px;
+      width: 1px;
+      background-color: #222;
+    }
+
+    .tag-del-btn:before {
+      transform: rotate(45deg);
+    }
+
+    .tag-del-btn:after {
+      transform: rotate(-45deg);
+    }
+  </style>
+</head>
+<body>
+<div class="d-flex flex-column justify-content-center" layout:fragment="content">
+  <div class="row">
+    <div class="col-md-3">
+      <div th:replace="~{fragments/sidebar/info-sidebar :: sidebar}"></div>
+    </div>
+
+    <div class=" col-md-9">
+      <!-- 에디터를 적용할 요소 (컨테이너) -->
+      <div class="w-75" id="editor-container">
+        <input class="border rounded border-dark-subtle w-100 p-2 fs-4 fw-semibold mb-2" id="title"
+               placeholder="제목을 입력해주세요." style="text-align: center;">
+        <div id="content">
+        </div>
+        <div class="d-flex justify-content-end align-items-center my-2" id="tags-container">
+          <div class="d-flex align-items-center" id="tags"></div>
+          <input class="text-center mx-1 p-1 rounded-pill" placeholder="태그를 입력하세요" type="text">
+          <button class="btn btn-success py-1" id="tag-add-btn">추가</button>
+        </div>
+        <button class="w-100 btn btn-primary" id="submit-btn" type="button">제출하기</button>
+      </div>
+    </div>
+  </div>
+  <!-- TUI 에디터 JS CDN -->
+  <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+  <script src="/js/mentoring/mentoring-edit.js"></script>
+  <script th:inline="javascript">
+    const initContents = (editor, tagEvent, addTag, submitEvent, submit) => {
+      const savedContents = [[${mentoringContents}]];
+      const title = document.querySelector('#title');
+      const tagsContainer = document.querySelector("#tags-container")
+      const tagInput = tagsContainer.querySelector('input')
+      const tags = document.querySelector('#tags');
+      const addButton = document.querySelector('#tag-add-btn');
+      const submitButton = document.querySelector('#submit-btn');
+
+      // 0. 제목 초기화
+      if (savedContents !== null) {
+        title.value = savedContents.title;
+
+        // 1. 에디터 초기화
+
+        const initalContents = savedContents.contents
+        editor.setHTML(initalContents)
+
+        // 2. 태그 초기화
+        savedContents.tags.forEach((savedTag, idx) => {
+          const tagh5 = document.createElement('h5')
+          const tagSpan = document.createElement('span')
+          tagSpan.textContent = savedTag;
+          tagSpan.classList.add('tag-' + idx)
+          tagSpan.classList.add('me-2')
+          tagSpan.classList.add('badge')
+          tagSpan.classList.add('bg-success')
+          tagh5.appendChild(tagSpan)
+          tags.appendChild(tagSpan)
+        })
+      }
+
+      // 3. 태그 추가 이벤트
+      tagEvent(tags, tagInput, addButton, addTag)
+
+      // 4. 제출 이벤트
+      submitEvent(axios, submitButton, editor, tags, submit)
+    }
+
+    initContents(editor, tagEvent, addTag, submitEvent, submit)
+  </script>
+</div>
+</body>
+</html>

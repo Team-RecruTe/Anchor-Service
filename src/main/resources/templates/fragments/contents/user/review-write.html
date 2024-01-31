@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" layout:decorate="~{layout/default}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>리뷰 작성</title>
+  <style>
+    #field-error {
+      color: red;
+      margin-top: 5px;
+    }
+
+    .star {
+      font-size: 60px;
+      color: #ead161;
+    }
+  </style>
+</head>
+<div class="main" layout:fragment="content">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-6">
+        <div class="card shadow  rounded-2">
+          <div class="card-header">
+            <h2 class="mt-5 mb-2 text-center"
+                style="font-weight:700; color: #0a58ca">
+              리뷰 작성 페이지</h2>
+          </div>
+          <div class="card-body">
+            <form method="post" th:action="@{/users/me/applied-mentorings/review}"
+                  th:object="${mentoringReviewInfo}">
+              <div class="mb-3 d-flex justify-content-center star-box">
+                <i class="bi bi-star mx-2 star" id="star1"></i>
+                <i class="bi bi-star mx-2 star" id="star2"></i>
+                <i class="bi bi-star mx-2 star" id="star3"></i>
+                <i class="bi bi-star mx-2 star" id="star4"></i>
+                <i class="bi bi-star mx-2 star" id="star5"></i>
+              </div>
+              <div class="mb-3">
+                <div class="form-floating">
+              <textarea class="form-control" id="contents" name="contents" placeholder="리뷰를 남겨주세요" style="height: 100px"
+                        th:field="*{contents}"
+                        th:name="contents"
+                        th:value="${mentoringReviewInfo.contents}"></textarea>
+                  <label for="contents">리뷰를 남겨주세요</label>
+                  <div id="field-error" th:errors="*{contents}" th:if="${#fields.hasErrors('contents')}">please check it
+                    again
+                  </div>
+                </div>
+                <input id="ratings" name="ratings" th:name="ratings" type="hidden">
+                <input th:name="startTime" th:value="${mentoringReservedTime.startTime}" type="hidden">
+                <input th:name="endTime" th:value="${mentoringReservedTime.endTime}" type="hidden">
+              </div>
+              <div class="d-flex justify-content-center mt-5">
+                <button class="btn btn-primary" id="btnSubmit">WRITE</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    $(".star").on("click", function () {
+      const total = $(this).index();
+      $(this).parent().find(".star").removeClass("bi-star-fill").addClass("bi-star");
+      $(this).prevAll().removeClass("bi-star").addClass("bi-star-fill").css('color', '#ead161');
+      $(this).removeClass("bi-star").addClass("bi-star-fill").css('color', '#ead161');
+      $("#ratings").val($(this).index() + 1);
+    });
+
+  </script>
+</div>
+</html>
