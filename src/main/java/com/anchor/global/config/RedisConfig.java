@@ -52,7 +52,7 @@ public class RedisConfig {
   @Bean
   public RedissonClient redissonClient() {
     Config config = new Config();
-    String prefix = hostname.equals("127.0.0.1") ? LOCAL_REDISSON_PREFIX : REDISSON_PREFIX;
+    String prefix = hostname.equals("localhost") ? LOCAL_REDISSON_PREFIX : REDISSON_PREFIX;
     config.useSingleServer()
         .setAddress(prefix + hostname + ":" + port);
     return Redisson.create(config);

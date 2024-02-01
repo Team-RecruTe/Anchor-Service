@@ -12,22 +12,71 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: MAIN
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      
-    - name: Set up JDK
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        
-    - name: Set up Gradle
-      uses: gradle/gradle-build-action@v3
-      with:
-        gradle-version: current
-        cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-        
-    - name: Build Project
-      run: gradle build
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Gradle
+        uses: gradle/gradle-build-action@v3
+        with:
+          gradle-version: current
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Get Github Actions IP
+        id: ip
+        uses: haythem/public-ip@v1.3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Add Github Actions IP to Security group
+        run: |
+          aws ec2 authorize-security-group-ingress --group-id ${{ secrets.AWS_SECURITY_GROUP }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32;
+          aws ec2 authorize-security-group-ingress --group-id ${{ secrets.AWS_SECURITY_GROUP }} --protocol tcp --port 3306 --cidr ${{ steps.ip.outputs.ipv4 }}/32;
+
+      - name: Start Redis
+        uses: supercharge/redis-github-action@1.8.0
+
+      - name: Build Project
+        run: |
+          gradle build --info
+        env:
+          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          BASE_URL: ${{ secrets.BASE_URL }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_URL: ${{ secrets.MYSQL_URL }}
+          MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+          NH_ACCESS_TOKEN: ${{ secrets.NH_ACCESS_TOKEN }}
+          NH_ISCD: ${{ secrets.NH_ISCD }}
+          REDIS_HOST: localhost # ${{ secrets.REDIS_HOST }}
+          REDIS_PORT: 6379 # ${{ secrets.REDIS_PORT }}
+          AWS_IMAGE_STORAGE: ${{ secrets.AWS_IMAGE_STORAGE }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          IMP_CODE: ${{ secrets.IMP_CODE }}
+          IMP_KEY: ${{ secrets.IMP_KEY }}
+          IMP_SECRET: ${{ secrets.IMP_SECRET }}
+          TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
+
+      - name: Remove Github Actions IP From Security Group
+        run: |
+          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.AWS_SECURITY_GROUP }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
+          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.AWS_SECURITY_GROUP }} --protocol tcp --port 3306 --cidr ${{ steps.ip.outputs.ipv4 }}/32;

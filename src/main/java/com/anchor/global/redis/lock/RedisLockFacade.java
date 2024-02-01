@@ -21,7 +21,7 @@ public class RedisLockFacade {
     RLock lock = redissonClient.getLock(mentoringId.toString());
 
     try {
-      boolean available = lock.tryLock(3, 1, TimeUnit.SECONDS);
+      boolean available = lock.tryLock(60, 10, TimeUnit.SECONDS);
       if (!available) {
         throw new LockAcquisitionFailedException();
       }
