@@ -1,0 +1,17 @@
+version: 0.0
+os: linux
+
+files:
+  - source: /
+    destination: /home/ubuntu/anchor/dev
+    overwrite: yes
+
+permissions:
+  - object: /home/ubuntu/anchor/dev
+    owner: ubuntu
+    group: ubuntu
+
+hooks:
+  AfterInstall:
+    - location: scripts/build/deploy.sh
+      timeout: 60
