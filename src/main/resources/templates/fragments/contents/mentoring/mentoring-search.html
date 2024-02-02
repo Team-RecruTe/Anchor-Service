@@ -118,8 +118,10 @@
               <th:block th:if="${mentoring.mentoringInfo.mentoringTags.isEmpty()}">
                 <h5><span class="badge bg-secondary-subtle mx-1 mr-2">No Tags</span></h5>
               </th:block>
-              <th:block th:each="tag, tagStat : ${mentoring.mentoringInfo.mentoringTags}">
-                <h5><span class="badge bg-success mx-1 mr-2" th:text="${tag}"></span></h5>
+              <th:block th:unless="${mentoring.mentoringInfo.mentoringTags.isEmpty()}">
+                <div th:each="tag, tagStat: ${mentoring.mentoringInfo.mentoringTags}">
+                  <h5><span class="badge bg-success mx-1 mr-2" th:text="${tag}"></span></h5>
+                </div>
               </th:block>
             </div>
           </div>

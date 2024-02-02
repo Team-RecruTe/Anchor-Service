@@ -27,7 +27,6 @@ public class MentoringDetailInfo {
   }
 
   public void addPopularTags(List<PopularTag> popularTags) {
-    popularTags.sort(PopularTag::compareTo);
     this.searchTags = popularTags;
   }
 
