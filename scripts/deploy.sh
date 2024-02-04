@@ -17,14 +17,15 @@ if [ -z $CURRENT_PID ]
 then
   echo "> Application Not Found: 종료할 어플리케이션이 없습니다."
 else
-  echo "> Stop Application: 실행중인 어플리케이션을 종료합니다."
+  echo "> Stop Application: 실행중인 어플리케이션을 종료합니다. $CURRENT_PID"
   kill -15 $CURRENT_PID
   sleep 5
 fi
 
 ## Start Application
 NOW=$(date +%c)
-
-echo "> Start Application: 어플리케이션을 실행합니다. // $JAR_PATH ($NOW)"
-source $ENV_PATH/env.sh
+sudo chmod -R u+rwx $DEV_DIR
+mkdir -p $DEV_DIR/log
+echo "> Start Application: 어플리케이션을 실행합니다. || $JAR_PATH ($NOW)"
+. $ENV_PATH/env.sh
 nohup java -jar $JAR_PATH > $APP_LOG 2> $ERROR_LOG &

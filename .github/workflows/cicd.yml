@@ -76,7 +76,30 @@ jobs:
           IMP_SECRET: ${{ secrets.IMP_SECRET }}
           TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
 
+      - name: Zip Build File
+        uses: montudor/action-zip@v1
+
+      - name: Upload to S3
+        run: |
+          zip -vr ./build/$GITHUB_SHA.zip .;
+          ls -l ./build;
+          aws s3 cp --region ap-northeast-2 ./build/$GITHUB_SHA.zip s3://$AWS_BUCKET_TO_DEPLOY/dev/$GITHUB_SHA.zip;
+        env:
+          AWS_BUCKET_TO_DEPLOY: ${{ secrets.AWS_BUCKET_TO_DEPLOY }}
+
+      - name: Code Deploy To EC2 instance
+        run: aws deploy create-deployment
+          --application-name $AWS_CODE_DEPLOY_APP
+          --deployment-config-name $AWS_CODE_DEPLOY_CONFIG
+          --deployment-group-name $AWS_CODE_DEPLOY_GROUP
+          --s3-location bucket=$AWS_BUCKET_TO_DEPLOY,bundleType=zip,key=dev/$GITHUB_SHA.zip
+        env:
+          AWS_BUCKET_TO_DEPLOY: ${{ secrets.AWS_BUCKET_TO_DEPLOY }}
+          AWS_CODE_DEPLOY_APP: ${{ secrets.AWS_CODE_DEPLOY_APP }}
+          AWS_CODE_DEPLOY_CONFIG: ${{ secrets.AWS_CODE_DEPLOY_CONFIG }}
+          AWS_CODE_DEPLOY_GROUP: ${{ secrets.AWS_CODE_DEPLOY_GROUP }}
+
       - name: Remove Github Actions IP From Security Group
         run: |
-          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.AWS_SECURITY_GROUP }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
+          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.AWS_SECURITY_GROUP }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32;
           aws ec2 revoke-security-group-ingress --group-id ${{ secrets.AWS_SECURITY_GROUP }} --protocol tcp --port 3306 --cidr ${{ steps.ip.outputs.ipv4 }}/32;
