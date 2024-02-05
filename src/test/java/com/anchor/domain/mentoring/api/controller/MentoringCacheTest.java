@@ -18,7 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 public class MentoringCacheTest {
 
   private static Logger logger = LoggerFactory.getLogger(MentoringCacheTest.class);
-  
+
   @Autowired
   private MentoringService mentoringService;
 

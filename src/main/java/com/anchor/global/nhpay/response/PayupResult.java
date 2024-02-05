@@ -1,6 +1,8 @@
 package com.anchor.global.nhpay.response;
 
-public interface PayupResult {
+import com.anchor.global.util.type.JsonSerializable;
+
+public interface PayupResult extends JsonSerializable {
 
   PayupResponseHeader getHeader();
 

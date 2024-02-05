@@ -1,6 +1,8 @@
 package com.anchor.global.payment.portone.request;
 
-public interface RequiredPaymentData {
+import com.anchor.global.util.type.JsonSerializable;
 
-  public String getImpUid();
+public interface RequiredPaymentData extends JsonSerializable {
+
+  String getImpUid();
 }

@@ -1,5 +1,7 @@
 package com.anchor.global.payment.portone.response;
 
-public interface PaymentResult {
+import com.anchor.global.util.type.JsonSerializable;
+
+public interface PaymentResult extends JsonSerializable {
 
 }

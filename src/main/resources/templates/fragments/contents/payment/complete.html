@@ -24,9 +24,8 @@
               <td th:text="${paymentResult.mentoringInfo.mentorNickname}"></td>
             </tr>
             <tr>
-              <th scope="row">멘토링 결제시간</th>
-              <td th:text="${#temporals.format(paymentResult.mentoringInfo.mentoringReservedTime.from,'yyyy.MM.dd HH:mm')+' ~ '
-              +#temporals.format(paymentResult.mentoringInfo.mentoringReservedTime.to,'HH:mm')}"></td>
+              <th scope="row">멘토링 신청시간</th>
+              <td th:text="${paymentResult.mentoringInfo.mentoringReservedTime}"></td>
             </tr>
             <tr>
               <th scope="row">주문번호</th>
@@ -34,7 +33,7 @@
             </tr>
             <tr>
               <th scope="row">결제금액</th>
-              <td th:text="${paymentResult.paymentInfo.getAmount()}"></td>
+              <td th:text="${#numbers.formatInteger(paymentResult.paymentInfo.getAmount(),3,'COMMA')+'원'}"></td>
             </tr>
             </tbody>
           </table>

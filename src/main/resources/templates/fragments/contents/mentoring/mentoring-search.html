@@ -82,7 +82,7 @@
         <div class="card mb-2 shadow rounded" id="card-container" style="min-height: 300px; min-width: 80px">
           <!-- Title -->
           <div class="card-header clamp-lines d-flex justify-content-center align-items-center mb-2 mt-1 m-0"
-               style="min-height: 60px; max-height: 80px;">
+               style="min-height: 80px; max-height: 80px;">
             <!--            <a class="text-decoration-none fs-5 text-center"-->
             <!--               th:href="@{/mentorings/{id}(id=${mentoring.mentoringInfo.id})}">-->
             <p class="clamp-lines fs-5" th:text="${mentoring.mentoringInfo.title}"></p>
@@ -118,8 +118,10 @@
               <th:block th:if="${mentoring.mentoringInfo.mentoringTags.isEmpty()}">
                 <h5><span class="badge bg-secondary-subtle mx-1 mr-2">No Tags</span></h5>
               </th:block>
-              <th:block th:each="tag, tagStat : ${mentoring.mentoringInfo.mentoringTags}">
-                <h5><span class="badge bg-success mx-1 mr-2" th:text="${tag}"></span></h5>
+              <th:block th:unless="${mentoring.mentoringInfo.mentoringTags.isEmpty()}">
+                <div th:each="tag, tagStat: ${mentoring.mentoringInfo.mentoringTags}">
+                  <h5><span class="badge bg-success mx-1 mr-2" th:text="${tag}"></span></h5>
+                </div>
               </th:block>
             </div>
           </div>
@@ -127,8 +129,6 @@
       </div>
     </div>
   </div>
-
-
   <div class="col-md-12 mt-4">
     <nav aria-label="Page navigation example">
       <ul class="pagination justify-content-center">

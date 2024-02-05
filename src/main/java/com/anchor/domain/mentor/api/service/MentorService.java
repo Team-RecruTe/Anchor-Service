@@ -21,7 +21,7 @@ import com.anchor.domain.payment.domain.repository.PayupRepository;
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
-import com.anchor.global.exception.ServiceException;
+import com.anchor.global.exception.AnchorException;
 import com.anchor.global.exception.type.entity.MentorNotFoundException;
 import com.anchor.global.exception.type.entity.MentoringApplicationNotUniqueException;
 import com.anchor.global.exception.type.entity.UserNotFoundException;
@@ -136,7 +136,7 @@ public class MentorService {
       mentoringApplicationRepository.save(mentoringApplication);
       publishNotification(mentoringApplication, mentoring, mentoringStatus);
       mailMessage = createMailMessage(user, mentoring, mentor, mentoringReservedTime.getFrom(), mentoringStatus);
-    } catch (ServiceException e) {
+    } catch (AnchorException e) {
       log.warn("[멘토번호 :: {} || 멘토링시간 :: {}] 상태변경 실패", mentorId, mentoringReservedTime.toString());
     }
     return mailMessage;
@@ -198,4 +198,5 @@ public class MentorService {
     return currentMonth.with(TemporalAdjusters.firstDayOfNextMonth())
         .truncatedTo(ChronoUnit.DAYS);
   }
+
 }

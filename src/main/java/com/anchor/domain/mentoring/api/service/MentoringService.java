@@ -53,7 +53,6 @@ import com.anchor.global.util.type.DateTimeRange;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
@@ -135,7 +134,7 @@ public class MentoringService {
   @Transactional(readOnly = true)
   public MentoringDetailInfo getMentoringDetailInfo(Long id) {
     Mentoring mentoring = mentoringRepository.findMentoringDetailInfo(id)
-        .orElseThrow(() -> new NoSuchElementException(id + "에 해당하는 멘토링이 존재하지 않습니다."));
+        .orElseThrow(MentoringNotFoundException::new);
     List<MentoringReview> mentoringReviews = mentoringReviewRepository.findAllByMentoringId(id);
     return MentoringDetailInfo.of(mentoring, mentoringReviews);
   }
@@ -191,8 +190,7 @@ public class MentoringService {
     applicationInfo.addApplicationTime(myApplicationLockTime);
     User user = getUser(sessionUser);
     Payment payment = new Payment(applicationInfo);
-    MentoringApplication mentoringApplication = new MentoringApplication(applicationInfo, mentoring, payment,
-        user);
+    MentoringApplication mentoringApplication = new MentoringApplication(applicationInfo, mentoring, payment, user);
     mentoringApplicationRepository.save(mentoringApplication);
     applicationLockClient.remove(key);
     publishNotification(mentoring, mentoringApplication.getMentoringStatus());
@@ -251,10 +249,10 @@ public class MentoringService {
     String key = ApplicationLockClient.createKey(mentor, sessionUser);
     try {
       applicationLockClient.refresh(key);
+      return true;
     } catch (ReservationTimeExpiredException e) {
       return false;
     }
-    return true;
   }
 
   public void autoChangeStatus(DateTimeRange targetDateRange) {

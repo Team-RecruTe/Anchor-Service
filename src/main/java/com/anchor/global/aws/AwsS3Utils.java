@@ -10,6 +10,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.anchor.global.exception.type.image.ImageDeleteException;
 import com.anchor.global.exception.type.image.ImageUploadException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,7 @@ public class AwsS3Utils {
       amazonS3Client.putObject(
           new PutObjectRequest(bucketName, fileName, inputStream, objectMetadata)
               .withCannedAcl(CannedAccessControlList.PublicRead));
-    } catch (Exception e) {
+    } catch (IOException e) {
       throw new ImageUploadException(e);
     }
 

@@ -42,10 +42,10 @@ public class Mentor extends BaseEntity {
   private String accountNumber;
 
   @Column(length = 20, nullable = false)
-  private String bankName;
+  private String accountName;
 
   @Column(length = 20, nullable = false)
-  private String accountName;
+  private String bankName;
 
   @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
   @JoinColumn(name = "mentor_introduction_id")

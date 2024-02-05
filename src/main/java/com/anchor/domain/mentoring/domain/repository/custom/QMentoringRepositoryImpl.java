@@ -23,6 +23,7 @@ import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -93,7 +94,7 @@ public class QMentoringRepositoryImpl implements QMentoringRepository {
 
   @Override
   public List<PopularTag> findPopularTags() {
-    return jpaQueryFactory.select(
+    List<PopularTag> popularTags = jpaQueryFactory.select(
             Projections.constructor(
                 PopularTag.class,
                 mentoringTag.tag.as("tagName"),
@@ -108,6 +109,11 @@ public class QMentoringRepositoryImpl implements QMentoringRepository {
         .offset(0)
         .limit(10)
         .fetch();
+    if (CollectionUtils.isEmpty(popularTags)) {
+      return Collections.emptyList();
+    }
+    popularTags.sort(PopularTag::compareTo);
+    return popularTags;
   }
 
   public List<MentoringSearchResult> findTopMentorings() {
