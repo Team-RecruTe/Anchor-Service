@@ -34,7 +34,7 @@
         멘토링 신청내역
       </a>
     </li>
-    <li th:if="${session.user.mentorId eq null}">
+    <li th:if="${session.user ne null and session.user.mentorId eq null}">
       <a class="nav-link link-body-emphasis" th:href="@{/mentors/register}">
         <svg class="bi pe-none me-2" height="16" width="16">
           <use xlink:href="#speedometer2"></use>
@@ -43,7 +43,7 @@
       </a>
     </li>
 
-    <th:block th:unless="${session.user.mentorId eq null}">
+    <th:block th:if="${session.user ne null and session.user.mentorId ne null}">
       <p>
         <button aria-controls="collapseExample" aria-expanded="false" class="nav-link link-body-emphasis"
                 data-bs-target="#collapseExample"

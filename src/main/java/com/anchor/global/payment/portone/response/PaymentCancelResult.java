@@ -2,7 +2,6 @@ package com.anchor.global.payment.portone.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.io.Serializable;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PaymentCancelResult implements Serializable, PaymentResult {
+public class PaymentCancelResult implements PaymentResult {
 
   private Integer amount;
 

@@ -8,7 +8,7 @@ import com.anchor.global.exception.type.entity.NotificationNotFoundException;
 import com.anchor.global.redis.message.MentoringNotification;
 import com.anchor.global.redis.message.NotificationEvent;
 import com.anchor.global.redis.message.RedisEventManager;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.anchor.global.util.JsonUtils;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -49,7 +49,7 @@ public class NotificationService {
   private static final String DEFAULT_MESSAGE = "EventStream Created.";
   private final RedisEventManager<MentoringNotification> redisEventManager;
   private final NotificationRepository notificationRepository;
-  private final ObjectMapper objectMapper;
+  private final JsonUtils jsonUtils;
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   @TransactionalEventListener
@@ -88,19 +88,11 @@ public class NotificationService {
   }
 
   private String serialize(Notification notification) {
-    try {
-      return this.objectMapper.writeValueAsString(notification);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    return jsonUtils.serializeObjectToJson(notification);
   }
 
   private Notification deserialize(Message message) {
-    try {
-      return this.objectMapper.readValue(message.getBody(), Notification.class);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    return jsonUtils.deserializejsonToObject(message.getBody(), Notification.class);
   }
 
   private SseEmitter createAndSetEmitter(String id) throws IOException {

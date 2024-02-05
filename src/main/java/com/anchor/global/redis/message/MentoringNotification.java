@@ -15,8 +15,8 @@ public class MentoringNotification extends ResponseDto implements NotificationRe
   private String message;
   private boolean isRead;
 
-  private MentoringNotification(Long NotificationId, Long mentoringId, String message, boolean isRead) {
-    this.notificationId = NotificationId;
+  private MentoringNotification(Long notificationId, Long mentoringId, String message, boolean isRead) {
+    this.notificationId = notificationId;
     this.mentoringId = mentoringId;
     this.message = message;
     this.isRead = isRead;

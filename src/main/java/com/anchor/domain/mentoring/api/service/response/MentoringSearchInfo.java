@@ -19,7 +19,6 @@ public class MentoringSearchInfo {
   }
 
   public static MentoringSearchInfo of(Page<MentoringSearchResult> mentoringInfos, List<PopularTag> tags) {
-    tags.sort(PopularTag::compareTo);
     return new MentoringSearchInfo(mentoringInfos, tags);
   }
 }

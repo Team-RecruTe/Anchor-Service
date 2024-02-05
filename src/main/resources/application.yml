@@ -41,6 +41,7 @@ spring:
     web:
       pageable:
         one-indexed-parameters: true
+
   security:
     oauth2:
       client:

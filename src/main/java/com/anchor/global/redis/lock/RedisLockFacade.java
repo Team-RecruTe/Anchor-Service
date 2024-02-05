@@ -1,10 +1,11 @@
 package com.anchor.global.redis.lock;
 
 import com.anchor.domain.mentoring.domain.Mentoring;
+import com.anchor.global.exception.type.entity.IncreaseCountFailedException;
 import com.anchor.global.exception.type.redis.LockAcquisitionFailedException;
-import groovy.util.logging.Slf4j;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
@@ -26,10 +27,11 @@ public class RedisLockFacade {
         throw new LockAcquisitionFailedException();
       }
       return mentoringServiceWithLock.increaseTotalApplication(mentoringId);
-    } catch (InterruptedException e) {
+    } catch (InterruptedException | LockAcquisitionFailedException e) {
       Thread.currentThread()
           .interrupt();
-      throw new LockAcquisitionFailedException();
+      log.error("[멘토링 번호 : {}] :: 신청자수 증가 락 획득 실패", mentoringId);
+      throw new IncreaseCountFailedException(e);
     } finally {
       lock.unlock();
     }

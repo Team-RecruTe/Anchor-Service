@@ -3,10 +3,10 @@ package com.anchor.global.util;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 import com.anchor.domain.mentor.domain.Mentor;
-import com.anchor.global.exception.ServiceException;
-import com.anchor.global.exception.type.api.ApiClientException;
-import com.anchor.global.exception.type.api.HttpClientException;
-import com.anchor.global.exception.type.api.JsonDeserializationFailedException;
+import com.anchor.global.exception.AnchorException;
+import com.anchor.global.exception.type.api.HttpResponseNotFoundException;
+import com.anchor.global.exception.type.api.HttpStatus5xxException;
+import com.anchor.global.exception.type.api.InvalidParamException;
 import com.anchor.global.nhpay.request.PayupRequestHeader;
 import com.anchor.global.nhpay.request.PayupRequestHeaderCreator;
 import com.anchor.global.nhpay.request.RequiredAccountHolderData;
@@ -14,8 +14,6 @@ import com.anchor.global.nhpay.request.RequiredDepositData;
 import com.anchor.global.nhpay.response.AccountHolderResult;
 import com.anchor.global.nhpay.response.DepositResult;
 import com.anchor.global.nhpay.response.PayupResult;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
@@ -30,13 +28,13 @@ import org.springframework.web.client.RestClient;
 public class PayupClient {
 
   private final RestClient restClient;
-  private final ObjectMapper objectMapper;
+  private final JsonUtils jsonUtils;
   private final PayupRequestHeaderCreator headerCreator;
 
-  public PayupClient(@Qualifier("payUpRestClient") RestClient restClient, ObjectMapper objectMapper,
-      PayupRequestHeaderCreator headerCreator) {
+  public PayupClient(@Qualifier("payUpRestClient") RestClient restClient,
+      JsonUtils jsonUtils, PayupRequestHeaderCreator headerCreator) {
     this.restClient = restClient;
-    this.objectMapper = objectMapper;
+    this.jsonUtils = jsonUtils;
     this.headerCreator = headerCreator;
   }
 
@@ -45,10 +43,10 @@ public class PayupClient {
     PayupRequestHeader accountHolderHeader = headerCreator.createAccountRequestHeader(mentor);
     try {
       RequiredAccountHolderData requiredData = RequiredAccountHolderData.of(accountHolderHeader, mentor);
-      String body = objectMapper.writeValueAsString(requiredData);
+      String body = jsonUtils.serializeObjectToJson(requiredData);
       AccountHolderResult result = request(requestUrl, body, AccountHolderResult.class);
       return validateResponse(result);
-    } catch (JsonProcessingException | ServiceException e) {
+    } catch (AnchorException e) {
       failMentor.add(mentor);
       return false;
     }
@@ -59,10 +57,10 @@ public class PayupClient {
     PayupRequestHeader depositRequestHeader = headerCreator.createDepositRequestHeader(mentor);
     try {
       RequiredDepositData requiredData = RequiredDepositData.of(depositRequestHeader, mentor, totalAmount);
-      String body = objectMapper.writeValueAsString(requiredData);
+      String body = jsonUtils.serializeObjectToJson(requiredData);
       DepositResult result = request(requestUrl, body, DepositResult.class);
       validateResponse(result);
-    } catch (JsonProcessingException | ServiceException e) {
+    } catch (AnchorException e) {
       failMentor.add(mentor);
     }
   }
@@ -80,13 +78,11 @@ public class PayupClient {
     try {
       HttpStatusCode statusCode = response.getStatusCode();
       if (statusCode.is4xxClientError() || statusCode.is5xxServerError()) {
-        throw new ApiClientException();
+        throw new HttpStatus5xxException();
       }
-      return objectMapper.readValue(response.getBody(), clazz);
-    } catch (JsonProcessingException e) {
-      throw new JsonDeserializationFailedException(e);
+      return jsonUtils.deserializejsonToObject(response.getBody(), clazz);
     } catch (IOException e) {
-      throw new HttpClientException(e);
+      throw new HttpResponseNotFoundException(e);
     }
   }
 
@@ -94,7 +90,7 @@ public class PayupClient {
     if (payupResult.validateResponseCode()) {
       return true;
     }
-    throw new ApiClientException(payupResult.getMessage());
+    throw new InvalidParamException(payupResult.getMessage());
   }
 
 }

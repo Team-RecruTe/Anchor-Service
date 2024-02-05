@@ -21,7 +21,7 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
 @EnableRedisRepositories
 public class RedisConfig {
 
-  private final String REDISSON_PREFIX = "rediss://";
+  private final String REDISSON_PREFIX = "redis://";
   private final String LOCAL_REDISSON_PREFIX = "redis://";
 
   @Value("${spring.data.redis.host}")

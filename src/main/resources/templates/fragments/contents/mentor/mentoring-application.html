@@ -17,7 +17,7 @@
 <div layout:fragment="content">
   <div th:replace="~{fragments/sidebar/info-sidebar::sidebar}"></div>
   <div class="d-flex justify-content-center">
-    <div class="mx-auto" id="table-container" style="height: 82vh; width:60vw">
+    <div class="mx-auto" id="table-container" style="height: 90vh; width:60vw">
       <div class="card border d-flex justify-content-center mb-5 border-success-subtle border-3">
         <h2 class="text-center">신청내역 관리</h2>
       </div>
@@ -50,10 +50,8 @@
           <td class="align-middle" th:text="${#numbers.formatInteger(app.paymentInfo.amount,3,'COMMA')}+'원'"></td>
           <td class="align-middle ma"
               th:id="${app.mentoringApplicationInfo.dateTimeRange.from} + ' ' + ${app.mentoringApplicationInfo.dateTimeRange.to}">
-          <span>
-            [[${app.mentoringApplicationInfo.dateTimeRange.from.toString().replace("T", " ")}]] ~
-            [[${app.mentoringApplicationInfo.dateTimeRange.to.toString().replace("T", " ")}]]
-          </span>
+            <span th:text="${#temporals.format(app.mentoringApplicationInfo.dateTimeRange.from,'yyyy.MM.dd HH:mm')+ ' ~ '
+            +#temporals.format(app.mentoringApplicationInfo.dateTimeRange.to,'HH:mm')}"></span>
           </td>
           <td class="align-middle" th:id="status">
             <div class="btn-group d-flex justify-content-center">
@@ -101,6 +99,9 @@
         </tr>
         </tbody>
       </table>
+    </div>
+    <div class="row">
+
     </div>
   </div>
 

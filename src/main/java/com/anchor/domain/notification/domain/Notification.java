@@ -2,12 +2,12 @@ package com.anchor.domain.notification.domain;
 
 import com.anchor.global.redis.message.NotificationEvent;
 import com.anchor.global.util.BaseEntity;
+import com.anchor.global.util.type.JsonSerializable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
-import java.io.Serializable;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class Notification extends BaseEntity implements Serializable {
+public class Notification extends BaseEntity implements JsonSerializable {
 
   private Long mentoringId;
 

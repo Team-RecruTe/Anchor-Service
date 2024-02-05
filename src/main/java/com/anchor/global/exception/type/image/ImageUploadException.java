@@ -1,12 +1,12 @@
 package com.anchor.global.exception.type.image;
 
-import com.anchor.global.exception.ServiceException;
-import com.anchor.global.exception.error.ServiceErrorCode;
+import com.anchor.global.exception.ExternalApiException;
+import com.anchor.global.exception.error.AnchorErrorCode;
 
-public class ImageUploadException extends ServiceException {
+public class ImageUploadException extends ExternalApiException {
 
-  public ImageUploadException(Exception ex) {
-    super(ServiceErrorCode.IMAGE_UPLOAD_ERROR, ex);
+  public ImageUploadException(Throwable ex) {
+    super(AnchorErrorCode.IMAGE_UPLOAD_ERROR, ex);
   }
 
 }

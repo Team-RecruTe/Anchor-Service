@@ -46,12 +46,8 @@ public class UserViewController {
   @GetMapping("/me/applied-mentorings")
   public String appliedMentoringList(@PageableDefault(sort = {"id"}, direction = Direction.DESC) Pageable pageable,
       HttpSession session, Model model) {
-
     SessionUser sessionUser = SessionUser.getSessionUser(session);
-
-    Page<AppliedMentoringInfo> appliedMentoringInfoList = userService.loadAppliedMentoringList(
-        sessionUser, pageable);
-
+    Page<AppliedMentoringInfo> appliedMentoringInfoList = userService.loadAppliedMentoringList(sessionUser, pageable);
     model.addAttribute("mentoringApplications", appliedMentoringInfoList);
     return viewResolver.getViewPath("user", "user-mentoring-application");
   }
