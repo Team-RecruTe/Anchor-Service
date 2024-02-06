@@ -189,7 +189,6 @@ function updateReservationButtons(activeTimes, unavailableTimes, selectedDate) {
 // 결제페이지로 넘어가면서 결제진행할 시간 잠금처리하는 함수
 document.getElementById('submitButton').addEventListener('click', () => {
   applicationTimeLock();
-  document.getElementById('form').submit();
 });
 
 function applicationTimeLock() {
@@ -201,7 +200,13 @@ function applicationTimeLock() {
     date: inputDate,
     time: inputTime,
     durationTime: inputDurationTime
-  }).catch(error => alert(error));
+  }).then(res => document.getElementById('form').submit())
+  .catch(error => {
+    let response = error.response.data;
+    let message = `${response.errorCode.code} :: ${response.details.message}`;
+    alert(message);
+    window.location.reload();
+  });
 }
 
 //================================Date Function================================//

@@ -43,7 +43,7 @@ import com.anchor.global.auth.SessionUser;
 import com.anchor.global.exception.type.entity.MentorNotFoundException;
 import com.anchor.global.exception.type.entity.MentoringNotFoundException;
 import com.anchor.global.exception.type.entity.UserNotFoundException;
-import com.anchor.global.exception.type.redis.ReservationTimeExpiredException;
+import com.anchor.global.exception.type.mentoring.DuplicateReservedException;
 import com.anchor.global.mail.AsyncMailSender;
 import com.anchor.global.mail.MailMessage;
 import com.anchor.global.redis.client.ApplicationLockClient;
@@ -145,11 +145,9 @@ public class MentoringService {
   @Transactional(readOnly = true)
   public ApplicationTimeInfo getMentoringActiveTimes(Long id) {
     Mentor mentor = getMentoringById(id).getMentor();
-    String pattern = ApplicationLockClient.createMatchPattern(mentor);
-    List<DateTimeRange> paymentTimes = applicationLockClient.findAllByKeyword(pattern);
-    List<MentoringApplication> mentoringApplications = mentoringApplicationRepository.findAllByMentorId(mentor.getId());
+    List<DateTimeRange> unavailableTimes = getUnavailableTimes(mentor);
     List<MentorSchedule> mentorSchedules = mentorScheduleRepository.findMentorScheduleByMentorId(mentor.getId());
-    return ApplicationTimeInfo.create(mentoringApplications, mentorSchedules, paymentTimes);
+    return ApplicationTimeInfo.create(unavailableTimes, mentorSchedules);
   }
 
   /**
@@ -225,9 +223,12 @@ public class MentoringService {
   /**
    * Redis에 결제진행중인 시간대를 저장합니다.
    */
+  @Transactional
   public void lock(Long id, SessionUser sessionUser, MentoringApplicationTime applicationTime) {
     DateTimeRange dateTimeRange = applicationTime.convertDateTimeRange();
     Mentor mentor = getMentoringById(id).getMentor();
+    List<DateTimeRange> unavailableTimes = getUnavailableTimes(mentor);
+    duplicateTimeCheck(unavailableTimes, dateTimeRange);
     String key = ApplicationLockClient.createKey(mentor, sessionUser);
     applicationLockClient.save(key, dateTimeRange);
   }
@@ -247,12 +248,8 @@ public class MentoringService {
   public boolean refresh(Long id, SessionUser sessionUser) {
     Mentor mentor = getMentoringById(id).getMentor();
     String key = ApplicationLockClient.createKey(mentor, sessionUser);
-    try {
-      applicationLockClient.refresh(key);
-      return true;
-    } catch (ReservationTimeExpiredException e) {
-      return false;
-    }
+    applicationLockClient.refresh(key);
+    return true;
   }
 
   public void autoChangeStatus(DateTimeRange targetDateRange) {
@@ -305,6 +302,25 @@ public class MentoringService {
 
     List<Payment> paymentList = paymentRepository.findPaymentListStartWithToday(today);
     return CodeCreator.getMerchantUid(paymentList, today);
+  }
+
+  private List<DateTimeRange> getUnavailableTimes(Mentor mentor) {
+    String pattern = ApplicationLockClient.createMatchPattern(mentor);
+    List<DateTimeRange> paymentTimes = applicationLockClient.findAllByKeyword(pattern);
+    List<MentoringApplication> mentoringApplications = mentoringApplicationRepository.findAllByMentorId(mentor.getId());
+    mentoringApplications.stream()
+        .map(application -> DateTimeRange.of(application.getStartDateTime(), application.getEndDateTime()))
+        .forEach(paymentTimes::add);
+    return paymentTimes;
+  }
+
+  private void duplicateTimeCheck(List<DateTimeRange> unavailableTimes, DateTimeRange dateTimeRange) {
+    unavailableTimes.stream()
+        .filter(unavailableTime -> unavailableTime.isDuration(dateTimeRange.getFrom()))
+        .findFirst()
+        .ifPresent(unavailableTime -> {
+          throw new DuplicateReservedException();
+        });
   }
 
 }

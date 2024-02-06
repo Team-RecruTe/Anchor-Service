@@ -3,6 +3,8 @@ package com.anchor.global.valid;
 import com.anchor.global.util.type.DateTimeRange;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +29,16 @@ public class CustomValidatorRegistry {
       return rangeSet.size() == dateTimeRanges.size();
     }
 
+  }
+
+  public static class MonthValidator implements ConstraintValidator<NotFutureMonth, LocalDateTime> {
+
+    @Override
+    public boolean isValid(LocalDateTime dateTime, ConstraintValidatorContext constraintValidatorContext) {
+
+      return dateTime.isBefore(LocalDateTime.now()
+          .with(TemporalAdjusters.lastDayOfMonth()));
+    }
   }
 
 }

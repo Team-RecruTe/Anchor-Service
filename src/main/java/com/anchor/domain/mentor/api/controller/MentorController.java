@@ -2,28 +2,26 @@ package com.anchor.domain.mentor.api.controller;
 
 import com.anchor.domain.mentor.api.controller.request.MentorRegisterInfo;
 import com.anchor.domain.mentor.api.controller.request.MentoringStatusInfo;
+import com.anchor.domain.mentor.api.controller.request.PayupMonthRange;
 import com.anchor.domain.mentor.api.controller.request.RequiredMentorEmailInfo;
 import com.anchor.domain.mentor.api.service.MailService;
 import com.anchor.domain.mentor.api.service.MentorService;
 import com.anchor.domain.mentor.api.service.response.MentorOpenCloseTimes;
 import com.anchor.domain.mentor.api.service.response.MentorPayupResult;
 import com.anchor.global.auth.SessionUser;
-import com.anchor.global.exception.type.mentor.FutureDateException;
 import com.anchor.global.util.CodeCreator;
 import com.anchor.global.util.ResponseType;
 import jakarta.servlet.http.HttpSession;
-import java.time.LocalDateTime;
-import java.time.temporal.TemporalAdjusters;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -36,7 +34,8 @@ public class MentorController {
   private final MailService mailService;
 
   @PostMapping("/register/email/send")
-  public ResponseEntity<ResponseType> emailSend(@RequestBody RequiredMentorEmailInfo emailInfo, HttpSession session) {
+  public ResponseEntity<ResponseType> emailSend(@RequestBody @Valid RequiredMentorEmailInfo emailInfo,
+      HttpSession session) {
     String emailCode = CodeCreator.createEmailAuthCode();
     session.setAttribute("ecode", emailCode);
     mailService.sendAuthMail(emailInfo.getReceiver(), emailCode);
@@ -51,7 +50,7 @@ public class MentorController {
   }
 
   @PostMapping
-  public ResponseEntity<ResponseType> registerProcess(@RequestBody MentorRegisterInfo mentorRegisterInfo,
+  public ResponseEntity<ResponseType> registerProcess(@RequestBody @Valid MentorRegisterInfo mentorRegisterInfo,
       HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
     mentorService.register(mentorRegisterInfo, sessionUser);
@@ -75,21 +74,11 @@ public class MentorController {
   }
 
   @GetMapping("/me/payup-info")
-  public ResponseEntity<MentorPayupResult> getTest(
-      @RequestParam("currentMonth") @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") LocalDateTime currentMonth,
-      @RequestParam("startMonth") @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") LocalDateTime startMonth
-      /*,HttpSession session*/) {
+  public ResponseEntity<MentorPayupResult> getPayupResults(
+      @ModelAttribute @Valid PayupMonthRange monthRange/*,HttpSession session*/) {
     SessionUser sessionUser = new SessionUser();
-    if (isFutureDate(currentMonth)) {
-      throw new FutureDateException();
-    }
-    MentorPayupResult payupInfos = mentorService.getMentorPayupResult(startMonth, currentMonth, sessionUser);
+    MentorPayupResult payupInfos = mentorService.getMentorPayupResult(monthRange, sessionUser);
     return ResponseEntity.ok(payupInfos);
-  }
-
-  private boolean isFutureDate(LocalDateTime currentMonth) {
-    return currentMonth.isAfter(LocalDateTime.now()
-        .with(TemporalAdjusters.lastDayOfMonth()));
   }
 
 }
