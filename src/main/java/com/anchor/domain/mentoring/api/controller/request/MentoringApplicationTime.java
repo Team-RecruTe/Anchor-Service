@@ -1,5 +1,6 @@
 package com.anchor.domain.mentoring.api.controller.request;
 
+import com.anchor.global.exception.type.mentoring.DurationTimeParsingException;
 import com.anchor.global.util.type.DateTimeRange;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -56,6 +57,6 @@ public class MentoringApplicationTime {
           .plusHours(hour)
           .plusMinutes(minute);
     }
-    throw new RuntimeException("올바르지 않은 durationTime 형식입니다.");
+    throw new DurationTimeParsingException();
   }
 }
