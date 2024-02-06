@@ -4,10 +4,17 @@ spring:
     active: prod
 
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${MYSQL_URL}
-    username: ${MYSQL_USERNAME}
-    password: ${MYSQL_PASSWORD}
+    hikari:
+      master:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: ${AWS_RDS_MASTER_URL}
+        username: ${AWS_RDS_USERNAME}
+        password: ${AWS_RDS_PASSWORD}
+      slave:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: ${AWS_RDS_SLAVE_URL}
+        username: ${AWS_RDS_USERNAME}
+        password: ${AWS_RDS_PASSWORD}
 
   cache:
     type: caffeine

@@ -10,6 +10,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,25 +19,26 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Table(name="payment")
 public class Payment extends BaseEntity {
 
-  @Column(nullable = false, unique = true)
+  @Column(name="imp_uid", nullable = false, unique = true)
   private String impUid;
 
-  @Column(nullable = false, unique = true)
+  @Column(name="merchant_uid", nullable = false, unique = true)
   private String merchantUid;
 
-  @Column(nullable = false, unique = true)
+  @Column(name="order_uid", nullable = false, unique = true)
   private String orderUid;
 
   @Column(nullable = false)
   private Integer amount;
 
-  @Column(nullable = false)
+  @Column(name="cancel_amount", nullable = false)
   private Integer cancelAmount = 0;
 
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
+  @Column(name="payment_status", nullable = false)
   private PaymentStatus paymentStatus = PaymentStatus.SUCCESS;
 
   @OneToOne(mappedBy = "payment", fetch = FetchType.LAZY, optional = false)

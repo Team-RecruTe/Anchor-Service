@@ -5,6 +5,7 @@ import com.anchor.domain.mentoring.domain.MentoringDetail;
 import com.anchor.global.util.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,15 +13,15 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @Entity
+@Table(name="image")
 public class Image extends BaseEntity {
 
-  @Column
   private String url;
 
-  @Column
+  @Column(name="mentoring_detail_id")
   private Long mentoringDetailId;
 
-  @Column
+  @Column(name="mentor_introduction_id")
   private Long mentorIntroductionId;
 
   private Image(String url) {

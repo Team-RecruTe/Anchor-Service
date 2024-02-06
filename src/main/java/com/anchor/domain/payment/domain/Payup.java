@@ -11,6 +11,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -21,15 +22,17 @@ import org.springframework.data.annotation.LastModifiedDate;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Table(name="payup")
 public class Payup extends BaseEntity {
 
   private Integer amount;
 
   @LastModifiedDate
-  @Column(columnDefinition = "datetime")
+  @Column(name="payup_date_time", columnDefinition = "datetime")
   private LocalDateTime payupDateTime = LocalDateTime.MIN;
 
   @Enumerated(EnumType.STRING)
+  @Column(name="payup_status")
   private PayupStatus payupStatus = PayupStatus.WAITING;
 
   @ManyToOne(fetch = FetchType.LAZY)
