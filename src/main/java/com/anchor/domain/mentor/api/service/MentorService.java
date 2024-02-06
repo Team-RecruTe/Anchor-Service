@@ -5,6 +5,7 @@ import static com.anchor.global.mail.MentoringMailTitle.CANCEL_BY_MENTOR;
 
 import com.anchor.domain.mentor.api.controller.request.MentorRegisterInfo;
 import com.anchor.domain.mentor.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
+import com.anchor.domain.mentor.api.controller.request.PayupMonthRange;
 import com.anchor.domain.mentor.api.service.response.AppliedMentoringSearchResult;
 import com.anchor.domain.mentor.api.service.response.MentorOpenCloseTimes;
 import com.anchor.domain.mentor.api.service.response.MentorPayupResult;
@@ -99,10 +100,11 @@ public class MentorService {
   }
 
   @Transactional(readOnly = true)
-  public MentorPayupResult getMentorPayupResult(LocalDateTime startMonth, LocalDateTime currentMonth,
-      SessionUser sessionUser) {
+  public MentorPayupResult getMentorPayupResult(PayupMonthRange monthRange, SessionUser sessionUser) {
 //    Long mentorId = sessionUser.getMentorId();
     Long mentorId = 1L;
+    LocalDateTime startMonth = monthRange.getStartMonth();
+    LocalDateTime currentMonth = monthRange.getCurrentMonth();
     DateTimeRange actualCalendarRange = DateTimeRange.of(
         getFirstDayOfMonth(startMonth),
         getFirstDayOfNextMonth(currentMonth)

@@ -17,11 +17,11 @@ function paymentPageValidation() {
     if (confirmFlag) {
       let requestUri = currentUri.replace(/\/payment$/, '/refresh');
       axios.put(requestUri)
-      .then(res => {
-        if (res.status !== 200) {
-          alert(res.data);
-          history.back();
-        }
+      .catch(error => {
+        let response = error.response.data;
+        let message = `${response.errorCode.code} :: ${response.details.message}`
+        alert(message);
+        history.back();
       });
     }
 

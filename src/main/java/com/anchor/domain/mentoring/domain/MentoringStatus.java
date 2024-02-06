@@ -1,5 +1,6 @@
 package com.anchor.domain.mentoring.domain;
 
+import com.anchor.global.exception.type.entity.MentoringStatusNotFoundException;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
@@ -18,19 +19,16 @@ public enum MentoringStatus {
   private final String description;
 
   @JsonCreator
-  public static MentoringStatus fromDescription(String name) {
-    for (MentoringStatus status : MentoringStatus.values()) {
-      if (status.name()
-          .equals(name)) {
-        return status;
-      }
+  public static MentoringStatus find(String name) {
+    try {
+      return MentoringStatus.valueOf(name.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      throw new MentoringStatusNotFoundException();
     }
-    throw new IllegalArgumentException("Invalid description :: " + name);
   }
 
   public boolean isEqualTo(String status) {
     return status.toUpperCase()
         .equals(this.name());
   }
-
 }
