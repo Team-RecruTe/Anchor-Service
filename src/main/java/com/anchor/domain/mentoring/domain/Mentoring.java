@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -25,18 +26,19 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Table(name="mentoring")
 public class Mentoring extends BaseEntity {
 
-  @Column(length = 50, nullable = false)
+  @Column(name="title",length = 50, nullable = false)
   private String title;
 
-  @Column(length = 10, nullable = false)
+  @Column(name="duration_time", length = 10, nullable = false)
   private String durationTime;
 
-  @Column(nullable = false)
+  @Column(name="cost", nullable = false)
   private Integer cost;
 
-  @Column(nullable = false, columnDefinition = "int default 0")
+  @Column(name="total_application_number", nullable = false, columnDefinition = "int default 0")
   private Integer totalApplicationNumber = 0;
 
   @ManyToOne(fetch = FetchType.LAZY)

@@ -4,12 +4,14 @@ import com.anchor.domain.mentor.api.service.response.MentorOpenCloseTimes;
 import com.anchor.domain.mentor.api.service.response.MentorOpenCloseTimes.HourMinute;
 import com.anchor.domain.mentor.api.service.response.MentorOpenCloseTimes.OpenCloseTime;
 import com.anchor.global.util.BaseEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -23,16 +25,21 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Table(name="mentor_schedule")
 public class MentorSchedule extends BaseEntity {
 
   @Enumerated(EnumType.STRING)
+  @Column(name="day_of_week")
   private DayOfWeek dayOfWeek;
 
+  @Column(name="open_time")
   private LocalTime openTime;
 
+  @Column(name="close_time")
   private LocalTime closeTime;
 
   @Enumerated(EnumType.STRING)
+  @Column(name="active_status")
   private ActiveStatus activeStatus;
 
   @ManyToOne(fetch = FetchType.LAZY)

@@ -16,6 +16,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -29,22 +30,23 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Table(name="mentor")
 public class Mentor extends BaseEntity {
 
-  @Column(length = 50, unique = true)
+  @Column(name="company_email", length = 50, unique = true)
   private String companyEmail;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private Career career;
 
-  @Column(length = 40, nullable = false)
+  @Column(name="account_number", length = 40, nullable = false)
   private String accountNumber;
 
-  @Column(length = 20, nullable = false)
+  @Column(name="account_name", length = 20, nullable = false)
   private String accountName;
 
-  @Column(length = 20, nullable = false)
+  @Column(name="bank_name", length = 20, nullable = false)
   private String bankName;
 
   @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
