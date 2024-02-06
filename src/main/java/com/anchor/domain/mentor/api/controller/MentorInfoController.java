@@ -7,6 +7,7 @@ import com.anchor.domain.mentor.api.service.MentorInfoService;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.util.ResponseType;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,7 +24,7 @@ public class MentorInfoController {
   private final MentorInfoService mentorInfoService;
 
   @PutMapping("/info")
-  public ResponseEntity<ResponseType> modifyInfo(@RequestBody MentorInfoRequest mentorInfoRequest,
+  public ResponseEntity<ResponseType> modifyInfo(@RequestBody @Valid MentorInfoRequest mentorInfoRequest,
       HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
     mentorInfoService.editInfo(sessionUser, mentorInfoRequest);

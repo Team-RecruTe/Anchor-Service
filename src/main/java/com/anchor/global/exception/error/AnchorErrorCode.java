@@ -16,6 +16,8 @@ public enum AnchorErrorCode {
 
   DUPLICATE_COMPANY_EMAIL(HttpStatus.CONFLICT, "이미 등록된 회사 메일입니다."),
 
+  INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "올바르지 않은 데이터 입력 입니다."),
+
   INVALID_DURATION_TIME(HttpStatus.BAD_REQUEST, "올바르지 않은 durationTime 형식입니다."),
 
   FUTURE_DATE(HttpStatus.BAD_REQUEST, "미래시점의 정산내역 조회는 불가능합니다."),
@@ -47,6 +49,8 @@ public enum AnchorErrorCode {
   RESPONSE_NOT_FOUND(HttpStatus.SERVICE_UNAVAILABLE, "API서버에서 응답이 전달되지 않았습니다."),
 
   MENTORING_STATUS_NOT_FOUND(HttpStatus.NOT_FOUND, "일치하는 멘토링 상태값이 존재하지 않습니다."),
+
+  CAREER_NOT_FOUND(HttpStatus.NOT_FOUND, "일치하는 경력 타입이 존재하지 않습니다."),
 
   BANK_NAME_NOT_FOUND(HttpStatus.NOT_FOUND, "일치하는 은행명이 존재하지 않습니다."),
 

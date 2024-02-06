@@ -12,6 +12,7 @@ import com.anchor.global.exception.type.mentor.FutureDateException;
 import com.anchor.global.util.CodeCreator;
 import com.anchor.global.util.ResponseType;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,8 @@ public class MentorController {
   private final MailService mailService;
 
   @PostMapping("/register/email/send")
-  public ResponseEntity<ResponseType> emailSend(@RequestBody RequiredMentorEmailInfo emailInfo, HttpSession session) {
+  public ResponseEntity<ResponseType> emailSend(@RequestBody @Valid RequiredMentorEmailInfo emailInfo,
+      HttpSession session) {
     String emailCode = CodeCreator.createEmailAuthCode();
     session.setAttribute("ecode", emailCode);
     mailService.sendAuthMail(emailInfo.getReceiver(), emailCode);
@@ -51,7 +53,7 @@ public class MentorController {
   }
 
   @PostMapping
-  public ResponseEntity<ResponseType> registerProcess(@RequestBody MentorRegisterInfo mentorRegisterInfo,
+  public ResponseEntity<ResponseType> registerProcess(@RequestBody @Valid MentorRegisterInfo mentorRegisterInfo,
       HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
     mentorService.register(mentorRegisterInfo, sessionUser);
