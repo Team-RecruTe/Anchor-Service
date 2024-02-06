@@ -54,6 +54,8 @@ public enum AnchorErrorCode {
 
   BANK_NAME_NOT_FOUND(HttpStatus.NOT_FOUND, "일치하는 은행명이 존재하지 않습니다."),
 
+  DUPLICATE_RESERVATION(HttpStatus.CONFLICT, "이미 결제된 멘토링 시간대입니다."),
+
   EXPIRED_TIME(HttpStatus.UNAUTHORIZED, "이미 만료된 Lock입니다."),
 
   LOCK_ACQUIRE_FAIL(HttpStatus.BAD_GATEWAY, "Lock 획득에 실패하였습니다."),

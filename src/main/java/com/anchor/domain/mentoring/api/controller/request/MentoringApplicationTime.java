@@ -15,14 +15,14 @@ import lombok.Getter;
 @Getter
 public class MentoringApplicationTime {
 
+  private static final Pattern pattern = Pattern.compile("(\\d+)h(?:([1-5]0)m)?");
+
   @JsonProperty("date")
   @JsonFormat(pattern = "yyyy-MM-dd")
   private LocalDate date;
-
   @JsonProperty("time")
   @JsonFormat(pattern = "HH:mm")
   private LocalTime time;
-
   private String durationTime;
 
   @ConstructorProperties({"date", "time", "durationTime"})
@@ -45,14 +45,10 @@ public class MentoringApplicationTime {
   }
 
   public LocalDateTime getToDateTime() {
-    Matcher matcher = Pattern.compile("(\\d+)h(?:([1-5]0)m)?")
-        .matcher(durationTime);
-
+    Matcher matcher = pattern.matcher(durationTime);
     if (matcher.find()) {
-
       long hour = Long.parseLong(matcher.group(1));
       long minute = matcher.group(2) == null ? 0L : Long.parseLong(matcher.group(2));
-
       return LocalDateTime.of(this.date, this.time)
           .plusHours(hour)
           .plusMinutes(minute);

@@ -2,7 +2,6 @@ package com.anchor.domain.mentoring.api.service.response;
 
 import com.anchor.domain.mentor.domain.ActiveStatus;
 import com.anchor.domain.mentor.domain.MentorSchedule;
-import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.global.util.type.DateTimeRange;
 import com.anchor.global.util.type.TimeRange;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -38,21 +37,15 @@ public class ApplicationTimeInfo {
     this.activeTimes = activeTimes;
   }
 
-  public static ApplicationTimeInfo create(List<MentoringApplication> applications, List<MentorSchedule> schedules,
-      List<DateTimeRange> paymentTimes) {
-    Map<LocalDate, List<TimeRange>> unavailableTimeMap = createUnavailableTimeMap(applications, paymentTimes);
+  public static ApplicationTimeInfo create(List<DateTimeRange> unavailableTimes, List<MentorSchedule> schedules) {
+    Map<LocalDate, List<TimeRange>> unavailableTimeMap = createUnavailableTimeMap(unavailableTimes);
     Map<DayOfWeek, List<MentorActiveTime>> activeTimeMap = createActiveTimeMap(schedules);
     return new ApplicationTimeInfo(unavailableTimeMap, activeTimeMap);
   }
 
-  private static Map<LocalDate, List<TimeRange>> createUnavailableTimeMap(List<MentoringApplication> applications,
-      List<DateTimeRange> paymentTimes) {
+  private static Map<LocalDate, List<TimeRange>> createUnavailableTimeMap(List<DateTimeRange> unavailableTimes) {
     Map<LocalDate, List<TimeRange>> unavailableTimeMap = new HashMap<>();
-    applications.stream()
-        .filter(MentoringApplication::isNotCancelled)
-        .map(application -> DateTimeRange.of(application.getStartDateTime(), application.getEndDateTime()))
-        .forEach(dateTimeRange -> addUnavailableTimes(dateTimeRange, unavailableTimeMap));
-    paymentTimes.forEach(dateTimeRange -> addUnavailableTimes(dateTimeRange, unavailableTimeMap));
+    unavailableTimes.forEach(dateTimeRange -> addUnavailableTimes(dateTimeRange, unavailableTimeMap));
     return unavailableTimeMap;
   }
 
