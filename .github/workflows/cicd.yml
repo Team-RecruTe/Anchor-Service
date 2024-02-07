@@ -51,7 +51,7 @@ jobs:
 
       - name: Build Project
         run: |
-          gradle build --info
+          gradle clean build --info
         env:
           AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
