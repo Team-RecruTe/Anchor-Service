@@ -4,6 +4,7 @@ import static com.anchor.domain.mentor.domain.QMentor.mentor;
 import static com.anchor.domain.mentor.domain.QMentorSchedule.mentorSchedule;
 
 import com.anchor.domain.mentor.api.service.response.MentorOpenCloseTimes;
+import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentor.domain.MentorSchedule;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.sql.PreparedStatement;
@@ -20,6 +21,20 @@ public class QMentorRepositoryImpl implements QMentorRepository {
 
   private final JPAQueryFactory jpaQueryFactory;
   private final JdbcTemplate jdbcTemplate;
+
+
+  @Override
+  public Mentor findMentorInfoById(Long mentorId) {
+    return jpaQueryFactory.selectFrom(mentor)
+        .join(mentor.mentorings)
+        .fetchJoin()
+        .join(mentor.user)
+        .fetchJoin()
+        .join(mentor.mentorIntroduction)
+        .fetchJoin()
+        .where(mentor.id.eq(mentorId))
+        .fetchOne();
+  }
 
   @Override
   public MentorOpenCloseTimes findScheduleById(Long mentorId) {

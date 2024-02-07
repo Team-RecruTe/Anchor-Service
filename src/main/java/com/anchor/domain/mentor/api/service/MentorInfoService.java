@@ -20,8 +20,8 @@ public class MentorInfoService {
 
   @Transactional
   public MentorInfoResponse findInfo(Long mentorId) {
-    Mentor mentor = getMentor(mentorId);
-    return new MentorInfoResponse(mentor);
+    Mentor mentor = mentorRepository.findMentorInfoById(mentorId);
+    return MentorInfoResponse.of(mentor);
   }
 
   @Transactional
