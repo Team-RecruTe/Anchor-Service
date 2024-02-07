@@ -16,12 +16,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.test.context.ActiveProfiles;
 
 @Slf4j
 @DisplayName("비동기 메일 전송 테스트")
-@Import({JavaMailSenderImpl.class, DBConfig.class})
+@Import(DBConfig.class)
 @ActiveProfiles("test")
 @SpringBootTest
 class AsyncMailServiceTest {
