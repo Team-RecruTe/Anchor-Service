@@ -117,8 +117,8 @@ public class MentoringController {
   @PutMapping("/{id}/refresh")
   public ResponseEntity<ResponseType> refreshPaymentTime(@PathVariable("id") Long id, HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
-    boolean refreshResult = mentoringService.refresh(id, sessionUser);
-    return ResponseEntity.ok(ResponseType.of(refreshResult));
+    mentoringService.refresh(id, sessionUser);
+    return ResponseEntity.ok(ResponseType.SUCCESS);
   }
 
 

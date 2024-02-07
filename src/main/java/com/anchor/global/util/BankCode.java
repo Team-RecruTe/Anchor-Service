@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@Getter
 @RequiredArgsConstructor
 public enum BankCode {
 
@@ -31,9 +32,9 @@ public enum BankCode {
 
   private static final Map<String, BankCode> BANK_CODES = Arrays.stream(BankCode.values())
       .collect(Collectors.toMap(BankCode::getBankName, Function.identity()));
-  @Getter
+
   private final String bankName;
-  @Getter
+
   private final String code;
 
   public static BankCode find(String bankName) {

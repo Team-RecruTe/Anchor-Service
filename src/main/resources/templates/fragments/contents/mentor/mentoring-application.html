@@ -220,7 +220,10 @@
 
     const saveButton = document.querySelector('#save-button')
     saveButton.addEventListener('click', () => {
-      const json = {requiredMentoringStatusInfos: []}
+      const json = {
+        requestTime: getDateTime(),
+        requiredMentoringStatusInfos: []
+      }
       for (const app of apps) {
         const ma = app.querySelector('.ma')
         if (ma.classList.contains('changed')) {
@@ -257,6 +260,12 @@
       const waiting = app.querySelector('#waiting')
       const dropdownButton = app.querySelector('#dropdown-button')
       addEvent(ma, approval, cancel, waiting, dropdownButton)
+    }
+
+    function getDateTime() {
+      let currentDate = new Date();
+      currentDate.setHours(currentDate.getHours() + 9);
+      return currentDate.toISOString().substring(0, 19);
     }
   </script>
 </div>

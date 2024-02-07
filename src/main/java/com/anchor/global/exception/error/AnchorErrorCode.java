@@ -24,6 +24,8 @@ public enum AnchorErrorCode {
 
   INVALID_STATUS(HttpStatus.CONFLICT, "변경 불가능한 상태를 요청하였습니다."),
 
+  INVALID_CANCELLATION_TIME(HttpStatus.CONFLICT, "취소가 불가능한 시간입니다."),
+
   INCREASE_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "멘토링 신청자수 증가에 실패하였습니다."),
 
   ATTRIBUTE_NOT_FOUND(HttpStatus.NOT_FOUND, "주어진 속성 필드가 존재하지 않습니다."),

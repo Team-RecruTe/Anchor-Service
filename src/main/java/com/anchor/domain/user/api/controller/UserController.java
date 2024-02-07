@@ -62,7 +62,7 @@ public class UserController {
   public ResponseEntity<ResponseType> appliedMentoringStatusChange(@RequestBody MentoringStatusInfo mentoringStatus,
       HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
-    boolean changeStatusResult = userService.changeAppliedMentoringStatus(sessionUser, mentoringStatus);
+    boolean changeStatusResult = userService.changeMentoringStatus(sessionUser, mentoringStatus);
     return ResponseEntity.ok(ResponseType.of(changeStatusResult));
   }
 

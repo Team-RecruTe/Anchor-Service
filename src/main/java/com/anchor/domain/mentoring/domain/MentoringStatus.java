@@ -21,14 +21,10 @@ public enum MentoringStatus {
   @JsonCreator
   public static MentoringStatus find(String name) {
     try {
-      return MentoringStatus.valueOf(name.toUpperCase());
+      return MentoringStatus.valueOf(name);
     } catch (IllegalArgumentException e) {
       throw new MentoringStatusNotFoundException();
     }
   }
 
-  public boolean isEqualTo(String status) {
-    return status.toUpperCase()
-        .equals(this.name());
-  }
 }

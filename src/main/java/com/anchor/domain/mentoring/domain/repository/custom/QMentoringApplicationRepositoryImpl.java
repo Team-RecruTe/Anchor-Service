@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -33,8 +34,8 @@ public class QMentoringApplicationRepositoryImpl implements QMentoringApplicatio
   private final JPAQueryFactory jpaQueryFactory;
 
   @Override
-  public MentoringApplication findByMentorIdAndProgressTime(Long mentorId,
-      LocalDateTime startDateTime, LocalDateTime endDateTime) {
+  public MentoringApplication findByMentorIdAndProgressTime(Long mentorId, LocalDateTime startDateTime,
+      LocalDateTime endDateTime) {
     return jpaQueryFactory.selectFrom(mentoringApplication)
         .where(mentoringApplication.mentoring.mentor.id.eq(mentorId)
             .and(mentoringApplication.startDateTime.eq(startDateTime))
@@ -42,6 +43,25 @@ public class QMentoringApplicationRepositoryImpl implements QMentoringApplicatio
         .fetchOne();
   }
 
+  @Override
+  public Optional<MentoringApplication> findByUserIdAndProgressTime(Long userId, LocalDateTime startDateTime,
+      LocalDateTime endDateTime) {
+    return Optional.ofNullable(jpaQueryFactory.selectFrom(mentoringApplication)
+        .join(mentoringApplication.user)
+        .fetchJoin()
+        .join(mentoringApplication.mentoring, mentoring)
+        .fetchJoin()
+        .join(mentoring.mentor)
+        .fetchJoin()
+        .join(mentoringApplication.payment)
+        .fetchJoin()
+        .where(mentoringApplication.user.id.eq(userId)
+            .and(mentoringApplication.startDateTime.eq(startDateTime))
+            .and(mentoringApplication.endDateTime.eq(endDateTime)))
+        .fetchOne());
+  }
+
+  @Override
   public Page<AppliedMentoringSearchResult> findAllByMentorId(Long mentorId, Pageable pageable) {
     Long totalElements = jpaQueryFactory.select(mentoringApplication.count())
         .from(mentoringApplication)
@@ -85,15 +105,6 @@ public class QMentoringApplicationRepositoryImpl implements QMentoringApplicatio
           orders.add(new OrderSpecifier(direction, orderByExpression.get(prop)));
         });
     return orders.toArray(OrderSpecifier[]::new);
-  }
-
-  @Override
-  public List<MentoringApplication> findUnavailableTimesByMentoringIdAndStatus(Long mentorId,
-      MentoringStatus... statuses) {
-    return jpaQueryFactory.selectFrom(mentoringApplication)
-        .where(mentoringApplication.mentoring.mentor.id.eq(mentorId)
-            .and(equalsStatuses(statuses)))
-        .fetch();
   }
 
   @Override

@@ -41,8 +41,7 @@ public class MentoringViewController {
   public String viewMentoringPage(
       @RequestParam(value = "tag", required = false) List<String> tags,
       @RequestParam(value = "keyword", required = false) String keyword,
-      @PageableDefault(size = 16,
-          sort = "totalApplicationNumber", direction = Sort.Direction.DESC) Pageable pageable,
+      @PageableDefault(size = 16, sort = "totalApplicationNumber", direction = Sort.Direction.DESC) Pageable pageable,
       Model model
   ) {
     Page<MentoringSearchResult> mentoringSearchResults = mentoringService.getMentorings(tags, keyword, pageable);
@@ -70,8 +69,8 @@ public class MentoringViewController {
   }
 
   @GetMapping("/{id}/edit")
-  public String viewMentoringEditPage(@PathVariable Long id, Model model, HttpSession httpSession) {
-    SessionUser user = (SessionUser) httpSession.getAttribute("user");
+  public String viewMentoringEditPage(@PathVariable Long id, Model model, HttpSession session) {
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
     MentoringContents result = mentoringService.getContents(id, 1L);
     model.addAttribute("mentoringContents", result);
     return viewResolver.getViewPath("mentoring", "mentoring-edit");
