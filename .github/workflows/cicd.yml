@@ -60,9 +60,10 @@ jobs:
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
           MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
-          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
-          MYSQL_URL: ${{ secrets.MYSQL_URL }}
-          MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
+          AWS_RDS_USERNAME: ${{secrets.AWS_RDS_USERNAME}}
+          AWS_RDS_PASSWORD: ${{secrets.AWS_RDS_PASSWORD}}
+          AWS_RDS_MASTER_URL: ${{ secrets.AWS_RDS_MASTER_URL }}
+          AWS_RDS_SLAVE_URL: ${{ secrets.AWS_RDS_SLAVE_URL }}
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
           NH_ACCESS_TOKEN: ${{ secrets.NH_ACCESS_TOKEN }}
