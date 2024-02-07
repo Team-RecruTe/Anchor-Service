@@ -44,7 +44,7 @@ public class MentoringController {
   public ResponseEntity<MentoringCreateResult> createMentoring(
       @RequestBody @Valid MentoringBasicInfo mentoringBasicInfo, HttpSession httpSession) {
     SessionUser user = (SessionUser) httpSession.getAttribute("user");
-    MentoringCreateResult result = mentoringService.create(user.getMentorId(),
+    MentoringCreateResult result = mentoringService.create(1L,
         mentoringBasicInfo);
 
     result.addLinks(Link.builder()

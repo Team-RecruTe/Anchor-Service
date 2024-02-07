@@ -125,7 +125,7 @@ public class MentoringService {
   public MentoringContents getContents(Long id, Long mentorId) {
     Mentor mentor = getMentorById(mentorId);
     Mentoring mentoring = getMentoringByIdAndMentor(id, mentor);
-    return new MentoringContents(mentoring.getTitle(), mentoring.getContents(), mentoring.getTags());
+    return MentoringContents.of(mentoring);
   }
 
   /**
