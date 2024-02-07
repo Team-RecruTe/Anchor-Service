@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.anchor.global.db.DBConfig;
 import com.anchor.global.mail.AsyncMailSender;
 import com.anchor.global.mail.MailMessage;
 import com.anchor.global.mail.SimpleMailMessage;
@@ -20,7 +21,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @Slf4j
 @DisplayName("비동기 메일 전송 테스트")
-@Import(JavaMailSenderImpl.class)
+@Import({JavaMailSenderImpl.class, DBConfig.class})
 @ActiveProfiles("test")
 @SpringBootTest
 class AsyncMailServiceTest {

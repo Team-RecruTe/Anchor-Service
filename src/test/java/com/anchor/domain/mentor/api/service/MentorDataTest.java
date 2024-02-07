@@ -18,7 +18,9 @@ import com.anchor.domain.user.domain.UserRole;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.config.QueryDslConfig;
 import com.anchor.global.config.RestClientConfig;
+import com.anchor.global.db.DBConfig;
 import com.anchor.global.mail.AsyncMailSender;
+import com.anchor.global.util.JsonUtils;
 import com.anchor.global.util.PaymentClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,7 +46,7 @@ import org.springframework.test.context.ActiveProfiles;
 @DisplayName("멘토 서비스 테스트 - DB 의존성 포함")
 @ActiveProfiles("test")
 @Import({QueryDslConfig.class, MentorService.class, ObjectMapper.class, PaymentClient.class, RestClientConfig.class,
-    AsyncMailSender.class, JavaMailSenderImpl.class})
+    AsyncMailSender.class, JavaMailSenderImpl.class, DBConfig.class, JsonUtils.class})
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DataJpaTest
 class MentorDataTest {

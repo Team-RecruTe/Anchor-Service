@@ -10,6 +10,7 @@ import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.config.QueryDslConfig;
 import com.anchor.global.config.RedisConfig;
+import com.anchor.global.db.DBConfig;
 import com.anchor.global.mail.AsyncMailSender;
 import com.anchor.global.redis.client.ApplicationLockClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +28,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @DisplayName("멘토링 서비스 테스트 - DB 의존성 포함")
 @Import({QueryDslConfig.class, MentoringService.class, ObjectMapper.class, ApplicationLockClient.class,
-    RedisConfig.class, AsyncMailSender.class, JavaMailSenderImpl.class})
+    RedisConfig.class, AsyncMailSender.class, JavaMailSenderImpl.class, DBConfig.class})
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @ActiveProfiles("test")
 @DataJpaTest
