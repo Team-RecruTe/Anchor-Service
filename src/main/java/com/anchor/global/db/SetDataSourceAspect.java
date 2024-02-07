@@ -11,7 +11,6 @@ public class SetDataSourceAspect {
 
   @Before("@annotation(com.anchor.global.db.SetDataSource) && @annotation(target)")
   public void setDataSource(SetDataSource target) throws Exception {
-
     if (target.dataSourceType() == SetDataSource.DataSourceType.MASTER
         || target.dataSourceType() == SetDataSource.DataSourceType.SLAVE) {
       RoutingDataSourceManager.setCurrentDataSourceName(target.dataSourceType());

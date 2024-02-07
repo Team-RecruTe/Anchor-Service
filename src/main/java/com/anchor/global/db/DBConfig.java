@@ -3,12 +3,16 @@ package com.anchor.global.db;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import java.util.HashMap;
+import java.util.Map;
+import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
@@ -18,47 +22,34 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import javax.sql.DataSource;
-import java.util.HashMap;
-import java.util.Map;
-
 @Configuration
 @EnableTransactionManagement
-public class DbConfig {
+public class DBConfig {
 
-  @Bean
+  private final String MASTER_DATASOURCE = "masterDataSource";
+  private final String SLAVE_DATASOURCE = "slaveDataSource";
+  private final String ROUTING_DATASOURCE = "routingDataSource";
+  private final String LAZY_ROUTING_DATASOURCE = "lazyRoutingDataSource";
+
+  @Bean(MASTER_DATASOURCE)
   @ConfigurationProperties(prefix = "spring.datasource.hikari.master")
   public DataSource masterDataSource() {
-    return DataSourceBuilder.create().build();
-  }
-
-  @Bean
-  @ConfigurationProperties(prefix = "spring.datasource.hikari.slave")
-  public DataSource slaveDataSource() {
-    return DataSourceBuilder.create().build();
-  }
-
-  @Bean
-  public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-      EntityManagerFactoryBuilder builder,
-      DataSource lazyRoutingDataSource) {
-    return builder
-        .dataSource(lazyRoutingDataSource)
-        .packages("com.anchor.domain.**.domain")
-        .persistenceUnit("common")
+    return DataSourceBuilder.create()
         .build();
   }
 
-  @Bean
-  public PlatformTransactionManager transactionManager(
-      EntityManagerFactory entityManagerFactory) {
-    return new JpaTransactionManager(entityManagerFactory);
+  @Bean(SLAVE_DATASOURCE)
+  @ConfigurationProperties(prefix = "spring.datasource.hikari.slave")
+  public DataSource slaveDataSource() {
+    return DataSourceBuilder.create()
+        .build();
   }
 
-  @Bean
+  @DependsOn({MASTER_DATASOURCE, SLAVE_DATASOURCE})
+  @Bean(ROUTING_DATASOURCE)
   public AbstractRoutingDataSource routingDataSource(
-      DataSource masterDataSource,
-      DataSource slaveDataSource
+      @Qualifier(MASTER_DATASOURCE) DataSource masterDataSource,
+      @Qualifier(SLAVE_DATASOURCE) DataSource slaveDataSource
   ) {
     AbstractRoutingDataSource routingDataSource = new AbstractRoutingDataSource() {
       @Override
@@ -76,8 +67,10 @@ public class DbConfig {
     return routingDataSource;
   }
 
-  @Bean
-  public LazyConnectionDataSourceProxy lazyRoutingDataSource(DataSource routingDataSource) {
+  @DependsOn(ROUTING_DATASOURCE)
+  @Bean(LAZY_ROUTING_DATASOURCE)
+  public LazyConnectionDataSourceProxy lazyRoutingDataSource(
+      @Qualifier(ROUTING_DATASOURCE) DataSource routingDataSource) {
     return new LazyConnectionDataSourceProxy(routingDataSource);
   }
 
@@ -86,14 +79,33 @@ public class DbConfig {
     return new EntityManagerFactoryBuilder(new HibernateJpaVendorAdapter(), new HashMap<>(), null);
   }
 
+  @DependsOn(LAZY_ROUTING_DATASOURCE)
   @Bean
-  public JPAQueryFactory JPAQueryFactory(EntityManager entityManager) {
-    return new JPAQueryFactory(entityManager);
+  public LocalContainerEntityManagerFactoryBean entityManagerFactory(
+      EntityManagerFactoryBuilder builder,
+      @Qualifier(LAZY_ROUTING_DATASOURCE) DataSource lazyRoutingDataSource) {
+    return builder
+        .dataSource(lazyRoutingDataSource)
+        .packages("com.anchor.domain.**.domain")
+        .persistenceUnit("common")
+        .build();
+  }
+
+  @DependsOn(LAZY_ROUTING_DATASOURCE)
+  @Bean
+  public JdbcTemplate jdbcTemplate(@Qualifier(LAZY_ROUTING_DATASOURCE) DataSource dataSource) {
+    return new JdbcTemplate(dataSource);
   }
 
   @Bean
-  public JdbcTemplate jdbcTemplate(@Qualifier("routingDataSource") DataSource dataSource) {
-    return new JdbcTemplate(dataSource);
+  public PlatformTransactionManager transactionManager(
+      EntityManagerFactory entityManagerFactory) {
+    return new JpaTransactionManager(entityManagerFactory);
+  }
+
+  @Bean
+  public JPAQueryFactory JPAQueryFactory(EntityManager entityManager) {
+    return new JPAQueryFactory(entityManager);
   }
 
 }
