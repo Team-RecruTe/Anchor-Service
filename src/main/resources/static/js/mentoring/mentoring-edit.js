@@ -85,43 +85,47 @@ const tagEvent = (tags, tagInput, addButton, addTag) => {
   });
 }
 
-const submit = (axios, editor, tags) => {
+const submit = (axios, title, durationTime, cost, editor, tags) => {
   console.log(editor.getHTML())
   const addedImages = document.querySelectorAll('img[id*="add"]')
   console.log(addedImages)
   const imageIds = Array.from(addedImages).map(image => image.id.split(" ")[1])
   const tagList = Array.from(tags.children).map(
       tag => tag.querySelector('span').textContent)
-  const json = {
+
+  const basic = {
+    title: title.value,
+    durationTime: durationTime.value,
+    cost: cost.value
+  }
+
+  const contents = {
     contents: editor.getHTML(),
     tags: tagList,
-    imageIds: imageIds,
+    imageIds: imageIds
   }
+
   const currentPath = window.location.pathname
   const suffix = '/edit'
   const path = currentPath.substring(0, currentPath.indexOf(suffix))
 
-  axios.put(path, json)
-  .then((res) => {
+  axios.put(path, basic).then(res => {
     if (res.status === 200) {
-      for (const link of res.data.links) {
-        if (link.rel === "self") {
-          window.location.href = link.href
-          return
-        }
-      }
-      window.location.href = "/"
-    } else {
-      alert('url이 반환되지 않았습니다.')
+      axios.put(`${path}/contents`, contents).then(res => {
+        window.location = `/mentorings/${res.data.id}`
+      }).catch(e => {
+        alert("멘토링 내용 생성에 실패하였습니다.")
+        console.log(e)
+      })
     }
+  }).catch(e => {
+    alert("멘토링 생성에 실패하였습니다.")
+    console.log(e)
   })
-  .catch((error) => {
-    console.error('PUT 요청 중 오류가 발생했습니다.', error);
-    alert('PUT 요청 중에 문제가 발생했습니다.')
-  });
 }
 
-const submitEvent = (axios, submitButton, editor, tags, submit) => {
+const submitEvent = (axios, submitButton, title, durationTime, cost, editor,
+    tags, submit) => {
   submitButton.addEventListener('click',
-      () => submit(axios, editor, tags));
+      () => submit(axios, title, durationTime, cost, editor, tags));
 }
