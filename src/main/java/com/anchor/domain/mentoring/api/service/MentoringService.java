@@ -226,6 +226,8 @@ public class MentoringService {
   public void lock(Long id, SessionUser sessionUser, MentoringApplicationTime applicationTime) {
     DateTimeRange dateTimeRange = applicationTime.convertDateTimeRange();
     Mentor mentor = getMentoringById(id).getMentor();
+    List<DateTimeRange> unavailableTimes = getUnavailableTimes(mentor);
+    duplicateTimeCheck(unavailableTimes, dateTimeRange);
     String key = ApplicationLockClient.createKey(mentor, sessionUser);
     applicationLockClient.save(key, dateTimeRange);
   }
