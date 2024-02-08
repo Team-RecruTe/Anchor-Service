@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko"
+      layout:decorate="~{layout/default}"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+>
+<head>
+  <title>멘토 - 멘토링 에디터 페이지</title>
+  <link href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" rel="stylesheet"/>
+  <style>
+    h5 {
+      margin: 0;
+    }
+
+    .tag-del-btn {
+      background-color: transparent;
+      color: #DB4455;
+      border: none;
+      padding: 8px;
+    }
+
+    .tag-del-btn {
+      position: relative;
+    }
+
+    .tag-del-btn:before, .tag-del-btn:after {
+      position: absolute;
+      /*right: 7px;*/
+      top: 5px;
+      content: '';
+      height: 8px;
+      width: 1px;
+      background-color: #222;
+    }
+
+    .tag-del-btn:before {
+      transform: rotate(45deg);
+    }
+
+    .tag-del-btn:after {
+      transform: rotate(-45deg);
+    }
+  </style>
+</head>
+<body>
+<div class="d-flex flex-column justify-content-center" layout:fragment="content">
+  <div class="row">
+    <div class="col-md-3">
+      <div th:replace="~{fragments/sidebar/info-sidebar :: sidebar}"></div>
+    </div>
+
+    <div class=" col-md-9">
+      <div class="w-75">
+        <input class="border rounded border-dark-subtle w-100 p-2 fs-4 fw-semibold" id="title"
+               placeholder="제목을 입력해주세요." style="text-align: center;">
+        <div class="d-flex align-items-center justify-content-between">
+          <table class="table table-bordered mt-3">
+            <tbody>
+            <tr>
+              <th class="text-center align-middle" scope="row">시간</th>
+              <td>
+                <select class="form-control form-control-sm" id="mentoring-durationTime" type="text">
+                  <option value="30m">30m</option>
+                  <option value="1h">1h</option>
+                  <option value="1h 30m">1h 30m</option>
+                  <option value="2h">2h</option>
+                  <option value="2h 30m">2h 30m</option>
+                  <option value="3h">3h</option>
+                  <option value="3h 30m">3h 30m</option>
+                  <option value="4h">4h</option>
+                  <option value="4h 30m">4h 30m</option>
+                  <option value="5h">5h</option>
+                  <option value="5h 30m">5h 30m</option>
+                  <option value="6h">6h</option>
+                </select>
+              </td>
+              <th class="text-center align-middle" scope="row">비용</th>
+              <td><input class="form-control form-control-sm" id="mentoring-cost" min="0" placeholder="금액을 입력해주세요."
+                         type="number"></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 에디터를 적용할 요소 (컨테이너) -->
+      <div class="w-75" id="editor-container">
+        <div id="content">
+        </div>
+        <div class="d-flex justify-content-end align-items-center my-2" id="tags-container">
+          <div class="d-flex align-items-center" id="tags"></div>
+          <input class="text-center mx-1 p-1 rounded-pill" placeholder="태그를 입력하세요" type="text">
+          <button class="btn btn-success py-1" id="tag-add-btn">추가</button>
+        </div>
+        <button class="w-100 btn btn-primary" id="submit-btn" type="button">제출하기</button>
+      </div>
+    </div>
+  </div>
+  <!-- TUI 에디터 JS CDN -->
+  <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+  <script src="/js/mentoring/mentoring-edit.js"></script>
+  <script th:inline="javascript">
+    const title = document.querySelector('#title');
+    const durationTime = document.querySelector('#mentoring-durationTime')
+    const cost = document.querySelector('#mentoring-cost')
+    const tagsContainer = document.querySelector("#tags-container")
+    const tagInput = tagsContainer.querySelector('input')
+    const tags = document.querySelector('#tags');
+    const addButton = document.querySelector('#tag-add-btn');
+    const submitButton = document.querySelector('#submit-btn');
+
+    const createEvent = (axios, submitButton, title, durationTime, cost, tags) => {
+      submitButton.addEventListener('click', e => {
+        const addedImages = document.querySelectorAll('img[id*="add"]')
+        const imageIds = Array.from(addedImages).map(image => image.id.split(" ")[1])
+        const tagList = Array.from(tags.children).map(tag => tag.querySelector('span').textContent)
+
+        const basic = {
+          title: title.value,
+          durationTime: durationTime.value,
+          cost: cost.value
+        }
+
+        const contents = {
+          contents: editor.getHTML(),
+          tags: tagList,
+          imageIds: imageIds
+        }
+
+        axios.post('/mentorings', basic).then(res => {
+          if (res.status === 200) {
+            axios.put(`/mentorings/${res.data.id}/contents`, contents).then(res => {
+              window.location = `/mentorings/${res.data.id}`
+            }).catch(e => {
+              alert("멘토링 내용 생성에 실패하였습니다.")
+              console.log(e)
+            })
+          }
+        }).catch(e => {
+          alert("멘토링 생성에 실패하였습니다.")
+          console.log(e)
+        })
+
+      })
+    }
+
+    // 3. 태그 추가 이벤트
+    tagEvent(tags, tagInput, addButton, addTag)
+
+    // 4. 저장 이벤트
+    createEvent(axios, submitButton, title, durationTime, cost, tags)
+  </script>
+</div>
+</body>
+</html>

@@ -24,11 +24,11 @@ public abstract class BaseEntity {
   private Long id;
 
   @CreatedDate
-  @Column(updatable = false, columnDefinition = "datetime default now()")
+  @Column(name="create_date", updatable = false, columnDefinition = "datetime default now()")
   private LocalDateTime createDate;
 
   @LastModifiedDate
-  @Column(columnDefinition = "datetime default now()")
+  @Column(name="update_date", columnDefinition = "datetime default now()")
   private LocalDateTime updateDate;
 
 }

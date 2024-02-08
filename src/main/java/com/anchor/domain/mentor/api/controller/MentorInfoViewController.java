@@ -37,7 +37,7 @@ public class MentorInfoViewController {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
     MentorContents contents = mentorInfoService.getContents(1L);
     model.addAttribute("mentorContents", contents);
-    return viewResolver.getViewPath("mentor", "contents-edit");
+    return viewResolver.getViewPath("mentor", "mentoring-edit");
   }
 
 }

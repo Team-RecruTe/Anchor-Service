@@ -49,10 +49,44 @@
     </div>
 
     <div class=" col-md-9">
+      <div class="w-75">
+        <input class="border rounded border-dark-subtle w-100 p-2 fs-4 fw-semibold" id="title"
+               placeholder="제목을 입력해주세요." style="text-align: center;">
+        <div class="d-flex align-items-center justify-content-between">
+          <table class="table table-bordered mt-3">
+            <tbody>
+            <tr>
+              <th class="text-center align-middle" scope="row">시간</th>
+              <td>
+                <select class="form-control form-control-sm" id="mentoring-durationTime" type="text">
+                  <option value="30m">30m</option>
+                  <option value="1h">1h</option>
+                  <option value="1h 30m">1h 30m</option>
+                  <option value="2h">2h</option>
+                  <option value="2h 30m">2h 30m</option>
+                  <option value="3h">3h</option>
+                  <option value="3h 30m">3h 30m</option>
+                  <option value="4h">4h</option>
+                  <option value="4h 30m">4h 30m</option>
+                  <option value="5h">5h</option>
+                  <option value="5h 30m">5h 30m</option>
+                  <option value="6h">6h</option>
+                </select>
+              </td>
+              <th class="text-center align-middle" scope="row">비용</th>
+              <td><input class="form-control form-control-sm" id="mentoring-cost" min="0" placeholder="금액을 입력해주세요."
+                         type="number"></td>
+            </tr>
+            </tbody>
+          </table>
+          <button class="w-25 btn btn-primary" id="save-btn"
+                  style="height: 48px; margin-left: 16px; border-radius: 8px" type="button">저장하기
+          </button>
+        </div>
+      </div>
+
       <!-- 에디터를 적용할 요소 (컨테이너) -->
       <div class="w-75" id="editor-container">
-        <input class="border rounded border-dark-subtle w-100 p-2 fs-4 fw-semibold mb-2" id="title"
-               placeholder="제목을 입력해주세요." style="text-align: center;">
         <div id="content">
         </div>
         <div class="d-flex justify-content-end align-items-center my-2" id="tags-container">
@@ -103,7 +137,27 @@
       // 3. 태그 추가 이벤트
       tagEvent(tags, tagInput, addButton, addTag)
 
-      // 4. 제출 이벤트
+      // 4. 저장 이벤트
+      const title = document.querySelector('#title');
+      const saveButton = document.querySelector('#save-btn')
+      const durationTime = document.querySelector('#mentoring-durationTime')
+      const cost = document.querySelector('#mentoring-cost')
+      const createMentoring = (axios, title, durationTime, cost) => {
+        const data = {
+          title: title,
+          durationTime: durationTime,
+          cost: cost
+        }
+        axios.post('/mentorings', data).then(res => {
+          window.location = `/mentorings/${res.data.id}`
+        }).catch(e => {
+          alert("저장에 실패하였습니다.")
+          console.log(e)
+        })
+
+      }
+
+      // 5. 제출 이벤트
       submitEvent(axios, submitButton, editor, tags, submit)
     }
 

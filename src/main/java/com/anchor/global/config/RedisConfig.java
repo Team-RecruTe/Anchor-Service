@@ -22,7 +22,6 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
 public class RedisConfig {
 
   private final String REDISSON_PREFIX = "redis://";
-  private final String LOCAL_REDISSON_PREFIX = "redis://";
 
   @Value("${spring.data.redis.host}")
   private String hostname;
@@ -52,9 +51,8 @@ public class RedisConfig {
   @Bean
   public RedissonClient redissonClient() {
     Config config = new Config();
-    String prefix = hostname.equals("127.0.0.1") ? LOCAL_REDISSON_PREFIX : REDISSON_PREFIX;
     config.useSingleServer()
-        .setAddress(prefix + hostname + ":" + port);
+        .setAddress(REDISSON_PREFIX + hostname + ":" + port);
     return Redisson.create(config);
   }
 

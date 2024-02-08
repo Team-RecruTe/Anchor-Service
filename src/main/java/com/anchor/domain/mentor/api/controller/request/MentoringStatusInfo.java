@@ -1,7 +1,6 @@
 package com.anchor.domain.mentor.api.controller.request;
 
 import com.anchor.domain.mentoring.domain.MentoringStatus;
-import com.anchor.domain.mentoring.domain.MentoringStatusUtils;
 import com.anchor.global.util.type.DateTimeRange;
 import java.util.List;
 import lombok.Builder;
@@ -28,7 +27,7 @@ public class MentoringStatusInfo {
     }
 
     public MentoringStatus getMentoringStatus() {
-      return MentoringStatusUtils.of(mentoringStatus);
+      return MentoringStatus.find(mentoringStatus);
     }
   }
 

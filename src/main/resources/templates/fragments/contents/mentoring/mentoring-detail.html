@@ -116,7 +116,7 @@
         </div>
         <ul class="list-group list-group-flush">
           <li class="list-group-item">
-            <div class="d-flex align-items-center mb-3" id="mentor-icon" style="width:100%">
+            <div class="d-flex align-items-center" id="mentor-icon" style="width:100%">
               <a class="z-3 mr-5 d-flex gap-2 justify-content-center align-items-center text-decoration-none text-dark"
                  style=" margin-left: auto"
                  th:href="@{/mentors/{id}(id=${mentoringDetail.mentoringDetailSearchResult.mentorId})}">
@@ -141,7 +141,7 @@
 
         <!-- Duration and Cost -->
         <div class="card-footer">
-          <div class="row mt-3">
+          <div class="row mt-2">
             <div class="col-md-6">
               <span class="fs-5" style="width: 48px">시간</span>
               <span class="mr-2 fs-5 text-success"
@@ -157,12 +157,12 @@
 
           <!-- Tags -->
           <hr>
-          <div class="row mt-3">
+          <div class="row mb-2">
             <div class="col-6 d-flex justify-content-start">
-              <div class="d-flex flex-wrap align-items-center h-25">
+              <div class="d-flex flex-wrap align-items-center">
                 <span class="fs-5" style="width: 48px">태그</span>
                 <th:block th:each="tag : ${mentoringDetail.mentoringDetailSearchResult.tags}">
-                  <h5><span class="badge bg-success mx-1 mr-2" th:text="${tag}">Tag1</span></h5>
+                  <h5 class="m-0"><span class="badge bg-success mx-1 mr-2" th:text="${tag}">Tag1</span></h5>
                 </th:block>
               </div>
             </div>
