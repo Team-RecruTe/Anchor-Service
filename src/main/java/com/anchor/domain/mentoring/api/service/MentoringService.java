@@ -50,8 +50,6 @@ import com.anchor.global.redis.client.ApplicationLockClient;
 import com.anchor.global.redis.message.NotificationEvent;
 import com.anchor.global.util.CodeCreator;
 import com.anchor.global.util.type.DateTimeRange;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -171,7 +169,7 @@ public class MentoringService {
     Mentor mentor = mentoring.getMentor();
     String key = ApplicationLockClient.createKey(mentor, sessionUser);
     DateTimeRange myApplicationLockTime = applicationLockClient.findByKey(key);
-    String merchantUid = createMerchantUid();
+    String merchantUid = CodeCreator.createMerchantUid(sessionUser.getEmail());
     return MentoringPaymentInfo.of(mentoring, myApplicationLockTime, userInfo, merchantUid, impCode);
   }
 
@@ -292,14 +290,6 @@ public class MentoringService {
   @Transactional(readOnly = true)
   public List<PopularTag> getPopularTags() {
     return mentoringRepository.findPopularTags();
-  }
-
-  private String createMerchantUid() {
-    String today = LocalDate.now()
-        .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-
-    List<Payment> paymentList = paymentRepository.findPaymentListStartWithToday(today);
-    return CodeCreator.getMerchantUid(paymentList, today);
   }
 
   private List<DateTimeRange> getUnavailableTimes(Mentor mentor) {

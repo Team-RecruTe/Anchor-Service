@@ -7,7 +7,11 @@ document.getElementById('cancel-button').addEventListener('click', () => {
 function cancelPaymentProcess() {
   let currentUri = String(window.location.pathname);
   let requestUri = currentUri.replace(/\/payment$/, '/lock');
-  axios.delete(requestUri).then(res => history.back());
+  axios.delete(requestUri).then(res => {
+    if (res.data === 'SUCCESS') {
+      location.href = currentUri.replace(/\/payment$/, '');
+    }
+  });
 }
 
 function paymentProcess() {
@@ -73,7 +77,7 @@ function paymentValidation(res, amount) {
       }
     });
   } else {
-    alert('에러내용: ' + res.error_msg);
+    alert(res.error_msg);
   }
 }
 
