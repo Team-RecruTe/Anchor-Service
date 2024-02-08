@@ -76,9 +76,9 @@ public class MentorController {
 
   @GetMapping("/me/payup-info")
   public ResponseEntity<MentorPayupResult> getPayupResults(
-      @ModelAttribute @Valid PayupMonthRange monthRange/*,HttpSession session*/) {
-    SessionUser sessionUser = new SessionUser();
-    MentorPayupResult payupInfos = mentorService.getMentorPayupResult(monthRange, sessionUser);
+      @ModelAttribute @Valid PayupMonthRange monthRange, HttpSession session) {
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
+    MentorPayupResult payupInfos = mentorService.getMentorPayupResult(monthRange, sessionUser.getMentorId());
     return ResponseEntity.ok(payupInfos);
   }
 

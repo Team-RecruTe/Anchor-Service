@@ -9,6 +9,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -40,6 +41,23 @@ public class MentorPayupResult {
     return new MentorPayupResult(dailyTotalAmount, dailyMentoringPayupInfo);
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof MentorPayupResult that)) {
+      return false;
+    }
+    return Objects.equals(getDailyTotalAmount(), that.getDailyTotalAmount()) && Objects.equals(
+        getDailyMentoringPayupInfo(), that.getDailyMentoringPayupInfo());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getDailyTotalAmount(), getDailyMentoringPayupInfo());
+  }
+
   @Getter
   @NoArgsConstructor
   public static class PayupInfo {
@@ -59,6 +77,26 @@ public class MentorPayupResult {
       this.payupAmount = payupAmount;
       this.payupStatus = payupStatus;
     }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (!(o instanceof PayupInfo payupInfo)) {
+        return false;
+      }
+      return Objects.equals(getDateTimeRange(), payupInfo.getDateTimeRange()) && Objects.equals(
+          getMenteeNickname(), payupInfo.getMenteeNickname()) && Objects.equals(getPaymentAmount(),
+          payupInfo.getPaymentAmount()) && Objects.equals(getPayupAmount(), payupInfo.getPayupAmount())
+          && getPayupStatus() == payupInfo.getPayupStatus();
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(getDateTimeRange(), getMenteeNickname(), getPaymentAmount(), getPayupAmount(),
+          getPayupStatus());
+    }
   }
 
   @Getter
@@ -70,5 +108,20 @@ public class MentorPayupResult {
       totalAmount.merge(status, amount, Integer::sum);
     }
 
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (!(o instanceof PayupTotalAmount that)) {
+        return false;
+      }
+      return Objects.equals(getTotalAmount(), that.getTotalAmount());
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(getTotalAmount());
+    }
   }
 }

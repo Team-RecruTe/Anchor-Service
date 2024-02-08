@@ -67,8 +67,7 @@ public class MentorService {
     }
     User user = getUser(sessionUser);
     Mentor mentor = Mentor.of(user, mentorRegisterInfo);
-    mentorRepository.save(mentor);
-    return mentor;
+    return mentorRepository.save(mentor);
   }
 
   @Transactional(readOnly = true)
@@ -99,9 +98,7 @@ public class MentorService {
   }
 
   @Transactional(readOnly = true)
-  public MentorPayupResult getMentorPayupResult(PayupMonthRange monthRange, SessionUser sessionUser) {
-//    Long mentorId = sessionUser.getMentorId();
-    Long mentorId = 1L;
+  public MentorPayupResult getMentorPayupResult(PayupMonthRange monthRange, Long mentorId) {
     LocalDateTime startMonth = monthRange.getStartMonth();
     LocalDateTime currentMonth = monthRange.getCurrentMonth();
     DateTimeRange actualCalendarRange = DateTimeRange.of(
