@@ -36,7 +36,6 @@ import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
 import com.anchor.domain.mentoring.domain.repository.MentoringReviewRepository;
 import com.anchor.domain.notification.domain.ReceiverType;
 import com.anchor.domain.payment.domain.Payment;
-import com.anchor.domain.payment.domain.repository.PaymentRepository;
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
@@ -48,7 +47,7 @@ import com.anchor.global.mail.AsyncMailSender;
 import com.anchor.global.mail.MailMessage;
 import com.anchor.global.redis.client.ApplicationLockClient;
 import com.anchor.global.redis.message.NotificationEvent;
-import com.anchor.global.util.CodeCreator;
+import com.anchor.global.util.PaymentClient;
 import com.anchor.global.util.type.DateTimeRange;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -68,11 +67,11 @@ public class MentoringService {
   private final MentoringRepository mentoringRepository;
   private final UserRepository userRepository;
   private final MentorRepository mentorRepository;
-  private final PaymentRepository paymentRepository;
   private final MentorScheduleRepository mentorScheduleRepository;
   private final MentoringApplicationRepository mentoringApplicationRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
   private final MentoringReviewRepository mentoringReviewRepository;
+  private final PaymentClient paymentClient;
   private final ApplicationLockClient applicationLockClient;
   private final AsyncMailSender asyncMailSender;
 
@@ -149,13 +148,14 @@ public class MentoringService {
   }
 
   /**
-   * 멘토링 결제페이지에 필요한 정보를 조회한 후 반환합니다.
+   * 멘토링 결제페이지에 필요한 정보를 조회한 후 반환합니다. 해당 결제페이지에 대한 결제고유번호를 생성하고, 결제금액 사전등록 요청을 진행합니다.
    */
   @Transactional(readOnly = true)
   public MentoringPayConfirmInfo getMentoringConfirmInfo(Long id, MentoringApplicationTime applicationTime,
       SessionUser sessionUser) {
     User user = getUser(sessionUser);
     Mentoring mentoring = getMentoringById(id);
+    paymentClient.preRegisterAmount(user.getEmail(), mentoring.getCost());
     return MentoringPayConfirmInfo.of(user, mentoring, applicationTime);
   }
 
@@ -163,13 +163,12 @@ public class MentoringService {
    * 멘토링 결제에 필요한 정보를 생성합니다.
    */
   @Transactional(readOnly = true)
-  public MentoringPaymentInfo createPaymentInfo(Long id, MentoringApplicationUserInfo userInfo,
+  public MentoringPaymentInfo createPaymentInfo(Long id, MentoringApplicationUserInfo userInfo, String merchantUid,
       SessionUser sessionUser) {
     Mentoring mentoring = getMentoringById(id);
     Mentor mentor = mentoring.getMentor();
     String key = ApplicationLockClient.createKey(mentor, sessionUser);
     DateTimeRange myApplicationLockTime = applicationLockClient.findByKey(key);
-    String merchantUid = CodeCreator.createMerchantUid(sessionUser.getEmail());
     return MentoringPaymentInfo.of(mentoring, myApplicationLockTime, userInfo, merchantUid, impCode);
   }
 
