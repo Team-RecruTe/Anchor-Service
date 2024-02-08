@@ -104,7 +104,7 @@
   <script th:inline="javascript">
     const initContents = (editor, tagEvent, addTag, submitEvent, submit) => {
       const savedContents = [[${mentoringContents}]];
-      const title = document.querySelector('#title');
+      let title = document.querySelector('#title');
       const tagsContainer = document.querySelector("#tags-container")
       const tagInput = tagsContainer.querySelector('input')
       const tags = document.querySelector('#tags');
@@ -138,7 +138,7 @@
       tagEvent(tags, tagInput, addButton, addTag)
 
       // 4. 저장 이벤트
-      const title = document.querySelector('#title');
+      title = document.querySelector('#title');
       const saveButton = document.querySelector('#save-btn')
       const durationTime = document.querySelector('#mentoring-durationTime')
       const cost = document.querySelector('#mentoring-cost')
