@@ -244,11 +244,10 @@ public class MentoringService {
   /**
    * 결제진행중인 시간 잠금 유효시간을 갱신합니다.
    */
-  public boolean refresh(Long id, SessionUser sessionUser) {
+  public void refresh(Long id, SessionUser sessionUser) {
     Mentor mentor = getMentoringById(id).getMentor();
     String key = ApplicationLockClient.createKey(mentor, sessionUser);
     applicationLockClient.refresh(key);
-    return true;
   }
 
   public void autoChangeStatus(DateTimeRange targetDateRange) {

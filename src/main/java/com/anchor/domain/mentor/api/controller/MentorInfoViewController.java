@@ -35,9 +35,9 @@ public class MentorInfoViewController {
   @GetMapping("/me/introduction")
   public String editIntroductionPage(HttpSession session, Model model) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
-    MentorContents contents = mentorInfoService.getContents(1L);
+    MentorContents contents = mentorInfoService.getContents(sessionUser.getMentorId());
     model.addAttribute("mentorContents", contents);
-    return viewResolver.getViewPath("mentor", "mentoring-edit");
+    return viewResolver.getViewPath("mentor", "contents-edit");
   }
 
 }

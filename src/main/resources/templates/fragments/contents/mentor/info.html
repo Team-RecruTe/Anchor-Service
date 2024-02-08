@@ -36,7 +36,7 @@
 
   <div class="row d-flex justify-content-center">
     <div class="col-md-2">
-      <div th:if="${session.user != null && mentorInfo.id eq session.user.mentorId}">
+      <div th:if="${session.user != null && mentorInfo.mentorInfo.id eq session.user.mentorId}">
         <div th:replace="~{fragments/sidebar/info-sidebar :: sidebar}"></div>
       </div>
     </div>
@@ -56,11 +56,11 @@
       </div>
       <a class="btn btn-success mt-3 mb-2"
          th:href="@{/mentors/me/introduction}"
-         th:if="${session.user ne null && mentorInfo.id eq session.user.mentorId && mentorInfo.mentorIntroduction ne null}">
+         th:if="${session.user ne null && mentorInfo.mentorInfo.id eq session.user.mentorId && mentorInfo.mentorInfo.mentorIntroduction ne null}">
         소개글 수정</a>
       <a class="btn btn-success mt-3 mb-2"
          th:href="@{/mentors/me/introduction}"
-         th:if="${session.user ne null && mentorInfo.id eq session.user.mentorId && mentorInfo.mentorIntroduction eq null}">
+         th:if="${session.user ne null && mentorInfo.mentorInfo.id eq session.user.mentorId && mentorInfo.mentorInfo.mentorIntroduction eq null}">
         소개글 작성</a>
 
       <hr>
@@ -69,12 +69,12 @@
         <h3 class="mb-3 d-flex justify-content-center" style=" text-align: center; font-weight: bold;">
           멘토링 목록</h3>
         <div class="row row-cols-4" id="mentoringList">
-          <div class="col-md-4 mb-4" th:each="mentorings, iterStat : ${mentorInfo.mentorings}">
+          <div class="col-md-4 mb-4" th:each="mentoring, iterStat : ${mentorInfo.mentoringInfos}">
             <div id="card-container">
               <div class="card mt-2">
                 <div class="card-header clamp-lines d-flex justify-content-center align-items-center mb-2 mt-1 m-0"
                      style="min-height: 80px; max-height: 80px;">
-                  <h5 class="card-title" th:text="${mentorings.title}">멘토링 주제</h5>
+                  <h5 class="card-title" th:text="${mentoring.title}">멘토링 주제</h5>
 
                 </div>
                 <div class="card-body d-flex flex-column text-center align-items-center">
@@ -82,20 +82,21 @@
                     <div class="pb-1 d-flex mb-3" id="mentoring-durationTime">
                       <span class="fs-6" style="width: 48px">시간</span>
                       <span class="mr-2 fs-6 text-success" style="font-size: 20px; width: 80px"
-                            th:text="${#strings.replace(#strings.replace(mentorings.durationTime,'h','시간'),'m','분')}"></span>
+                            th:text="${#strings.replace(#strings.replace(mentoring.durationTime,'h','시간'),'m','분')}"></span>
                     </div>
                     <div class="pb-1 d-flex">
                       <span class="fs-6" style="width:48px">비용</span>
                       <span class="mr-2 fs-6 text-success" style="font-size: 20px; width: 80px"
-                            th:text="${#numbers.formatInteger(mentorings.cost,3,'COMMA')}+'원'"></span>
+                            th:text="${#numbers.formatInteger(mentoring.cost,3,'COMMA')}+'원'"></span>
                     </div>
                   </div>
                 </div>
                 <div class="card-footer d-flex flex-wrap gap-2 justify-content-center align-items-center">
-                  <a class="btn btn-success mt-2 mb-2" th:href="@{/mentorings/{id}(id=${mentorings.id})}">상세 보기</a>
+                  <a class="btn btn-success mt-2 mb-2" th:href="@{/mentorings/{id}(id=${mentoring.id})}">상세 보기</a>
                   <button class="btn btn-danger mt-2 mb-2"
                           id="btn-mentoring-delete"
-                          th:if="${session.user != null && mentorInfo.id eq session.user.mentorId}" type="button">멘토링
+                          th:if="${session.user != null && mentorInfo.mentorInfo.id eq session.user.mentorId}"
+                          type="button">멘토링
                     삭제
                   </button>
                 </div>
@@ -116,10 +117,10 @@
         <div class="mt-3" id="current-profile-image">
           <div class="profile">
             <img alt="" src="/images/x.png" style="border-radius: 50%; width: 150px; height: 150px"
-                 th:if="${mentorInfo.user.image eq null}"
+                 th:if="${mentorInfo.userInfo.image eq null}"
             >
-            <img alt="" style="border-radius: 50%; width: 150px; height: 150px" th:src="${mentorInfo.user.image}"
-                 th:unless="${mentorInfo.user.image eq null}"
+            <img alt="" style="border-radius: 50%; width: 150px; height: 150px" th:src="${mentorInfo.userInfo.image}"
+                 th:unless="${mentorInfo.userInfo.image eq null}"
             >
           </div>
         </div>
@@ -130,7 +131,7 @@
             <label class="col-sm-4 col-form-label text-end" for="nickname" style="color: #808080;">닉네임</label>
             <div class="col-sm-8">
               <span class="form-control-plaintext text-start" id="nickname"
-                    th:text="${mentorInfo.user.nickname}"></span>
+                    th:text="${mentorInfo.userInfo.nickname}"></span>
             </div>
           </div>
           <!--회사 계정-->
@@ -138,7 +139,7 @@
             <label class="col-sm-4 col-form-label text-end" for="companyEmail" style="color: #808080;">회사 메일</label>
             <div class="col-sm-8">
               <span class="form-control-plaintext text-start" id="companyEmail"
-                    th:text="${mentorInfo.companyEmail}"></span>
+                    th:text="${mentorInfo.mentorInfo.companyEmail}"></span>
             </div>
           </div>
           <!--커리어-->
@@ -146,14 +147,14 @@
             <label class="col-sm-4 col-form-label text-end" for="current-career" style="color: #808080;">경력</label>
             <div class="col-sm-8">
                 <span class="form-control-plaintext text-start" id="current-career"
-                      th:text="${mentorInfo.career} +' (' + ${mentorInfo.career.rangeOfYear} +')'"></span>
+                      th:text="${mentorInfo.mentorInfo.career} +' (' + ${mentorInfo.mentorInfo.career.rangeOfYear} +')'"></span>
             </div>
           </div>
         </div>
       </div>
 
       <!--멘토 + 자신의 페이지-->
-      <div class="card mt-3" th:if="${session.user != null and mentorInfo.id eq session.user.mentorId}">
+      <div class="card mt-3" th:if="${session.user != null and mentorInfo.mentorInfo.id eq session.user.mentorId}">
         <div class="card-header">멘토 정보 수정</div>
         <div class="card-body">
           <!--커리어-->
@@ -165,7 +166,7 @@
                   <select aria-label="career" class="form-control text-center" id="career" name="career">
                     <option value=''>-선택-</option>
                     <option th:each="career : ${careers}"
-                            th:selected="${career eq mentorInfo.career}"
+                            th:selected="${career eq mentorInfo.mentorInfo.career}"
                             th:text="${career.name} +' (' + ${career.rangeOfYear} + ')'"
                             th:value="${career.name}">
                       Select Career
@@ -179,7 +180,8 @@
                 <div class="col-sm-5">
                   <select aria-label="bankName" class="form-control text-center" id="bankName" name="bankName">
                     <option value=''>-선택-</option>
-                    <option th:each="bankCode : ${bankCodes}" th:selected="${bankCode.bankName eq mentorInfo.bankName}"
+                    <option th:each="bankCode : ${bankCodes}"
+                            th:selected="${bankCode.bankName eq mentorInfo.mentorInfo.bankName}"
                             th:text="${bankCode.bankName}" th:value="${bankCode.bankName}"></option>
                   </select>
                 </div>
@@ -190,7 +192,7 @@
                 <div class="col-sm-5">
                   <input aria-label="accountNumber" class="form-control text-center" id="accountNumber"
                          name="accountNumber"
-                         th:value="${mentorInfo.accountNumber}"
+                         th:value="${mentorInfo.mentorInfo.accountNumber}"
                          type="text">
                 </div>
               </div>
@@ -199,7 +201,7 @@
                 <span class="input-group-text w-25">예금주명</span>
                 <div class="col-sm-5">
                   <input aria-label="accountName" class="form-control text-center" id="accountName" name="accountName"
-                         th:value="${mentorInfo.accountName}"
+                         th:value="${mentorInfo.mentorInfo.accountName}"
                          type="text">
                 </div>
               </div>
@@ -221,7 +223,7 @@
     const viewer = new toastui.Editor.factory({
       el: document.getElementById('viewer'), // toast ui editor 적용할 div
       viewer: true, // viewer 사용 여부
-      initialValue: [[${mentorInfo.mentorIntroduction}]] //초기 입력값
+      initialValue: [[${mentorInfo.mentorInfo.mentorIntroduction}]] //초기 입력값
     });
 
     let index = {
@@ -264,7 +266,7 @@
       /*멘토 권한 해제*/
       deleteMentor: function () {
         let data = {
-          mentorId: [[${mentorInfo.id}]]
+          mentorId: [[${mentorInfo.mentorInfo.id}]]
         };
         $.ajax({
           type: "delete",

@@ -5,6 +5,7 @@ import static com.anchor.global.mail.MentoringMailTitle.COMPLETE_BY_MENTEE;
 
 import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.domain.mentoring.api.controller.request.MentoringReviewInfo;
+import com.anchor.domain.mentoring.api.service.MentoringStatusChangeProcessor;
 import com.anchor.domain.mentoring.domain.Mentoring;
 import com.anchor.domain.mentoring.domain.MentoringApplication;
 import com.anchor.domain.mentoring.domain.MentoringReview;
@@ -12,9 +13,6 @@ import com.anchor.domain.mentoring.domain.MentoringStatus;
 import com.anchor.domain.mentoring.domain.repository.MentoringApplicationRepository;
 import com.anchor.domain.mentoring.domain.repository.MentoringReviewRepository;
 import com.anchor.domain.notification.domain.ReceiverType;
-import com.anchor.domain.payment.domain.Payment;
-import com.anchor.domain.payment.domain.Payup;
-import com.anchor.domain.payment.domain.repository.PayupRepository;
 import com.anchor.domain.user.api.controller.request.MentoringReservedTime;
 import com.anchor.domain.user.api.controller.request.MentoringStatusInfo;
 import com.anchor.domain.user.api.controller.request.MentoringStatusInfo.RequiredMentoringStatusInfo;
@@ -34,17 +32,11 @@ import com.anchor.global.exception.type.entity.UserNotFoundException;
 import com.anchor.global.mail.AsyncMailSender;
 import com.anchor.global.mail.MailMessage;
 import com.anchor.global.mail.MentoringMailMessage;
-import com.anchor.global.payment.portone.request.RequiredPaymentCancelData;
-import com.anchor.global.payment.portone.response.PaymentCancelResult;
-import com.anchor.global.payment.portone.response.PaymentResult;
-import com.anchor.global.redis.lock.RedisLockFacade;
 import com.anchor.global.redis.message.NotificationEvent;
-import com.anchor.global.util.PaymentClient;
 import com.anchor.global.util.type.DateTimeRange;
 import jakarta.persistence.PersistenceException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -62,10 +54,8 @@ public class UserService {
   private final MentoringApplicationRepository mentoringApplicationRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
   private final MentoringReviewRepository mentoringReviewRepository;
-  private final PayupRepository payupRepository;
-  private final PaymentClient paymentClient;
-  private final RedisLockFacade redisLockFacade;
   private final AsyncMailSender asyncMailSender;
+  private final MentoringStatusChangeProcessor statusChangeProcessor;
 
   @Transactional
   public void writeReview(SessionUser sessionUser, MentoringReviewInfo mentoringReviewInfo) {
@@ -130,34 +120,40 @@ public class UserService {
   }
 
   @Transactional
-  public boolean changeAppliedMentoringStatus(SessionUser sessionUser, MentoringStatusInfo changeRequest) {
+  public boolean changeMentoringStatus(SessionUser sessionUser, MentoringStatusInfo changeRequest) {
     User user = getUser(sessionUser);
-    List<RequiredMentoringStatusInfo> mentoringStatusList = changeRequest.getRequiredMentoringStatusInfos();
-    List<MailMessage> mailMessages = mentoringStatusList.stream()
-        .map(status -> {
-          MailMessage mailMessage = null;
-          DateTimeRange range = status.getMentoringReservedTime();
-          MentoringApplication mentoringApplication = getMentoringApplication(range.getFrom(), range.getTo(),
-              user.getId());
-          Mentoring mentoring = mentoringApplication.getMentoring();
-          Mentor mentor = mentoring.getMentor();
-          try {
-            validateMentoringStatus(status);
-            changeStatus(mentoringApplication, mentoring, status.getMentoringStatus());
-            mailMessage = createMailMessage(user, mentoring, mentor, range.getFrom(), status.getMentoringStatus());
-          } catch (AnchorException | PersistenceException e) {
-            log.warn("[회원번호 :: {} || 신청내역 번호 :: {}] 상태변경 실패", user.getId(), mentoringApplication.getId());
-          }
-          return mailMessage;
-        })
+    LocalDateTime requestTime = changeRequest.getRequestTime();
+    List<RequiredMentoringStatusInfo> mentoringStatusInfos = changeRequest.getRequiredMentoringStatusInfos();
+    List<MailMessage> mailMessages = mentoringStatusInfos.stream()
+        .map(statusInfo -> changeStatus(user, requestTime, statusInfo))
         .toList();
     asyncMailSender.sendMails(mailMessages);
     return true;
   }
 
-  private MentoringApplication getMentoringApplication(LocalDateTime startDateTime, LocalDateTime endDateTime,
-      Long userId) {
-    return mentoringApplicationRepository.findByStartDateTimeAndEndDateTimeAndUserId(startDateTime, endDateTime, userId)
+  private MailMessage changeStatus(User user, LocalDateTime requestTime,
+      RequiredMentoringStatusInfo requiredStatusInfo) {
+    MailMessage mailMessage = null;
+    DateTimeRange reservedTime = requiredStatusInfo.getMentoringReservedTime();
+    MentoringApplication mentoringApplication = getMentoringApplication(user.getId(), reservedTime);
+    Mentoring mentoring = mentoringApplication.getMentoring();
+    Mentor mentor = mentoring.getMentor();
+    MentoringStatus mentoringStatus = requiredStatusInfo.getMentoringStatus();
+    try {
+      validateMentoringStatus(mentoringStatus);
+      statusChangeProcessor.changeStatusProcess(mentoringApplication, mentoringStatus, requestTime);
+      mentoringApplicationRepository.save(mentoringApplication);
+      publishNotification(mentoring, mentoringStatus);
+      mailMessage = createMailMessage(user, mentoring, mentor, reservedTime.getFrom(), mentoringStatus);
+    } catch (AnchorException | PersistenceException e) {
+      log.warn("[회원번호 :: {} || 신청내역 번호 :: {}] 상태변경 실패", user.getId(), mentoringApplication.getId());
+      log.warn("cause :: {}", e.getMessage());
+    }
+    return mailMessage;
+  }
+
+  private MentoringApplication getMentoringApplication(Long userId, DateTimeRange range) {
+    return mentoringApplicationRepository.findByUserIdAndProgressTime(userId, range.getFrom(), range.getTo())
         .orElseThrow(MentoringApplicationNotFoundException::new);
   }
 
@@ -180,8 +176,7 @@ public class UserService {
         .build();
   }
 
-  private void validateMentoringStatus(RequiredMentoringStatusInfo statusInfo) {
-    MentoringStatus status = statusInfo.getMentoringStatus();
+  private void validateMentoringStatus(MentoringStatus status) {
     if (status.equals(MentoringStatus.WAITING) || status.equals(MentoringStatus.APPROVAL)) {
       throw new InvalidStatusException();
     }
@@ -198,14 +193,6 @@ public class UserService {
         .orElseThrow(MentoringApplicationNotFoundException::new);
   }
 
-  private void changeStatus(MentoringApplication mentoringApplication, Mentoring mentoring,
-      MentoringStatus mentoringStatus) {
-    processPayment(mentoringApplication, mentoringStatus);
-    mentoringApplication.changeStatus(mentoringStatus);
-    publishNotification(mentoring, mentoringStatus);
-    mentoringApplicationRepository.save(mentoringApplication);
-  }
-
   private void publishNotification(Mentoring mentoring, MentoringStatus mentoringStatus) {
     applicationEventPublisher.publishEvent(NotificationEvent.builder()
         .email(mentoring.getMentor()
@@ -215,32 +202,6 @@ public class UserService {
         .mentoringStatus(mentoringStatus)
         .receiverType(ReceiverType.TO_MENTOR)
         .build());
-  }
-
-  private void processPayment(MentoringApplication mentoringApplication, MentoringStatus mentoringStatus) {
-    switch (mentoringStatus) {
-      case CANCELLED -> cancelPayment(mentoringApplication, mentoringStatus);
-      case COMPLETE -> savePayup(mentoringApplication);
-    }
-  }
-
-  private void cancelPayment(MentoringApplication application, MentoringStatus mentoringStatus) {
-    Payment payment = application.getPayment();
-    RequiredPaymentCancelData requiredPaymentCancelData = new RequiredPaymentCancelData(payment);
-    Optional<PaymentResult> paymentCancelResult = paymentClient.request(mentoringStatus, requiredPaymentCancelData);
-    paymentCancelResult.ifPresent(result -> payment.editPaymentCancelStatus((PaymentCancelResult) result));
-  }
-
-  private void savePayup(MentoringApplication application) {
-    Long mentoringId = mentoringApplicationRepository.getMentoringId(application);
-    Mentoring mentoring = redisLockFacade.increaseTotalApplication(mentoringId);
-    Mentor mentor = mentoring.getMentor();
-    Payment payment = application.getPayment();
-    Payup payup = Payup.builder()
-        .mentor(mentor)
-        .payment(payment)
-        .build();
-    payupRepository.save(payup);
   }
 
 }

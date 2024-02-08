@@ -1,13 +1,13 @@
 package com.anchor.domain.mentor.api.controller;
 
 import com.anchor.domain.mentor.api.controller.request.MentorRegisterInfo;
-import com.anchor.domain.mentor.api.controller.request.MentoringStatusInfo;
 import com.anchor.domain.mentor.api.controller.request.PayupMonthRange;
 import com.anchor.domain.mentor.api.controller.request.RequiredMentorEmailInfo;
 import com.anchor.domain.mentor.api.service.MailService;
 import com.anchor.domain.mentor.api.service.MentorService;
 import com.anchor.domain.mentor.api.service.response.MentorOpenCloseTimes;
 import com.anchor.domain.mentor.api.service.response.MentorPayupResult;
+import com.anchor.domain.user.api.controller.request.MentoringStatusInfo;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.util.CodeCreator;
 import com.anchor.global.util.ResponseType;
@@ -69,7 +69,7 @@ public class MentorController {
   public ResponseEntity<ResponseType> changeMentoringStatus(@RequestBody MentoringStatusInfo mentoringStatusInfo,
       HttpSession session) {
     SessionUser user = SessionUser.getSessionUser(session);
-    mentorService.changeMentoringStatus(1L, mentoringStatusInfo.getRequiredMentoringStatusInfos());
+    mentorService.changeMentoringStatus(1L, mentoringStatusInfo);
     return ResponseEntity.ok(ResponseType.SUCCESS);
   }
 

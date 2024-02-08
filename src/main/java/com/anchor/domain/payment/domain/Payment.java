@@ -19,26 +19,26 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name="payment")
+@Table(name = "payment")
 public class Payment extends BaseEntity {
 
-  @Column(name="imp_uid", nullable = false, unique = true)
+  @Column(name = "imp_uid", nullable = false, unique = true)
   private String impUid;
 
-  @Column(name="merchant_uid", nullable = false, unique = true)
+  @Column(name = "merchant_uid", nullable = false, unique = true)
   private String merchantUid;
 
-  @Column(name="order_uid", nullable = false, unique = true)
+  @Column(name = "order_uid", nullable = false, unique = true)
   private String orderUid;
 
   @Column(nullable = false)
   private Integer amount;
 
-  @Column(name="cancel_amount", nullable = false)
+  @Column(name = "cancel_amount", nullable = false)
   private Integer cancelAmount = 0;
 
   @Enumerated(EnumType.STRING)
-  @Column(name="payment_status", nullable = false)
+  @Column(name = "payment_status", nullable = false)
   private PaymentStatus paymentStatus = PaymentStatus.SUCCESS;
 
   @OneToOne(mappedBy = "payment", fetch = FetchType.LAZY, optional = false)
@@ -67,9 +67,9 @@ public class Payment extends BaseEntity {
     return this.paymentStatus.equals(PaymentStatus.CANCELLED);
   }
 
-  public void editPaymentCancelStatus(PaymentCancelResult PaymentCancelDetail) {
+  public void editPaymentCancelStatus(PaymentCancelResult paymentCancelResult) {
     this.paymentStatus = PaymentStatus.CANCELLED;
-    this.cancelAmount = PaymentCancelDetail.getCancelAmount();
+    this.cancelAmount = paymentCancelResult.getCancelAmount();
   }
 
   public void addMentoringApplication(MentoringApplication mentoringApplication) {
