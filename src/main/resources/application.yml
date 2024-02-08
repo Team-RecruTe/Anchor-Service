@@ -107,6 +107,9 @@ payup:
   access-token: ${NH_ACCESS_TOKEN}
   iscd: ${NH_ISCD}
 
+logging:
+  config: classpath:log4j2/log4j2.yml
+
 ---
 spring:
   config:

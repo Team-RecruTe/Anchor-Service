@@ -1,0 +1,66 @@
+Configutation:
+  name: Anchor
+
+  Properties:
+    Property:
+      - name: "log-path"
+        value: "./logs"
+      - name: "charset-UTF-8"
+        value: "UTF-8"
+      - name: "console-layout-pattern"
+        value: "%style{%d}{White} %highlight{%-5level} [%style{%t}{bright,blue}-%c{1}] %style{%C}{bright,yellow}: %msg%n%throwable"
+      - name: "file-layout-pattern"
+        value: "%d %-5level [%t :: %c] %C: %msg%n%throwable"
+
+  Appenders:
+    Console:
+      - name: console-appender
+        target: SYSTEM_OUT
+        PatternLayout:
+          pattern: ${console-layout-pattern}
+
+    RollingFile:
+      name: rolling-file-appender
+      fileName: ${log-path}/rolling-file.log
+      filePattern: "${log-path}/archive/rollingFile.log.%d{yyyy-MM-dd_hh:mm}_%i.gz"
+      immediateFlush: "false"
+      PatternLayout:
+        charset: ${charset-UTF-8}
+        pattern: ${file-layout-pattern}
+      Policies:
+        SizeBasedTriggeringPolicy:
+          size: "1MB"
+        TimeBasedTriggeringPolicy:
+          interval: "1"
+      DefaultRollOverStrategy:
+        max: "10"
+        fileIndex: "max"
+
+  Loggers:
+    Root:
+      level: INFO
+      AppenderRef:
+        - ref: console-appender
+
+    Logger:
+      - name: com.anchor
+        additivity: "false"
+        level: DEBUG
+        AppenderRef:
+          - ref: console-appender
+
+    AsyncLogger:
+      - name: p6spy
+        level: INFO
+        AppenderRef:
+          - ref: rolling-file-appender
+
+      - name: com
+        level: INFO
+        AppenderRef:
+          - ref: rolling-file-appender
+
+      - name: org
+        level: INFO
+        AppenderRef:
+          - ref: rolling-file-appender
