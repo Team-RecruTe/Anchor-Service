@@ -1,10 +1,10 @@
 package com.anchor.global.redis.client;
 
 import com.anchor.domain.mentor.domain.Mentor;
-import com.anchor.global.auth.SessionUser;
 import com.anchor.global.exception.type.redis.ReservationTimeExpiredException;
 import com.anchor.global.util.type.DateTimeRange;
 import java.time.Duration;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -16,13 +16,16 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ApplicationLockClient implements RedisClient<DateTimeRange> {
+public class ApplicationLockClient implements RedisClient<ReservationTimeInfo> {
 
-  private final RedisOperations<String, DateTimeRange> redis;
+  private final RedisOperations<String, ReservationTimeInfo> redis;
+
   private final Duration expiredTime = Duration.ofMinutes(5L);
 
-  public static String createKey(Mentor mentor, SessionUser sessionUser) {
-    return "mentor:" + mentor.getId() + ":" + sessionUser.getEmail();
+  public static String createKey(Mentor mentor, DateTimeRange reservedTime) {
+    String reservationLockTime = reservedTime.getFrom()
+        .format(DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
+    return "mentor:" + mentor.getId() + ":" + reservationLockTime;
   }
 
   public static String createMatchPattern(Mentor mentor) {
@@ -30,31 +33,31 @@ public class ApplicationLockClient implements RedisClient<DateTimeRange> {
   }
 
   @Override
-  public void save(String key, DateTimeRange value) {
+  public void save(String key, ReservationTimeInfo value) {
     redis.opsForValue()
         .set(key, value, expiredTime);
   }
 
   @Override
-  public List<DateTimeRange> findAllByKeyword(String pattern) {
-    List<DateTimeRange> applicationLockTimes = new ArrayList<>();
+  public List<ReservationTimeInfo> findAllByKeyword(String pattern) {
+    List<ReservationTimeInfo> reservationTimeInfos = new ArrayList<>();
     ScanOptions options = ScanOptions.scanOptions()
         .match(pattern)
         .build();
     try (Cursor<String> scan = redis.scan(options)) {
       while (scan.hasNext()) {
         String key = scan.next();
-        DateTimeRange dateTimeRange = findByKey(key);
-        if (Objects.nonNull(dateTimeRange)) {
-          applicationLockTimes.add(dateTimeRange);
+        ReservationTimeInfo reservationTimeInfo = findByKey(key);
+        if (Objects.nonNull(reservationTimeInfo)) {
+          reservationTimeInfos.add(reservationTimeInfo);
         }
       }
     }
-    return applicationLockTimes;
+    return reservationTimeInfos;
   }
 
   @Override
-  public DateTimeRange findByKey(String key) {
+  public ReservationTimeInfo findByKey(String key) {
     return redis.opsForValue()
         .get(key);
   }
@@ -64,14 +67,13 @@ public class ApplicationLockClient implements RedisClient<DateTimeRange> {
     redis.delete(key);
   }
 
-  @Override
-  public void refresh(String key) {
-    DateTimeRange dateTimeRange = findByKey(key);
-    if (Objects.nonNull(dateTimeRange)) {
-      redis.opsForValue()
-          .set(key, dateTimeRange, expiredTime);
-    } else {
+  public void refresh(String key, String email) {
+    ReservationTimeInfo reservationTimeInfo = Objects.requireNonNull(findByKey(key), () -> {
       throw new ReservationTimeExpiredException();
+    });
+    if (reservationTimeInfo.isOwner(email)) {
+      save(key, reservationTimeInfo);
     }
   }
+
 }

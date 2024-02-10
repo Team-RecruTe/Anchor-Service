@@ -29,13 +29,6 @@ public class ImageSessionClient implements RedisClient<String> {
 
   @Override
   public void remove(String key) {
-
   }
-
-  @Override
-  public void refresh(String key) {
-
-  }
-
 
 }

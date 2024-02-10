@@ -43,13 +43,17 @@ import com.anchor.global.exception.type.entity.MentorNotFoundException;
 import com.anchor.global.exception.type.entity.MentoringNotFoundException;
 import com.anchor.global.exception.type.entity.UserNotFoundException;
 import com.anchor.global.exception.type.mentoring.DuplicateReservedException;
+import com.anchor.global.exception.type.redis.ReservationTimeExpiredException;
 import com.anchor.global.mail.AsyncMailSender;
 import com.anchor.global.mail.MailMessage;
 import com.anchor.global.redis.client.ApplicationLockClient;
+import com.anchor.global.redis.client.ReservationTimeInfo;
 import com.anchor.global.redis.message.NotificationEvent;
 import com.anchor.global.util.PaymentClient;
 import com.anchor.global.util.type.DateTimeRange;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
@@ -164,30 +168,28 @@ public class MentoringService {
    */
   @Transactional(readOnly = true)
   public MentoringPaymentInfo createPaymentInfo(Long id, MentoringApplicationUserInfo userInfo, String merchantUid,
-      SessionUser sessionUser) {
+      String redisLockKey) {
     Mentoring mentoring = getMentoringById(id);
-    Mentor mentor = mentoring.getMentor();
-    String key = ApplicationLockClient.createKey(mentor, sessionUser);
-    DateTimeRange myApplicationLockTime = applicationLockClient.findByKey(key);
-    return MentoringPaymentInfo.of(mentoring, myApplicationLockTime, userInfo, merchantUid, impCode);
+    ReservationTimeInfo reservationTimeInfo = Objects.requireNonNull(applicationLockClient.findByKey(redisLockKey),
+        () -> {
+          throw new ReservationTimeExpiredException();
+        });
+    return MentoringPaymentInfo.of(mentoring, reservationTimeInfo.getReservedTime(), userInfo, merchantUid, impCode);
   }
 
   /**
    * 멘토링 신청이 완료되면 멘토링 신청내역을 저장합니다.
    */
   @Transactional
-  public MentoringOrderUid saveMentoringApplication(SessionUser sessionUser,
-      Long id, MentoringApplicationInfo applicationInfo) {
+  public MentoringOrderUid saveMentoringApplication(Long id, SessionUser sessionUser, String redisLockKey,
+      MentoringApplicationInfo applicationInfo) {
     Mentoring mentoring = getMentoringById(id);
     Mentor mentor = mentoring.getMentor();
-    String key = ApplicationLockClient.createKey(mentor, sessionUser);
-    DateTimeRange myApplicationLockTime = applicationLockClient.findByKey(key);
-    applicationInfo.addApplicationTime(myApplicationLockTime);
     User user = getUser(sessionUser);
     Payment payment = new Payment(applicationInfo);
     MentoringApplication mentoringApplication = new MentoringApplication(applicationInfo, mentoring, payment, user);
     mentoringApplicationRepository.save(mentoringApplication);
-    applicationLockClient.remove(key);
+    applicationLockClient.remove(redisLockKey);
     publishNotification(mentoring, mentoringApplication.getMentoringStatus());
     sendMailToMentor(mentoring, mentor, user, applicationInfo);
     return new MentoringOrderUid(mentoringApplication);
@@ -201,7 +203,8 @@ public class MentoringService {
         .receiverEmail(mentor.getCompanyEmail())
         .opponentEmail(user.getEmail())
         .opponentNickName(user.getNickname())
-        .startDateTime(applicationInfo.getStartDateTime())
+        .startDateTime(applicationInfo.getReservedTime()
+            .getFrom())
         .receiverType(ReceiverType.TO_MENTOR)
         .build());
   }
@@ -220,33 +223,33 @@ public class MentoringService {
   /**
    * Redis에 결제진행중인 시간대를 저장합니다.
    */
-  public void lock(Long id, SessionUser sessionUser, MentoringApplicationTime applicationTime) {
+  @Transactional
+  public String lock(Long id, SessionUser sessionUser, MentoringApplicationTime applicationTime) {
     DateTimeRange dateTimeRange = applicationTime.convertDateTimeRange();
     Mentor mentor = getMentoringById(id).getMentor();
     List<DateTimeRange> unavailableTimes = getUnavailableTimes(mentor);
     duplicateTimeCheck(unavailableTimes, dateTimeRange);
-    String key = ApplicationLockClient.createKey(mentor, sessionUser);
-    applicationLockClient.save(key, dateTimeRange);
+    String redisLockKey = ApplicationLockClient.createKey(mentor, dateTimeRange);
+    ReservationTimeInfo reservationTimeInfo = ReservationTimeInfo.of(sessionUser, dateTimeRange);
+    applicationLockClient.save(redisLockKey, reservationTimeInfo);
+    return redisLockKey;
   }
 
   /**
    * Redis에 저장되어있던 시간대를 삭제합니다.
    */
-  public void unlock(Long id, SessionUser sessionUser) {
-    Mentor mentor = getMentoringById(id).getMentor();
-    String key = ApplicationLockClient.createKey(mentor, sessionUser);
+  public void unlock(String key) {
     applicationLockClient.remove(key);
   }
 
   /**
    * 결제진행중인 시간 잠금 유효시간을 갱신합니다.
    */
-  public void refresh(Long id, SessionUser sessionUser) {
-    Mentor mentor = getMentoringById(id).getMentor();
-    String key = ApplicationLockClient.createKey(mentor, sessionUser);
-    applicationLockClient.refresh(key);
+  public void refresh(String key, String email) {
+    applicationLockClient.refresh(key, email);
   }
 
+  @Transactional
   public void autoChangeStatus(DateTimeRange targetDateRange) {
     List<MentoringApplication> result = mentoringApplicationRepository.findAllByNotCompleteForWeek(targetDateRange);
     result.forEach(application -> application.changeStatus(MentoringStatus.COMPLETE));
@@ -293,7 +296,10 @@ public class MentoringService {
 
   private List<DateTimeRange> getUnavailableTimes(Mentor mentor) {
     String pattern = ApplicationLockClient.createMatchPattern(mentor);
-    List<DateTimeRange> paymentTimes = applicationLockClient.findAllByKeyword(pattern);
+    List<ReservationTimeInfo> reservedTimes = applicationLockClient.findAllByKeyword(pattern);
+    List<DateTimeRange> paymentTimes = reservedTimes.stream()
+        .map(ReservationTimeInfo::getReservedTime)
+        .collect(Collectors.toList());
     List<MentoringApplication> mentoringApplications = mentoringApplicationRepository.findAllByMentorId(mentor.getId());
     mentoringApplications.stream()
         .map(application -> DateTimeRange.of(application.getStartDateTime(), application.getEndDateTime()))

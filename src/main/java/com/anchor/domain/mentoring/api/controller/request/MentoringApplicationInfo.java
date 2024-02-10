@@ -1,10 +1,8 @@
 package com.anchor.domain.mentoring.api.controller.request;
 
 import com.anchor.global.util.type.DateTimeRange;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,21 +19,15 @@ public class MentoringApplicationInfo implements Serializable {
 
   private Integer amount;
 
-  @JsonIgnore
-  private LocalDateTime startDateTime;
-
-  @JsonIgnore
-  private LocalDateTime endDateTime;
+  @JsonProperty("reserved_time")
+  private DateTimeRange reservedTime;
 
   @Builder
-  private MentoringApplicationInfo(String impUid, String merchantUid, Integer amount) {
+  private MentoringApplicationInfo(String impUid, String merchantUid, Integer amount, DateTimeRange reservedTime) {
     this.impUid = impUid;
     this.merchantUid = merchantUid;
     this.amount = amount;
+    this.reservedTime = reservedTime;
   }
 
-  public void addApplicationTime(DateTimeRange dateTimeRange) {
-    this.startDateTime = dateTimeRange.getFrom();
-    this.endDateTime = dateTimeRange.getTo();
-  }
 }
