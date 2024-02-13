@@ -4,7 +4,6 @@ import com.anchor.domain.mentor.domain.Mentor;
 import com.anchor.global.exception.type.redis.ReservationTimeExpiredException;
 import com.anchor.global.util.type.DateTimeRange;
 import java.time.Duration;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -22,10 +21,9 @@ public class ApplicationLockClient implements RedisClient<ReservationTimeInfo> {
 
   private final Duration expiredTime = Duration.ofMinutes(5L);
 
-  public static String createKey(Mentor mentor, DateTimeRange reservedTime) {
-    String reservationLockTime = reservedTime.getFrom()
-        .format(DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
-    return "mentor:" + mentor.getId() + ":" + reservationLockTime;
+  public static String createKey(Long mentorId, DateTimeRange reservedTime) {
+    String reservationLockTime = reservedTime.formattingFromTime();
+    return "mentor:" + mentorId + ":" + reservationLockTime;
   }
 
   public static String createMatchPattern(Mentor mentor) {

@@ -42,12 +42,12 @@ import com.anchor.global.auth.SessionUser;
 import com.anchor.global.exception.type.entity.MentorNotFoundException;
 import com.anchor.global.exception.type.entity.MentoringNotFoundException;
 import com.anchor.global.exception.type.entity.UserNotFoundException;
-import com.anchor.global.exception.type.mentoring.DuplicateReservedException;
 import com.anchor.global.exception.type.redis.ReservationTimeExpiredException;
 import com.anchor.global.mail.AsyncMailSender;
 import com.anchor.global.mail.MailMessage;
 import com.anchor.global.redis.client.ApplicationLockClient;
 import com.anchor.global.redis.client.ReservationTimeInfo;
+import com.anchor.global.redis.lock.RedisLockFacade;
 import com.anchor.global.redis.message.NotificationEvent;
 import com.anchor.global.util.PaymentClient;
 import com.anchor.global.util.type.DateTimeRange;
@@ -76,6 +76,7 @@ public class MentoringService {
   private final ApplicationEventPublisher applicationEventPublisher;
   private final MentoringReviewRepository mentoringReviewRepository;
   private final PaymentClient paymentClient;
+  private final RedisLockFacade redisLockFacade;
   private final ApplicationLockClient applicationLockClient;
   private final AsyncMailSender asyncMailSender;
 
@@ -227,12 +228,8 @@ public class MentoringService {
   public String lock(Long id, SessionUser sessionUser, MentoringApplicationTime applicationTime) {
     DateTimeRange dateTimeRange = applicationTime.convertDateTimeRange();
     Mentor mentor = getMentoringById(id).getMentor();
-    List<DateTimeRange> unavailableTimes = getUnavailableTimes(mentor);
-    duplicateTimeCheck(unavailableTimes, dateTimeRange);
-    String redisLockKey = ApplicationLockClient.createKey(mentor, dateTimeRange);
     ReservationTimeInfo reservationTimeInfo = ReservationTimeInfo.of(sessionUser, dateTimeRange);
-    applicationLockClient.save(redisLockKey, reservationTimeInfo);
-    return redisLockKey;
+    return redisLockFacade.lockApplicationTime(mentor.getId(), reservationTimeInfo);
   }
 
   /**
@@ -305,15 +302,6 @@ public class MentoringService {
         .map(application -> DateTimeRange.of(application.getStartDateTime(), application.getEndDateTime()))
         .forEach(paymentTimes::add);
     return paymentTimes;
-  }
-
-  private void duplicateTimeCheck(List<DateTimeRange> unavailableTimes, DateTimeRange dateTimeRange) {
-    unavailableTimes.stream()
-        .filter(unavailableTime -> unavailableTime.isDuration(dateTimeRange.getFrom()))
-        .findFirst()
-        .ifPresent(unavailableTime -> {
-          throw new DuplicateReservedException();
-        });
   }
 
 }
