@@ -72,7 +72,7 @@ public class RestClientConfig {
   private ConnectionConfig setConnectionConfig() {
     return ConnectionConfig.custom()
         .setConnectTimeout(Timeout.ofSeconds(timeout))
-        .setSocketTimeout(Timeout.ofSeconds(timeout))
+        .setSocketTimeout(Timeout.ofSeconds(10))
         .build();
   }
 

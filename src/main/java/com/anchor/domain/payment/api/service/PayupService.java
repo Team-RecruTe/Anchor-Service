@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ForkJoinPool;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,10 +34,13 @@ public class PayupService {
     Map<Mentor, Integer> mentorTotalAmount = new HashMap<>();
     payupList.forEach(payup -> mentorTotalAmount.merge(payup.getMentor(), payup.getAmount(), Integer::sum));
     Set<Mentor> payupFailMentors = new HashSet<>();
+    ForkJoinPool forkJoinPool = new ForkJoinPool(Runtime.getRuntime()
+        .availableProcessors());
     mentorTotalAmount.keySet()
         .parallelStream()
         .filter(key -> payupClient.validateAccountHolder(key, payupFailMentors))
         .forEach(key -> payupClient.requestPayup(key, mentorTotalAmount.get(key), payupFailMentors));
+    forkJoinPool.shutdown();
     payupRepository.updateStatus(dateTimeRange, payupFailMentors);
   }
 

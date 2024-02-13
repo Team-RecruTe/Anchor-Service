@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum BankCode {
 
-  HANA("하나은행", "001"),
+  HANA("하나은행", "081"),
   KDB("산업은행", "002"),
   IBK("기업은행", "003"),
   KB("국민은행", "004"),

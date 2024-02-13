@@ -82,8 +82,8 @@ spring:
 
 rest-template:
   timeout: 5
-  max-connection: 50
-  max-per-route: 20
+  max-connection: 16
+  max-per-route: 16
 
 cloud:
   aws:
