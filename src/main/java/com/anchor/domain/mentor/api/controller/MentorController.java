@@ -11,6 +11,7 @@ import com.anchor.domain.user.api.controller.request.MentoringStatusInfo;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.util.CodeCreator;
 import com.anchor.global.util.ResponseType;
+import com.anchor.global.util.SessionKeyType;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,14 +38,14 @@ public class MentorController {
   public ResponseEntity<ResponseType> emailSend(@RequestBody @Valid RequiredMentorEmailInfo emailInfo,
       HttpSession session) {
     String emailCode = CodeCreator.createEmailAuthCode();
-    session.setAttribute("ecode", emailCode);
+    session.setAttribute(SessionKeyType.ECODE.getKey(), emailCode);
     mailService.sendAuthMail(emailInfo.getReceiver(), emailCode);
     return ResponseEntity.ok(ResponseType.SUCCESS);
   }
 
   @PostMapping("/register/email/auth")
   public ResponseEntity<ResponseType> emailVerify(@RequestBody RequiredMentorEmailInfo emailInfo, HttpSession session) {
-    String emailCode = (String) session.getAttribute("ecode");
+    String emailCode = (String) session.getAttribute(SessionKeyType.ECODE.getKey());
     return ResponseEntity.ok()
         .body(ResponseType.of(emailInfo.isSameAs(emailCode)));
   }
@@ -75,9 +76,9 @@ public class MentorController {
 
   @GetMapping("/me/payup-info")
   public ResponseEntity<MentorPayupResult> getPayupResults(
-      @ModelAttribute @Valid PayupMonthRange monthRange/*,HttpSession session*/) {
-    SessionUser sessionUser = new SessionUser();
-    MentorPayupResult payupInfos = mentorService.getMentorPayupResult(monthRange, sessionUser);
+      @ModelAttribute @Valid PayupMonthRange monthRange, HttpSession session) {
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
+    MentorPayupResult payupInfos = mentorService.getMentorPayupResult(monthRange, sessionUser.getMentorId());
     return ResponseEntity.ok(payupInfos);
   }
 

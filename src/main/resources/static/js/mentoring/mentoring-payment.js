@@ -7,7 +7,11 @@ document.getElementById('cancel-button').addEventListener('click', () => {
 function cancelPaymentProcess() {
   let currentUri = String(window.location.pathname);
   let requestUri = currentUri.replace(/\/payment$/, '/lock');
-  axios.delete(requestUri).then(res => history.back());
+  axios.delete(requestUri).then(res => {
+    if (res.data === 'SUCCESS') {
+      location.href = currentUri.replace(/\/payment$/, '');
+    }
+  });
 }
 
 function paymentProcess() {
@@ -73,18 +77,24 @@ function paymentValidation(res, amount) {
       }
     });
   } else {
-    alert('에러내용: ' + res.error_msg);
+    alert(res.error_msg);
   }
 }
 
 function saveMentoringApplication(res, amount) {
   //imp uid , amount, merchant uid,
+  let startDateTime = document.getElementById('start').value;
+  let endDateTime = document.getElementById('end').value;
   let currentUri = String(window.location.pathname);
   let requestUri = currentUri.replace(/\/payment$/, '/apply');
   axios.post(requestUri, {
     imp_uid: res.data.imp_uid,
     merchant_uid: res.data.merchant_uid,
-    amount: amount
+    amount: amount,
+    reserved_time: {
+      from: startDateTime + ':00',
+      to: endDateTime + ':00'
+    }
   })
   .then(res => {
     if (res.status === 200) {

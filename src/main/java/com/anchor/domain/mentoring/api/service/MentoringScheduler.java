@@ -26,14 +26,4 @@ public class MentoringScheduler {
     mentoringService.autoChangeStatus(targetDateRange);
   }
 
-  @Scheduled(initialDelay = 5_000)
-  public void autoChange() {
-    LocalDateTime baseDate = LocalDateTime.now()
-        .minusDays(1L)
-        .truncatedTo(ChronoUnit.DAYS);
-    LocalDateTime targetDateStart = baseDate.minusWeeks(1L);
-    LocalDateTime targetDateEnd = targetDateStart.plusDays(1L);
-    DateTimeRange targetDateRange = DateTimeRange.of(targetDateStart, targetDateEnd);
-    mentoringService.autoChangeStatus(targetDateRange);
-  }
 }

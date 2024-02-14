@@ -36,23 +36,24 @@ import com.anchor.domain.mentoring.domain.repository.MentoringRepository;
 import com.anchor.domain.mentoring.domain.repository.MentoringReviewRepository;
 import com.anchor.domain.notification.domain.ReceiverType;
 import com.anchor.domain.payment.domain.Payment;
-import com.anchor.domain.payment.domain.repository.PaymentRepository;
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.exception.type.entity.MentorNotFoundException;
 import com.anchor.global.exception.type.entity.MentoringNotFoundException;
 import com.anchor.global.exception.type.entity.UserNotFoundException;
-import com.anchor.global.exception.type.mentoring.DuplicateReservedException;
+import com.anchor.global.exception.type.redis.ReservationTimeExpiredException;
 import com.anchor.global.mail.AsyncMailSender;
 import com.anchor.global.mail.MailMessage;
 import com.anchor.global.redis.client.ApplicationLockClient;
+import com.anchor.global.redis.client.ReservationTimeInfo;
+import com.anchor.global.redis.lock.RedisLockFacade;
 import com.anchor.global.redis.message.NotificationEvent;
-import com.anchor.global.util.CodeCreator;
+import com.anchor.global.util.PaymentClient;
 import com.anchor.global.util.type.DateTimeRange;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
@@ -70,11 +71,12 @@ public class MentoringService {
   private final MentoringRepository mentoringRepository;
   private final UserRepository userRepository;
   private final MentorRepository mentorRepository;
-  private final PaymentRepository paymentRepository;
   private final MentorScheduleRepository mentorScheduleRepository;
   private final MentoringApplicationRepository mentoringApplicationRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
   private final MentoringReviewRepository mentoringReviewRepository;
+  private final PaymentClient paymentClient;
+  private final RedisLockFacade redisLockFacade;
   private final ApplicationLockClient applicationLockClient;
   private final AsyncMailSender asyncMailSender;
 
@@ -151,13 +153,14 @@ public class MentoringService {
   }
 
   /**
-   * 멘토링 결제페이지에 필요한 정보를 조회한 후 반환합니다.
+   * 멘토링 결제페이지에 필요한 정보를 조회한 후 반환합니다. 해당 결제페이지에 대한 결제고유번호를 생성하고, 결제금액 사전등록 요청을 진행합니다.
    */
   @Transactional(readOnly = true)
   public MentoringPayConfirmInfo getMentoringConfirmInfo(Long id, MentoringApplicationTime applicationTime,
       SessionUser sessionUser) {
     User user = getUser(sessionUser);
     Mentoring mentoring = getMentoringById(id);
+    paymentClient.preRegisterAmount(user.getEmail(), mentoring.getCost());
     return MentoringPayConfirmInfo.of(user, mentoring, applicationTime);
   }
 
@@ -165,32 +168,29 @@ public class MentoringService {
    * 멘토링 결제에 필요한 정보를 생성합니다.
    */
   @Transactional(readOnly = true)
-  public MentoringPaymentInfo createPaymentInfo(Long id, MentoringApplicationUserInfo userInfo,
-      SessionUser sessionUser) {
+  public MentoringPaymentInfo createPaymentInfo(Long id, MentoringApplicationUserInfo userInfo, String merchantUid,
+      String redisLockKey) {
     Mentoring mentoring = getMentoringById(id);
-    Mentor mentor = mentoring.getMentor();
-    String key = ApplicationLockClient.createKey(mentor, sessionUser);
-    DateTimeRange myApplicationLockTime = applicationLockClient.findByKey(key);
-    String merchantUid = createMerchantUid();
-    return MentoringPaymentInfo.of(mentoring, myApplicationLockTime, userInfo, merchantUid, impCode);
+    ReservationTimeInfo reservationTimeInfo = Objects.requireNonNull(applicationLockClient.findByKey(redisLockKey),
+        () -> {
+          throw new ReservationTimeExpiredException();
+        });
+    return MentoringPaymentInfo.of(mentoring, reservationTimeInfo.getReservedTime(), userInfo, merchantUid, impCode);
   }
 
   /**
    * 멘토링 신청이 완료되면 멘토링 신청내역을 저장합니다.
    */
   @Transactional
-  public MentoringOrderUid saveMentoringApplication(SessionUser sessionUser,
-      Long id, MentoringApplicationInfo applicationInfo) {
+  public MentoringOrderUid saveMentoringApplication(Long id, SessionUser sessionUser, String redisLockKey,
+      MentoringApplicationInfo applicationInfo) {
     Mentoring mentoring = getMentoringById(id);
     Mentor mentor = mentoring.getMentor();
-    String key = ApplicationLockClient.createKey(mentor, sessionUser);
-    DateTimeRange myApplicationLockTime = applicationLockClient.findByKey(key);
-    applicationInfo.addApplicationTime(myApplicationLockTime);
     User user = getUser(sessionUser);
     Payment payment = new Payment(applicationInfo);
     MentoringApplication mentoringApplication = new MentoringApplication(applicationInfo, mentoring, payment, user);
     mentoringApplicationRepository.save(mentoringApplication);
-    applicationLockClient.remove(key);
+    applicationLockClient.remove(redisLockKey);
     publishNotification(mentoring, mentoringApplication.getMentoringStatus());
     sendMailToMentor(mentoring, mentor, user, applicationInfo);
     return new MentoringOrderUid(mentoringApplication);
@@ -204,7 +204,8 @@ public class MentoringService {
         .receiverEmail(mentor.getCompanyEmail())
         .opponentEmail(user.getEmail())
         .opponentNickName(user.getNickname())
-        .startDateTime(applicationInfo.getStartDateTime())
+        .startDateTime(applicationInfo.getReservedTime()
+            .getFrom())
         .receiverType(ReceiverType.TO_MENTOR)
         .build());
   }
@@ -223,33 +224,29 @@ public class MentoringService {
   /**
    * Redis에 결제진행중인 시간대를 저장합니다.
    */
-  public void lock(Long id, SessionUser sessionUser, MentoringApplicationTime applicationTime) {
+  @Transactional
+  public String lock(Long id, SessionUser sessionUser, MentoringApplicationTime applicationTime) {
     DateTimeRange dateTimeRange = applicationTime.convertDateTimeRange();
     Mentor mentor = getMentoringById(id).getMentor();
-    List<DateTimeRange> unavailableTimes = getUnavailableTimes(mentor);
-    duplicateTimeCheck(unavailableTimes, dateTimeRange);
-    String key = ApplicationLockClient.createKey(mentor, sessionUser);
-    applicationLockClient.save(key, dateTimeRange);
+    ReservationTimeInfo reservationTimeInfo = ReservationTimeInfo.of(sessionUser, dateTimeRange);
+    return redisLockFacade.lockApplicationTime(mentor.getId(), reservationTimeInfo);
   }
 
   /**
    * Redis에 저장되어있던 시간대를 삭제합니다.
    */
-  public void unlock(Long id, SessionUser sessionUser) {
-    Mentor mentor = getMentoringById(id).getMentor();
-    String key = ApplicationLockClient.createKey(mentor, sessionUser);
+  public void unlock(String key) {
     applicationLockClient.remove(key);
   }
 
   /**
    * 결제진행중인 시간 잠금 유효시간을 갱신합니다.
    */
-  public void refresh(Long id, SessionUser sessionUser) {
-    Mentor mentor = getMentoringById(id).getMentor();
-    String key = ApplicationLockClient.createKey(mentor, sessionUser);
-    applicationLockClient.refresh(key);
+  public void refresh(String key, String email) {
+    applicationLockClient.refresh(key, email);
   }
 
+  @Transactional
   public void autoChangeStatus(DateTimeRange targetDateRange) {
     List<MentoringApplication> result = mentoringApplicationRepository.findAllByNotCompleteForWeek(targetDateRange);
     result.forEach(application -> application.changeStatus(MentoringStatus.COMPLETE));
@@ -294,31 +291,17 @@ public class MentoringService {
     return mentoringRepository.findPopularTags();
   }
 
-  private String createMerchantUid() {
-    String today = LocalDate.now()
-        .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-
-    List<Payment> paymentList = paymentRepository.findPaymentListStartWithToday(today);
-    return CodeCreator.getMerchantUid(paymentList, today);
-  }
-
   private List<DateTimeRange> getUnavailableTimes(Mentor mentor) {
     String pattern = ApplicationLockClient.createMatchPattern(mentor);
-    List<DateTimeRange> paymentTimes = applicationLockClient.findAllByKeyword(pattern);
+    List<ReservationTimeInfo> reservedTimes = applicationLockClient.findAllByKeyword(pattern);
+    List<DateTimeRange> paymentTimes = reservedTimes.stream()
+        .map(ReservationTimeInfo::getReservedTime)
+        .collect(Collectors.toList());
     List<MentoringApplication> mentoringApplications = mentoringApplicationRepository.findAllByMentorId(mentor.getId());
     mentoringApplications.stream()
         .map(application -> DateTimeRange.of(application.getStartDateTime(), application.getEndDateTime()))
         .forEach(paymentTimes::add);
     return paymentTimes;
-  }
-
-  private void duplicateTimeCheck(List<DateTimeRange> unavailableTimes, DateTimeRange dateTimeRange) {
-    unavailableTimes.stream()
-        .filter(unavailableTime -> unavailableTime.isDuration(dateTimeRange.getFrom()))
-        .findFirst()
-        .ifPresent(unavailableTime -> {
-          throw new DuplicateReservedException();
-        });
   }
 
 }

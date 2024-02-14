@@ -35,15 +35,19 @@ public class TimeRange {
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (obj instanceof TimeRange other) {
-      return other.hashCode() == hashCode();
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
     }
-    return false;
+    if (!(o instanceof TimeRange timeRange)) {
+      return false;
+    }
+    return Objects.equals(getFrom(), timeRange.getFrom()) && Objects.equals(getTo(),
+        timeRange.getTo());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(from, to);
+    return Objects.hash(getFrom(), getTo());
   }
 }

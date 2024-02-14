@@ -19,6 +19,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -75,6 +76,23 @@ public class ApplicationTimeInfo {
     mentorActiveTimes.add(mentorActiveTime);
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof ApplicationTimeInfo that)) {
+      return false;
+    }
+    return Objects.equals(getUnavailableTimes(), that.getUnavailableTimes()) && Objects.equals(
+        getActiveTimes(), that.getActiveTimes());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getUnavailableTimes(), getActiveTimes());
+  }
+
   @Getter
   @NoArgsConstructor
   static class MentorActiveTime {
@@ -108,6 +126,23 @@ public class ApplicationTimeInfo {
     static MentorActiveTime of(MentorSchedule mentorSchedule) {
       return new MentorActiveTime(mentorSchedule.getOpenTime(), mentorSchedule.getCloseTime(),
           mentorSchedule.getDayOfWeek(), mentorSchedule.getActiveStatus());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (!(o instanceof MentorActiveTime that)) {
+        return false;
+      }
+      return Objects.equals(getOpenTime(), that.getOpenTime()) && Objects.equals(getCloseTime(),
+          that.getCloseTime()) && getDayOfWeek() == that.getDayOfWeek() && getActiveStatus() == that.getActiveStatus();
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(getOpenTime(), getCloseTime(), getDayOfWeek(), getActiveStatus());
     }
   }
 

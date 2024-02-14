@@ -2,21 +2,22 @@ package com.anchor.global.util;
 
 import static lombok.AccessLevel.PRIVATE;
 
-import com.anchor.domain.payment.domain.Payment;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 import jodd.util.RandomString;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = PRIVATE)
 public class CodeCreator {
 
-  public static String getMerchantUid(List<Payment> paymentList, String today) {
-    String merchantUid = createMerchantUid(today);
-    while (isDuplicate(paymentList, merchantUid)) {
-      merchantUid = createMerchantUid(today);
-    }
-    return merchantUid;
+  public static String createMerchantUid(String userEmail) {
+    String shuffleEmail = shuffleEmail(userEmail);
+    String today = LocalDateTime.now()
+        .format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+    return "toss_" + shuffleEmail + today;
   }
 
   public static String createEmailAuthCode() {
@@ -24,23 +25,16 @@ public class CodeCreator {
     return randomString.randomAlphaNumeric(12);
   }
 
-  private static boolean isDuplicate(List<Payment> payments, String merchantUid) {
-    if (payments.isEmpty()) {
-      return false;
+  private static String shuffleEmail(String email) {
+    StringBuilder sb = new StringBuilder();
+    List<Character> characters = new ArrayList<>();
+    String parseEmail = email.substring(0, email.indexOf('@'));
+    for (char token : parseEmail.toCharArray()) {
+      characters.add(token);
     }
-    for (Payment payment : payments) {
-      String savedImpUid = payment.getMerchantUid();
-      if (savedImpUid.equals(merchantUid)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private static String createMerchantUid(String today) {
-    String randomDigit = String.format("%05d", ThreadLocalRandom.current()
-        .nextInt(0, 10000));
-    return "toss_" + today + randomDigit;
+    Collections.shuffle(characters);
+    characters.forEach(sb::append);
+    return sb.toString();
   }
 
 }

@@ -16,6 +16,8 @@
 
       <div class="col-md-6">
         <div class="card">
+          <input id="start" th:value="${confirmInfo.mentoringInfo.startDateTime}" type="hidden">
+          <input id="end" th:value="${confirmInfo.mentoringInfo.endDateTime}" type="hidden">
           <div class="card-body">
             <h2 class="card-title">결제할 멘토링 정보</h2>
             <hr>

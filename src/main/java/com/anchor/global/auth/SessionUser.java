@@ -2,10 +2,10 @@ package com.anchor.global.auth;
 
 import com.anchor.domain.user.domain.User;
 import com.anchor.global.exception.type.auth.UserNotLoggedInException;
+import com.anchor.global.util.SessionKeyType;
 import jakarta.servlet.http.HttpSession;
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.Optional;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -31,8 +31,10 @@ public class SessionUser implements Serializable {
   }
 
   public static SessionUser getSessionUser(HttpSession session) {
-    return Optional.ofNullable((SessionUser) session.getAttribute("user"))
-        .orElseThrow(UserNotLoggedInException::new);
+    SessionUser sessionUser = (SessionUser) session.getAttribute(SessionKeyType.USER.getKey());
+    return Objects.requireNonNull(sessionUser, () -> {
+      throw new UserNotLoggedInException();
+    });
   }
 
   public void addMentorId(Long mentorId) {

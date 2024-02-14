@@ -21,7 +21,7 @@
           <h2 class="card-title text-center mt-2 mb-2">멘토 등록 페이지</h2>
         </div>
         <div class="card-body d-flex justify-content-center align-items-center">
-          <form id="register-form">
+          <div id="register-form">
             <div class="input-group mb-3">
               <label class="input-group-text" for="companyEmail">이메일</label>
               <input class="form-control" id="companyEmail" name="companyEmail" placeholder="companyEmail" type="email">
@@ -58,7 +58,7 @@
               <label class="input-group-text" for="accountName">예금주 명</label>
               <input class="form-control" id="accountName" name="accountName" placeholder="예금주 명을 입력하세요." type="text">
             </div>
-          </form>
+          </div>
         </div>
         <div class="card-footer">
           <div class="d-flex justify-content-end">
@@ -79,7 +79,8 @@
     let emailAuthButton = document.getElementById('email-auth-button');
     let companyEmailInput = document.getElementById('companyEmail');
     let emailAuthCode = document.getElementById('emailCheck');
-    emailSendButton.addEventListener('click', () => {
+    emailSendButton.addEventListener('click', (e) => {
+      e.preventDefault();
       let companyEmail = companyEmailInput.value;
       axios.post('/mentors/register/email/send', {
         receiver: companyEmail
@@ -93,7 +94,8 @@
       }).catch(error => alert(error.message));
     });
 
-    emailAuthButton.addEventListener('click', () => {
+    emailAuthButton.addEventListener('click', (e) => {
+      e.preventDefault();
       let authCode = emailAuthCode.value;
       axios.post('/mentors/register/email/auth', {
         userEmailCode: authCode
@@ -112,7 +114,8 @@
       }).catch(error => alert(error.message));
     });
 
-    document.getElementById('submit-button').addEventListener('click', () => {
+    document.getElementById('submit-button').addEventListener('click', (e) => {
+      e.preventDefault();
       let validationResult = validateInputValue();
       if (validationResult) {
         axios.post('/mentors', {
@@ -129,7 +132,7 @@
           }
         }).catch(error => {
           let errorBody = error.response.data;
-          alert(errorBody.error.message);
+          alert(errorBody.errorCode.message);
         })
       }
     });
@@ -139,7 +142,7 @@
       let bankNameSelectedIndex = document.getElementById('bankName').selectedIndex;
 
       if (companyEmailInput.value === '') {
-        alert('이메일 입력을 필수입니다.');
+        alert('이메일 입력은 필수입니다.');
         return false;
       }
       if (emailVerified === false) {
@@ -151,7 +154,7 @@
         return false;
       }
       if (bankNameSelectedIndex === 0) {
-        alert('은행 선택을 필수입니다.');
+        alert('은행 선택은 필수입니다.');
         return false;
       }
       if (accountNumber.value === '') {
@@ -160,7 +163,7 @@
       }
 
       if (accountName.value === '') {
-        alert('예금주명 입력을 필수입니다.');
+        alert('예금주명 입력은 필수입니다.');
         return false;
       }
       return true;

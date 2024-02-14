@@ -1,13 +1,25 @@
 package com.anchor.domain.mentor.api.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.anchor.domain.mentor.api.controller.request.PayupMonthRange;
+import com.anchor.domain.mentor.api.service.MailService;
 import com.anchor.domain.mentor.api.service.MentorService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @MockBean(JpaMetamodelMappingContext.class)
 @WithMockUser(roles = "MENTOR")
@@ -23,51 +35,33 @@ class MentorControllerTest {
   @MockBean
   MentorService mentorService;
 
-//  @DisplayName("중복된 멘토링 불가능 시간에 대해 Validation을 실패합니다.")
-//  @Test
-//  void registerUnavailableTimes() throws Exception {
-//    // given
-//    MockHttpSession session = new MockHttpSession();
-//    session.setAttribute("user", new SessionUser());
-//
-//    List<DateTimeRange> dateTimeRanges = List.of(
-//        DateTimeRange.of(
-//            LocalDateTime.of(2023, 12, 12, 20, 30, 1),
-//            LocalDateTime.of(2023, 12, 12, 21, 30, 1)
-//        ),
-//        DateTimeRange.of(
-//            LocalDateTime.of(2023, 12, 12, 20, 30, 1),
-//            LocalDateTime.of(2023, 12, 12, 21, 30, 1)
-//        )
-//    );
-//
-//    // when
-//    ArrayNode dateTimeRangesJson = objectMapper.createArrayNode();
-//    for (DateTimeRange range : dateTimeRanges) {
-//      ObjectNode rangeJson = objectMapper.createObjectNode();
-//      rangeJson.put("from", range.getFrom()
-//          .toString());
-//      rangeJson.put("to", range.getTo()
-//          .toString());
-//      dateTimeRangesJson.add(rangeJson);
-//    }
-//
-//    // Wrap the array in an object with the desired key
-//    ObjectNode requestBody = objectMapper.createObjectNode();
-//    requestBody.set("dateTimeRanges", dateTimeRangesJson);
-//
-//    String json = objectMapper.writeValueAsString(dateTimeRanges);
-//
-//    ResultActions perform = mockMvc.perform(post("/mentors/me/schedule")
-//        .with(csrf())
-//        .session(session)
-//        .contentType("application/json")
-//        .content(requestBody.toString()));
-////        .content(json));
-//
-//    // then
-//    perform.andDo(print())
-//        .andExpect(status().isBadRequest());
-//  }
+  @MockBean
+  MailService mailService;
+
+  @Test
+  @DisplayName("정산내역 조회 요청시 이번달보다 미래시점이라면 Validation을 실패합니다.")
+  void notFutureMonthTest() throws Exception {
+    //given
+    PayupMonthRange monthRange = PayupMonthRange.builder()
+        .startMonth(LocalDateTime.of(2023, 6, 1, 0, 0, 0))
+        .currentMonth(LocalDateTime.now()
+            .plusMonths(1L))
+        .build();
+
+    //when, then
+    mockMvc.perform(MockMvcRequestBuilders.get("/mentors/me/payup-info")
+            .param("currentMonth", monthRange.getCurrentMonth()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")))
+            .param("startMonth", monthRange.getStartMonth()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")))
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(MockMvcResultMatchers.status()
+            .isBadRequest())
+        .andExpect(result -> {
+          String responseBody = result.getResponse()
+              .getContentAsString(StandardCharsets.UTF_8);
+          assertThat(responseBody).contains("이번달 보다 미래시점의 조회는 불가능합니다.");
+        });
+  }
 
 }

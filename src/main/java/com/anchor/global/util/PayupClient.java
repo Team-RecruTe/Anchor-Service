@@ -15,12 +15,16 @@ import com.anchor.global.nhpay.response.AccountHolderResult;
 import com.anchor.global.nhpay.response.DepositResult;
 import com.anchor.global.nhpay.response.PayupResult;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
 @Slf4j
@@ -38,6 +42,8 @@ public class PayupClient {
     this.headerCreator = headerCreator;
   }
 
+  @Retryable(retryFor = {SocketTimeoutException.class, ResourceAccessException.class},
+      maxAttempts = 2, backoff = @Backoff(delay = 500))
   public boolean validateAccountHolder(Mentor mentor, Set<Mentor> failMentor) {
     String requestUrl = headerCreator.createAccountRequestUrl(mentor);
     PayupRequestHeader accountHolderHeader = headerCreator.createAccountRequestHeader(mentor);
@@ -52,6 +58,8 @@ public class PayupClient {
     }
   }
 
+  @Retryable(retryFor = {SocketTimeoutException.class, ResourceAccessException.class},
+      maxAttempts = 2, backoff = @Backoff(delay = 500))
   public void requestPayup(Mentor mentor, Integer totalAmount, Set<Mentor> failMentor) {
     String requestUrl = headerCreator.createDepositRequestUrl(mentor);
     PayupRequestHeader depositRequestHeader = headerCreator.createDepositRequestHeader(mentor);

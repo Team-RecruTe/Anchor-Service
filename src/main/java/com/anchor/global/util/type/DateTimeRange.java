@@ -35,6 +35,10 @@ public class DateTimeRange implements Serializable {
     return new DateTimeRange(from, to);
   }
 
+  public String formattingFromTime() {
+    return from.format(DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
+  }
+
   public boolean isDuration(LocalDateTime target) {
     return isOnOrBefore(target) && isOnOrAfter(target);
   }

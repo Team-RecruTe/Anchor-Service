@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ForkJoinPool;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,13 +31,8 @@ public class PayupService {
   public void processMonthlyPayup() {
     DateTimeRange dateTimeRange = createMonthRange();
     List<Payup> payupList = payupRepository.findAllByMonthRange(dateTimeRange);
-    Map<Mentor, Integer> mentorTotalAmount = new HashMap<>();
-    payupList.forEach(payup -> mentorTotalAmount.merge(payup.getMentor(), payup.getAmount(), Integer::sum));
-    Set<Mentor> payupFailMentors = new HashSet<>();
-    mentorTotalAmount.keySet()
-        .parallelStream()
-        .filter(key -> payupClient.validateAccountHolder(key, payupFailMentors))
-        .forEach(key -> payupClient.requestPayup(key, mentorTotalAmount.get(key), payupFailMentors));
+    Map<Mentor, Integer> mentorTotalAmount = mergePayupAmount(payupList);
+    Set<Mentor> payupFailMentors = processPayup(mentorTotalAmount);
     payupRepository.updateStatus(dateTimeRange, payupFailMentors);
   }
 
@@ -46,6 +42,24 @@ public class PayupService {
         .truncatedTo(ChronoUnit.DAYS);
     LocalDateTime lastMonth = thisMonth.minusMonths(1L);
     return DateTimeRange.of(lastMonth, thisMonth);
+  }
+
+  private Map<Mentor, Integer> mergePayupAmount(List<Payup> payupList) {
+    Map<Mentor, Integer> mentorTotalAmount = new HashMap<>();
+    payupList.forEach(payup -> mentorTotalAmount.merge(payup.getMentor(), payup.getAmount(), Integer::sum));
+    return mentorTotalAmount;
+  }
+
+  private Set<Mentor> processPayup(Map<Mentor, Integer> mentorTotalAmount) {
+    Set<Mentor> payupFailMentors = new HashSet<>();
+    ForkJoinPool customForkJoinPool = new ForkJoinPool(Runtime.getRuntime()
+        .availableProcessors());
+    mentorTotalAmount.keySet()
+        .parallelStream()
+        .filter(key -> payupClient.validateAccountHolder(key, payupFailMentors))
+        .forEach(key -> payupClient.requestPayup(key, mentorTotalAmount.get(key), payupFailMentors));
+    customForkJoinPool.shutdown();
+    return payupFailMentors;
   }
 
 }

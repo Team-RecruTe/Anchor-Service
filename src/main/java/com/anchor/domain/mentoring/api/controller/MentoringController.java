@@ -15,7 +15,10 @@ import com.anchor.domain.mentoring.api.service.response.MentoringOrderUid;
 import com.anchor.domain.mentoring.api.service.response.MentoringPaymentInfo;
 import com.anchor.domain.mentoring.api.service.response.TopMentoring;
 import com.anchor.global.auth.SessionUser;
+import com.anchor.global.exception.type.redis.SessionAttributeNotFoundException;
+import com.anchor.global.redis.client.ApplicationLockClient;
 import com.anchor.global.util.ResponseType;
+import com.anchor.global.util.SessionKeyType;
 import com.anchor.global.util.type.Link;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -42,10 +45,9 @@ public class MentoringController {
 
   @PostMapping
   public ResponseEntity<MentoringCreateResult> createMentoring(
-      @RequestBody @Valid MentoringBasicInfo mentoringBasicInfo, HttpSession httpSession) {
-    SessionUser user = (SessionUser) httpSession.getAttribute("user");
-    MentoringCreateResult result = mentoringService.create(1L,
-        mentoringBasicInfo);
+      @RequestBody @Valid MentoringBasicInfo mentoringBasicInfo, HttpSession session) {
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
+    MentoringCreateResult result = mentoringService.create(sessionUser.getMentorId(), mentoringBasicInfo);
 
     result.addLinks(Link.builder()
         .setLink("self", String.format("/mentorings/%d", result.getId()))
@@ -107,7 +109,9 @@ public class MentoringController {
   public ResponseEntity<ResponseType> applicationTimeLock(@PathVariable("id") Long id,
       @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
-    mentoringService.lock(id, sessionUser, applicationTime);
+    String redisLockKey = mentoringService.lock(id, sessionUser, applicationTime);
+    String sessionReservationKey = ApplicationLockClient.createSessionKey(id, sessionUser.getEmail());
+    session.setAttribute(sessionReservationKey, redisLockKey);
     return ResponseEntity.ok(ResponseType.SUCCESS);
   }
 
@@ -117,7 +121,8 @@ public class MentoringController {
   @PutMapping("/{id}/refresh")
   public ResponseEntity<ResponseType> refreshPaymentTime(@PathVariable("id") Long id, HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
-    mentoringService.refresh(id, sessionUser);
+    String redisLockKey = getRedisLockKey(id, sessionUser.getEmail(), session);
+    mentoringService.refresh(redisLockKey, sessionUser.getEmail());
     return ResponseEntity.ok(ResponseType.SUCCESS);
   }
 
@@ -128,7 +133,11 @@ public class MentoringController {
   @DeleteMapping("/{id}/lock")
   public ResponseEntity<ResponseType> mentoringTimeSessionRemove(@PathVariable("id") Long id, HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
-    mentoringService.unlock(id, sessionUser);
+    String redisLockKey = getRedisLockKey(id, sessionUser.getEmail(), session);
+    mentoringService.unlock(redisLockKey);
+    String sessionReservationKey = ApplicationLockClient.createSessionKey(id, sessionUser.getEmail());
+    session.removeAttribute(sessionReservationKey);
+    session.removeAttribute(SessionKeyType.MERCHANT_UID.getKey());
     return ResponseEntity.ok(ResponseType.SUCCESS);
   }
 
@@ -139,7 +148,11 @@ public class MentoringController {
   public ResponseEntity<MentoringPaymentInfo> mentoringTimeSessionSave(
       @PathVariable("id") Long id, @RequestBody MentoringApplicationUserInfo userInfo, HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
-    MentoringPaymentInfo mentoringPaymentInfo = mentoringService.createPaymentInfo(id, userInfo, sessionUser);
+    String merchantUid = getSessionAttribute(session, SessionKeyType.MERCHANT_UID.getKey());
+    String sessionReservationKey = ApplicationLockClient.createSessionKey(id, sessionUser.getEmail());
+    String redisLockKey = getSessionAttribute(session, sessionReservationKey);
+    MentoringPaymentInfo mentoringPaymentInfo = mentoringService.createPaymentInfo(id, userInfo, merchantUid,
+        redisLockKey);
     return ResponseEntity.ok(mentoringPaymentInfo);
   }
 
@@ -150,13 +163,26 @@ public class MentoringController {
   public ResponseEntity<MentoringOrderUid> mentoringApplicationSave
   (@PathVariable("id") Long id, @RequestBody MentoringApplicationInfo applicationInfo, HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
+    String redisLockKey = getRedisLockKey(id, sessionUser.getEmail(), session);
     MentoringOrderUid mentoringOrderUid =
-        mentoringService.saveMentoringApplication(sessionUser, id, applicationInfo);
+        mentoringService.saveMentoringApplication(id, sessionUser, redisLockKey, applicationInfo);
     if (Objects.nonNull(mentoringOrderUid)) {
+      session.removeAttribute(ApplicationLockClient.createSessionKey(id, sessionUser.getEmail()));
       return ResponseEntity.ok(mentoringOrderUid);
     }
     return ResponseEntity.badRequest()
         .build();
+  }
+
+  private String getRedisLockKey(Long id, String email, HttpSession session) {
+    String sessionKey = ApplicationLockClient.createSessionKey(id, email);
+    return getSessionAttribute(session, sessionKey);
+  }
+
+  private String getSessionAttribute(HttpSession session, String key) {
+    return Objects.requireNonNull((String) session.getAttribute(key), () -> {
+      throw new SessionAttributeNotFoundException();
+    });
   }
 
 }

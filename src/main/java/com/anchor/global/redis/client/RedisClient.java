@@ -12,6 +12,4 @@ public interface RedisClient<V> {
 
   void remove(String key);
 
-  void refresh(String key);
-
 }

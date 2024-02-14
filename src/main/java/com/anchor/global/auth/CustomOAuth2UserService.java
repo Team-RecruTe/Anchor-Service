@@ -3,6 +3,7 @@ package com.anchor.global.auth;
 import com.anchor.domain.user.domain.User;
 import com.anchor.domain.user.domain.repository.UserRepository;
 import com.anchor.global.auth.OAuth2UserProviderRegistry.OAuth2LoginProviderType;
+import com.anchor.global.util.SessionKeyType;
 import jakarta.servlet.http.HttpSession;
 import java.util.Collections;
 import java.util.Map;
@@ -40,7 +41,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         userNameAttributeName, oAuth2UserResponse);
 
     User user = save(oAuth2UserAttributes);
-    httpSession.setAttribute("user", new SessionUser(user));
+    httpSession.setAttribute(SessionKeyType.USER.getKey(), new SessionUser(user));
 
     return new DefaultOAuth2User(
         Collections.singleton(new SimpleGrantedAuthority(user.getRoleKey())),

@@ -4,6 +4,7 @@ import com.anchor.domain.mentoring.api.controller.request.MentoringApplicationIn
 import com.anchor.domain.payment.domain.Payment;
 import com.anchor.domain.user.domain.User;
 import com.anchor.global.util.BaseEntity;
+import com.anchor.global.util.type.DateTimeRange;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,20 +25,20 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name="mentoring_application")
+@Table(name = "mentoring_application")
 public class MentoringApplication extends BaseEntity {
 
-  @Column(name="start_date_time", nullable = false, columnDefinition = "datetime")
+  @Column(name = "start_date_time", nullable = false, columnDefinition = "datetime")
   private LocalDateTime startDateTime;
 
-  @Column(name="end_date_time", nullable = false, columnDefinition = "datetime")
+  @Column(name = "end_date_time", nullable = false, columnDefinition = "datetime")
   private LocalDateTime endDateTime;
 
-  @Column(name="has_review", nullable = false, columnDefinition = "boolean default false")
+  @Column(name = "has_review", nullable = false, columnDefinition = "boolean default false")
   private Boolean hasReview = Boolean.FALSE;
 
   @Enumerated(EnumType.STRING)
-  @Column(name="mentoring_status", nullable = false)
+  @Column(name = "mentoring_status", nullable = false)
   private MentoringStatus mentoringStatus = MentoringStatus.WAITING;
 
   @ManyToOne(fetch = FetchType.LAZY)
@@ -66,8 +67,9 @@ public class MentoringApplication extends BaseEntity {
 
   public MentoringApplication(MentoringApplicationInfo applicationInfo, Mentoring mentoring, Payment payment,
       User user) {
-    this.startDateTime = applicationInfo.getStartDateTime();
-    this.endDateTime = applicationInfo.getEndDateTime();
+    DateTimeRange reservedTime = applicationInfo.getReservedTime();
+    this.startDateTime = reservedTime.getFrom();
+    this.endDateTime = reservedTime.getTo();
     this.mentoring = mentoring;
     this.payment = payment;
     this.payment.addMentoringApplication(this);

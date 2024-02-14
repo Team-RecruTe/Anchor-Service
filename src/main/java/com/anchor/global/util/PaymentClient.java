@@ -10,12 +10,15 @@ import com.anchor.global.exception.type.api.InvalidImpUidException;
 import com.anchor.global.exception.type.api.OtherHttpStatus4xxException;
 import com.anchor.global.payment.portone.request.AccessTokenRequest;
 import com.anchor.global.payment.portone.request.PortOneRequestUrl;
+import com.anchor.global.payment.portone.request.PrepareRequestData;
 import com.anchor.global.payment.portone.request.RequiredPaymentData;
 import com.anchor.global.payment.portone.response.AccessTokenResult;
 import com.anchor.global.payment.portone.response.PaymentCancelResult;
 import com.anchor.global.payment.portone.response.PaymentRequestResult;
 import com.anchor.global.payment.portone.response.PaymentResult;
+import com.anchor.global.payment.portone.response.PrepareResult;
 import com.anchor.global.payment.portone.response.SinglePaymentResult;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -35,15 +38,19 @@ public class PaymentClient {
 
   private final JsonUtils jsonUtils;
 
+  private final HttpSession session;
+
   @Value("${payment.imp-key}")
   private String impKey;
 
   @Value("${payment.imp-secret}")
   private String impSecret;
 
-  public PaymentClient(@Qualifier("paymentRestClient") RestClient restClient, JsonUtils jsonUtils) {
+  public PaymentClient(@Qualifier("paymentRestClient") RestClient restClient, JsonUtils jsonUtils,
+      HttpSession session) {
     this.restClient = restClient;
     this.jsonUtils = jsonUtils;
+    this.session = session;
   }
 
   public Optional<PaymentResult> request(MentoringStatus status, RequiredPaymentData requiredPaymentData) {
@@ -53,6 +60,13 @@ public class PaymentClient {
       case WAITING -> getSinglePayment(accessToken, requiredPaymentData);
       default -> Optional.empty();
     };
+  }
+
+  public void preRegisterAmount(String userEmail, Integer amount) {
+    String accessToken = getAccessToken();
+    PrepareRequestData prepareRequestData = PrepareRequestData.of(userEmail, amount);
+    PrepareResult prepareResult = prepareRegisterAmount(accessToken, prepareRequestData);
+    session.setAttribute(SessionKeyType.MERCHANT_UID.getKey(), prepareResult.getMerchantUid());
   }
 
   private Optional<PaymentResult> getSinglePayment(String accessToken, RequiredPaymentData paymentResultInfo) {
@@ -106,6 +120,19 @@ public class PaymentClient {
         .exchange((request, response) -> checkStatus(response));
 
     return Optional.ofNullable(jsonUtils.convertValue(entity.getResponse(), PaymentCancelResult.class));
+  }
+
+  private PrepareResult prepareRegisterAmount(String accessToken, PrepareRequestData prepareRequestData) {
+    String requestBody = jsonUtils.serializeObjectToJson(prepareRequestData);
+    PaymentRequestResult entity = restClient.post()
+        .uri(PortOneRequestUrl.PRE_REGISTER_URL.getUrl())
+        .headers(header -> {
+          header.add(HttpHeaders.AUTHORIZATION, accessToken);
+          header.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        })
+        .body(requestBody)
+        .exchange((request, response) -> checkStatus(response));
+    return jsonUtils.convertValue(entity.getResponse(), PrepareResult.class);
   }
 
   private PaymentRequestResult checkStatus(ClientHttpResponse response) {

@@ -22,6 +22,8 @@ public enum AnchorErrorCode {
 
   FUTURE_DATE(HttpStatus.BAD_REQUEST, "미래시점의 정산내역 조회는 불가능합니다."),
 
+  SESSION_ATTRIBUTE_NOT_FOUND(HttpStatus.NOT_FOUND, "세션 값이 존재하지 않습니다."),
+
   INVALID_STATUS(HttpStatus.CONFLICT, "변경 불가능한 상태를 요청하였습니다."),
 
   INVALID_CANCELLATION_TIME(HttpStatus.CONFLICT, "취소가 불가능한 시간입니다."),

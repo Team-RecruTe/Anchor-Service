@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum PortOneRequestUrl {
 
   ACCESS_TOKEN_URL("/users/getToken"),
+  PRE_REGISTER_URL("/payments/prepare"),
   CANCEL_PAYMENT_URL("/payments/cancel"),
   CREATE_PAYMENT_URL("/payments/");
 
