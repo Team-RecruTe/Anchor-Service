@@ -16,6 +16,7 @@ import com.anchor.domain.mentoring.api.service.response.MentoringPaymentInfo;
 import com.anchor.domain.mentoring.api.service.response.TopMentoring;
 import com.anchor.global.auth.SessionUser;
 import com.anchor.global.exception.type.redis.SessionAttributeNotFoundException;
+import com.anchor.global.redis.client.ApplicationLockClient;
 import com.anchor.global.util.ResponseType;
 import com.anchor.global.util.SessionKeyType;
 import com.anchor.global.util.type.Link;
@@ -109,7 +110,8 @@ public class MentoringController {
       @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
     String redisLockKey = mentoringService.lock(id, sessionUser, applicationTime);
-    session.setAttribute(createSessionReservationKey(id, sessionUser.getEmail()), redisLockKey);
+    String sessionReservationKey = ApplicationLockClient.createSessionKey(id, sessionUser.getEmail());
+    session.setAttribute(sessionReservationKey, redisLockKey);
     return ResponseEntity.ok(ResponseType.SUCCESS);
   }
 
@@ -119,9 +121,8 @@ public class MentoringController {
   @PutMapping("/{id}/refresh")
   public ResponseEntity<ResponseType> refreshPaymentTime(@PathVariable("id") Long id, HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
-    String email = sessionUser.getEmail();
-    String redisLockKey = getSessionAttribute(session, createSessionReservationKey(id, email));
-    mentoringService.refresh(redisLockKey, email);
+    String redisLockKey = getRedisLockKey(id, sessionUser.getEmail(), session);
+    mentoringService.refresh(redisLockKey, sessionUser.getEmail());
     return ResponseEntity.ok(ResponseType.SUCCESS);
   }
 
@@ -132,9 +133,9 @@ public class MentoringController {
   @DeleteMapping("/{id}/lock")
   public ResponseEntity<ResponseType> mentoringTimeSessionRemove(@PathVariable("id") Long id, HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
-    String sessionReservationKey = createSessionReservationKey(id, sessionUser.getEmail());
-    String redisLockKey = getSessionAttribute(session, sessionReservationKey);
+    String redisLockKey = getRedisLockKey(id, sessionUser.getEmail(), session);
     mentoringService.unlock(redisLockKey);
+    String sessionReservationKey = ApplicationLockClient.createSessionKey(id, sessionUser.getEmail());
     session.removeAttribute(sessionReservationKey);
     session.removeAttribute(SessionKeyType.MERCHANT_UID.getKey());
     return ResponseEntity.ok(ResponseType.SUCCESS);
@@ -148,7 +149,8 @@ public class MentoringController {
       @PathVariable("id") Long id, @RequestBody MentoringApplicationUserInfo userInfo, HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
     String merchantUid = getSessionAttribute(session, SessionKeyType.MERCHANT_UID.getKey());
-    String redisLockKey = getSessionAttribute(session, createSessionReservationKey(id, sessionUser.getEmail()));
+    String sessionReservationKey = ApplicationLockClient.createSessionKey(id, sessionUser.getEmail());
+    String redisLockKey = getSessionAttribute(session, sessionReservationKey);
     MentoringPaymentInfo mentoringPaymentInfo = mentoringService.createPaymentInfo(id, userInfo, merchantUid,
         redisLockKey);
     return ResponseEntity.ok(mentoringPaymentInfo);
@@ -161,20 +163,20 @@ public class MentoringController {
   public ResponseEntity<MentoringOrderUid> mentoringApplicationSave
   (@PathVariable("id") Long id, @RequestBody MentoringApplicationInfo applicationInfo, HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
-    String sessionReservationKey = createSessionReservationKey(id, sessionUser.getEmail());
-    String redisLockKey = getSessionAttribute(session, sessionReservationKey);
+    String redisLockKey = getRedisLockKey(id, sessionUser.getEmail(), session);
     MentoringOrderUid mentoringOrderUid =
         mentoringService.saveMentoringApplication(id, sessionUser, redisLockKey, applicationInfo);
     if (Objects.nonNull(mentoringOrderUid)) {
-      session.removeAttribute(sessionReservationKey);
+      session.removeAttribute(ApplicationLockClient.createSessionKey(id, sessionUser.getEmail()));
       return ResponseEntity.ok(mentoringOrderUid);
     }
     return ResponseEntity.badRequest()
         .build();
   }
 
-  private String createSessionReservationKey(Long id, String email) {
-    return "mentoring:" + id + ":" + email;
+  private String getRedisLockKey(Long id, String email, HttpSession session) {
+    String sessionKey = ApplicationLockClient.createSessionKey(id, email);
+    return getSessionAttribute(session, sessionKey);
   }
 
   private String getSessionAttribute(HttpSession session, String key) {

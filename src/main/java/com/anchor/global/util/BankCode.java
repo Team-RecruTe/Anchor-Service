@@ -2,7 +2,9 @@ package com.anchor.global.util;
 
 import com.anchor.global.exception.type.api.BankNameNotFoundException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.Getter;
@@ -30,17 +32,16 @@ public enum BankCode {
   KAKAO("카카오뱅크", "090");
 
 
-  private static final Map<String, BankCode> BANK_CODES = Arrays.stream(BankCode.values())
-      .collect(Collectors.toMap(BankCode::getBankName, Function.identity()));
+  private static final Map<String, BankCode> BANK_CODES = Collections.unmodifiableMap(Arrays.stream(values())
+      .collect(Collectors.toMap(BankCode::getBankName, Function.identity())));
 
   private final String bankName;
 
   private final String code;
 
   public static BankCode find(String bankName) {
-    if (BANK_CODES.containsKey(bankName)) {
-      return BANK_CODES.get(bankName);
-    }
-    throw new BankNameNotFoundException();
+    return Optional.ofNullable(BANK_CODES.get(bankName))
+        .orElseThrow(BankNameNotFoundException::new);
   }
+
 }

@@ -26,6 +26,10 @@ public class ApplicationLockClient implements RedisClient<ReservationTimeInfo> {
     return "mentor:" + mentorId + ":" + reservationLockTime;
   }
 
+  public static String createSessionKey(Long id, String email) {
+    return "mentoring:" + id + ":" + email;
+  }
+
   public static String createMatchPattern(Mentor mentor) {
     return "mentor:" + mentor.getId() + ":*";
   }
