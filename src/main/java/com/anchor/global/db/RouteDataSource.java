@@ -7,11 +7,12 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface SetDataSource {
+public @interface RouteDataSource {
 
   DataSourceType dataSourceType();
 
   enum DataSourceType {
     MASTER, SLAVE
   }
+
 }

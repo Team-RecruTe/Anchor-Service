@@ -49,6 +49,12 @@ Configutation:
         AppenderRef:
           - ref: console-appender
 
+      - name: org.hibernate.SQL
+        additivity: "false"
+        level: DEBUG
+        AppenderRef:
+          - ref: console-appender
+
     AsyncLogger:
       - name: p6spy
         level: INFO

@@ -7,14 +7,14 @@ spring:
     hikari:
       master:
         driver-class-name: com.mysql.cj.jdbc.Driver
-        jdbc-url: ${AWS_RDS_MASTER_URL}
-        username: ${AWS_RDS_USERNAME}
-        password: ${AWS_RDS_PASSWORD}
+        jdbc-url: ${DB_MASTER_URL}
+        username: ${DB_MASTER_USERNAME}
+        password: ${DB_MASTER_PASSWORD}
       slave:
         driver-class-name: com.mysql.cj.jdbc.Driver
-        jdbc-url: ${AWS_RDS_SLAVE_URL}
-        username: ${AWS_RDS_USERNAME}
-        password: ${AWS_RDS_PASSWORD}
+        jdbc-url: ${DB_SLAVE_URL}
+        username: ${DB_SLAVE_USERNAME}
+        password: ${DB_SLAVE_PASSWORD}
 
   cache:
     type: caffeine
@@ -118,8 +118,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none
-
+      ddl-auto: create
     properties:
       hibernate:
         format_sql: ture

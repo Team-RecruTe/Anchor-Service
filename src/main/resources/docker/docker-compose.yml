@@ -1,28 +1,44 @@
 services:
-  redis_session:
+  mysql-master:
+    image: mysql:latest
+    container_name: mysql-master
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: master
+      MYSQL_DATABASE: anchor
+    ports:
+      - "3306:3306"
+    networks:
+      - mysql-network
+
+  mysql-slave:
+    image: mysql:latest
+    container_name: mysql-slave
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: slave
+      MYSQL_DATABASE: anchor
+      MYSQL_MASTER_HOST: mysql-master
+      MYSQL_MASTER_PORT: 3306
+    ports:
+      - "3307:3306"
+    networks:
+      - mysql-network
+
+  redis:
     image: redis:latest
     hostname: 127.0.0.1
     ports:
       - 6379:6379
     volumes:
-      - ./redis/session/data:/data
-      - ./redis/session/conf/redis.conf:/usr/local/conf/redis.conf
+      - ./redis/data:/data
+      - ./redis/conf/redis.conf:/usr/local/conf/redis.conf
     labels:
       - "name=redis_session"
       - "mode=standalone"
     restart: always
     command: redis-server /usr/local/conf/redis.conf
-  redis_default:
-    image: redis:latest
-    hostname: 127.0.0.1
-    ports:
-      - 6380:6380
-    volumes:
-      - ./redis/default/data:/data
-      - ./redis/default/conf/redis.conf:/usr/local/conf/redis.conf
-    labels:
-      - "name=redis_default"
-      - "mode=standalone"
-    restart: always
-    command: redis-server /usr/local/conf/redis.conf
 
+networks:
+  mysql-network:
+    driver: bridge

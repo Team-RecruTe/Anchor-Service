@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateProperties;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateSettings;
+import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
@@ -24,12 +27,20 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-public class DBConfig {
+public class DataSourceConfig {
 
   private final String MASTER_DATASOURCE = "masterDataSource";
   private final String SLAVE_DATASOURCE = "slaveDataSource";
   private final String ROUTING_DATASOURCE = "routingDataSource";
   private final String LAZY_ROUTING_DATASOURCE = "lazyRoutingDataSource";
+  private final HibernateProperties hibernateProperties;
+  private final JpaProperties jpaProperties;
+
+  public DataSourceConfig(JpaProperties jpaProperties) {
+    this.jpaProperties = jpaProperties;
+    this.hibernateProperties = new HibernateProperties();
+    hibernateProperties.setDdlAuto("create-drop");
+  }
 
   @Bean(MASTER_DATASOURCE)
   @ConfigurationProperties(prefix = "spring.datasource.hikari.master")
@@ -54,12 +65,12 @@ public class DBConfig {
     AbstractRoutingDataSource routingDataSource = new AbstractRoutingDataSource() {
       @Override
       protected Object determineCurrentLookupKey() {
-        return RoutingDataSourceManager.getCurrentDataSourceName();
+        return RouteDataSourceManager.getCurrentDataSourceName();
       }
     };
     Map<Object, Object> targetDataSources = new HashMap<>();
-    targetDataSources.put(SetDataSource.DataSourceType.MASTER, masterDataSource);
-    targetDataSources.put(SetDataSource.DataSourceType.SLAVE, slaveDataSource);
+    targetDataSources.put(RouteDataSource.DataSourceType.MASTER, masterDataSource);
+    targetDataSources.put(RouteDataSource.DataSourceType.SLAVE, slaveDataSource);
 
     routingDataSource.setTargetDataSources(targetDataSources);
     routingDataSource.setDefaultTargetDataSource(masterDataSource);
@@ -84,9 +95,12 @@ public class DBConfig {
   public LocalContainerEntityManagerFactoryBean entityManagerFactory(
       EntityManagerFactoryBuilder builder,
       @Qualifier(LAZY_ROUTING_DATASOURCE) DataSource lazyRoutingDataSource) {
+    var props = hibernateProperties.determineHibernateProperties(jpaProperties.getProperties(),
+        new HibernateSettings());
     return builder
         .dataSource(lazyRoutingDataSource)
         .packages("com.anchor.domain.**.domain")
+        .properties(props)
         .persistenceUnit("common")
         .build();
   }
