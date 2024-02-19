@@ -68,7 +68,6 @@ public class NotificationService {
     redisEventManager.addMessageListener(id, messageListener);
     emitter.onCompletion(removeEmitter(emitter, messageListener));
     emitter.onTimeout(removeEmitter(emitter, messageListener));
-    log.info("ID: {}", id);
     return emitter;
   }
 
@@ -124,8 +123,8 @@ public class NotificationService {
   }
 
   @Transactional
-  public void readNotification(Long id) {
-    Notification notification = notificationRepository.findById(id)
+  public void readNotification(Long id, String email) {
+    Notification notification = notificationRepository.findByIdAndReceiverEmail(id, email)
         .orElseThrow(NotificationNotFoundException::new);
     notification.read();
     notificationRepository.save(notification);

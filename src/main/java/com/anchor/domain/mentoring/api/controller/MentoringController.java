@@ -26,6 +26,7 @@ import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,11 +44,15 @@ public class MentoringController {
 
   private final MentoringService mentoringService;
 
+  /**
+   * 멘토링을 생성합니다.
+   */
+  @PreAuthorize("hasRole('ROLE_MENTOR')")
   @PostMapping
   public ResponseEntity<MentoringCreateResult> createMentoring(
       @RequestBody @Valid MentoringBasicInfo mentoringBasicInfo, HttpSession session) {
-    SessionUser sessionUser = SessionUser.getSessionUser(session);
-    MentoringCreateResult result = mentoringService.create(sessionUser.getMentorId(), mentoringBasicInfo);
+    SessionUser user = (SessionUser) session.getAttribute("user");
+    MentoringCreateResult result = mentoringService.create(user.getMentorId(), mentoringBasicInfo);
 
     result.addLinks(Link.builder()
         .setLink("self", String.format("/mentorings/%d", result.getId()))
@@ -56,6 +61,10 @@ public class MentoringController {
     return ResponseEntity.ok(result);
   }
 
+  /**
+   * 멘토링 정보를 편집합니다.
+   */
+  @PreAuthorize("hasRole('ROLE_MENTOR')")
   @PutMapping("/{id}")
   public ResponseEntity<MentoringEditResult> editMentoring(@PathVariable Long id,
       @RequestBody @Valid MentoringBasicInfo mentoringBasicInfo) {
@@ -67,12 +76,20 @@ public class MentoringController {
     return ResponseEntity.ok(result);
   }
 
+  /**
+   * 멘토링을 삭제합니다.
+   */
+  @PreAuthorize("hasRole('ROLE_MENTOR')")
   @DeleteMapping("/{id}")
   public ResponseEntity<MentoringDeleteResult> deleteMentoring(@PathVariable Long id) {
     MentoringDeleteResult result = mentoringService.delete(id);
     return ResponseEntity.ok(result);
   }
 
+  /**
+   * 멘토링 내용을 편집합니다.
+   */
+  @PreAuthorize("hasRole('ROLE_MENTOR')")
   @PutMapping("/{id}/contents")
   public ResponseEntity<MentoringContentsEditResult> editContents(@PathVariable Long id,
       @RequestBody @Valid MentoringContentsInfo mentoringContentsInfo) {
@@ -83,6 +100,9 @@ public class MentoringController {
     return ResponseEntity.ok(result);
   }
 
+  /**
+   * 인기 멘토링 10개를 조회합니다.
+   */
   @GetMapping("/rank")
   public ResponseEntity<TopMentoring> getTopMentoring() {
     TopMentoring result = mentoringService.getTopMentorings();
@@ -93,9 +113,10 @@ public class MentoringController {
   }
 
   /**
-   * 멘토의 활동시간과 해당 멘토링의 신청내역, Redis에 저장된 결제중인 멘토링시간대를 조회합니다. 해당 멘토링의 신청대기 또는 완료된 시간대를 조회한 후 활동시간과 신청내역 시간을 분리해서 클라이언트로
-   * 전달합니다.
+   * 멘토의 활동시간과 해당 멘토링의 신청내역, Redis에 저장된 결제중인 멘토링시간대를 조회합니다.
+   * 해당 멘토링의 신청대기 또는 완료된 시간대를 조회한 후 활동시간과 신청내역 시간을 분리해서 클라이언트로 전달합니다.
    */
+  @PreAuthorize("hasRole('ROLE_USER')")
   @GetMapping("/{id}/reservation-time")
   public ResponseEntity<ApplicationTimeInfo> mentoringActiveTime(@PathVariable("id") Long id) {
     ApplicationTimeInfo mentoringActiveTimes = mentoringService.getMentoringActiveTimes(id);
@@ -105,12 +126,13 @@ public class MentoringController {
   /**
    * 신청중인 멘토링 시간을 잠금처리하고, 세션에 멘토링 신청중인 데이터를 저장합니다.
    */
+  @PreAuthorize("hasRole('ROLE_USER')")
   @PostMapping("/{id}/lock")
   public ResponseEntity<ResponseType> applicationTimeLock(@PathVariable("id") Long id,
       @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
-    SessionUser sessionUser = SessionUser.getSessionUser(session);
-    String redisLockKey = mentoringService.lock(id, sessionUser, applicationTime);
-    String sessionReservationKey = ApplicationLockClient.createSessionKey(id, sessionUser.getEmail());
+    SessionUser user = (SessionUser) session.getAttribute("user");
+    String redisLockKey = mentoringService.lock(id, user, applicationTime);
+    String sessionReservationKey = ApplicationLockClient.createSessionKey(id, user.getEmail());
     session.setAttribute(sessionReservationKey, redisLockKey);
     return ResponseEntity.ok(ResponseType.SUCCESS);
   }
@@ -118,11 +140,12 @@ public class MentoringController {
   /**
    * 결제중인 멘토링 시간대의 잠금 유효시간을 갱신합니다.
    */
+  @PreAuthorize("hasRole('ROLE_USER')")
   @PutMapping("/{id}/refresh")
   public ResponseEntity<ResponseType> refreshPaymentTime(@PathVariable("id") Long id, HttpSession session) {
-    SessionUser sessionUser = SessionUser.getSessionUser(session);
-    String redisLockKey = getRedisLockKey(id, sessionUser.getEmail(), session);
-    mentoringService.refresh(redisLockKey, sessionUser.getEmail());
+    SessionUser user = (SessionUser) session.getAttribute("user");
+    String redisLockKey = getRedisLockKey(id, user.getEmail(), session);
+    mentoringService.refresh(redisLockKey, user.getEmail());
     return ResponseEntity.ok(ResponseType.SUCCESS);
   }
 
@@ -130,12 +153,13 @@ public class MentoringController {
   /**
    * 멘토링 신청 도중 페이지를 벗어나거나, 시간이 만료되면 잠금을 해제합니다.
    */
+  @PreAuthorize("hasRole('ROLE_USER')")
   @DeleteMapping("/{id}/lock")
   public ResponseEntity<ResponseType> mentoringTimeSessionRemove(@PathVariable("id") Long id, HttpSession session) {
-    SessionUser sessionUser = SessionUser.getSessionUser(session);
-    String redisLockKey = getRedisLockKey(id, sessionUser.getEmail(), session);
+    SessionUser user = (SessionUser) session.getAttribute("user");
+    String redisLockKey = getRedisLockKey(id, user.getEmail(), session);
     mentoringService.unlock(redisLockKey);
-    String sessionReservationKey = ApplicationLockClient.createSessionKey(id, sessionUser.getEmail());
+    String sessionReservationKey = ApplicationLockClient.createSessionKey(id, user.getEmail());
     session.removeAttribute(sessionReservationKey);
     session.removeAttribute(SessionKeyType.MERCHANT_UID.getKey());
     return ResponseEntity.ok(ResponseType.SUCCESS);
@@ -144,12 +168,13 @@ public class MentoringController {
   /**
    * 포트원 결제 API를 실행하기 위한 데이터를 응답데이터로 반환합니다.
    */
+  @PreAuthorize("hasRole('ROLE_USER')")
   @PostMapping("/{id}/payment-process")
   public ResponseEntity<MentoringPaymentInfo> mentoringTimeSessionSave(
       @PathVariable("id") Long id, @RequestBody MentoringApplicationUserInfo userInfo, HttpSession session) {
-    SessionUser sessionUser = SessionUser.getSessionUser(session);
+    SessionUser user = (SessionUser) session.getAttribute("user");
     String merchantUid = getSessionAttribute(session, SessionKeyType.MERCHANT_UID.getKey());
-    String sessionReservationKey = ApplicationLockClient.createSessionKey(id, sessionUser.getEmail());
+    String sessionReservationKey = ApplicationLockClient.createSessionKey(id, user.getEmail());
     String redisLockKey = getSessionAttribute(session, sessionReservationKey);
     MentoringPaymentInfo mentoringPaymentInfo = mentoringService.createPaymentInfo(id, userInfo, merchantUid,
         redisLockKey);
@@ -159,15 +184,16 @@ public class MentoringController {
   /**
    * 멘토링 결제 완료가 되면 멘토링 신청이력을 저장합니다.
    */
+  @PreAuthorize("hasRole('ROLE_USER')")
   @PostMapping("/{id}/apply")
   public ResponseEntity<MentoringOrderUid> mentoringApplicationSave
   (@PathVariable("id") Long id, @RequestBody MentoringApplicationInfo applicationInfo, HttpSession session) {
-    SessionUser sessionUser = SessionUser.getSessionUser(session);
-    String redisLockKey = getRedisLockKey(id, sessionUser.getEmail(), session);
+    SessionUser user = (SessionUser) session.getAttribute("user");
+    String redisLockKey = getRedisLockKey(id, user.getEmail(), session);
     MentoringOrderUid mentoringOrderUid =
-        mentoringService.saveMentoringApplication(id, sessionUser, redisLockKey, applicationInfo);
+        mentoringService.saveMentoringApplication(id, user, redisLockKey, applicationInfo);
     if (Objects.nonNull(mentoringOrderUid)) {
-      session.removeAttribute(ApplicationLockClient.createSessionKey(id, sessionUser.getEmail()));
+      session.removeAttribute(ApplicationLockClient.createSessionKey(id, user.getEmail()));
       return ResponseEntity.ok(mentoringOrderUid);
     }
     return ResponseEntity.badRequest()

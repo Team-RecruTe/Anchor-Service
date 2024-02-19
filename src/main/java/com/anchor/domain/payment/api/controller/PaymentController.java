@@ -6,6 +6,7 @@ import com.anchor.domain.payment.api.service.response.PaymentValidationInfo;
 import com.anchor.global.util.ResponseType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +22,7 @@ public class PaymentController {
   /**
    * 결제 금액을 검증합니다.
    */
+  @PreAuthorize("hasRole('ROLE_USER')")
   @PostMapping("/validation")
   public ResponseEntity<PaymentValidationInfo> paymentValidation(@RequestBody PaymentResultInfo paymentResultInfo) {
     ResponseType validationResult = paymentService.validatePaymentResult(paymentResultInfo);

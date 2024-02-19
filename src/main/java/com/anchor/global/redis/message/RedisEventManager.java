@@ -26,7 +26,6 @@ public class RedisEventManager<T> {
   }
 
   private ChannelTopic getTopic(String id) {
-    log.info("ChannelTopic: {}", ChannelTopic.of(getChannelName(id)));
     return ChannelTopic.of(getChannelName(id));
   }
 

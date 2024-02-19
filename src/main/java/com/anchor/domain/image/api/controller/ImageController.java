@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * S3 저장소에 이미지를 업로드합니다.
+ */
 @RequiredArgsConstructor
 @RequestMapping("/image/upload")
 @RestController

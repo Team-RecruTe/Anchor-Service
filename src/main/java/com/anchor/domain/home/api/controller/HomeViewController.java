@@ -18,8 +18,11 @@ public class HomeViewController {
   private final ViewResolver viewResolver;
   private final MentoringService mentoringService;
 
+  /**
+   * 인기 멘토링 10개, 인기 태그 10개와 포함해 홈페이지를 조회합니다.
+   */
   @GetMapping({"", "/"})
-  public String viewHome(Model model) {
+  public String viewHomePage(Model model) {
     List<PopularTag> popularTags = mentoringService.getPopularTags();
     TopMentoring topMentorings = mentoringService.getTopMentorings();
     model.addAttribute("popularTags", popularTags);
@@ -27,8 +30,11 @@ public class HomeViewController {
     return viewResolver.getViewPath("common", "home");
   }
 
+  /**
+   * 로그인 페이지를 조회합니다.
+   */
   @GetMapping("/login")
-  public String viewLogin() {
+  public String viewLoginPage() {
     return viewResolver.getViewPath("common", "login");
   }
 }
