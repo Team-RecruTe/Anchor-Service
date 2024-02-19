@@ -17,7 +17,7 @@ public class MentoringBasicInfo {
   private String title;
 
   @NotBlank(message = "진행시간을 입력해주세요.")
-  @Pattern(regexp = "^(?:(1[0-2]|[1-9])h\\s)?(?:([1-5]0)m)?$", message = "시간(h)이 분(m)보다 앞에 와야 하며, 1시간 단위 혹은 10분 단위로 등록할 수 있습니다.")
+  @Pattern(regexp = "^(?:(1[0-2]|[1-9])h)?\\s?(?:([1-5]0)m)?$", message = "시간(h)이 분(m)보다 앞에 와야 하며, 1시간 단위 혹은 10분 단위로 등록할 수 있습니다.")
   private String durationTime;
 
   @NotNull(message = "비용을 입력해주세요.")

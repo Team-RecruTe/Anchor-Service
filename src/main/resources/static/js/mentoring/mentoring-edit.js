@@ -29,7 +29,8 @@ const editor = new toastui.Editor({
 
 const isUnique = (tags, inputValue) => {
   for (const tag of tags.children) {
-    if (tag.querySelector('span').textContent === inputValue) {
+    const tagSpan = tag.querySelector('span');
+    if (tagSpan && tagSpan.textContent === inputValue) {
       return false;
     }
   }
@@ -91,7 +92,7 @@ const submit = (axios, title, durationTime, cost, editor, tags) => {
   console.log(addedImages)
   const imageIds = Array.from(addedImages).map(image => image.id.split(" ")[1])
   const tagList = Array.from(tags.children).map(
-      tag => tag.querySelector('span').textContent)
+      tag => tag.querySelector('span')).filter(span => span !== null).map(span => span.textContent)
 
   const basic = {
     title: title.value,

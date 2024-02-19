@@ -10,7 +10,6 @@ import static com.querydsl.core.types.dsl.Expressions.numberTemplate;
 import com.anchor.domain.mentoring.api.service.response.MentoringSearchResult;
 import com.anchor.domain.mentoring.api.service.response.PopularTag;
 import com.anchor.domain.mentoring.domain.Mentoring;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -42,7 +41,6 @@ import org.springframework.util.StringUtils;
 public class QMentoringRepositoryImpl implements QMentoringRepository {
 
   private final JPAQueryFactory jpaQueryFactory;
-  private final ObjectMapper objectMapper;
 
   private static NumberTemplate<Double> getScore(StringPath target, String keyword) {
     return numberTemplate(Double.class, "function('match_against', {0}, {1})",
@@ -117,15 +115,20 @@ public class QMentoringRepositoryImpl implements QMentoringRepository {
   }
 
   public List<MentoringSearchResult> findTopMentorings() {
-    List<Mentoring> result = jpaQueryFactory.selectFrom(mentoring)
+    List<Long> mentoringIds = jpaQueryFactory.select(mentoring.id)
+        .from(mentoring)
         .orderBy(mentoring.totalApplicationNumber.desc())
         .limit(10)
+        .fetch();
+
+    List<Mentoring> result = jpaQueryFactory.selectFrom(mentoring)
         .leftJoin(mentoring.mentor)
         .fetchJoin()
         .leftJoin(mentoring.mentoringTags)
         .fetchJoin()
         .leftJoin(mentoring.mentor.user)
         .fetchJoin()
+        .where(mentoring.id.in(mentoringIds))
         .fetch();
 
     return result.stream()
