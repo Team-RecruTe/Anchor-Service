@@ -61,15 +61,15 @@ public class MentorController {
   @PutMapping("/me/schedule")
   public ResponseEntity<ResponseType> editMentorSchedule(@RequestBody MentorOpenCloseTimes mentorOpenCloseTimes,
       HttpSession session) {
-//    SessionUser user = SessionUser.getSessionUser(session);
-    mentorService.setMentorSchedule(1L, mentorOpenCloseTimes);
+    SessionUser sessionUser = SessionUser.getSessionUser(session);
+    mentorService.setMentorSchedule(sessionUser.getMentorId(), mentorOpenCloseTimes);
     return ResponseEntity.ok(ResponseType.SUCCESS);
   }
 
   @PostMapping("/me/applied-mentorings")
   public ResponseEntity<ResponseType> changeMentoringStatus(@RequestBody MentoringStatusInfo mentoringStatusInfo,
       HttpSession session) {
-    SessionUser user = SessionUser.getSessionUser(session);
+//    SessionUser sessionUser = SessionUser.getSessionUser(session);
     mentorService.changeMentoringStatus(1L, mentoringStatusInfo);
     return ResponseEntity.ok(ResponseType.SUCCESS);
   }
@@ -78,7 +78,8 @@ public class MentorController {
   public ResponseEntity<MentorPayupResult> getPayupResults(
       @ModelAttribute @Valid PayupMonthRange monthRange, HttpSession session) {
     SessionUser sessionUser = SessionUser.getSessionUser(session);
-    MentorPayupResult payupInfos = mentorService.getMentorPayupResult(monthRange, sessionUser.getMentorId());
+//    MentorPayupResult payupInfos = mentorService.getMentorPayupResult(monthRange, sessionUser.getMentorId());
+    MentorPayupResult payupInfos = mentorService.getMentorPayupResult(monthRange, 1L);
     return ResponseEntity.ok(payupInfos);
   }
 

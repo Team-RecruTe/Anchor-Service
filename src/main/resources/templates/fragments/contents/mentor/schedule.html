@@ -339,23 +339,23 @@
         document.querySelector('#monday-times-container').appendChild(divElement);
         openCloseTimes.MONDAY.push(newOpenCloseTime);
       } else if (tuesdayRadio.checked) {
-        for (const openCloseTime of openCloseTimes.WEDNESDAY) {
-          if (isTimeRangesOverlap(openCloseTime, newOpenCloseTime)) {
-            alert("추가된 시간범위와 중복됩니다.")
-            return
-          }
-        }
-        document.querySelector('#wednesday-times-container').appendChild(divElement);
-        openCloseTimes.WEDNESDAY.push(newOpenCloseTime);
-      } else if (wednesdayRadio.checked) {
         for (const openCloseTime of openCloseTimes.TUESDAY) {
           if (isTimeRangesOverlap(openCloseTime, newOpenCloseTime)) {
             alert("추가된 시간범위와 중복됩니다.")
             return
           }
         }
-        document.querySelector('#tuesday-times-container').appendChild(divElement);
+        document.querySelector('#wednesday-times-container').appendChild(divElement);
         openCloseTimes.TUESDAY.push(newOpenCloseTime);
+      } else if (wednesdayRadio.checked) {
+        for (const openCloseTime of openCloseTimes.WENDESDAY) {
+          if (isTimeRangesOverlap(openCloseTime, newOpenCloseTime)) {
+            alert("추가된 시간범위와 중복됩니다.")
+            return
+          }
+        }
+        document.querySelector('#tuesday-times-container').appendChild(divElement);
+        openCloseTimes.WENDESDAY.push(newOpenCloseTime);
       } else if (thursdayRadio.checked) {
         for (const openCloseTime of openCloseTimes.THURSDAY) {
           if (isTimeRangesOverlap(openCloseTime, newOpenCloseTime)) {

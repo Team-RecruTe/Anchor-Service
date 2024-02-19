@@ -14,6 +14,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.util.CollectionUtils;
 
 @Getter
 @NoArgsConstructor
@@ -60,6 +62,9 @@ public class ApplicationTimeInfo {
   }
 
   private static Map<DayOfWeek, List<MentorActiveTime>> createActiveTimeMap(List<MentorSchedule> schedules) {
+    if (CollectionUtils.isEmpty(schedules)) {
+      return Collections.emptyMap();
+    }
     Map<DayOfWeek, List<MentorActiveTime>> activeTimeMap = new EnumMap<>(DayOfWeek.class);
     schedules.stream()
         .map(MentorActiveTime::of)
