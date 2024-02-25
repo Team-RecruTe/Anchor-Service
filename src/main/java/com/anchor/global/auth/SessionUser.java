@@ -27,13 +27,6 @@ public class SessionUser implements Serializable {
     }
   }
 
-//  public static SessionUser getSessionUser(HttpSession session) {
-//    SessionUser sessionUser = (SessionUser) session.getAttribute(SessionKeyType.USER.getKey());
-//    return Objects.requireNonNull(sessionUser, () -> {
-//      throw new UserNotLoggedInException();
-//    });
-//  }
-
   public void addMentorId(Long mentorId) {
     this.mentorId = mentorId;
   }

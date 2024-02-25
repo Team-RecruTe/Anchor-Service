@@ -22,7 +22,7 @@ public class PaymentController {
   /**
    * 결제 금액을 검증합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @PostMapping("/validation")
   public ResponseEntity<PaymentValidationInfo> paymentValidation(@RequestBody PaymentResultInfo paymentResultInfo) {
     ResponseType validationResult = paymentService.validatePaymentResult(paymentResultInfo);

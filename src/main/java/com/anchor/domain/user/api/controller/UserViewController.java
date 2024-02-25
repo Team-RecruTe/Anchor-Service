@@ -36,7 +36,7 @@ public class UserViewController {
   /**
    * 유저 정보 페이지를 조회합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @GetMapping("/me")
   public String viewUserInfoPage(Model model, @SessionAttribute("user") SessionUser user) {
     UserInfoResponse userInfoResponse = userService.getProfile(user);
@@ -47,7 +47,7 @@ public class UserViewController {
   /**
    * 멘토링 신청내역 페이지를 조회합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @GetMapping("/me/applied-mentorings")
   public String viewAppliedMentoringListPage(
       @PageableDefault(sort = {"id"}, direction = Direction.DESC) Pageable pageable,
@@ -60,7 +60,7 @@ public class UserViewController {
   /**
    * 멘토링 리뷰 작성 페이지를 조회합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @GetMapping("/me/applied-mentorings/review")
   public String viewReviewEditPage(@ModelAttribute MentoringReservedTime reservedTime, Model model) {
     model.addAttribute("mentoringReviewInfo", MentoringReviewInfo.builder()
@@ -73,7 +73,7 @@ public class UserViewController {
    * 멘토링 리뷰 작성을 처리하고, 멘토링 신청내역 페이지로 리다이렉트합니다.
    * 입력 값이 잘못되면 재작성하도록 합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @PostMapping("/me/applied-mentorings/review")
   public String processReview(@Valid @ModelAttribute MentoringReviewInfo mentoringReviewInfo,
       BindingResult bindingResult, @SessionAttribute("user") SessionUser user, Model model) {
@@ -89,7 +89,7 @@ public class UserViewController {
   /**
    * 멘토링 리뷰 수정 페이지를 조회합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @GetMapping("/me/review/edit")
   public String viewReviewEditPage(@ModelAttribute MentoringReservedTime reservedTime,
       @SessionAttribute("user") SessionUser user, Model model) {
@@ -102,7 +102,7 @@ public class UserViewController {
    * 멘토링 리뷰 수정을 처리하고, 멘토링 신청내역 페이지로 리다이렉트합니다.
    * 입력 값이 잘못되면 재작성하도록 합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @PostMapping("/me/review/edit")
   public String editReview(@Validated @ModelAttribute RequiredEditReview requiredEditReview,
       BindingResult bindingResult, Model model) {

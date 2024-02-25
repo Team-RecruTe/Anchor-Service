@@ -87,7 +87,7 @@ public class MentoringViewController {
   /**
    * 멘토링 결제페이지로 이동합니다. 결제할 멘토링정보, 신청한 시간이 데이터로 반환됩니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @PostMapping("/{id}/payment")
   public String viewMentoringPaymentPage(@PathVariable("id") Long id,
       @ModelAttribute MentoringApplicationTime applicationTime, @SessionAttribute("user") SessionUser user,

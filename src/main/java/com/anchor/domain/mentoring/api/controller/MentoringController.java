@@ -116,7 +116,7 @@ public class MentoringController {
    * 멘토의 활동시간과 해당 멘토링의 신청내역, Redis에 저장된 결제중인 멘토링시간대를 조회합니다.
    * 해당 멘토링의 신청대기 또는 완료된 시간대를 조회한 후 활동시간과 신청내역 시간을 분리해서 클라이언트로 전달합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @GetMapping("/{id}/reservation-time")
   public ResponseEntity<ApplicationTimeInfo> mentoringActiveTime(@PathVariable("id") Long id) {
     ApplicationTimeInfo mentoringActiveTimes = mentoringService.getMentoringActiveTimes(id);
@@ -126,7 +126,7 @@ public class MentoringController {
   /**
    * 신청중인 멘토링 시간을 잠금처리하고, 세션에 멘토링 신청중인 데이터를 저장합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @PostMapping("/{id}/lock")
   public ResponseEntity<ResponseType> applicationTimeLock(@PathVariable("id") Long id,
       @RequestBody MentoringApplicationTime applicationTime, HttpSession session) {
@@ -140,7 +140,7 @@ public class MentoringController {
   /**
    * 결제중인 멘토링 시간대의 잠금 유효시간을 갱신합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @PutMapping("/{id}/refresh")
   public ResponseEntity<ResponseType> refreshPaymentTime(@PathVariable("id") Long id, HttpSession session) {
     SessionUser user = (SessionUser) session.getAttribute("user");
@@ -153,7 +153,7 @@ public class MentoringController {
   /**
    * 멘토링 신청 도중 페이지를 벗어나거나, 시간이 만료되면 잠금을 해제합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @DeleteMapping("/{id}/lock")
   public ResponseEntity<ResponseType> mentoringTimeSessionRemove(@PathVariable("id") Long id, HttpSession session) {
     SessionUser user = (SessionUser) session.getAttribute("user");
@@ -168,7 +168,7 @@ public class MentoringController {
   /**
    * 포트원 결제 API를 실행하기 위한 데이터를 응답데이터로 반환합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @PostMapping("/{id}/payment-process")
   public ResponseEntity<MentoringPaymentInfo> mentoringTimeSessionSave(
       @PathVariable("id") Long id, @RequestBody MentoringApplicationUserInfo userInfo, HttpSession session) {
@@ -184,7 +184,7 @@ public class MentoringController {
   /**
    * 멘토링 결제 완료가 되면 멘토링 신청이력을 저장합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @PostMapping("/{id}/apply")
   public ResponseEntity<MentoringOrderUid> mentoringApplicationSave
   (@PathVariable("id") Long id, @RequestBody MentoringApplicationInfo applicationInfo, HttpSession session) {

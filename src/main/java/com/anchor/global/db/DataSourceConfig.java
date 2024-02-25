@@ -39,7 +39,7 @@ public class DataSourceConfig {
   public DataSourceConfig(JpaProperties jpaProperties) {
     this.jpaProperties = jpaProperties;
     this.hibernateProperties = new HibernateProperties();
-    hibernateProperties.setDdlAuto("create-drop");
+    hibernateProperties.setDdlAuto("none");
   }
 
   @Bean(MASTER_DATASOURCE)

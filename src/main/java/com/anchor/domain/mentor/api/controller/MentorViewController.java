@@ -30,7 +30,7 @@ public class MentorViewController {
   /**
    * 멘토 등록 페이지를 조회합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @GetMapping("/register")
   public String viewMentorRegisterPage(Model model) {
     model.addAttribute("bankCodes", BankCode.values());

@@ -25,7 +25,7 @@ public class NotificationController {
   /**
    * 읽지 않은 알림의 개수를 조회합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @GetMapping("/count")
   public ResponseEntity<Long> count(@SessionAttribute("user") SessionUser user) throws IOException {
     Long count = notificationService.getCount(user.getEmail());
@@ -35,7 +35,7 @@ public class NotificationController {
   /**
    * 실시간 알림 이벤트를 구독 처리합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @GetMapping(value = "/connect", produces = "text/event-stream")
   public SseEmitter subscribe(@SessionAttribute("user") SessionUser user) throws IOException {
     return notificationService.subscribe(user.getEmail());
@@ -44,7 +44,7 @@ public class NotificationController {
   /**
    * 모든 알림을 조회합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @GetMapping
   public ResponseEntity<AllNotification> getAllNotifications(@SessionAttribute("user") SessionUser user) {
     AllNotification notifications = notificationService.getAllNotifications(user.getEmail());
@@ -54,7 +54,7 @@ public class NotificationController {
   /**
    * 알림을 읽음 처리합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @PutMapping("/{id}")
   public ResponseEntity<Void> readNotification(@PathVariable Long id, @SessionAttribute("user") SessionUser user) {
     notificationService.readNotification(id, user.getEmail());
@@ -65,7 +65,7 @@ public class NotificationController {
   /**
    * 모든 알림을 읽음 처리합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @PutMapping("/read-all")
   public ResponseEntity<Void> readAllNotifications(@SessionAttribute("user") SessionUser user) {
     notificationService.readAllNotifications(user.getEmail());

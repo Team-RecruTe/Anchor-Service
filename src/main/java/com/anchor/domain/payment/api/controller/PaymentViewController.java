@@ -22,7 +22,7 @@ public class PaymentViewController {
   /**
    * 결제 완료 페이지를 조회합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @GetMapping("/complete")
   public String viewPaymentCompletePage(@RequestParam("order") String orderUid, Model model) {
     PaymentCompleteResult paymentResult = paymentService.getPaymentResult(orderUid);

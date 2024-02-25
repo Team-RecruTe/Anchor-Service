@@ -47,16 +47,16 @@ public class QMentoringRepositoryImpl implements QMentoringRepository {
         target, keyword);
   }
 
-  /*
+  /**
    * 조건에 맞는 멘토링을 검색한 결과 값을 가져옵니다.
-   *
+   * <p>
    * 1차 정렬 기준은 다음과 같습니다.
    * 기준 1. 입력받은 키워드와 멘토링 제목 및 내용이 일치하는 정도를 기준으로 내림차순
    * 기준 2. 아이디를 기준으로 내림차순 (= 최신 멘토링 등록순)
-   *
+   * <p>
    * 2차 정렬 기준은 다음과 같습니다.
    * 기준 1. 멘토링 신청자 수를 기준으로 내림차순
-   *
+   * <p>
    * (참고로 2차 정렬은 요청에 따라 달라집니다.)
    */
   public Page<MentoringSearchResult> findMentorings(List<String> tags, String keyword, Pageable pageable) {

@@ -27,7 +27,7 @@ public class UserController {
   /**
    * 유저 닉네임을 변경합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @PutMapping("/me")
   public ResponseEntity<ResponseType> putInfo(@RequestBody UserNicknameRequest userNicknameRequest,
       @SessionAttribute("user") SessionUser user) {
@@ -38,7 +38,7 @@ public class UserController {
   /**
    * 유저 프로필 이미지를 변경합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @PutMapping("/me/image")
   public ResponseEntity<ResponseType> putImage(@RequestBody UserImageRequest userImageRequest,
       @SessionAttribute("user") SessionUser user) {
@@ -49,7 +49,7 @@ public class UserController {
   /**
    * 유저를 삭제합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @DeleteMapping("/me")
   public ResponseEntity<ResponseType> deleteUser(HttpSession session) {
     SessionUser user = (SessionUser) session.getAttribute("user");
@@ -62,7 +62,7 @@ public class UserController {
   /**
    * 신청한 멘토링의 상태를 변경합니다. 취소, 또는 완료로 변경가능합니다.
    */
-  @PreAuthorize("hasRole('ROLE_USER')")
+  @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MENTOR')")
   @PutMapping("/me/applied-mentorings")
   public ResponseEntity<ResponseType> appliedMentoringStatusChange(@RequestBody MentoringStatusInfo mentoringStatus,
       @SessionAttribute("user") SessionUser user) {
