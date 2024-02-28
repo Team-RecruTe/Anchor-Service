@@ -14,17 +14,17 @@ IT 취업 시장의 기준이 점점 높아지고 있으며, 이러한 흐름 �
 Anchor 서비스의 목표는 다음과 같습니다.<br>
 
 - 목표 1. 재직중 혹은 재직했던 회사의 이메일 인증을 통해 신뢰성 있는 멘토를 만날 수 있도록 합니다.</br>
-- 목표 2. 알림, 정산과 같은 기능을 통해 서비스 이용에 대한 사용자 편의성을 확보합니다.</br>
+- 목표 2. 실시간 알림, 정산과 같은 기능을 통해 서비스 이용에 대한 사용자 편의성을 확보합니다.</br>
 - 목표 3. 원한할 서비스 운영을 위한 기술적 요소를 적용하고 개선합니다. (ex. DB 이중화)
 
 ## 🛠️ 기술 스택
 
-| 분류       | 기술명                                                                  |
-|----------|----------------------------------------------------------------------|
-| BackEnd  | Java Spring (Boot, Security, JPA) QueryDsl Junit Mockito Redis MySql |
-| FrontEnd | HTML Javascript Thymeleaf                                            |
-| DevOps   | nGrinder EC2 RDS S3 CodeDeploy GithubAction                          |
-| Tools    | IntelliJ Gradle Maven                                                |
+| 분류       | 기술명                                                                        |
+|----------|----------------------------------------------------------------------------|
+| BackEnd  | Java, Spring (Boot, Security, JPA), QueryDsl, Junit, Mockito, Redis, MySql |
+| FrontEnd | HTML, Javascript, Thymeleaf                                                |
+| DevOps   | nGrinder, Jmeter, EC2, RDS, S3, CodeDeploy, GithubAction                   |
+| Tools    | IntelliJ, Gradle, Maven                                                    |
 
 ## 🗺️ 서버 구조
 
@@ -151,6 +151,12 @@ Anchor 서비스의 목표는 다음과 같습니다.<br>
 - `@ValidFile` 커스텀 어노테이션을 통해 빈 이미지 파일 요청에 대한 검증 처리
     - ConstraintValidator 클래스를 구현해 Custom Validator 직접 정의
 - [이미지 요청 시 파일당 10MB 용량 제한](https://github.com/Team-RecruTe/Anchor-Service/blob/fe37c7b7a98d0511150b2ba4dd09574adfb07e82/src/main/resources/application.yml#L22C1-L25C29)
+
+### 로그 메세지 최적화 [[설정 코드](https://github.com/Team-RecruTe/Anchor-Service/blob/develop/src/main/resources/log4j2/log4j2.yml)]
+
+- 속도가 빠른 `AsyncLogger` 옵션을 제공하는 Log4j2 라이브러리를 도입해 로깅 처리
+    - Appender: console-appender와 rolling-file-appender 적용
+    - Logger: rolling-file-appender에 대해서 AsyncLogger 부분 적용
 
 ### CI/CD 환경 구축 [[설정 코드](https://github.com/Team-RecruTe/Anchor-Service/blob/develop/.github/workflows/cicd.yml)]
 
