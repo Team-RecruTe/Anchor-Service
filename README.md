@@ -9,13 +9,13 @@
 ## 💡 서비스 배경 및 목표
 
 IT 취업 시장의 기준이 점점 높아지고 있으며, 이러한 흐름 속에서 실무적인 역량이 더욱 중요해지고 있습니다.</br>
-신뢰할 수 있는 현업자의 직간접적 경험 공유에 대한 필요성과 수요를 확인했습니다.
+신뢰할 수 있는 현업자의 직,간접적 경험 공유에 대한 필요성과 수요를 확인했습니다.
 
 Anchor 서비스의 목표는 다음과 같습니다.<br>
 
 - 목표 1. 재직중 혹은 재직했던 회사의 이메일 인증을 통해 신뢰성 있는 멘토를 만날 수 있도록 합니다.</br>
 - 목표 2. 실시간 알림, 정산과 같은 기능을 통해 서비스 이용에 대한 사용자 편의성을 확보합니다.</br>
-- 목표 3. 원한할 서비스 운영을 위한 기술적 요소를 적용하고 개선합니다. (ex. DB 이중화)
+- 목표 3. 원활한 서비스 운영을 위한 기술적 요소를 적용하고 개선합니다. (ex. DB 이중화)
 
 ## 🛠️ 기술 스택
 
@@ -41,10 +41,11 @@ Anchor 서비스의 목표는 다음과 같습니다.<br>
     - domain
         - api
             - controller
-            - request
+              - request
+            - service
+              - response
         - domain
             - (Entity, Type Object)
-            - response
             - repository
     - global
         - config
@@ -141,9 +142,16 @@ Anchor 서비스의 목표는 다음과 같습니다.<br>
 - 서버 분산을 고려해 `Facade 패턴`과 `Redis Lock`을 이용해 동시성 제어 구현
     - pub/sub을 이용해 Lock 획득을 시도하는 RedissonClient를 통해 CPU 낭비 방지
 
-### S3 저장소 내 불필요한 이미지 삭제 자동화 [[적용 코드](https://github.com/Team-RecruTe/Anchor-Service/blob/fe37c7b7a98d0511150b2ba4dd09574adfb07e82/src/main/java/com/anchor/domain/readme/image/api/service/ImageService.java#L31C1-L40C4)]
+### 멘토링 신청시간 중복선택 방지 [[적용코드](https://github.com/Team-RecruTe/Anchor-Service/blob/fe37c7b7a98d0511150b2ba4dd09574adfb07e82/src/main/java/com/anchor/global/redis/lock/RedisLockFacade.java#L43C1-L61C4) / [구성패키지](https://github.com/Team-RecruTe/Anchor-Service/tree/fe37c7b7a98d0511150b2ba4dd09574adfb07e82/src/main/java/com/anchor/global/redis/lock)]
 
-- 트래픽이 적은 시간을 고려해 `@Sceduled`를 이용해 이미지 삭제를 요청하는 스케줄링 구현
+- 서버 분산을 고려해 `Facade 패턴`과 `Redis Lock`을 이용해 동시성 제어 구현
+    - pub/sub을 이용해 Lock 획득을 시도하는 RedissonClient를 통해 CPU 낭비 방지
+- 신청시간 잠금 이후 서버를 이탈하는 로직으로 락 소유권에 대한 추적이 어려울 것이라 판단, [Key,Value] 타입의 데이터로 신청시간 잠금 진행
+    - 커서 기반 검색명령어 `scan`을 사용해 Redis 서버의 작업을 중단시키지 않도록 구현
+
+### S3 저장소 내 불필요한 이미지 삭제 자동화 [[적용 코드](https://github.com/Team-RecruTe/Anchor-Service/blob/fe37c7b7a98d0511150b2ba4dd09574adfb07e82/src/main/java/com/anchor/domain/image/api/service/ImageService.java#L33C3-L40C4)]
+
+- 트래픽이 적은 시간을 고려해 `@Scheduled`를 이용해 이미지 삭제를 요청하는 스케줄링 구현
     - 매일 새벽 3시에 이미지 삭제 요청 스케줄링 동작
 
 ### 이미지 파일의 효율적인 관리 [[적용 코드](https://github.com/Team-RecruTe/Anchor-Service/blob/fe37c7b7a98d0511150b2ba4dd09574adfb07e82/src/main/java/com/anchor/global/valid/CustomValidatorRegistry.java#L13C1-L44C2) / [구성 패키지](https://github.com/Team-RecruTe/Anchor-Service/tree/develop/src/main/java/com/anchor/global/valid)]
@@ -158,6 +166,22 @@ Anchor 서비스의 목표는 다음과 같습니다.<br>
     - Appender: console-appender와 rolling-file-appender 적용
     - Logger: rolling-file-appender에 대해서 AsyncLogger 부분 적용
 
+### 정산프로세스 및 멘토링 완료 자동화 [[적용코드1](https://github.com/Team-RecruTe/Anchor-Service/blob/f4bb891e3ac535e991525b07b98eb2f89ddcf167/src/main/java/com/anchor/domain/mentoring/api/service/MentoringScheduler.java#L19C1-L27C4) / [적용코드2](https://github.com/Team-RecruTe/Anchor-Service/blob/f4bb891e3ac535e991525b07b98eb2f89ddcf167/src/main/java/com/anchor/domain/payment/api/service/PayupScheduler.java#L18C1-L21C4)]
+
+- 트래픽이 적은 시간을 고려해 `@Scheduled`를 이용해 정산 및 멘토링 완료 스케줄링 구현
+    - 매월 1일 새벽 3시에 정산 스케줄링 동작
+    - 매일 새벽 2시 일주일이 지난 멘토링 자동 완료 스케줄링 동작
+
+### 병렬처리를 통한 작업시간 개선[[적용코드](https://github.com/Team-RecruTe/Anchor-Service/blob/f4bb891e3ac535e991525b07b98eb2f89ddcf167/src/main/java/com/anchor/domain/payment/api/service/PayupService.java#L53C2-L63C4)]
+
+- `ParallelStream`을 적용해 병렬처리로 정산프로세스 작업시간 개선
+  <details>
+  <summary>테스트 결과, 순차처리 대비 작업시간 12% 개선</summary>
+      <img src="readme/image/stream/stream_elapsed_time.png">
+      <img src="readme/image/stream/parallel_stream_elapsed_time.png">
+  </details>
+- `ParallelStream`간 **Thread DeadLock** 방지를 위해 커스텀 `ForkJoinPool` 설정
+
 ### CI/CD 환경 구축 [[설정 코드](https://github.com/Team-RecruTe/Anchor-Service/blob/develop/.github/workflows/cicd.yml)]
 
 - `Github Actions`, `AWS CodeDeploy`, `S3`를 이용해 테스트-빌드-배포 자동화
@@ -167,6 +191,20 @@ Anchor 서비스의 목표는 다음과 같습니다.<br>
 
 - `OAuth 2.0 & OpenID Connect`를 이용해 Naver, Google 인증 기능 구현
     - 인증 회원의 정보는 Redis 분산 세션에 SessionUser 객체를 저장
+
+### RestClient 추가 설정 및 에러핸들링[[적용코드](https://github.com/Team-RecruTe/Anchor-Service/blob/f4bb891e3ac535e991525b07b98eb2f89ddcf167/src/main/java/com/anchor/global/util/PaymentClient.java#L125C1-L136C4) / [설정코드](https://github.com/Team-RecruTe/Anchor-Service/blob/f4bb891e3ac535e991525b07b98eb2f89ddcf167/src/main/java/com/anchor/global/config/RestClientConfig.java#L19)]
+
+- Connection Pool 설정으로 외부 API 호출시 멀티 스레딩 및 가용 스레드 수 제한
+- Timeout 설정으로 가용 스레드 확보
+- `exchange`메서드를 사용해 응답코드 별 에러 핸들링
+- `@Retryable`으로 재시도 로직 추가
+- 추가 고려사항. API 서버 장애로 인한 에러 발생시 서킷브레이커 패턴 도입 필요
+
+### 예외 정의 및 예외발생 로그 관심사 분리[[구성패키지](https://github.com/Team-RecruTe/Anchor-Service/tree/develop/src/main/java/com/anchor/global/exception) / [설정코드](https://github.com/Team-RecruTe/Anchor-Service/blob/f4bb891e3ac535e991525b07b98eb2f89ddcf167/src/main/java/com/anchor/global/log/ExceptionLoggingAspect.java#L14C1-L18C1)]
+
+- 어플리케이션에서 발생하는 예외를 새로 정의해 비즈니스 로직에서 발생하는 예외 가독성 향상
+- 예외 추상화를 통한 에러 핸들링 유연성 확보
+- AOP를 통한 예외 발생 로깅 코드 재사용성 증가
 
 ### Insert 쿼리 성능 개선
 
