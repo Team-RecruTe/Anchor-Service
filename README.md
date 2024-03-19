@@ -105,8 +105,11 @@ Anchor 서비스의 목표는 다음과 같습니다.<br>
 - 멀티 스레딩을 이용한 `@Async 비동기` 처리
   <details>
   <summary>테스트 결과, 클라이언트 기준 응답시간을 약 3s에서 100ms로 단축</summary>
+      <h4>[비동기 처리 전]</h4>
       <img src="readme/image/async/sync_rt.png">
       <img src="readme/image/async/async_rt.png">
+      <h4>[비동기 처리 후]</h4>
+      <img width="388" alt="다운로드" src="https://github.com/Team-RecruTe/Anchor-Service/assets/58262954/9c9eba96-11d0-4d0d-9a62-09bf1f744b74">
   </details>
 - 비동기 작업 스레드의 로깅을 위해 `@Around`를 적용
   <details>
@@ -114,6 +117,7 @@ Anchor 서비스의 목표는 다음과 같습니다.<br>
       <img src="readme/image/async/mail_log_1.png">
       <img src="readme/image/async/mail_log_2.png">
   </details>
+
 
 ### 멘토링 검색 정확도, 정밀도 개선 [[적용 코드](https://github.com/Team-RecruTe/Anchor-Service/blob/fe37c7b7a98d0511150b2ba4dd09574adfb07e82/src/main/java/com/anchor/domain/mentoring/domain/repository/custom/QMentoringRepositoryImpl.java#L190C1-L223C2) / [설정 코드](https://github.com/Team-RecruTe/Anchor-Service/blob/fe37c7b7a98d0511150b2ba4dd09574adfb07e82/src/main/java/com/anchor/global/config/CustomFunctionContributor.java#L9C1-L21C2)]
 
